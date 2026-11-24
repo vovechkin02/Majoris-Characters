@@ -1,0 +1,11 @@
+[Desktop Entry]
+Name=Characters
+Comment=Open the Characters utility
+Exec=majoris-characters
+Icon=com.majoris.characters
+Terminal=false
+Type=Application
+Categories=GTK;Utility;
+Keywords=Unicode;Character;Symbol;Emoji;
+StartupNotify=true
+DBusActivatable=true

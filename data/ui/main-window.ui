@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface domain="majoris-characters">
+  <requires lib="gtk" version="4.14"/>
+  <menu id="primary_menu">
+    <section>
+      <item>
+        <attribute name="label" translatable="yes">About Characters</attribute>
+        <attribute name="action">app.about</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">Quit</attribute>
+        <attribute name="action">app.quit</attribute>
+      </item>
+    </section>
+  </menu>
+  <template class="CharactersMainWindow" parent="AdwApplicationWindow">
+    <property name="title" translatable="yes">Characters</property>
+    <property name="default-width">960</property>
+    <property name="default-height">720</property>
+    <property name="width-request">320</property>
+    <property name="height-request">320</property>
+    <property name="content">
+      <object class="AdwToolbarView">
+        <child type="top">
+          <object class="AdwHeaderBar">
+            <child type="end">
+              <object class="GtkMenuButton">
+                <property name="icon-name">open-menu-symbolic</property>
+                <property name="tooltip-text" translatable="yes">Main Menu</property>
+                <property name="menu-model">primary_menu</property>
+                <accessibility>
+                  <property name="label" translatable="yes">Main Menu</property>
+                </accessibility>
+              </object>
+            </child>
+          </object>
+        </child>
+        <property name="content">
+          <object class="AdwStatusPage">
+            <property name="icon-name">com.majoris.characters</property>
+            <property name="title" translatable="yes">Characters</property>
+            <property name="description" translatable="yes">The application foundation is ready. Character browsing and search are not available in this version.</property>
+          </object>
+        </property>
+      </object>
+    </property>
+  </template>
+</interface>

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schemalist gettext-domain="majoris-characters">
+  <schema id="com.majoris.characters" path="/com/majoris/characters/">
+    <key name="window-width" type="i">
+      <range min="320" max="8192"/>
+      <default>960</default>
+      <summary>Window width</summary>
+      <description>Last normal window width in logical pixels.</description>
+    </key>
+    <key name="window-height" type="i">
+      <range min="320" max="8192"/>
+      <default>720</default>
+      <summary>Window height</summary>
+      <description>Last normal window height in logical pixels.</description>
+    </key>
+    <key name="window-maximized" type="b">
+      <default>false</default>
+      <summary>Maximized window</summary>
+      <description>Whether to restore the window maximized.</description>
+    </key>
+  </schema>
+</schemalist>

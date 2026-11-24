@@ -1,0 +1,10 @@
+namespace Characters {
+    /** Stable desktop, D-Bus, and settings identity. */
+    internal const string APP_ID = "@APP_ID@";
+    /** Product version from the authoritative Meson project declaration. */
+    internal const string VERSION = "@VERSION@";
+    /** Catalog domain for application translations. */
+    internal const string GETTEXT_PACKAGE = "@GETTEXT_PACKAGE@";
+    /** Installed directory for gettext catalogs. */
+    internal const string LOCALEDIR = "@LOCALEDIR@";
+}

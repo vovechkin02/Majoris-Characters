@@ -1,0 +1,11 @@
+/build/
+/build-*/
+/__pycache__/
+**/__pycache__/
+/debian/.debhelper/
+/debian/majoris-characters/
+/debian/*.substvars
+/debian/*.debhelper.log
+/debian/debhelper-build-stamp
+/debian/files
+/obj-*/
