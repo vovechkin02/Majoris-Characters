@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface domain="majoris-characters">
+  <requires lib="gtk" version="4.14"/>
+  <template class="CharactersLibraryDialog" parent="AdwDialog">
+    <property name="content-width">560</property>
+    <property name="content-height">520</property>
+    <property name="child">
+      <object class="AdwToastOverlay" id="library_toasts">
+        <property name="child">
+          <object class="AdwToolbarView">
+            <child type="top"><object class="AdwHeaderBar"/></child>
+            <property name="content">
+              <object class="GtkBox">
+                <property name="orientation">vertical</property>
+                <property name="spacing">8</property>
+                <property name="margin-start">16</property>
+                <property name="margin-end">16</property>
+                <property name="margin-top">8</property>
+                <property name="margin-bottom">16</property>
+                <child>
+                  <object class="GtkSearchEntry" id="library_query">
+                    <property name="placeholder-text" translatable="yes">Search This Collection</property>
+                    <accessibility><property name="label" translatable="yes">Search This Collection</property></accessibility>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkScrolledWindow">
+                    <property name="vexpand">True</property>
+                    <property name="hscrollbar-policy">never</property>
+                    <property name="child">
+                      <object class="GtkListView" id="library_list">
+                        <accessibility><property name="label" translatable="yes">Saved Characters</property></accessibility>
+                      </object>
+                    </property>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkLabel" id="library_status">
+                    <property name="wrap">True</property>
+                    <style><class name="dim-label"/></style>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkBox">
+                    <property name="spacing">8</property>
+                    <property name="homogeneous">True</property>
+                    <child>
+                      <object class="GtkButton" id="library_copy">
+                        <property name="label" translatable="yes">Copy</property>
+                        <property name="sensitive">False</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkButton" id="library_inspect">
+                        <property name="label" translatable="yes">Inspect</property>
+                        <property name="sensitive">False</property>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkBox">
+                    <property name="spacing">8</property>
+                    <property name="homogeneous">True</property>
+                    <child>
+                      <object class="GtkButton" id="library_add">
+                        <property name="label" translatable="yes">Add to Composer</property>
+                        <property name="sensitive">False</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkButton" id="library_save">
+                        <property name="label" translatable="yes">Add to Favorites</property>
+                        <property name="sensitive">False</property>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkBox">
+                    <property name="spacing">8</property>
+                    <property name="homogeneous">True</property>
+                    <child>
+                      <object class="GtkButton" id="library_up">
+                        <property name="label" translatable="yes">Move Up</property>
+                        <property name="sensitive">False</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkButton" id="library_down">
+                        <property name="label" translatable="yes">Move Down</property>
+                        <property name="sensitive">False</property>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkBox">
+                    <property name="spacing">8</property>
+                    <property name="homogeneous">True</property>
+                    <child>
+                      <object class="GtkButton" id="library_remove">
+                        <property name="label" translatable="yes">Remove Character</property>
+                        <property name="sensitive">False</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkButton" id="library_clear">
+                        <property name="label" translatable="yes">Clear History</property>
+                        <property name="sensitive">False</property>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+              </object>
+            </property>
+          </object>
+        </property>
+      </object>
+    </property>
+  </template>
+</interface>

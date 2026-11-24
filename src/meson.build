@@ -13,13 +13,19 @@ font_sources = files(
   'fonts/font-source-loader.vala',
   'fonts/font-source-request.vala',
 )
-application_sources = files('app/application.vala') + font_sources + search_sources + files(
+library_sources = files(
+  'library/library-store.vala',
+  'library/usage-entry.vala',
+)
+application_sources = files('app/application.vala') + font_sources + library_sources + search_sources + files(
   'views/character-inspector.vala',
   'views/character-tile.vala',
   'views/composer-view.vala',
   'views/emoji-variations.vala',
   'views/font-browser.vala',
+  'views/library-dialog.vala',
   'views/main-window.vala',
+  'views/preferences-dialog.vala',
 )
 app_entry = files('app/main.vala')
 app_vala_args = [

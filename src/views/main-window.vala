@@ -71,6 +71,9 @@ namespace Characters {
         /** Adds the selected original text to the session composition. */
         [GtkChild]
         private unowned Gtk.Button browser_add;
+        /** Saves the selected exact identity independently of usage history. */
+        [GtkChild]
+        private unowned Gtk.Button browser_favorite;
         /** Hosts the independently defined XML composer view. */
         [GtkChild]
         private unowned Gtk.Box composer_slot;
@@ -79,6 +82,12 @@ namespace Characters {
 
         /** Owns persistent geometry settings for this window. */
         private GLib.Settings settings;
+        /** Shared local collection repository, independent of search and clipboard state. */
+        private LibraryStore library;
+        /** Cached grid size in points, updated only when the preference changes. */
+        private int grid_size_pt;
+        /** Settings subscription released before the window closes. */
+        private ulong preferences_handler;
         /** Serializes native worker jobs independently of GTK widgets. */
         private SearchController controller;
         /** GTK-owned selection, containing one bounded page at a time. */
@@ -105,13 +114,17 @@ namespace Characters {
             if (settings.get_boolean ("window-maximized")) {
                 maximize ();
             }
-            composer = new ComposerView ();
+            library = new LibraryStore (settings);
+            composer = new ComposerView (library);
             composer_slot.append (composer);
             controller = new SearchController ();
             completion_handler = controller.completed.connect (on_search_completed);
             configure_grid ();
             configure_filters ();
             configure_actions ();
+            preferences_handler = settings.changed.connect (on_preferences_changed);
+            apply_category_preferences ();
+            grid_size_pt = settings.get_int ("grid-preview-size");
             submit_search ();
         }
 
@@ -166,11 +179,12 @@ namespace Characters {
         }
 
         /** Populates a recycled tile using its opaque numeric model identity. */
-        private static void bind_tile (GLib.Object object) {
+        private void bind_tile (GLib.Object object) {
             var item = (Gtk.ListItem) object;
             var value = (Gtk.StringObject) item.item;
             var tile = (CharacterTile) item.child;
-            tile.bind_id ((uint32) uint.parse (value.get_string ()));
+            var id = (uint32) uint.parse (value.get_string ());
+            tile.bind_id (id, grid_size_pt);
         }
 
         /** Clears the tile before reuse; no result objects are retained by the cell. */
@@ -232,6 +246,82 @@ namespace Characters {
             var copy = new SimpleAction ("copy-character", null);
             copy.activate.connect (copy_selected);
             add_action (copy);
+            var favorite = new SimpleAction ("save-favorite", null);
+            favorite.activate.connect (save_favorite);
+            add_action (favorite);
+            var favorites = new SimpleAction ("favorites", null);
+            favorites.activate.connect (open_favorites);
+            add_action (favorites);
+            var recent = new SimpleAction ("recent", null);
+            recent.activate.connect (open_recent);
+            add_action (recent);
+            var frequent = new SimpleAction ("frequent", null);
+            frequent.activate.connect (open_frequent);
+            add_action (frequent);
+            var preferences = new SimpleAction ("preferences", null);
+            preferences.activate.connect (open_preferences);
+            add_action (preferences);
+        }
+
+        /** Saves the selected identity; a full or unwritable collection reports failure. */
+        private void save_favorite (Variant? parameter) {
+            var text = selected_text ();
+            if (text != null) {
+                var message = library.add_favorite (text) ? _("Saved to Favorites") :
+                    _("Unable to Save Favorite. Check the Limit or Settings Permissions.");
+                browser_toasts.add_toast (new Adw.Toast (message));
+            }
+        }
+
+        /** Opens the manually ordered favorite collection. */
+        private void open_favorites (Variant? parameter) {
+            new LibraryDialog (library, LibraryMode.FAVORITES, composer).present (this);
+        }
+
+        /** Opens the most recently used identities. */
+        private void open_recent (Variant? parameter) {
+            new LibraryDialog (library, LibraryMode.RECENT, composer).present (this);
+        }
+
+        /** Opens identities ordered by retained usage count. */
+        private void open_frequent (Variant? parameter) {
+            new LibraryDialog (library, LibraryMode.FREQUENT, composer).present (this);
+        }
+
+        /** Opens local preferences without changing the active browser selection. */
+        private void open_preferences (Variant? parameter) {
+            new PreferencesDialog (settings, library).present (this);
+        }
+
+        /** Applies category visibility without renumbering native scope rows. */
+        private void apply_category_preferences () {
+            string[] keys = { "show-emoji", "show-symbols", "show-scripts", "show-blocks",
+                "show-named", "show-fonts", "show-encodings" };
+            for (var index = 0; index < keys.length; index++) {
+                var row = scope_list.get_row_at_index (index + 1);
+                if (row == null) {
+                    continue;
+                }
+                var visible = settings.get_boolean (keys[index]);
+                if (!visible && row == scope_list.get_selected_row ()) {
+                    scope_list.select_row (scope_list.get_row_at_index (0));
+                }
+                row.visible = visible;
+            }
+        }
+
+        /** Rebinds the bounded visible page on size changes, preserving its selected identity. */
+        private void on_preferences_changed (string key) {
+            if (key.has_prefix ("show-")) {
+                apply_category_preferences ();
+            } else if (key == "grid-preview-size") {
+                grid_size_pt = settings.get_int (key);
+                if (results != null) {
+                    var position = selection.selected;
+                    show_page ();
+                    selection.selected = position;
+                }
+            }
         }
 
         /** Opens the editor without modifying the current browser selection. */
@@ -258,27 +348,35 @@ namespace Characters {
             var text = selected_text ();
             if (text != null) {
                 get_clipboard ().set_text (text);
-                browser_toasts.add_toast (new Adw.Toast (_("Copied to Clipboard")));
+                var saved = library.record_use (text);
+                browser_toasts.add_toast (new Adw.Toast (saved ? _("Copied to Clipboard") :
+                    _("Copied to Clipboard; Usage History Could Not Be Saved")));
             }
         }
 
         /** Opens the installed-font browser without replacing the main search. */
         private void browse_fonts (Variant? parameter) {
-            new FontBrowser (false, uint32.MAX, composer).present (this);
+            new FontBrowser (false, uint32.MAX, composer, library).present (this);
         }
 
         /** Opens legacy character-set browsing without changing the selected Unicode collection. */
         private void browse_encodings (Variant? parameter) {
-            new FontBrowser (true, uint32.MAX, composer).present (this);
+            new FontBrowser (true, uint32.MAX, composer, library).present (this);
         }
 
-        /** The final two sidebar rows open independent source browsers, not native search scopes. */
+        /** Trailing sidebar rows open independent source or saved-collection dialogs. */
         private void on_source_activated (Gtk.ListBoxRow row) {
             var index = row.get_index ();
             if (index == (int) Search.Scope.NAMED + 1) {
                 browse_fonts (null);
             } else if (index == (int) Search.Scope.NAMED + 2) {
                 browse_encodings (null);
+            } else if (index == (int) Search.Scope.NAMED + 3) {
+                open_favorites (null);
+            } else if (index == (int) Search.Scope.NAMED + 4) {
+                open_recent (null);
+            } else if (index == (int) Search.Scope.NAMED + 5) {
+                open_frequent (null);
             }
         }
 
@@ -290,7 +388,7 @@ namespace Characters {
             }
             var initial = Inspector.from_id ((uint32) uint.parse (item.get_string ()));
             if (initial != null) {
-                var dialog = new CharacterInspector ((owned) initial, composer);
+                var dialog = new CharacterInspector ((owned) initial, composer, library);
                 dialog.present (this);
             }
         }
@@ -303,13 +401,13 @@ namespace Characters {
             }
             var text = Search.text ((uint32) uint.parse (item.get_string ()));
             if (text != null && Emoji.is_candidate (text)) {
-                new EmojiVariations (text, composer).present (this);
+                new EmojiVariations (text, composer, library).present (this);
             }
         }
 
         /** Opens identification without requiring a character to be selected. */
         private void identify_character (Variant? parameter) {
-            var dialog = new CharacterInspector (null, composer);
+            var dialog = new CharacterInspector (null, composer, library);
             dialog.present (this);
         }
 
@@ -460,6 +558,7 @@ namespace Characters {
             emoji_button.visible = text != null && Emoji.is_candidate (text);
             browser_copy.sensitive = text != null;
             browser_add.sensitive = text != null;
+            browser_favorite.sensitive = text != null;
         }
 
         /** Removes the old selection summary before a new page or search is displayed. */
@@ -470,11 +569,16 @@ namespace Characters {
             emoji_button.visible = false;
             browser_copy.sensitive = false;
             browser_add.sensitive = false;
+            browser_favorite.sensitive = false;
         }
 
         /** Disconnects the window from the worker before cancellation; closing never joins GTK. */
         private void stop_search () {
             updating_filters = true;
+            if (preferences_handler != 0) {
+                settings.disconnect (preferences_handler);
+                preferences_handler = 0;
+            }
             if (completion_handler != 0) {
                 controller.disconnect (completion_handler);
                 completion_handler = 0;

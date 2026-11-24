@@ -35,13 +35,22 @@ namespace Characters {
         private unowned Gtk.Button emoji_add;
         /** Non-owning editor reference for this and nested dialogs. */
         private weak ComposerView? composer;
+        /** Optional shared local collection repository. */
+        private LibraryStore? library;
+        /** Saves the exact selected identity into Favorites. */
+        [GtkChild]
+        private unowned Gtk.Button emoji_favorite;
 
         /** Immutable native collection owned by the dialog for its lifetime. */
         private Emoji.Variants? variants;
 
         /** Builds a searchable selection list; preserves the incoming identity if available. */
-        public EmojiVariations (string text, ComposerView? composer = null) {
+        public EmojiVariations (string text, ComposerView? composer = null, LibraryStore? library = null) {
             this.composer = composer;
+            this.library = library;
+            emoji_favorite.visible = library != null;
+            emoji_favorite.sensitive = false;
+            emoji_favorite.clicked.connect (save_favorite);
             emoji_add.visible = composer != null;
             emoji_add.clicked.connect (add_to_composer);
             variants = Emoji.create_variants (text);
@@ -79,6 +88,7 @@ namespace Characters {
         private void update_preview () {
             var text = selected_text ();
             copy_button.sensitive = text != null;
+            emoji_favorite.sensitive = text != null && library != null;
             emoji_add.sensitive = text != null && composer != null;
             inspect_button.sensitive = text != null;
             if (text == null || variants == null) {
@@ -103,7 +113,9 @@ namespace Characters {
             var text = selected_text ();
             if (text != null) {
                 get_clipboard ().set_text (text);
-                toast_overlay.add_toast (new Adw.Toast (_("Copied to Clipboard")));
+                var saved = library == null || library.record_use (text);
+                toast_overlay.add_toast (new Adw.Toast (saved ? _("Copied to Clipboard") :
+                    _("Copied to Clipboard; Usage History Could Not Be Saved")));
             }
         }
 
@@ -124,7 +136,17 @@ namespace Characters {
             }
             var snapshot = Inspector.from_text (text);
             if (snapshot != null) {
-                new CharacterInspector ((owned) snapshot, composer).present (this);
+                new CharacterInspector ((owned) snapshot, composer, library).present (this);
+            }
+        }
+
+        /** Saves the exact selected identity without recording a copy or insertion. */
+        private void save_favorite () {
+            var text = selected_text ();
+            if (text != null && library != null) {
+                var message = library.add_favorite (text) ? _("Saved to Favorites") :
+                    _("Unable to Save Favorite. Check the Limit or Settings Permissions.");
+                toast_overlay.add_toast (new Adw.Toast (message));
             }
         }
     }

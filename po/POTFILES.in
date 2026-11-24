@@ -3,11 +3,15 @@ data/ui/character-tile.ui
 data/ui/composer-view.ui
 data/ui/emoji-variations.ui
 data/ui/font-browser.ui
+data/ui/library-dialog.ui
 data/ui/main-window.ui
+data/ui/preferences-dialog.ui
 src/app/application.vala
 src/views/character-inspector.vala
 src/views/character-tile.vala
 src/views/composer-view.vala
 src/views/emoji-variations.vala
 src/views/font-browser.vala
+src/views/library-dialog.vala
 src/views/main-window.vala
+src/views/preferences-dialog.vala

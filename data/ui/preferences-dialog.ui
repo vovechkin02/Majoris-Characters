@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface domain="majoris-characters">
+  <requires lib="gtk" version="4.14"/>
+  <template class="CharactersPreferencesDialog" parent="AdwDialog">
+    <property name="title" translatable="yes">Preferences</property>
+    <property name="content-width">560</property>
+    <property name="content-height">600</property>
+    <property name="child">
+      <object class="AdwToastOverlay" id="preferences_toasts">
+        <property name="child">
+          <object class="AdwToolbarView">
+            <child type="top"><object class="AdwHeaderBar"/></child>
+            <property name="content">
+              <object class="AdwPreferencesPage">
+                <child>
+                  <object class="AdwPreferencesGroup">
+                    <property name="title" translatable="yes">History</property>
+                    <property name="description" translatable="yes">Only explicit character copies and additions to the composer are recorded.</property>
+                    <child>
+                      <object class="AdwSwitchRow" id="history_enabled">
+                        <property name="title" translatable="yes">Record Character Usage</property>
+                        <property name="subtitle" translatable="yes">Disabling recording also clears retained history.</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="AdwSpinRow" id="history_limit">
+                        <property name="title" translatable="yes">Maximum History Entries</property>
+                        <property name="adjustment">
+                          <object class="GtkAdjustment">
+                            <property name="lower">1</property>
+                            <property name="upper">512</property>
+                            <property name="step-increment">1</property>
+                            <property name="page-increment">4</property>
+                          </object>
+                        </property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="AdwActionRow">
+                        <property name="title" translatable="yes">Clear Usage History</property>
+                        <property name="subtitle" translatable="yes">Favorites are not affected.</property>
+                        <child type="suffix">
+                          <object class="GtkButton" id="clear_history">
+                            <property name="label" translatable="yes">Clear</property>
+                            <property name="valign">center</property>
+                            <style><class name="destructive-action"/></style>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+                <child>
+                  <object class="AdwPreferencesGroup">
+                    <property name="title" translatable="yes">Preview</property>
+                    <child>
+                      <object class="AdwSpinRow" id="grid_size">
+                        <property name="title" translatable="yes">Character Grid Size (pt)</property>
+                        <property name="adjustment">
+                          <object class="GtkAdjustment">
+                            <property name="lower">12</property>
+                            <property name="upper">72</property>
+                            <property name="step-increment">4</property>
+                            <property name="page-increment">16</property>
+                          </object>
+                        </property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="AdwSpinRow" id="font_size">
+                        <property name="title" translatable="yes">Font Preview Size (pt)</property>
+                        <property name="adjustment">
+                          <object class="GtkAdjustment">
+                            <property name="lower">12</property>
+                            <property name="upper">72</property>
+                            <property name="step-increment">4</property>
+                            <property name="page-increment">16</property>
+                          </object>
+                        </property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="AdwSwitchRow" id="font_fallback">
+                        <property name="title" translatable="yes">Allow Font Fallback</property>
+                        <property name="subtitle" translatable="yes">Affects rendering, not font coverage.</property>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+                <child>
+                  <object class="AdwPreferencesGroup">
+                    <property name="title" translatable="yes">Sidebar Categories</property>
+                    <property name="description" translatable="yes">All Characters and saved collections always remain available.</property>
+                    <child>
+                      <object class="AdwSwitchRow" id="show_emoji">
+                        <property name="title" translatable="yes">Emoji</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="AdwSwitchRow" id="show_symbols">
+                        <property name="title" translatable="yes">Symbols</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="AdwSwitchRow" id="show_scripts">
+                        <property name="title" translatable="yes">Scripts</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="AdwSwitchRow" id="show_blocks">
+                        <property name="title" translatable="yes">Unicode Blocks</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="AdwSwitchRow" id="show_named">
+                        <property name="title" translatable="yes">Named Sequences</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="AdwSwitchRow" id="show_fonts">
+                        <property name="title" translatable="yes">Fonts</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="AdwSwitchRow" id="show_encodings">
+                        <property name="title" translatable="yes">Character Sets</property>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+              </object>
+            </property>
+          </object>
+        </property>
+      </object>
+    </property>
+  </template>
+</interface>

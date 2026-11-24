@@ -318,6 +318,72 @@ private void test_composer (MainWindow window) {
     expander.expanded = false;
 }
 
+/** Verifies browser favorites, usage recording, history views and live preference changes. */
+private void test_library (MainWindow window) {
+    var settings = new GLib.Settings (APP_ID);
+    var favorite = find_widget (window, "browser_favorite") as Gtk.Button;
+    var copy = find_widget (window, "browser_copy") as Gtk.Button;
+    assert (favorite != null && favorite.sensitive && copy != null && copy.sensitive);
+    favorite.clicked ();
+    favorite.clicked ();
+    copy.clicked ();
+    expect_clipboard (window, "€");
+    assert (settings.get_strv ("favorites").length == 1);
+    assert (settings.get_strv ("favorites")[0] == "€");
+    assert (settings.get_strv ("usage-history")[0] == "1:€");
+    foreach (var name in new string[] { "favorites", "recent", "frequent" }) {
+        var action = window.lookup_action (name);
+        assert (action != null);
+        action.activate (null);
+        var dialog = window.get_visible_dialog () as LibraryDialog;
+        assert (dialog != null);
+        var list = find_widget (dialog, "library_list") as Gtk.ListView;
+        var query = find_widget (dialog, "library_query") as Gtk.SearchEntry;
+        assert (list != null && query != null);
+        var selection = list.model as Gtk.SingleSelection;
+        assert (selection != null);
+        wait_for_page (selection, 1, "€");
+        query.text = "U+20AC";
+        wait_for_page (selection, 1, "€");
+        query.text = "missing character";
+        wait_for_page (selection, 0);
+        query.text = "";
+        wait_for_page (selection, 1, "€");
+        selection.selected = 0;
+        if (name == "frequent") {
+            var remove = find_widget (dialog, "library_remove") as Gtk.Button;
+            assert (remove != null && remove.sensitive);
+            remove.clicked ();
+            wait_for_page (selection, 0);
+        }
+        assert (dialog.close ());
+    }
+    assert (settings.get_strv ("usage-history").length == 0);
+    assert (settings.get_strv ("favorites").length == 1);
+    var action = window.lookup_action ("preferences");
+    assert (action != null);
+    action.activate (null);
+    var preferences = window.get_visible_dialog () as PreferencesDialog;
+    assert (preferences != null);
+    var enabled = find_widget (preferences, "history_enabled") as Adw.SwitchRow;
+    var symbols = find_widget (preferences, "show_symbols") as Adw.SwitchRow;
+    var size = find_widget (preferences, "grid_size") as Adw.SpinRow;
+    var scopes = find_widget (window, "scope_list") as Gtk.ListBox;
+    assert (enabled != null && symbols != null && size != null && scopes != null);
+    enabled.active = false;
+    symbols.active = false;
+    size.value = 40;
+    assert (!settings.get_boolean ("history-enabled"));
+    assert (!scopes.get_row_at_index ((int) Search.Scope.SYMBOLS).visible);
+    assert (settings.get_int ("grid-preview-size") == 40);
+    assert (preferences.close ());
+    copy.clicked ();
+    assert (settings.get_strv ("usage-history").length == 0);
+    settings.reset ("history-enabled");
+    settings.reset ("show-symbols");
+    settings.reset ("grid-preview-size");
+}
+
 /** Exercises actual widget models, search supersession, filters, reset and selection. */
 private void test_browser () {
     var application = new Characters.Application ();
@@ -359,6 +425,7 @@ private void test_browser () {
     assert (selected_code.label == "U+20AC");
     var inspect = find_widget (window, "inspect_button") as Gtk.Button;
     assert (inspect != null && inspect.sensitive);
+    test_library (window);
     test_composer (window);
     test_inspector (window);
     assert (selected_code.label == "U+20AC");

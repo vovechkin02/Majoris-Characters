@@ -1,14 +1,14 @@
 # Majoris Characters
 
 Characters is a native GTK4/libadwaita character utility for the Majoris desktop.
-This development release adds a session-only character composer and exact clipboard
-operations to the existing Unicode, emoji, font, and legacy character browsers.
+This development release adds local favorite and usage collections and configurable
+privacy, sidebar visibility, and preview preferences to the existing character utility.
 
 | Project metadata | Value |
 | --- | --- |
-| Version | 0.7.0 |
+| Version | 0.8.0 |
 | Platform target | Majoris OS / Debian 13 (Trixie) |
-| Development status | Stage 7 — composition and clipboard |
+| Development status | Stage 8 — favorites, history and preferences |
 | Application ID | `com.majoris.characters` |
 | Debian package | `majoris-characters` |
 | License | GPL-3.0-or-later |
@@ -73,6 +73,11 @@ operations to the existing Unicode, emoji, font, and legacy character browsers.
 - Direct raw text copying, nine encoding representations, explicit four-form normalization,
   scalar and UTF-8 byte counts, and ICU extended grapheme counts.
 - Inspect selected composed text (up to 32 scalars) without modifying the editor.
+- Persistent, manually ordered favorites for exact character and sequence identities.
+- Recently and frequently used collections, per-entry removal, and history clearing.
+- Configurable history retention and recording opt-out; favorites remain independent.
+- Searchable saved collections with copy, inspect, and add-to-composer actions.
+- Persistent sidebar category visibility, grid and font preview sizes, and font fallback.
 
 The bundled catalog is Unicode 17.0.0; ICU 76 provides Unicode 16.0 properties,
 and the alias/named-sequence supplement is Unicode 15.0.0. Newer metadata not
@@ -84,8 +89,8 @@ CLDR XML imports are supported by the offline generator. The picker exposes
 catalog-backed skin tone, gender, hair, direction, relationship, flag and
 keycap choices, and presentation pairs derived from the catalog. Color glyphs
 are rendered by Pango with installed emoji fonts. See [emoji functionality](docs/emoji-functionality.md)
-for coverage and rendering boundaries. Favorites, persistent usage history, and
-the compact picker remain later stages.
+for coverage and rendering boundaries. The compact picker and system-wide insertion
+remain later stages.
 The Vala/GTK and Fontconfig/Pango source is not yet compiler- or runtime-qualified
 in the delivery environment.
 
@@ -135,7 +140,7 @@ For Debian binary packages (run from the repository root):
 
 ```sh
 dpkg-buildpackage -us -uc -b
-sudo apt install ../majoris-characters_0.7.0-1_$(dpkg --print-architecture).deb
+sudo apt install ../majoris-characters_0.8.0-1_$(dpkg --print-architecture).deb
 ```
 
 The source package uses `3.0 (quilt)` and requires the corresponding upstream
@@ -177,6 +182,13 @@ Open the composer from the menu or Ctrl+M, edit text or drag a character tile
 into the editor, then copy the whole string or a selected representation.
 Normalization is explicit and undoable. See [composition and clipboard](docs/composition.md)
 for selection semantics, analysis limits, and exact-text guarantees.
+Choose **Add to Favorites** in any character browser or inspector. Open Favorites,
+Recently Used, or Frequently Used from the sidebar or menu; search, copy, inspect,
+remove, or add a saved identity to the composer. Favorites can be moved up or down
+when no collection filter is active. Preferences controls history recording and
+retention, top-level sidebar category visibility, and glyph sizes. See
+[collections and preferences](docs/library-and-preferences.md) for exact identity,
+privacy, ordering, and retention semantics.
 Ctrl+F focuses search; the main menu resets search and filters, shows version
 information, or closes the window. The window size is restored on subsequent
 launches. See [character browsing and search](docs/character-search.md) for query
@@ -203,6 +215,7 @@ D-Bus API, library ABI, or plugin API is provided.
 - `tests/unit/`: native engine, search, inspector, Vala binding, and supersession contracts.
 - `src/app/`: thin entry point and application lifecycle/actions.
 - `src/search/`: bounded asynchronous request lifecycle and native result ownership.
+- `src/library/`: GSettings-backed exact-text favorites and bounded usage history.
 - `src/views/`: window presentation, virtualized tiles, filtering, selection, inspector dialogs, and composer.
 - `data/`: UI templates, GResources, schema, application icon and desktop metadata.
 - `po/`: translation catalog inputs.
@@ -217,10 +230,16 @@ See [architecture](docs/architecture.md) for ownership and design decisions.
 The application is unprivileged and performs no networking, font installation,
 font removal, or external process launching. Font inspection reads installed
 font metadata through Fontconfig, which may maintain standard font caches. Search runs in a bounded, cancellable native
-worker. Query, identification, and composed text are not persisted or transmitted. Clipboard
+worker. Query, identification, and composed text are not automatically persisted or transmitted. Clipboard
 access and drag-and-drop are initiated by the user through native GTK controls.
-Its temporary navigation history is discarded on close. Its only persistent application
-state is the three GSettings window keys. Native D-Bus activation is scoped to the user's session.
+Its temporary navigation history is discarded on close. Persistent state consists
+of window geometry, explicit favorite identities, opt-out-controlled character usage,
+and presentation preferences in the local GSettings backend. Arbitrary clipboard
+contents, typed composition text and copied metadata are not recorded. Usage is
+recorded only by explicit character copy or composer addition actions (including
+explicitly identified sequences). Disabling history clears retained records when
+settings are writable; deletion is not a secure erase of storage or backups.
+Native D-Bus activation is scoped to the user's session.
 The interface inherits system theme styling; no custom CSS or Majoris-specific runtime package is required. Font previews
 use explicit Pango attributes without changing the interface font. The app's original icon follows the
 Majoris color palette. GNOME-derived data and algorithms are attributed in [third-party notices](THIRD_PARTY_NOTICES.md).
@@ -237,8 +256,10 @@ The default suite checks native Unicode, search, inspector, legacy encoding and 
 request supersession, declaration documentation, CLI version/help/error handling,
 XML window startup, repeat activation, actions, clean close, settings persistence,
 and actual GTK browser paging, search, filtering, selection, inspector navigation,
-exact emoji variation copying, and composer editing, normalization and clipboard copying in a private D-Bus
-session and Xvfb display. The test runner isolates the home and configuration
+exact emoji variation copying, composer editing, normalization and clipboard copying,
+and saved-collection interactions in a private D-Bus
+session and Xvfb display. Headless library tests and a separate-process keyfile
+persistence test cover the new settings repository. The test runner isolates the home and configuration
 directories and treats GTK warnings as fatal. Native search and inspector contracts are tested without a
 graphical display. Native timings are not a substitute for GTK responsiveness or platform performance qualification.
 
@@ -246,13 +267,13 @@ After installing the Debian package, the same runtime tests can target the real
 installed executable:
 
 ```sh
-python3 tests/integration/test_application.py /usr/bin/majoris-characters 0.7.0 cli
+python3 tests/integration/test_application.py /usr/bin/majoris-characters 0.8.0 cli
 xvfb-run -a dbus-run-session -- python3 \
-  tests/integration/test_application.py /usr/bin/majoris-characters 0.7.0 gui
+  tests/integration/test_application.py /usr/bin/majoris-characters 0.8.0 gui
 ```
 
-See [Stage 7 qualification](docs/stage-7-qualification.md) for actual
-verification results and remaining build/package checks. Historical Stage 1–6
+See [Stage 8 qualification](docs/stage-8-qualification.md) for actual
+verification results and remaining build/package checks. Historical Stage 1–7
 reports are preserved under `docs/`. Source inspection is
 not equivalent to compilation or runtime validation.
 

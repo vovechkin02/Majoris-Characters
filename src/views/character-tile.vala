@@ -31,10 +31,10 @@ namespace Characters {
         }
 
         /** Replaces all data when GTK binds this recycled cell to a new identity. */
-        public void bind_id (uint32 id) {
+        public void bind_id (uint32 id, int size_pt = 24) {
             var code = Search.code (id) ?? "";
             var name = Search.name (id) ?? _("Unknown Character");
-            bind_preview (id, null, 24, true, code, "%s\n%s".printf (name, code));
+            bind_preview (id, null, size_pt, true, code, "%s\n%s".printf (name, code));
         }
 
         /** Renders a scalar using typed Pango attributes, never markup or injected font labels. */
@@ -51,7 +51,9 @@ namespace Characters {
             glyph_label.attributes = attributes;
             glyph_label.set_text (Search.display (id) ?? "");
             code_label.max_width_chars = wide_caption ? 24 : 10;
-            width_request = wide_caption ? 176 : 72;
+            var glyph_width_px = size_pt * 2 + 16;
+            var minimum_width_px = wide_caption ? 176 : 72;
+            width_request = glyph_width_px > minimum_width_px ? glyph_width_px : minimum_width_px;
             height_request = size_pt > 24 ? size_pt * 2 + 16 : 64;
             code_label.set_text (caption);
             tooltip_text = detail;

@@ -1,3 +1,11 @@
+majoris-characters (0.8.0-1) unstable; urgency=medium
+
+  * Add persistent favorites, recent and frequent character usage collections.
+  * Add history privacy, retention, sidebar category and glyph preview preferences.
+  * Add repository, persistence and GTK interaction tests.
+
+ -- Vlad Ovechkin <45165533+vovechkin02@users.noreply.github.com>  Tue, 24 Nov 2026 21:00:00 +1100
+
 majoris-characters (0.7.0-1) unstable; urgency=medium
 
   * Add a shared character composer with exact text editing, clipboard, and drag-and-drop.

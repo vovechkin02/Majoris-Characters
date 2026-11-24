@@ -200,6 +200,13 @@
                       </object>
                     </child>
                     <child>
+                      <object class="GtkButton" id="font_favorite">
+                        <property name="label" translatable="yes">Add to Favorites</property>
+                        <property name="sensitive">False</property>
+                        <property name="visible">False</property>
+                      </object>
+                    </child>
+                    <child>
                       <object class="GtkBox">
                         <property name="spacing">8</property>
                         <child>

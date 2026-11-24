@@ -186,6 +186,13 @@
                               </object>
                             </child>
                             <child>
+                              <object class="GtkButton" id="inspect_favorite">
+                                <property name="label" translatable="yes">Add to Favorites</property>
+                                <property name="sensitive">False</property>
+                                <property name="visible">False</property>
+                              </object>
+                            </child>
+                            <child>
                               <object class="GtkBox">
                                 <property name="orientation">vertical</property>
                                 <property name="spacing">8</property>

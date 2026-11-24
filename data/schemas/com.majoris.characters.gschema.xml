@@ -18,5 +18,78 @@
       <summary>Maximized window</summary>
       <description>Whether to restore the window maximized.</description>
     </key>
+    <key name="favorites" type="as">
+      <default>[]</default>
+      <summary>Favorites</summary>
+      <description>Ordered exact UTF-8 favorite identities.</description>
+    </key>
+    <key name="usage-history" type="as">
+      <default>[]</default>
+      <summary>Usage history</summary>
+      <description>Newest-first character usage records, each with a decimal count prefix.</description>
+    </key>
+    <key name="history-enabled" type="b">
+      <default>true</default>
+      <summary>History enabled</summary>
+      <description>Record explicit character copies and composer additions.</description>
+    </key>
+    <key name="history-limit" type="i">
+      <range min="1" max="512"/>
+      <default>128</default>
+      <summary>History limit</summary>
+      <description>Maximum number of distinct retained usage identities.</description>
+    </key>
+    <key name="grid-preview-size" type="i">
+      <range min="12" max="72"/>
+      <default>24</default>
+      <summary>Grid preview size</summary>
+      <description>Main character grid glyph size in points.</description>
+    </key>
+    <key name="font-preview-size" type="i">
+      <range min="12" max="72"/>
+      <default>24</default>
+      <summary>Font preview size</summary>
+      <description>Font browser glyph size in points.</description>
+    </key>
+    <key name="font-fallback" type="b">
+      <default>false</default>
+      <summary>Font fallback</summary>
+      <description>Allow fallback in font previews.</description>
+    </key>
+    <key name="show-emoji" type="b">
+      <default>true</default>
+      <summary>Show emoji</summary>
+      <description>Show this browsing category in the sidebar.</description>
+    </key>
+    <key name="show-symbols" type="b">
+      <default>true</default>
+      <summary>Show symbols</summary>
+      <description>Show this browsing category in the sidebar.</description>
+    </key>
+    <key name="show-scripts" type="b">
+      <default>true</default>
+      <summary>Show scripts</summary>
+      <description>Show this browsing category in the sidebar.</description>
+    </key>
+    <key name="show-blocks" type="b">
+      <default>true</default>
+      <summary>Show blocks</summary>
+      <description>Show this browsing category in the sidebar.</description>
+    </key>
+    <key name="show-named" type="b">
+      <default>true</default>
+      <summary>Show named</summary>
+      <description>Show this browsing category in the sidebar.</description>
+    </key>
+    <key name="show-fonts" type="b">
+      <default>true</default>
+      <summary>Show fonts</summary>
+      <description>Show this browsing category in the sidebar.</description>
+    </key>
+    <key name="show-encodings" type="b">
+      <default>true</default>
+      <summary>Show encodings</summary>
+      <description>Show this browsing category in the sidebar.</description>
+    </key>
   </schema>
 </schemalist>

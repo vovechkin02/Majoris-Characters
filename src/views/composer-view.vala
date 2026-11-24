@@ -51,6 +51,14 @@ namespace Characters {
         [GtkChild]
         private unowned Gtk.Button composer_inspect;
 
+        /** Shared repository records explicit identity insertion, never arbitrary editor text. */
+        private LibraryStore? library;
+
+        /** Creates a session editor with optional local usage accounting. */
+        public ComposerView (LibraryStore? library = null) {
+            this.library = library;
+        }
+
         /** Configures the native buffer and connects only widget-lifetime signals. */
         construct {
             var buffer = composer_input.buffer;
@@ -100,7 +108,9 @@ namespace Characters {
             buffer.insert (ref end, text, -1);
             buffer.place_cursor (end);
             buffer.end_user_action ();
-            composer_status.label = _("Added to Composer");
+            var saved = library == null || library.record_use (text);
+            composer_status.label = saved ? _("Added to Composer") :
+                _("Added to Composer; Usage History Could Not Be Saved");
         }
 
         /** Selects the current range, or the whole buffer when there is no selection. */
@@ -267,7 +277,7 @@ namespace Characters {
             }
             var snapshot = Inspector.from_text (text);
             if (snapshot != null) {
-                new CharacterInspector ((owned) snapshot, this).present (this);
+                new CharacterInspector ((owned) snapshot, this, library).present (this);
             }
         }
     }

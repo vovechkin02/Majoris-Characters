@@ -94,6 +94,11 @@ namespace Characters {
         private unowned Gtk.Button font_add;
         /** Non-owning editor reference passed on to the inspector. */
         private weak ComposerView? composer;
+        /** Optional shared local collection repository. */
+        private LibraryStore? library;
+        /** Saves the exact selected identity into Favorites. */
+        [GtkChild]
+        private unowned Gtk.Button font_favorite;
 
         /** Serializes source discovery and extraction without blocking GTK. */
         private FontSourceLoader loader = new FontSourceLoader ();
@@ -140,13 +145,20 @@ namespace Characters {
 
         /** Opens the font or encoding browser, optionally comparing a selected Unicode scalar. */
         public FontBrowser (bool legacy_mode = false, uint32 compare_point = uint32.MAX,
-                            ComposerView? composer = null) {
+                            ComposerView? composer = null, LibraryStore? library = null) {
             this.composer = composer;
+            this.library = library;
+            font_favorite.visible = library != null;
+            font_favorite.sensitive = false;
+            font_favorite.clicked.connect (save_favorite);
             font_add.visible = composer != null;
             font_add.sensitive = false;
             font_add.clicked.connect (add_to_composer);
             this.compare_point = compare_point;
             configure_grid ();
+            var preferences = new GLib.Settings (APP_ID);
+            preferences.bind ("font-preview-size", preview_size, "value", SettingsBindFlags.DEFAULT);
+            preferences.bind ("font-fallback", font_fallback, "active", SettingsBindFlags.DEFAULT);
             configure_controls (legacy_mode);
             source_handler = loader.completed.connect (on_source_completed);
             search_handler = controller.completed.connect (on_search_completed);
@@ -724,6 +736,7 @@ namespace Characters {
                 Search.code (point) ?? "");
             font_inspect.sensitive = true;
             font_copy.sensitive = Search.text (point) != null;
+            font_favorite.sensitive = font_copy.sensitive && library != null;
             font_add.sensitive = font_copy.sensitive && composer != null;
             bytes_copy.sensitive = false;
             if (mode == FontBrowserMode.ENCODINGS && mapping != null) {
@@ -750,6 +763,7 @@ namespace Characters {
             font_detail.label = "";
             font_inspect.sensitive = false;
             font_copy.sensitive = false;
+            font_favorite.sensitive = false;
             font_add.sensitive = false;
             bytes_copy.sensitive = false;
         }
@@ -762,7 +776,7 @@ namespace Characters {
             }
             var snapshot = Inspector.from_code ("U+%04X".printf (point));
             if (snapshot != null) {
-                new CharacterInspector ((owned) snapshot, composer).present (this);
+                new CharacterInspector ((owned) snapshot, composer, library).present (this);
             }
         }
 
@@ -770,7 +784,7 @@ namespace Characters {
         private void copy_character () {
             var text = Search.text (selected_point ());
             if (text != null) {
-                copy_text (text);
+                copy_text (text, true);
             }
         }
 
@@ -794,9 +808,11 @@ namespace Characters {
         }
 
         /** Uses the native display clipboard and confirms the completed local action. */
-        private void copy_text (string text) {
+        private void copy_text (string text, bool record = false) {
             get_clipboard ().set_text (text);
-            font_toasts.add_toast (new Adw.Toast (_("Copied to Clipboard")));
+            var saved = !record || library == null || library.record_use (text);
+            font_toasts.add_toast (new Adw.Toast (saved ? _("Copied to Clipboard") :
+                _("Copied to Clipboard; Usage History Could Not Be Saved")));
         }
 
         /** Disconnects callbacks and releases timers before closing; workers are never joined here. */
@@ -819,6 +835,16 @@ namespace Characters {
             }
             loader.shutdown ();
             controller.shutdown ();
+        }
+
+        /** Saves the exact selected identity without recording a copy or insertion. */
+        private void save_favorite () {
+            var text = Search.text (selected_point ());
+            if (text != null && library != null) {
+                var message = library.add_favorite (text) ? _("Saved to Favorites") :
+                    _("Unable to Save Favorite. Check the Limit or Settings Permissions.");
+                font_toasts.add_toast (new Adw.Toast (message));
+            }
         }
     }
 }

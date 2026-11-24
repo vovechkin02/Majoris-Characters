@@ -69,6 +69,11 @@ namespace Characters {
 
         /** Non-owning reference to the session editor; absent in standalone inspectors. */
         private weak ComposerView? composer;
+        /** Optional shared local collection repository. */
+        private LibraryStore? library;
+        /** Saves the exact selected identity into Favorites. */
+        [GtkChild]
+        private unowned Gtk.Button inspect_favorite;
         /** Owns the inspected identity independently of the browser and its worker. */
         private Inspector.Snapshot? snapshot;
         /** Code notation for previously inspected identities; never persists on disk. */
@@ -80,8 +85,12 @@ namespace Characters {
 
         /** Constructs an XML inspector, optionally taking ownership of a selected identity. */
         public CharacterInspector (owned Inspector.Snapshot? initial = null,
-                                   ComposerView? composer = null) {
+                                   ComposerView? composer = null, LibraryStore? library = null) {
             this.composer = composer;
+            this.library = library;
+            inspect_favorite.visible = library != null;
+            inspect_favorite.sensitive = false;
+            inspect_favorite.clicked.connect (save_favorite);
             inspect_add.visible = composer != null;
             inspect_add.sensitive = false;
             inspect_add.clicked.connect (add_to_composer);
@@ -222,6 +231,7 @@ namespace Characters {
             var text = snapshot.text ();
             preview.label = snapshot.display () ?? "";
             copy_character.sensitive = text != null;
+            inspect_favorite.sensitive = text != null && library != null;
             inspect_add.sensitive = text != null && composer != null;
             emoji_button.visible = text != null && Emoji.is_candidate (text);
             if (text == null) {
@@ -434,14 +444,14 @@ namespace Characters {
             if (snapshot == null || component_filter.selected >= snapshot.count ()) {
                 return;
             }
-            new FontBrowser (false, snapshot.point (component_filter.selected), composer).present (this);
+            new FontBrowser (false, snapshot.point (component_filter.selected), composer, library).present (this);
         }
 
         /** Opens an exact-sequence variation collection independently of the snapshot. */
         private void show_emoji_variations (Variant? parameter) {
             var text = snapshot != null ? snapshot.text () : null;
             if (text != null && Emoji.is_candidate (text)) {
-                new EmojiVariations (text, composer).present (this);
+                new EmojiVariations (text, composer, library).present (this);
             }
         }
 
@@ -456,7 +466,7 @@ namespace Characters {
         private void copy_original (Variant? parameter) {
             var text = snapshot != null ? snapshot.text () : null;
             if (text != null) {
-                copy_text (text);
+                copy_text (text, true);
             }
         }
 
@@ -477,9 +487,21 @@ namespace Characters {
         }
 
         /** Publishes text to the display clipboard after an explicit user action. */
-        private void copy_text (string text) {
+        private void copy_text (string text, bool record = false) {
             get_clipboard ().set_text (text);
-            toast_overlay.add_toast (new Adw.Toast (_("Copied to Clipboard")));
+            var saved = !record || library == null || library.record_use (text);
+            toast_overlay.add_toast (new Adw.Toast (saved ? _("Copied to Clipboard") :
+                _("Copied to Clipboard; Usage History Could Not Be Saved")));
+        }
+
+        /** Saves the exact selected identity without recording a copy or insertion. */
+        private void save_favorite () {
+            var text = snapshot != null ? snapshot.text () : null;
+            if (text != null && library != null) {
+                var message = library.add_favorite (text) ? _("Saved to Favorites") :
+                    _("Unable to Save Favorite. Check the Limit or Settings Permissions.");
+                toast_overlay.add_toast (new Adw.Toast (message));
+            }
         }
     }
 }

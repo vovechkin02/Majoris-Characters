@@ -6,7 +6,9 @@
     <file>ui/composer-view.ui</file>
     <file>ui/emoji-variations.ui</file>
     <file>ui/font-browser.ui</file>
+    <file>ui/library-dialog.ui</file>
     <file>ui/main-window.ui</file>
+    <file>ui/preferences-dialog.ui</file>
     <file alias="icons/scalable/apps/com.majoris.characters.svg">icons/com.majoris.characters.svg</file>
   </gresource>
 </gresources>

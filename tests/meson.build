@@ -159,3 +159,25 @@ composition_test = executable(
 )
 test('Composition graphemes, representations and normalization', composition_test,
   suite: 'unit', timeout: 30)
+
+library_store_test = executable(
+  'test-library-store',
+  'unit/test-library-store.vala',
+  library_sources,
+  app_config,
+  dependencies: gio_dep,
+  c_args: ['-UNDEBUG'],
+)
+test('Saved collection ordering and privacy', library_store_test,
+  env: test_environment,
+  depends: schema_target,
+  suite: 'unit',
+  timeout: 30,
+)
+test('Saved collections across process restarts', python,
+  args: [files('integration/test_library_persistence.py'), library_store_test],
+  env: test_environment,
+  depends: [library_store_test, schema_target],
+  suite: 'integration',
+  timeout: 45,
+)

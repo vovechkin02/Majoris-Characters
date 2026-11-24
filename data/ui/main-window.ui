@@ -26,6 +26,24 @@
     </section>
     <section>
       <item>
+        <attribute name="label" translatable="yes">Favorites</attribute>
+        <attribute name="action">win.favorites</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">Recently Used</attribute>
+        <attribute name="action">win.recent</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">Frequently Used</attribute>
+        <attribute name="action">win.frequent</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">Preferences</attribute>
+        <attribute name="action">win.preferences</attribute>
+      </item>
+    </section>
+    <section>
+      <item>
         <attribute name="label" translatable="yes">About Characters</attribute>
         <attribute name="action">app.about</attribute>
       </item>
@@ -139,6 +157,42 @@
                             <child>
                               <object class="GtkLabel">
                                 <property name="label" translatable="yes">Character Sets</property>
+                                <property name="xalign">0</property>
+                              </object>
+                            </child>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkListBoxRow">
+                            <property name="selectable">False</property>
+                            <property name="activatable">True</property>
+                            <child>
+                              <object class="GtkLabel">
+                                <property name="label" translatable="yes">Favorites</property>
+                                <property name="xalign">0</property>
+                              </object>
+                            </child>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkListBoxRow">
+                            <property name="selectable">False</property>
+                            <property name="activatable">True</property>
+                            <child>
+                              <object class="GtkLabel">
+                                <property name="label" translatable="yes">Recently Used</property>
+                                <property name="xalign">0</property>
+                              </object>
+                            </child>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkListBoxRow">
+                            <property name="selectable">False</property>
+                            <property name="activatable">True</property>
+                            <child>
+                              <object class="GtkLabel">
+                                <property name="label" translatable="yes">Frequently Used</property>
                                 <property name="xalign">0</property>
                               </object>
                             </child>
@@ -363,6 +417,13 @@
                                 <property name="sensitive">False</property>
                               </object>
                             </child>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkButton" id="browser_favorite">
+                            <property name="label" translatable="yes">Add to Favorites</property>
+                            <property name="sensitive">False</property>
+                            <property name="action-name">win.save-favorite</property>
                           </object>
                         </child>
                         <child>

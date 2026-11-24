@@ -1,0 +1,100 @@
+namespace Characters {
+    /** Local privacy, category visibility, and preview preferences backed by GSettings. */
+    [GtkTemplate (ui = "/com/majoris/characters/ui/preferences-dialog.ui")]
+    internal sealed class PreferencesDialog : Adw.Dialog {
+        /** Confirms history clearing or reports a persistence failure. */
+        [GtkChild]
+        private unowned Adw.ToastOverlay preferences_toasts;
+        /** Enables recording; disabling also discards retained history. */
+        [GtkChild]
+        private unowned Adw.SwitchRow history_enabled;
+        /** Bounds retained distinct history identities. */
+        [GtkChild]
+        private unowned Adw.SpinRow history_limit;
+        /** Main browser glyph size in points. */
+        [GtkChild]
+        private unowned Adw.SpinRow grid_size;
+        /** Font browser glyph size in points. */
+        [GtkChild]
+        private unowned Adw.SpinRow font_size;
+        /** Font browser rendering fallback, separate from coverage. */
+        [GtkChild]
+        private unowned Adw.SwitchRow font_fallback;
+        /** Controls visibility of the emoji sidebar category. */
+        [GtkChild]
+        private unowned Adw.SwitchRow show_emoji;
+        /** Controls visibility of the symbol sidebar category. */
+        [GtkChild]
+        private unowned Adw.SwitchRow show_symbols;
+        /** Controls visibility of the script sidebar category. */
+        [GtkChild]
+        private unowned Adw.SwitchRow show_scripts;
+        /** Controls visibility of the block sidebar category. */
+        [GtkChild]
+        private unowned Adw.SwitchRow show_blocks;
+        /** Controls visibility of the named-sequence sidebar category. */
+        [GtkChild]
+        private unowned Adw.SwitchRow show_named;
+        /** Controls visibility of the font sidebar entry. */
+        [GtkChild]
+        private unowned Adw.SwitchRow show_fonts;
+        /** Controls visibility of the legacy-encoding sidebar entry. */
+        [GtkChild]
+        private unowned Adw.SwitchRow show_encodings;
+        /** Opens confirmation for destructive history clearing. */
+        [GtkChild]
+        private unowned Gtk.Button clear_history;
+
+        /** Shared settings retained for the lifetime of automatic widget bindings. */
+        private GLib.Settings settings;
+        /** Owns history mutation policy; does not own this dialog. */
+        private LibraryStore library;
+
+        /** Binds persisted preferences bidirectionally using native GSettings bindings. */
+        public PreferencesDialog (GLib.Settings settings, LibraryStore library) {
+            this.settings = settings;
+            this.library = library;
+            settings.bind ("history-enabled", history_enabled, "active", SettingsBindFlags.DEFAULT);
+            settings.bind ("history-limit", history_limit, "value", SettingsBindFlags.DEFAULT);
+            settings.bind ("grid-preview-size", grid_size, "value", SettingsBindFlags.DEFAULT);
+            settings.bind ("font-preview-size", font_size, "value", SettingsBindFlags.DEFAULT);
+            settings.bind ("font-fallback", font_fallback, "active", SettingsBindFlags.DEFAULT);
+            settings.bind ("show-emoji", show_emoji, "active", SettingsBindFlags.DEFAULT);
+            settings.bind ("show-symbols", show_symbols, "active", SettingsBindFlags.DEFAULT);
+            settings.bind ("show-scripts", show_scripts, "active", SettingsBindFlags.DEFAULT);
+            settings.bind ("show-blocks", show_blocks, "active", SettingsBindFlags.DEFAULT);
+            settings.bind ("show-named", show_named, "active", SettingsBindFlags.DEFAULT);
+            settings.bind ("show-fonts", show_fonts, "active", SettingsBindFlags.DEFAULT);
+            settings.bind ("show-encodings", show_encodings, "active", SettingsBindFlags.DEFAULT);
+            clear_history.clicked.connect (confirm_clear);
+            history_enabled.notify["active"].connect (check_privacy);
+        }
+
+        /** Reports a locked history key if recording was disabled but old records remain. */
+        private void check_privacy () {
+            if (!history_enabled.active && settings.get_strv ("usage-history").length > 0) {
+                preferences_toasts.add_toast (new Adw.Toast (
+                    _("Recording Disabled; Unable to Clear History. Check Settings Permissions.")));
+            }
+        }
+
+        /** Prompts before removing usage records while keeping favorites intact. */
+        private void confirm_clear () {
+            var dialog = new Adw.AlertDialog (_("Clear Character History?"),
+                _("Recently and frequently used characters will be removed. Favorites are kept."));
+            dialog.add_response ("cancel", _("Cancel"));
+            dialog.add_response ("clear", _("Clear History"));
+            dialog.set_response_appearance ("clear", Adw.ResponseAppearance.DESTRUCTIVE);
+            dialog.set_default_response ("cancel");
+            dialog.set_close_response ("cancel");
+            dialog.response.connect ((response) => {
+                if (response == "clear") {
+                    var message = library.clear_history () ? _("History Cleared") :
+                        _("Unable to Clear History. Check Settings Permissions.");
+                    preferences_toasts.add_toast (new Adw.Toast (message));
+                }
+            });
+            dialog.present (this);
+        }
+    }
+}

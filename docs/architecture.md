@@ -192,3 +192,31 @@ New window actions are `win.open-composer`, `win.add-character`, and
 GSettings keys, native inspection snapshot semantics, and previous actions
 remain unchanged. ICU i18n is linked for grapheme segmentation via the existing
 Debian `libicu-dev` build dependency.
+
+## Stage 8: saved collections and preferences
+
+`LibraryStore` is the local repository for exact-text favorites and usage
+history. It owns a GSettings reference and uses the main context for all
+operations; no worker or native Unicode catalog index participates in persisted
+identity. The two independent collections use bounded string arrays; usage
+counts and recency order are written together in a single setting. Frequency
+is derived from immutable `UsageEntry` snapshots. No separate ranking database,
+clock-dependent timestamp, global Singleton, or custom history manager is
+required. See [saved collections and preferences](library-and-preferences.md)
+for the key contracts and privacy boundaries.
+
+| Decision | Pattern / idiom | Ownership and contract |
+| --- | --- | --- |
+| Shared local repository | Direct repository composition | MainWindow owns LibraryStore; composer and dialogs retain it explicitly. No speculative interchangeable backend. |
+| Collection changes | Observer via native GObject signals | The settings backend delivers changes on the owning main context. LibraryDialog disconnects on close/dispose; MainWindow disconnects its own settings observer on close. |
+| Frequency ordering | Direct stable bounded sort | UsageEntry values own their text; counts saturate, ties preserve recency. No Strategy hierarchy for a fixed ranking policy. |
+| Preferences | Native GSettings property bindings | Bindings follow widget lifetimes; renderer fallback does not change cmap coverage. |
+| Collection list | GTK model/view and recycled rows | GtkSingleSelection owns a bounded GtkStringList; selection is restored by exact identity rather than transient catalog ID. |
+
+Copies of original characters are recorded at the explicit action boundary.
+ComposerView accounts for explicit appends so nested dialogs do not record the
+same insertion twice. Metadata and arbitrary text editing remain untracked.
+The three existing window geometry keys and previous application actions retain
+their contracts. Stage 8 adds schema keys, XML templates, and `win.favorites`,
+`win.recent`, `win.frequent`, `win.save-favorite`, and `win.preferences` actions.
+The app has no public library ABI. No new package dependencies are needed.

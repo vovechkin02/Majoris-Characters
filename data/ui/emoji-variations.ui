@@ -82,6 +82,13 @@
                         <property name="label" translatable="yes">Inspect Sequence</property>
                       </object>
                     </child>
+                    <child>
+                      <object class="GtkButton" id="emoji_favorite">
+                        <property name="label" translatable="yes">Add to Favorites</property>
+                        <property name="sensitive">False</property>
+                        <property name="visible">False</property>
+                      </object>
+                    </child>
                   </object>
                 </child>
               </object>
