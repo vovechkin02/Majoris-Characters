@@ -42,6 +42,71 @@ private void wait_for_page (Gtk.SingleSelection selection, uint expected, string
     assert_not_reached ();
 }
 
+/** Reads actual clipboard text with a bounded wait on the GTK main context. */
+private void expect_clipboard (Gtk.Widget widget, string expected) {
+    var clipboard = widget.get_clipboard ();
+    string? copied = null;
+    bool completed = false;
+    clipboard.read_text_async.begin (null, (object, result) => {
+        try {
+            copied = clipboard.read_text_async.end (result);
+        } catch (Error error) {
+            Test.message ("Clipboard read failed: %s", error.message);
+        }
+        completed = true;
+    });
+    var deadline = get_monotonic_time () + WAIT_TIMEOUT_US;
+    var context = MainContext.default ();
+    while (!completed && get_monotonic_time () < deadline) {
+        context.iteration (false);
+        Thread.usleep (POLL_INTERVAL_US);
+    }
+    assert (completed && copied == expected);
+}
+
+/** Exercises the mapped inspector, exact clipboard, invalid input and related navigation. */
+private void test_inspector (MainWindow window) {
+    var action = window.lookup_action ("inspect-character");
+    assert (action != null);
+    action.activate (null);
+    var dialog = window.get_visible_dialog () as CharacterInspector;
+    assert (dialog != null);
+    var identity = find_widget (dialog, "identity_code") as Gtk.Label;
+    var input = find_widget (dialog, "identify_input") as Gtk.TextView;
+    var error_label = find_widget (dialog, "input_error") as Gtk.Label;
+    var copy = find_widget (dialog, "copy_character") as Gtk.Button;
+    var components = find_widget (dialog, "component_filter") as Gtk.DropDown;
+    var expander = find_widget (dialog, "identify_expander") as Gtk.Expander;
+    assert (identity != null && input != null && error_label != null);
+    assert (copy != null && components != null && expander != null);
+    assert (identity.label == "U+20AC" && copy.sensitive);
+    assert (dialog.activate_action_variant ("inspect.copy-character", null));
+    expect_clipboard (dialog, "€");
+
+    expander.expanded = true;
+    input.buffer.text = "👩‍💻";
+    assert (dialog.activate_action_variant ("inspect.identify-text", null));
+    assert (identity.label == "U+1F469 U+200D U+1F4BB");
+    assert (components.visible && components.model.get_n_items () == 3);
+    components.selected = 1;
+    assert (dialog.activate_action_variant ("inspect.copy-character", null));
+    expect_clipboard (dialog, "👩‍💻");
+    assert (dialog.activate_action_variant ("inspect.related", new Variant.string ("U+1F469")));
+    assert (identity.label == "U+1F469");
+    assert (dialog.activate_action_variant ("inspect.back", null));
+    assert (identity.label == "U+1F469 U+200D U+1F4BB");
+
+    input.buffer.text = "U+D800";
+    assert (dialog.activate_action_variant ("inspect.identify-code", null));
+    assert (error_label.visible && identity.label == "U+1F469 U+200D U+1F4BB");
+    input.buffer.text = "U+0000";
+    assert (dialog.activate_action_variant ("inspect.identify-code", null));
+    assert (!error_label.visible && identity.label == "U+0000" && !copy.sensitive);
+    assert (dialog.activate_action_variant ("inspect.copy", new Variant.string ("00")));
+    expect_clipboard (dialog, "00");
+    dialog.force_close ();
+}
+
 /** Exercises actual widget models, search supersession, filters, reset and selection. */
 private void test_browser () {
     var application = new Characters.Application ();
@@ -81,6 +146,10 @@ private void test_browser () {
     selection.selected = 0;
     assert (selected_name.label == "EURO SIGN");
     assert (selected_code.label == "U+20AC");
+    var inspect = find_widget (window, "inspect_button") as Gtk.Button;
+    assert (inspect != null && inspect.sensitive);
+    test_inspector (window);
+    assert (selected_code.label == "U+20AC");
 
     entry.text = "";
     scope_list.select_row (scope_list.get_row_at_index ((int) Search.Scope.BLOCK));
@@ -94,6 +163,7 @@ private void test_browser () {
     reset.activate (null);
     wait_for_page (selection, 512, "0");
     assert (entry.text == "" && category.selected == 0);
+    assert (!inspect.sensitive);
     entry.text = "letter";
     window.close ();
 }

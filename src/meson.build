@@ -9,6 +9,7 @@ search_sources = files(
   'search/search-request.vala',
 )
 application_sources = files('app/application.vala') + search_sources + files(
+  'views/character-inspector.vala',
   'views/character-tile.vala',
   'views/main-window.vala',
 )
@@ -27,6 +28,7 @@ characters_executable = executable(
   app_config,
   unicode_vapi,
   search_vapi,
+  inspector_vapi,
   app_resources,
   dependencies: app_dependencies,
   vala_args: app_vala_args,

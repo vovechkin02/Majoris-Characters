@@ -1,6 +1,7 @@
 unicode_include = include_directories('.')
 unicode_engine = static_library(
   'characters-unicode',
+  'character-inspector.c',
   'character-search.c',
   'unicode-engine.c',
   include_directories: unicode_include,
@@ -13,3 +14,4 @@ unicode_dep = declare_dependency(
 )
 unicode_vapi = files('../../vapi/characters-unicode.vapi')
 search_vapi = files('../../vapi/characters-search.vapi')
+inspector_vapi = files('../../vapi/characters-inspector.vapi')

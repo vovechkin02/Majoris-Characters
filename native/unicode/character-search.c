@@ -844,3 +844,18 @@ char *characters_search_code(uint32_t id) {
     }
     return strdup(code);
 }
+
+size_t characters_search_decode_code(const char *code, uint32_t *points) {
+    if (!code || !points || strnlen(code, MAX_QUERY_BYTES + 1) > MAX_QUERY_BYTES) {
+        return 0;
+    }
+    while (is_space(*code)) {
+        code++;
+    }
+    struct Query query = { 0 };
+    if (!parse_explicit(code, &query)) {
+        return 0;
+    }
+    memcpy(points, query.points, query.point_count * sizeof(*points));
+    return query.point_count;
+}

@@ -54,6 +54,10 @@ namespace Characters {
         [GtkChild]
         private unowned Gtk.Label selected_code;
 
+        /** Opens the full inspector for the current selection. */
+        [GtkChild]
+        private unowned Gtk.Button inspect_button;
+
         /** Owns persistent geometry settings for this window. */
         private GLib.Settings settings;
         /** Serializes native worker jobs independently of GTK widgets. */
@@ -128,9 +132,10 @@ namespace Characters {
             next_button.clicked.connect (next_page);
         }
 
-        /** Activating a cell with Enter or double-click selects its identity. */
+        /** Activating a cell with Enter or double-click opens its inspector. */
         private void on_grid_activate (uint position) {
             selection.selected = position;
+            inspect_selected (null);
         }
 
         /** Creates one reusable XML tile for a list item, independent of result identity. */
@@ -181,6 +186,31 @@ namespace Characters {
             var reset_action = new SimpleAction ("reset-search", null);
             reset_action.activate.connect (reset_search);
             add_action (reset_action);
+            var inspect_action = new SimpleAction ("inspect-character", null);
+            inspect_action.activate.connect (inspect_selected);
+            add_action (inspect_action);
+            var identify_action = new SimpleAction ("identify-character", null);
+            identify_action.activate.connect (identify_character);
+            add_action (identify_action);
+        }
+
+        /** Opens a snapshot independent of the current search result or selection lifetime. */
+        private void inspect_selected (Variant? parameter) {
+            var item = selection.selected_item as Gtk.StringObject;
+            if (item == null) {
+                return;
+            }
+            var initial = Inspector.from_id ((uint32) uint.parse (item.get_string ()));
+            if (initial != null) {
+                var dialog = new CharacterInspector ((owned) initial);
+                dialog.present (this);
+            }
+        }
+
+        /** Opens identification without requiring a character to be selected. */
+        private void identify_character (Variant? parameter) {
+            var dialog = new CharacterInspector ();
+            dialog.present (this);
         }
 
         /** Focuses the query field without changing the selected collection. */
@@ -315,7 +345,7 @@ namespace Characters {
             }
         }
 
-        /** Updates the basic name/code selection summary; full inspector follows in Stage 4. */
+        /** Updates the selection summary and enables the inspector for the selected identity. */
         private void update_selection () {
             var item = selection.selected_item as Gtk.StringObject;
             if (item == null) {
@@ -325,12 +355,14 @@ namespace Characters {
             var id = (uint32) uint.parse (item.get_string ());
             selected_name.label = Search.name (id) ?? _("Unknown Character");
             selected_code.label = Search.code (id) ?? "";
+            inspect_button.sensitive = true;
         }
 
         /** Removes the old selection summary before a new page or search is displayed. */
         private void clear_selection () {
             selected_name.label = _("No Character Selected");
             selected_code.label = "";
+            inspect_button.sensitive = false;
         }
 
         /** Disconnects the window from the worker before cancellation; closing never joins GTK. */

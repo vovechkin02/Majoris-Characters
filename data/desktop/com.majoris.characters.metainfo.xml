@@ -9,11 +9,12 @@
     <name>Majoris</name>
   </developer>
   <description>
-    <p>Browse Unicode characters, emoji, symbols, scripts, Unicode blocks, and named sequences. Search by name, keyword, alias, literal character, or code point, and view the name and Unicode values for a selected character.</p>
+    <p>Browse Unicode characters, emoji, symbols, scripts, Unicode blocks, and named sequences. Search by name, keyword, alias, literal character, or code point, and inspect each selected character or sequence. View properties, encodings, normalization, and related characters, and copy the original text or a metadata report.</p>
   </description>
   <launchable type="desktop-id">com.majoris.characters.desktop</launchable>
   <url type="homepage">https://github.com/vovechkin02/Majoris-Characters</url>
   <releases>
+    <release version="0.4.0" date="2026-11-24" type="development"/>
     <release version="0.3.0" date="2026-11-24" type="development"/>
     <release version="0.2.0" date="2026-11-24" type="development"/>
     <release version="0.1.0" date="2026-11-24" type="development"/>

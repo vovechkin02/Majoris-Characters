@@ -50,6 +50,28 @@ native request alive through idle delivery; the window is not retained by the
 worker. See [character search](character-search.md) for query and lifecycle
 contracts.
 
+## Stage 4 boundaries
+
+`character-inspector.c` owns immutable scalar snapshots, explicit numeric
+representations, safe previews, and length-aware ICU normalization. It reuses
+the search parser for explicit code points and the Unicode engine for names,
+relationships, and catalog data. The snapshot is independent of the search
+request and remains valid after the grid model changes or the worker is freed.
+A NUL is stored as a scalar, not a C string terminator. All input snapshots have
+1–32 scalars; normalized output may expand beyond that limit and is formatted
+without truncation. ICU normalization for unassigned data is withheld.
+
+`CharacterInspector` is an XML-backed adaptive `Adw.Dialog`, owned by the
+window's dialog presentation lifecycle. It owns one native snapshot, a bounded
+history of 32 previous numeric identities, and a plain-text report. All access
+and GTK updates occur on the main context; no new worker is created. The native
+operations inspect at most 32 scalars, fixed catalog tables, and bounded related
+classes. A component selector limits displayed property rows to one scalar,
+while reports contain all components. Generated row actions carry exact values
+as `GVariant` targets rather than capturing their parent dialog in closures.
+Only explicit actions copy to the GDK clipboard. No inspector data is persisted.
+See [character inspector](character-inspector.md) for user and API contracts.
+
 ## GoF applicability and lifecycle
 
 | Area | Decision | Ownership and rationale |
@@ -62,8 +84,10 @@ contracts.
 | Search supersession | Direct composition and single-worker scheduling | SearchController owns active and latest pending requests; no custom Command, Strategy, or State hierarchy is needed. |
 | Native search boundary | Adapter-like binding | SearchRequest owns one native job and translates ownership and completion to GObject lifetime. There is no interchangeable backend requirement. |
 | Grid tile recycling | GTK framework factory idiom | SignalListItemFactory owns setup, bind and unbind callbacks; CharacterTile clears every field on reuse. No application-defined Factory Method hierarchy. |
+| Inspection snapshot | Direct immutable data object | Native snapshot owns its scalar array; no Memento pattern is claimed for the simple bounded code-point navigation history. |
+| Inspector actions | Framework action group, command-like idiom | One dialog owns its action group, snapshot, and generated targets; GTK dispatches immediate callbacks, without a custom Command hierarchy. |
 
-There are no claimed custom GoF pattern instances in Stage 3. The architecture
+There are no claimed custom GoF pattern instances through Stage 4. The architecture
 favors composition and native framework extension points. Revisit pattern
 applicability when real backend or algorithm variation is introduced.
 
@@ -74,9 +98,10 @@ applicability when real backend or algorithm variation is introduced.
 - GSettings path: `/com/majoris/characters/`.
 - Keys: `window-width` and `window-height` (integer logical pixels, range
   320–8192, default 960×720), `window-maximized` (boolean, default false).
-- Actions: `app.about`, `app.quit`, `win.search`, and `win.reset-search`.
+- Actions: `app.about`, `app.quit`, `win.search`, `win.reset-search`, `win.inspect-character`, and `win.identify-character`.
 - Resource paths: `/com/majoris/characters/ui/main-window.ui` and
-  `/com/majoris/characters/ui/character-tile.ui`.
+  `/com/majoris/characters/ui/character-tile.ui`, and
+  `/com/majoris/characters/ui/character-inspector.ui`.
 - Search IDs are private, catalog-local, and not a persisted compatibility surface.
 
 Window geometry is a GTK logical-size request, not a guarantee of compositor

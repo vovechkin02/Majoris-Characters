@@ -1,0 +1,269 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface domain="majoris-characters">
+  <requires lib="gtk" version="4.14"/>
+  <template class="CharactersCharacterInspector" parent="AdwDialog">
+    <property name="title" translatable="yes">Character Inspector</property>
+    <property name="content-width">560</property>
+    <property name="content-height">640</property>
+    <property name="child">
+      <object class="AdwToastOverlay" id="toast_overlay">
+        <property name="child">
+          <object class="AdwToolbarView">
+            <child type="top">
+              <object class="AdwHeaderBar">
+                <child type="start">
+                  <object class="GtkButton" id="back_button">
+                    <property name="icon-name">go-previous-symbolic</property>
+                    <property name="tooltip-text" translatable="yes">Back</property>
+                    <property name="action-name">inspect.back</property>
+                    <property name="sensitive">False</property>
+                    <accessibility><property name="label" translatable="yes">Back</property></accessibility>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <property name="content">
+              <object class="GtkScrolledWindow">
+                <property name="hscrollbar-policy">never</property>
+                <child>
+                  <object class="AdwClamp">
+                    <property name="maximum-size">640</property>
+                    <property name="child">
+                      <object class="GtkBox">
+                        <property name="orientation">vertical</property>
+                        <property name="spacing">16</property>
+                        <property name="margin-start">16</property>
+                        <property name="margin-end">16</property>
+                        <property name="margin-top">16</property>
+                        <property name="margin-bottom">16</property>
+                        <child>
+                          <object class="GtkExpander" id="identify_expander">
+                            <property name="label" translatable="yes">Identify Characters</property>
+                            <property name="child">
+                              <object class="GtkBox">
+                                <property name="orientation">vertical</property>
+                                <property name="spacing">8</property>
+                                <property name="margin-top">8</property>
+                                <child>
+                                  <object class="GtkLabel">
+                                    <property name="label" translatable="yes">Paste text or explicit code points (U+0041, 0x41, dec:65). Identify up to 32 Unicode scalars.</property>
+                                    <property name="wrap">True</property>
+                                    <property name="xalign">0</property>
+                                    <style><class name="dim-label"/></style>
+                                  </object>
+                                </child>
+                                <child>
+                                  <object class="GtkScrolledWindow">
+                                    <property name="min-content-height">64</property>
+                                    <property name="hscrollbar-policy">never</property>
+                                    <property name="has-frame">True</property>
+                                    <child>
+                                      <object class="GtkTextView" id="identify_input">
+                                        <property name="wrap-mode">char</property>
+                                        <property name="top-margin">4</property>
+                                        <property name="bottom-margin">4</property>
+                                        <property name="left-margin">4</property>
+                                        <property name="right-margin">4</property>
+                                        <accessibility><property name="label" translatable="yes">Text or Code Points to Identify</property></accessibility>
+                                      </object>
+                                    </child>
+                                  </object>
+                                </child>
+                                <child>
+                                  <object class="GtkBox">
+                                    <property name="spacing">8</property>
+                                    <child>
+                                      <object class="GtkButton">
+                                        <property name="label" translatable="yes">Identify Text</property>
+                                        <property name="action-name">inspect.identify-text</property>
+                                        <property name="hexpand">True</property>
+                                      </object>
+                                    </child>
+                                    <child>
+                                      <object class="GtkButton">
+                                        <property name="label" translatable="yes">Identify Code Points</property>
+                                        <property name="action-name">inspect.identify-code</property>
+                                        <property name="hexpand">True</property>
+                                      </object>
+                                    </child>
+                                  </object>
+                                </child>
+                                <child>
+                                  <object class="GtkLabel" id="input_error">
+                                    <property name="visible">False</property>
+                                    <property name="wrap">True</property>
+                                    <property name="xalign">0</property>
+                                    <style><class name="error"/></style>
+                                  </object>
+                                </child>
+                              </object>
+                            </property>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkBox" id="details">
+                            <property name="orientation">vertical</property>
+                            <property name="spacing">16</property>
+                            <property name="visible">False</property>
+                            <child>
+                              <object class="GtkBox">
+                                <property name="orientation">vertical</property>
+                                <property name="spacing">8</property>
+                                <child>
+                                  <object class="GtkLabel" id="preview">
+                                    <property name="wrap">True</property>
+                                    <property name="wrap-mode">char</property>
+                                    <property name="max-width-chars">10</property>
+                                    <property name="justify">center</property>
+                                    <attributes><attribute name="size" value="65536"/></attributes>
+                                    <accessibility><property name="label" translatable="yes">Character Preview</property></accessibility>
+                                  </object>
+                                </child>
+                                <child>
+                                  <object class="GtkLabel" id="identity_name">
+                                    <property name="wrap">True</property>
+                                    <property name="justify">center</property>
+                                    <property name="selectable">True</property>
+                                    <style><class name="title-3"/></style>
+                                  </object>
+                                </child>
+                                <child>
+                                  <object class="GtkLabel" id="identity_code">
+                                    <property name="wrap">True</property>
+                                    <property name="wrap-mode">char</property>
+                                    <property name="selectable">True</property>
+                                    <property name="justify">center</property>
+                                    <style><class name="monospace"/></style>
+                                  </object>
+                                </child>
+                                <child>
+                                  <object class="GtkLabel" id="preview_note">
+                                    <property name="wrap">True</property>
+                                    <property name="justify">center</property>
+                                    <style><class name="dim-label"/></style>
+                                  </object>
+                                </child>
+                                <child>
+                                  <object class="GtkBox">
+                                    <property name="spacing">8</property>
+                                    <child>
+                                      <object class="GtkButton" id="copy_character">
+                                        <property name="label" translatable="yes">Copy Character</property>
+                                        <property name="hexpand">True</property>
+                                        <property name="action-name">inspect.copy-character</property>
+                                        <style><class name="suggested-action"/></style>
+                                      </object>
+                                    </child>
+                                    <child>
+                                      <object class="GtkButton">
+                                        <property name="label" translatable="yes">Copy Information</property>
+                                        <property name="hexpand">True</property>
+                                        <property name="action-name">inspect.copy-information</property>
+                                      </object>
+                                    </child>
+                                  </object>
+                                </child>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="GtkBox">
+                                <property name="orientation">vertical</property>
+                                <property name="spacing">8</property>
+                                <child>
+                                  <object class="GtkLabel">
+                                    <property name="label" translatable="yes">Character Properties</property>
+                                    <property name="xalign">0</property>
+                                    <style><class name="heading"/></style>
+                                  </object>
+                                </child>
+                                <child>
+                                  <object class="GtkDropDown" id="component_filter">
+                                    <accessibility><property name="label" translatable="yes">Sequence Component</property></accessibility>
+                                  </object>
+                                </child>
+                                <child>
+                                  <object class="GtkBox" id="property_rows">
+                                    <property name="orientation">vertical</property>
+                                    <property name="spacing">8</property>
+                                  </object>
+                                </child>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="GtkBox">
+                                <property name="orientation">vertical</property>
+                                <property name="spacing">8</property>
+                                <child>
+                                  <object class="GtkLabel">
+                                    <property name="label" translatable="yes">Encodings and Representations</property>
+                                    <property name="xalign">0</property>
+                                    <style><class name="heading"/></style>
+                                  </object>
+                                </child>
+                                <child>
+                                  <object class="GtkBox" id="encoding_rows">
+                                    <property name="orientation">vertical</property>
+                                    <property name="spacing">8</property>
+                                  </object>
+                                </child>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="GtkBox">
+                                <property name="orientation">vertical</property>
+                                <property name="spacing">8</property>
+                                <child>
+                                  <object class="GtkLabel">
+                                    <property name="label" translatable="yes">Normalization and Decomposition</property>
+                                    <property name="xalign">0</property>
+                                    <style><class name="heading"/></style>
+                                  </object>
+                                </child>
+                                <child>
+                                  <object class="GtkBox" id="normalization_rows">
+                                    <property name="orientation">vertical</property>
+                                    <property name="spacing">8</property>
+                                  </object>
+                                </child>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="GtkBox">
+                                <property name="orientation">vertical</property>
+                                <property name="spacing">8</property>
+                                <child>
+                                  <object class="GtkLabel">
+                                    <property name="label" translatable="yes">Related Characters</property>
+                                    <property name="xalign">0</property>
+                                    <style><class name="heading"/></style>
+                                  </object>
+                                </child>
+                                <child>
+                                  <object class="GtkBox" id="related_rows">
+                                    <property name="orientation">vertical</property>
+                                    <property name="spacing">8</property>
+                                  </object>
+                                </child>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="GtkLabel" id="version_note">
+                                <property name="wrap">True</property>
+                                <property name="xalign">0</property>
+                                <style><class name="dim-label"/></style>
+                              </object>
+                            </child>
+                          </object>
+                        </child>
+                      </object>
+                    </property>
+                  </object>
+                </child>
+              </object>
+            </property>
+          </object>
+        </property>
+      </object>
+    </property>
+  </template>
+</interface>

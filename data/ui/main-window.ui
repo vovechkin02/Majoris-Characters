@@ -4,6 +4,10 @@
   <menu id="primary_menu">
     <section>
       <item>
+        <attribute name="label" translatable="yes">Identify Characters</attribute>
+        <attribute name="action">win.identify-character</attribute>
+      </item>
+      <item>
         <attribute name="label" translatable="yes">Reset Search and Filters</attribute>
         <attribute name="action">win.reset-search</attribute>
       </item>
@@ -294,6 +298,14 @@
                         <property name="ellipsize">end</property>
                         <property name="xalign">0</property>
                         <style><class name="dim-label"/></style>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkButton" id="inspect_button">
+                        <property name="label" translatable="yes">Inspect Character</property>
+                        <property name="action-name">win.inspect-character</property>
+                        <property name="sensitive">False</property>
+                        <property name="halign">start</property>
                       </object>
                     </child>
                   </object>

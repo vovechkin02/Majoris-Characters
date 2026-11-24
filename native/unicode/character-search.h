@@ -159,4 +159,14 @@ char *characters_search_name(uint32_t id);
  */
 char *characters_search_code(uint32_t id);
 
+/**
+ * characters_search_decode_code:
+ * @code: Explicit U+, 0x, or dec: tokens, separated by ASCII whitespace.
+ * @points: (out): Storage for CHARACTERS_UNICODE_MAX_SEQUENCE_LENGTH scalars.
+ *
+ * Returns: Number of decoded scalars, or zero for invalid input. No assignment
+ * requirement is imposed; the destination may be partially written on failure.
+ */
+size_t characters_search_decode_code(const char *code, uint32_t *points);
+
 #endif

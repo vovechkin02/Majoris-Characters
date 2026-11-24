@@ -1,5 +1,7 @@
+data/ui/character-inspector.ui
 data/ui/character-tile.ui
 data/ui/main-window.ui
 src/app/application.vala
+src/views/character-inspector.vala
 src/views/character-tile.vala
 src/views/main-window.vala

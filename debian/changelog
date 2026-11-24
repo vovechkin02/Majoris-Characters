@@ -1,3 +1,11 @@
+majoris-characters (0.4.0-1) unstable; urgency=medium
+
+  * Add the sequence-aware character inspector, encoding representations, and normalization.
+  * Add identification, related-character navigation, and exact clipboard actions.
+  * Extend native, Vala binding, and browser integration tests.
+
+ -- Vlad Ovechkin <45165533+vovechkin02@users.noreply.github.com>  Tue, 24 Nov 2026 19:06:00 +1100
+
 majoris-characters (0.3.0-1) unstable; urgency=medium
 
   * Add virtualized character browsing, collection filters, and asynchronous search.

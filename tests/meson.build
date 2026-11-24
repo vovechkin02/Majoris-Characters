@@ -68,6 +68,7 @@ character_browser_test = executable(
   app_config,
   unicode_vapi,
   search_vapi,
+  inspector_vapi,
   app_resources,
   dependencies: app_dependencies,
   vala_args: app_vala_args,
@@ -81,3 +82,20 @@ test('Character browser interaction', find_program('xvfb-run'),
   suite: 'integration',
   timeout: 60,
 )
+
+character_inspector_test = executable(
+  'test-character-inspector',
+  'unit/test-character-inspector.c',
+  dependencies: unicode_dep,
+  c_args: ['-UNDEBUG'],
+)
+test('Character inspector contracts', character_inspector_test, suite: 'unit', timeout: 30)
+
+inspector_binding_test = executable(
+  'test-inspector-bindings',
+  'unit/test-inspector-bindings.vala',
+  inspector_vapi,
+  dependencies: [gio_dep, unicode_dep],
+  c_args: ['-UNDEBUG'],
+)
+test('Inspector Vala bindings', inspector_binding_test, suite: 'unit', timeout: 30)

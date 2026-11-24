@@ -1,14 +1,15 @@
 # Majoris Characters
 
 Characters is a native GTK4/libadwaita character utility for the Majoris desktop.
-This development release adds interactive character browsing and asynchronous
-search to the Unicode engine and native application foundation.
+This development release adds a sequence-aware inspector, Unicode encoding
+representations, normalization, related-character navigation, and character
+identification to the existing Unicode browser and search engine.
 
 | Project metadata | Value |
 | --- | --- |
-| Version | 0.3.0 |
+| Version | 0.4.0 |
 | Platform target | Majoris OS / Debian 13 (Trixie) |
-| Development status | Stage 3 — character browsing and search |
+| Development status | Stage 4 — character inspector |
 | Application ID | `com.majoris.characters` |
 | Debian package | `majoris-characters` |
 | License | GPL-3.0-or-later |
@@ -45,14 +46,28 @@ search to the Unicode engine and native application foundation.
 - Character selection with complete code point notation, including composite emoji.
 - Loading, empty, invalid-query and failure states; reset search and filters.
 - Collapsible category sidebar, native keyboard navigation, and Ctrl+F search focus.
+- Adaptive character inspector with enlarged glyph previews, explicit missing-glyph
+  or nonprinting-preview notes, and a selector for each constituent scalar.
+- Canonical names, aliases, assignment, blocks, planes, scripts, general category,
+  age, combining and bidirectional properties, decomposition type, width, and
+  emoji properties, subject to the installed data versions.
+- Exact hexadecimal and decimal code points, UTF-8 bytes, UTF-16/32 code units,
+  HTML numeric references, Unicode escape notation and CSS escape notation.
+- NFC, NFD, NFKC, and NFKD code-point results, with optional normalized-text copies.
+- Related-character navigation with bounded Back history; literal multiline text
+  and explicit numeric identification of up to 32 scalars, including unassigned
+  code points and NUL through numeric notation.
+- Copy original text, individual metadata/encoding values, normalized text, or
+  a report containing all sequence components. NUL-containing text cannot be
+  copied through the GTK string clipboard; its numeric representations remain available.
 
 The bundled catalog is Unicode 17.0.0; ICU 76 provides Unicode 16.0 properties,
 and the alias/named-sequence supplement is Unicode 15.0.0. Newer metadata not
 available in those sources is explicitly unavailable rather than fabricated.
 Script and general-category filters use ICU's assigned-property data. Font
-inspection, the full character inspector, localized emoji annotations, dedicated
-emoji variation selection, character copying/composition, favorites, history,
-and the compact picker remain later stages. The Stage 3 Vala/GTK source is
+inspection, localized emoji annotations, dedicated emoji variation selection,
+multi-character composition, drag-and-drop, favorites, persistent usage history,
+and the compact picker remain later stages. The Stage 4 Vala/GTK source is
 implemented but not yet compiler- or runtime-qualified in the delivery environment.
 
 ## Requirements and dependencies
@@ -99,7 +114,7 @@ For Debian binary packages (run from the repository root):
 
 ```sh
 dpkg-buildpackage -us -uc -b
-sudo apt install ../majoris-characters_0.3.0-1_$(dpkg --print-architecture).deb
+sudo apt install ../majoris-characters_0.4.0-1_$(dpkg --print-architecture).deb
 ```
 
 The source package uses `3.0 (quilt)` and requires the corresponding upstream
@@ -120,6 +135,12 @@ values, such as `U+1F469 U+200D U+1F4BB`.
 
 Use Previous/Next Page to browse larger result sets. Click a tile or use native
 keyboard navigation to select it and see its name and complete code-point list.
+Choose **Inspect Character**, or activate the tile with Enter or a double-click,
+to open the inspector. Use the component selector for a multi-scalar sequence,
+copy a representation, or navigate to a related character and back. Choose
+**Identify Characters** from the main menu to inspect pasted text or explicit
+code points without changing the browser search. See [character inspector](docs/character-inspector.md)
+for precise input, representation, and clipboard contracts.
 Ctrl+F focuses search; the main menu resets search and filters, shows version
 information, or closes the window. The window size is restored on subsequent
 launches. See [character browsing and search](docs/character-search.md) for query
@@ -137,17 +158,17 @@ D-Bus API, library ABI, or plugin API is provided.
 
 ## Architecture and source layout
 
-- `native/unicode/`: private C engine, search implementation, vendored catalog
+- `native/unicode/`: private C engine, search and inspector implementations, vendored catalog
   and generated supplement.
 - `vapi/`: internal Vala bindings.
 - `tools/unicode/`: offline catalog generation.
-- `tests/unit/`: native engine, search, Vala binding, and supersession contracts.
+- `tests/unit/`: native engine, search, inspector, Vala binding, and supersession contracts.
 - `src/app/`: thin entry point and application lifecycle/actions.
 - `src/search/`: bounded asynchronous request lifecycle and native result ownership.
-- `src/views/`: window presentation, virtualized tiles, filtering and selection.
+- `src/views/`: window presentation, virtualized tiles, filtering, selection, and the inspector dialog.
 - `data/`: UI templates, GResources, schema, application icon and desktop metadata.
 - `po/`: translation catalog inputs.
-- `tests/integration/`: real executable CLI and GUI lifecycle tests, plus browser interaction.
+- `tests/integration/`: real executable CLI and GUI lifecycle tests, plus browser and inspector interaction.
 - `tools/`: declaration documentation coverage checker.
 - `debian/`: package metadata and debhelper integration.
 
@@ -157,7 +178,9 @@ See [architecture](docs/architecture.md) for ownership and design decisions.
 
 The application is unprivileged and performs no networking, system modification,
 or external process launching. Search runs in a bounded, cancellable native
-worker. Query text is not persisted or transmitted. Its only persistent application
+worker. Query and identification text are not persisted or transmitted. The
+inspector only accesses the system clipboard after an explicit copy action.
+Its temporary navigation history is discarded on close. Its only persistent application
 state is the three GSettings window keys. Native D-Bus activation is scoped to the user's session.
 The interface inherits system theme styling; no custom CSS, font override, or
 Majoris-specific runtime package is required. The app's original icon follows the
@@ -171,26 +194,27 @@ meson test -C build --print-errorlogs
 meson test -C build --suite integration --print-errorlogs
 ```
 
-The default suite checks native Unicode and search contracts, Vala bindings and
+The default suite checks native Unicode, search and inspector contracts, Vala bindings and
 request supersession, declaration documentation, CLI version/help/error handling,
 XML window startup, repeat activation, actions, clean close, settings persistence,
-and actual GTK browser paging, search, filtering and selection in a private D-Bus
+and actual GTK browser paging, search, filtering, selection, inspector navigation,
+and clipboard copying in a private D-Bus
 session and Xvfb display. The test runner isolates the home and configuration
-directories and treats GTK warnings as fatal. Native search is tested without a
+directories and treats GTK warnings as fatal. Native search and inspector contracts are tested without a
 graphical display. Native timings are not a substitute for GTK responsiveness or platform performance qualification.
 
 After installing the Debian package, the same runtime tests can target the real
 installed executable:
 
 ```sh
-python3 tests/integration/test_application.py /usr/bin/majoris-characters 0.3.0 cli
+python3 tests/integration/test_application.py /usr/bin/majoris-characters 0.4.0 cli
 xvfb-run -a dbus-run-session -- python3 \
-  tests/integration/test_application.py /usr/bin/majoris-characters 0.3.0 gui
+  tests/integration/test_application.py /usr/bin/majoris-characters 0.4.0 gui
 ```
 
-See [Stage 3 qualification](docs/stage-3-qualification.md) for actual
-verification results and remaining build/package checks. Historical Stage 1
-and Stage 2 reports are preserved under `docs/`. Source inspection is
+See [Stage 4 qualification](docs/stage-4-qualification.md) for actual
+verification results and remaining build/package checks. Historical Stage 1–3
+reports are preserved under `docs/`. Source inspection is
 not equivalent to compilation or runtime validation.
 
 ## Documentation and contribution
