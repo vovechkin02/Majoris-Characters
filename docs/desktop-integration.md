@@ -15,7 +15,8 @@ The picker is an independent 400 × 480 logical-pixel default window. Opening it
 again presents the existing picker, not a new copy. Select All Characters,
 Emoji (default), Symbols, Favorites or Recently Used, and search within that
 collection. The catalog search is asynchronous and canceled on replacement.
-The view shows up to 80 exact identities; refine the query for additional
+The view honors the persisted character grid preview size, and shows up to 80
+exact identities; refine the query for additional
 results. Click a character or press Enter from the search field to copy it.
 Keyboard navigation through the result buttons is provided by GTK. Escape
 closes the picker; the full browser remains independent. The header's expand
@@ -112,11 +113,12 @@ require privileged compositor access. It does not replace existing language
 IMEs; switch input sources to use them. The compact GTK picker remains
 available independently.
 
-The engine executes `majoris-characters --input-search=QUERY` as a local child
-process. That headless option emits at most 20 lines, each containing base64
-UTF-8 identity and name separated by a tab. No shell is involved. The query is
-visible to processes permitted to inspect its command line; no network or
-logging of search contents is used by the engine. The Python decoder validates
+The engine executes `majoris-characters --input-search-stdin` as a local child
+process, writing the bounded UTF-8 query through its standard-input pipe. That
+headless option emits at most 20 lines, each containing base64 UTF-8 identity
+and name separated by a tab. No shell is involved. The query is not included in
+process arguments; no network or logging of search contents is used by the
+engine. The original `--input-search=QUERY` CLI remains available for compatibility. The Python decoder validates
 the exact sequence, length, count and output budget. Focus loss, reset,
 disable, or supersession cancels pending work and invalidates callbacks. The
 engine declines password, PIN, and private input where the client declares

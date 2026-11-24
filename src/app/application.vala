@@ -23,6 +23,8 @@ namespace Characters {
                 _("Search the full character catalog"), _("QUERY"));
             add_main_option ("input-search", 0, OptionFlags.NONE, OptionArg.STRING,
                 _("Return bounded input-source results without opening a window"), _("QUERY"));
+            add_main_option ("input-search-stdin", 0, OptionFlags.NONE, OptionArg.NONE,
+                _("Read a bounded input-source query from standard input"), null);
             add_main_option ("record-insertion", 0, OptionFlags.NONE, OptionArg.STRING,
                 _("Record an explicitly inserted character without opening a window"), _("TEXT"));
         }
@@ -41,6 +43,13 @@ namespace Characters {
                 return 0;
             }
             var input = options.lookup_value ("input-search", VariantType.STRING);
+            if (options.contains ("input-search-stdin")) {
+                if (input != null) {
+                    return 2;
+                }
+                var query = DesktopSearch.read_input_query ();
+                return query != null ? DesktopSearch.print_input_results (query) : 2;
+            }
             if (input != null) {
                 return DesktopSearch.print_input_results (input.get_string ());
             }

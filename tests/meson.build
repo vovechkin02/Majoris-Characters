@@ -187,3 +187,16 @@ test('Input source response protocol', python,
   suite: 'unit',
   timeout: 10,
 )
+
+test('Release source contracts', python,
+  args: [files('release/test_source_contracts.py')],
+  suite: 'source',
+  timeout: 10,
+)
+
+test('French translation formats', find_program('msgfmt'),
+  args: ['--check-format', '-o', '/dev/null',
+         meson.project_source_root() / 'po/fr.po'],
+  suite: 'source',
+  timeout: 10,
+)

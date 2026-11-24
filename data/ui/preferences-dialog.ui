@@ -15,7 +15,7 @@
                 <child>
                   <object class="AdwPreferencesGroup">
                     <property name="title" translatable="yes">History</property>
-                    <property name="description" translatable="yes">Only explicit character copies and additions to the composer are recorded.</property>
+                    <property name="description" translatable="yes">Only explicit character copies, composer additions, and input-source insertions are recorded.</property>
                     <child>
                       <object class="AdwSwitchRow" id="history_enabled">
                         <property name="title" translatable="yes">Record Character Usage</property>

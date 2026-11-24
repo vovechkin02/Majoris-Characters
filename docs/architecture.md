@@ -258,3 +258,18 @@ primary application, respecting the existing retention and opt-out policy.
 No external service or new public library ABI is introduced. Existing actions,
 application identity and GSettings keys are preserved. See [desktop integration](desktop-integration.md)
 for installation, protocol contracts and runtime boundaries.
+
+## Stage 10: qualification and hardening
+
+The compact picker shares the existing settings backend and disconnects its
+preview-size observer alongside its search and collection observers. The same
+exact identities and native clipboard contracts remain in place. The input
+adapter now transports its query through the child process's standard-input
+pipe. DesktopSearch validates an EOF-terminated, at-most-512-byte UTF-8 query
+before invoking the existing engine; the old argument-based CLI remains
+compatible. Modified shortcuts cancel an active input query rather than
+committing a candidate. Explicit insertion history still uses the existing
+primary application command. No new service or speculative pattern hierarchy
+is introduced. Native English metadata and identifiers remain stable; interface
+labels can be translated without changing search results. Source-level
+release checks complement, but do not replace, actual GTK and desktop testing.

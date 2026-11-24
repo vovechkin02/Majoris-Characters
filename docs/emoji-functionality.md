@@ -56,8 +56,8 @@ label, category and annotation keywords. A single non-ASCII Unicode letter in
 the Emoji scope can also act as an annotation term (for example a Chinese
 keyword); explicit numeric code-point queries remain exact. The original
 sequence is never modified by the annotation-key normalization. Uncovered
-localized names fall back to English catalog metadata. The UI itself remains
-English unless translations are separately installed.
+localized names fall back to English catalog metadata. The interface includes a partial French translation in Stage 10. Other languages
+use the English interface unless a translation is separately installed.
 
 The native lookup tables are immutable, compiled into the application and
 regenerated offline. See [annotation input](../data/unicode/emoji/README.md)

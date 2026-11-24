@@ -11,7 +11,7 @@
 | 7 | Composer, clipboard and drag-and-drop | Source implemented; native tests passed; GTK qualification pending |
 | 8 | Favorites, recent/frequent history and preferences | Source implemented; strict schema and native regressions passed; Vala/GTK qualification pending |
 | 9 | Compact picker, desktop search and native insertion | Source implemented; protocol/native checks passed; desktop and IBus qualification pending |
-| 10 | Accessibility, localization, performance, regression and ISO integration | Not started |
+| 10 | Accessibility, localization, performance, regression and ISO integration | Qualification candidate; see Stage 10 report for executed and outstanding gates |
 
 The scope is the Linux-native equivalent of Windows Character Map, macOS
 Character Viewer and GNOME Characters. No AI, vendor accounts, Microsoft/Apple

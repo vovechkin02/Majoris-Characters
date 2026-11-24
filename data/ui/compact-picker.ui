@@ -50,6 +50,9 @@
                 <child>
                   <object class="GtkFlowBox" id="picker_results">
                     <property name="selection-mode">none</property>
+                    <accessibility>
+                      <property name="label" translatable="yes">Character results</property>
+                    </accessibility>
                     <property name="max-children-per-line">8</property>
                     <property name="min-children-per-line">1</property>
                     <property name="row-spacing">4</property>

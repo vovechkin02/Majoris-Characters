@@ -76,15 +76,16 @@ class CharacterEngine(IBus.Engine):
             return GLib.SOURCE_REMOVE
         try:
             process = Gio.Subprocess.new(
-                [executable, "--input-search=" + self.query],
-                Gio.SubprocessFlags.STDOUT_PIPE | Gio.SubprocessFlags.STDERR_SILENCE,
+                [executable, "--input-search-stdin"],
+                Gio.SubprocessFlags.STDIN_PIPE | Gio.SubprocessFlags.STDOUT_PIPE
+                | Gio.SubprocessFlags.STDERR_SILENCE,
             )
         except GLib.Error:
             self.update_auxiliary_text(IBus.Text.new_from_string(_("Search unavailable")), True)
             return GLib.SOURCE_REMOVE
         self.process = process
         generation = self.generation
-        process.communicate_utf8_async(None, None, self._search_finished, generation)
+        process.communicate_utf8_async(self.query, None, self._search_finished, generation)
         return GLib.SOURCE_REMOVE
 
     def _search_finished(self, process, result, generation):
@@ -94,7 +95,7 @@ class CharacterEngine(IBus.Engine):
             values = decode_results(stdout or "") if process.get_successful() else []
         except (GLib.Error, ValueError):
             values = []
-        if generation != self.generation or not self.active:
+        if generation != self.generation or not self.active or self.sensitive_context:
             return
         self.process = None
         self.results = values
@@ -108,7 +109,7 @@ class CharacterEngine(IBus.Engine):
 
     def _commit(self, index):
         """Commit only a currently displayed exact identity through the IBus context."""
-        if self.active and 0 <= index < len(self.results):
+        if self.active and not self.sensitive_context and 0 <= index < len(self.results):
             text = self.results[index][0]
             self._reset_query()
             self.commit_text(IBus.Text.new_from_string(text))
@@ -148,6 +149,9 @@ class CharacterEngine(IBus.Engine):
                 self._refresh()
                 return True
             return False
+        if state & (control | IBus.ModifierType.MOD1_MASK | IBus.ModifierType.SUPER_MASK):
+            self._reset_query()
+            return False
         if keyval == IBus.KEY_Escape:
             self._reset_query()
             return True
@@ -171,9 +175,6 @@ class CharacterEngine(IBus.Engine):
             self.query = self.query[:-1]
             self._refresh()
             return True
-        if state & (control | IBus.ModifierType.MOD1_MASK | IBus.ModifierType.SUPER_MASK):
-            self._reset_query()
-            return False
         scalar = IBus.keyval_to_unicode(keyval)
         if scalar and chr(scalar).isprintable():
             candidate = self.query + chr(scalar)

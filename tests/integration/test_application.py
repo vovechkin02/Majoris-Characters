@@ -80,6 +80,23 @@ class CommandLineTest(ApplicationTest):
         invalid = self.run_command(EXECUTABLE, "--input-search=", check=False)
         self.assertNotEqual(invalid.returncode, 0)
 
+    def test_input_search_stdin(self) -> None:
+        """Match the legacy CLI results without placing the query in process arguments."""
+        query = "👩‍💻"
+        expected = self.run_command(EXECUTABLE, "--input-search=" + query).stdout.encode()
+        result = subprocess.run([EXECUTABLE, "--input-search-stdin"],
+                                input=query.encode(), env=self.env, capture_output=True,
+                                timeout=10, check=False)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(result.stdout, expected)
+        for invalid in (b"", b" ", b"A\x00B", b"\xff", b"x" * 513):
+            with self.subTest(invalid=invalid):
+                result = subprocess.run([EXECUTABLE, "--input-search-stdin"], input=invalid,
+                                        env=self.env, capture_output=True, timeout=10,
+                                        check=False)
+                self.assertEqual(result.returncode, 2)
+                self.assertEqual(result.stdout, b"")
+
     def test_help(self) -> None:
         """Advertise the supported local version option."""
         result = self.run_command(EXECUTABLE, "--help")

@@ -1,14 +1,14 @@
 # Majoris Characters
 
 Characters is a native GTK4/libadwaita character utility for the Majoris desktop.
-This development release adds local favorite and usage collections and configurable
-privacy, sidebar visibility, and preview preferences to the existing character utility.
+This Stage 10 qualification candidate brings together the nine implemented feature
+stages with desktop input hardening, accessibility, localization, and release checks.
 
 | Project metadata | Value |
 | --- | --- |
-| Version | 0.9.0 |
+| Version | 1.0.0 |
 | Platform target | Majoris OS / Debian 13 (Trixie) |
-| Development status | Stage 9 — desktop integration |
+| Development status | Stage 10 — qualification candidate (not a verified stable release) |
 | Application ID | `com.majoris.characters` |
 | Debian package | `majoris-characters` |
 | License | GPL-3.0-or-later |
@@ -33,7 +33,7 @@ privacy, sidebar visibility, and preview preferences to the existing character u
 - Persistent normal window size and maximized state using GSettings.
 - Desktop launcher, application icon, AppStream metadata and D-Bus service.
 - Shared system theme and light/dark appearance through libadwaita.
-- Gettext catalog infrastructure; English is currently the only supplied UI language.
+- Gettext catalogs: English source strings and a partial French interface translation.
 - Native Unicode names, aliases, scalar properties, scripts, blocks, named
   sequences, emoji catalogs, normalization, and related-character queries.
 - Independently versioned data and local database generation tools.
@@ -146,7 +146,7 @@ For Debian binary packages (run from the repository root):
 
 ```sh
 dpkg-buildpackage -us -uc -b
-sudo apt install ../majoris-characters_0.9.0-1_$(dpkg --print-architecture).deb
+sudo apt install ../majoris-characters_1.0.0-1_$(dpkg --print-architecture).deb
 ```
 
 The source package uses `3.0 (quilt)` and requires the corresponding upstream
@@ -224,8 +224,8 @@ majoris-characters --unicode-version
 ```
 
 These options do not need a graphical display. The registered D-Bus service
-uses the standard GApplication activation and action interfaces; no custom public
-D-Bus API, library ABI, or plugin API is provided.
+uses the standard GApplication activation and action interfaces and the GNOME
+SearchProvider2 interface. No public library ABI or plugin API is provided.
 
 ## Architecture and source layout
 
@@ -265,8 +265,9 @@ settings are writable; deletion is not a secure erase of storage or backups.
 Native D-Bus activation is scoped to the user's session. Desktop searches do not
 change history or the clipboard; activating a result opens its inspector.
 The optional IBus source blocks input in clients declaring password, PIN or private
-input and cancels search on focus loss. The input query is passed to a local
-subprocess (visible to processes permitted to inspect its command line).
+input and cancels search on focus loss. The input query is passed to a local subprocess via standard input, not its
+command line. The explicit insertion history command still receives the selected
+character as an argument.
 The interface inherits system theme styling; no custom CSS or Majoris-specific runtime package is required. Font previews
 use explicit Pango attributes without changing the interface font. The app's original icon follows the
 Majoris color palette. GNOME-derived data and algorithms are attributed in [third-party notices](THIRD_PARTY_NOTICES.md).
@@ -275,6 +276,7 @@ Majoris color palette. GNOME-derived data and algorithms are attributed in [thir
 
 ```sh
 python3 tools/check_documentation.py .
+python3 tests/release/test_source_contracts.py
 meson test -C build --print-errorlogs
 meson test -C build --suite integration --print-errorlogs
 ```
@@ -294,13 +296,20 @@ After installing the Debian package, the same runtime tests can target the real
 installed executable:
 
 ```sh
-python3 tests/integration/test_application.py /usr/bin/majoris-characters 0.9.0 cli
+python3 tests/integration/test_application.py /usr/bin/majoris-characters 1.0.0 cli
 xvfb-run -a dbus-run-session -- python3 \
-  tests/integration/test_application.py /usr/bin/majoris-characters 0.9.0 gui
+  tests/integration/test_application.py /usr/bin/majoris-characters 1.0.0 gui
 ```
 
-See [Stage 9 qualification](docs/stage-9-qualification.md) for actual
-verification results and remaining build/package checks. Historical Stage 1–8
+For a fresh, fail-closed automated build/test and optional Debian package gate:
+
+```sh
+python3 tools/qualification/qualify.py build-release --package
+```
+
+See [ISO integration and desktop qualification](docs/release-integration.md) for
+installation and target runtime checks. See [Stage 10 qualification](docs/stage-10-qualification.md) for actual
+verification results and remaining build/package checks. Historical Stage 1–9
 reports are preserved under `docs/`. Source inspection is
 not equivalent to compilation or runtime validation.
 

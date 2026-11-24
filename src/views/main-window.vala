@@ -199,7 +199,7 @@ namespace Characters {
             var categories = new Gtk.StringList (null);
             categories.append (_("All General Categories"));
             for (size_t index = 0; index < Search.category_count (); index++) {
-                categories.append (Search.category_name (index) ?? "");
+                categories.append (_(Search.category_name (index) ?? ""));
             }
             category_filter.model = categories;
             category_filter.selected = 0;
@@ -469,7 +469,7 @@ namespace Characters {
             for (size_t index = 0; index < Search.filter_count (scope); index++) {
                 unowned string? label = Search.filter_name (scope, index);
                 if (label != null) {
-                    model.append (label);
+                    model.append (scope == Search.Scope.SYMBOLS ? _(label) : label);
                     filter_slots += (int) index;
                 }
             }

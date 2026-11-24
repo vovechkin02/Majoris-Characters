@@ -1,0 +1,626 @@
+# French translations for Majoris Characters.
+# Licensed under the same license as the Majoris Characters package.
+msgid ""
+msgstr ""
+"Project-Id-Version: majoris-characters 1.0.0\n"
+"Language: fr\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+msgid "About Characters"
+msgstr "À propos de Caractères"
+
+msgid "Add to Composer"
+msgstr "Ajouter au composeur"
+
+msgid "Add to Favorites"
+msgstr "Ajouter aux favoris"
+
+msgid "Added to Composer"
+msgstr "Ajouté au composeur"
+
+msgid "Aliases"
+msgstr "Alias"
+
+msgid "All Characters"
+msgstr "Tous les caractères"
+
+msgid "All Collections"
+msgstr "Toutes les collections"
+
+msgid "All General Categories"
+msgstr "Toutes les catégories générales"
+
+msgid "Allow Font Fallback"
+msgstr "Autoriser les polices de secours"
+
+msgid "Allow font fallback"
+msgstr "Autoriser les polices de secours"
+
+msgid "Arrows"
+msgstr "Flèches"
+
+msgid "Back"
+msgstr "Retour"
+
+msgid "Box Drawing"
+msgstr "Dessin de cadres"
+
+msgid "Braille"
+msgstr "Braille"
+
+msgid "Browse Character Sets"
+msgstr "Parcourir les jeux de caractères"
+
+msgid "Browse Fonts"
+msgstr "Parcourir les polices"
+
+msgid "Browse and search Unicode characters"
+msgstr "Parcourir et rechercher des caractères Unicode"
+
+msgid "Browsing Mode"
+msgstr "Mode de navigation"
+
+msgid "Bullets & Stars"
+msgstr "Puces et étoiles"
+
+msgid "Cancel"
+msgstr "Annuler"
+
+msgid "Character Collections"
+msgstr "Collections de caractères"
+
+msgid "Character Composer"
+msgstr "Composeur de caractères"
+
+msgid "Character Grid Size (pt)"
+msgstr "Taille des caractères de la grille (pt)"
+
+msgid "Character Inspector"
+msgstr "Inspecteur de caractères"
+
+msgid "Character Picker"
+msgstr "Sélecteur de caractères"
+
+msgid "Character Preview"
+msgstr "Aperçu du caractère"
+
+msgid "Character Properties"
+msgstr "Propriétés du caractère"
+
+msgid "Character Removed"
+msgstr "Caractère supprimé"
+
+msgid "Character Sequence"
+msgstr "Séquence de caractères"
+
+msgid "Character Sets"
+msgstr "Jeux de caractères"
+
+msgid "Character collection"
+msgstr "Collection de caractères"
+
+msgid "Character copied. Paste it into your application."
+msgstr "Caractère copié. Collez-le dans votre application."
+
+msgid "Character results"
+msgstr "Résultats de recherche de caractères"
+
+msgid "Characters"
+msgstr "Caractères"
+
+msgid "Choose Emoji Variation"
+msgstr "Choisir une variante d’émoji"
+
+msgid "Choose a character to copy"
+msgstr "Choisissez un caractère à copier"
+
+msgid "Clear"
+msgstr "Effacer"
+
+msgid "Clear Character History?"
+msgstr "Effacer l’historique des caractères ?"
+
+msgid "Clear History"
+msgstr "Effacer l’historique"
+
+msgid "Clear Text"
+msgstr "Effacer le texte"
+
+msgid "Clear Usage History"
+msgstr "Effacer l’historique d’utilisation"
+
+msgid "Code point"
+msgstr "Point de code"
+
+msgid "Collection Filter"
+msgstr "Filtre de collection"
+
+msgid "Combining Marks"
+msgstr "Signes combinatoires"
+
+msgid "Composed Text"
+msgstr "Texte composé"
+
+msgid "Controls & Formatting"
+msgstr "Contrôles et formatage"
+
+msgid "Copied Representation to Clipboard"
+msgstr "Représentation copiée dans le presse-papiers"
+
+msgid "Copied Selection to Clipboard"
+msgstr "Sélection copiée dans le presse-papiers"
+
+msgid "Copied Text to Clipboard"
+msgstr "Texte copié dans le presse-papiers"
+
+msgid "Copied to Clipboard"
+msgstr "Copié dans le presse-papiers"
+
+msgid "Copy"
+msgstr "Copier"
+
+#, c-format
+msgid "Copy %s"
+msgstr "Copier %s"
+
+#, c-format
+msgid "Copy %s Text"
+msgstr "Copier le texte %s"
+
+msgid "Copy Bytes"
+msgstr "Copier les octets"
+
+msgid "Copy Character"
+msgstr "Copier le caractère"
+
+msgid "Copy Emoji"
+msgstr "Copier l’émoji"
+
+msgid "Copy Format"
+msgstr "Format de copie"
+
+msgid "Copy Information"
+msgstr "Copier les informations"
+
+msgid "Copy Selection"
+msgstr "Copier la sélection"
+
+msgid "Copy Text"
+msgstr "Copier le texte"
+
+msgid "Currencies"
+msgstr "Devises"
+
+msgid "Cut Selection"
+msgstr "Couper la sélection"
+
+msgid "Decimal"
+msgstr "Décimal"
+
+msgid "Disabling recording also clears retained history."
+msgstr "Désactiver l’enregistrement efface également l’historique conservé."
+
+msgid "Discovering Installed Fonts…"
+msgstr "Recherche des polices installées…"
+
+msgid "Emoji"
+msgstr "Émojis"
+
+msgid "Emoji Preview"
+msgstr "Aperçu de l’émoji"
+
+msgid "Emoji Variations"
+msgstr "Variantes d’émojis"
+
+msgid "Emoji name"
+msgstr "Nom de l’émoji"
+
+msgid "Enclosed"
+msgstr "Caractères encadrés"
+
+#, c-format
+msgid "Encoded bytes: %s"
+msgstr "Octets encodés : %s"
+
+msgid "Encodings and Representations"
+msgstr "Encodages et représentations"
+
+msgid "Favorite Moved"
+msgstr "Favori déplacé"
+
+msgid "Favorites"
+msgstr "Favoris"
+
+msgid "Favorites are not affected."
+msgstr "Les favoris ne sont pas modifiés."
+
+msgid "Font Face"
+msgstr "Face de police"
+
+msgid "Font Family"
+msgstr "Famille de polices"
+
+msgid "Font Preview Size (pt)"
+msgstr "Taille de l’aperçu de police (pt)"
+
+msgid "Font Variations"
+msgstr "Variantes de police"
+
+msgid "Fonts"
+msgstr "Polices"
+
+msgid "Fonts and Character Sets"
+msgstr "Polices et jeux de caractères"
+
+msgid "Frequently Used"
+msgstr "Fréquemment utilisés"
+
+msgid "Games"
+msgstr "Jeux"
+
+msgid "General Category Filter"
+msgstr "Filtre de catégorie générale"
+
+msgid "General category"
+msgstr "Catégorie générale"
+
+msgid "History"
+msgstr "Historique"
+
+msgid "History Cleared"
+msgstr "Historique effacé"
+
+msgid "Identify Characters"
+msgstr "Identifier les caractères"
+
+msgid "Identify Code Points"
+msgstr "Identifier les points de code"
+
+msgid "Identify Text"
+msgstr "Identifier le texte"
+
+msgid "Inspect"
+msgstr "Inspecter"
+
+msgid "Inspect Character"
+msgstr "Inspecter le caractère"
+
+msgid "Inspect Sequence"
+msgstr "Inspecter la séquence"
+
+msgid "Inspect Text"
+msgstr "Inspecter le texte"
+
+msgid "Installed Fonts"
+msgstr "Polices installées"
+
+msgid "Invalid Search Query"
+msgstr "Requête de recherche invalide"
+
+msgid "Invalid or Unmapped Byte Sequence"
+msgstr "Séquence d’octets invalide ou non mappée"
+
+msgid "Legacy Character Set"
+msgstr "Ancien jeu de caractères"
+
+msgid "Legacy Character Sets"
+msgstr "Anciens jeux de caractères"
+
+msgid "Letters"
+msgstr "Lettres"
+
+msgid "Main Menu"
+msgstr "Menu principal"
+
+msgid "Marks"
+msgstr "Signes"
+
+msgid "Mathematics"
+msgstr "Mathématiques"
+
+msgid "Maximum History Entries"
+msgstr "Nombre maximal d’entrées dans l’historique"
+
+msgid "Move Down"
+msgstr "Descendre"
+
+msgid "Move Up"
+msgstr "Monter"
+
+msgid "Music"
+msgstr "Musique"
+
+msgid "Named Sequences"
+msgstr "Séquences nommées"
+
+msgid "Next Page"
+msgstr "Page suivante"
+
+msgid "No"
+msgstr "Non"
+
+msgid "No Canonical Name"
+msgstr "Aucun nom canonique"
+
+msgid "No Character Selected"
+msgstr "Aucun caractère sélectionné"
+
+msgid "No Characters Found"
+msgstr "Aucun caractère trouvé"
+
+msgid "No Characters in This View"
+msgstr "Aucun caractère dans cette vue"
+
+msgid "No Emoji Variations Available"
+msgstr "Aucune variante d’émoji disponible"
+
+msgid "No Installed Font Faces Found"
+msgstr "Aucune face de police installée trouvée"
+
+msgid "No Matching Characters"
+msgstr "Aucun caractère correspondant"
+
+msgid "No Matching Font Faces"
+msgstr "Aucune face de police correspondante"
+
+msgid "No matching characters"
+msgstr "Aucun caractère correspondant"
+
+msgid "No related characters"
+msgstr "Aucun caractère associé"
+
+msgid "Normalization"
+msgstr "Normalisation"
+
+msgid "Normalization Form"
+msgstr "Forme de normalisation"
+
+msgid "Normalization and Decomposition"
+msgstr "Normalisation et décomposition"
+
+msgid "Normalize"
+msgstr "Normaliser"
+
+#, c-format
+msgid "Normalized Text (%s)"
+msgstr "Texte normalisé (%s)"
+
+msgid "Numbers"
+msgstr "Nombres"
+
+msgid "Numbers & Fractions"
+msgstr "Nombres et fractions"
+
+msgid "Open Characters"
+msgstr "Ouvrir Caractères"
+
+msgid "Open the compact character picker"
+msgstr "Ouvrir le sélecteur compact de caractères"
+
+msgid "Paste"
+msgstr "Coller"
+
+msgid "Phonetics"
+msgstr "Phonétique"
+
+msgid "Pictures & Shapes"
+msgstr "Images et formes"
+
+msgid "Plane"
+msgstr "Plan"
+
+msgid "Preferences"
+msgstr "Préférences"
+
+msgid "Preview"
+msgstr "Aperçu"
+
+msgid "Preview Size in Points"
+msgstr "Taille de l’aperçu en points"
+
+msgid "Previous Page"
+msgstr "Page précédente"
+
+msgid "Private Use"
+msgstr "Usage privé"
+
+msgid "Punctuation"
+msgstr "Ponctuation"
+
+msgid "Quit"
+msgstr "Quitter"
+
+msgid "Reading Character Set…"
+msgstr "Lecture du jeu de caractères…"
+
+msgid "Reading Font Coverage…"
+msgstr "Lecture de la couverture de la police…"
+
+msgid "Recently Used"
+msgstr "Récemment utilisés"
+
+msgid "Record Character Usage"
+msgstr "Enregistrer l’utilisation des caractères"
+
+#, c-format
+msgid "Recorded uses: %u"
+msgstr "Utilisations enregistrées : %u"
+
+msgid "Redo"
+msgstr "Rétablir"
+
+msgid "Refresh Installed Fonts"
+msgstr "Actualiser les polices installées"
+
+msgid "Regular"
+msgstr "Normal"
+
+msgid "Related Characters"
+msgstr "Caractères associés"
+
+msgid "Related characters"
+msgstr "Caractères associés"
+
+msgid "Remove Character"
+msgstr "Supprimer le caractère"
+
+msgid "Reset Search and Filters"
+msgstr "Réinitialiser la recherche et les filtres"
+
+msgid "Saved Characters"
+msgstr "Caractères enregistrés"
+
+msgid "Saved to Favorites"
+msgstr "Ajouté aux favoris"
+
+msgid "Scalar count"
+msgstr "Nombre de valeurs scalaires"
+
+msgid "Script"
+msgstr "Écriture"
+
+msgid "Script extensions"
+msgstr "Extensions d’écriture"
+
+msgid "Scripts"
+msgstr "Écritures"
+
+msgid "Search Characters"
+msgstr "Rechercher des caractères"
+
+msgid "Search Current Repertoire"
+msgstr "Rechercher dans le répertoire actuel"
+
+msgid "Search This Collection"
+msgstr "Rechercher dans cette collection"
+
+msgid "Search Unavailable"
+msgstr "Recherche indisponible"
+
+msgid "Search by name or code point"
+msgstr "Rechercher par nom ou point de code"
+
+msgid "Search by name, code point, or byte:80"
+msgstr "Rechercher par nom, point de code ou byte:80"
+
+msgid "Search characters"
+msgstr "Rechercher des caractères"
+
+msgid "Search characters by name or code point"
+msgstr "Rechercher des caractères par nom ou point de code"
+
+msgid "Search font families and faces"
+msgstr "Rechercher des familles et faces de polices"
+
+msgid "Search is too long"
+msgstr "La recherche est trop longue"
+
+msgid "Search unavailable"
+msgstr "Recherche indisponible"
+
+msgid "Searching Characters…"
+msgstr "Recherche de caractères…"
+
+msgid "Searching…"
+msgstr "Recherche…"
+
+msgid "Separators"
+msgstr "Séparateurs"
+
+msgid "Sequence Component"
+msgstr "Composant de séquence"
+
+msgid "Show Categories"
+msgstr "Afficher les catégories"
+
+#, c-format
+msgid "Showing %d of %d Characters"
+msgstr "Affichage de %d caractères sur %d"
+
+#, c-format
+msgid "Showing %u–%u of %u"
+msgstr "Affichage de %u à %u sur %u"
+
+msgid "Showing up to 80 characters. Refine your search for more."
+msgstr "Affichage de 80 caractères au maximum. Affinez votre recherche."
+
+msgid "Sidebar Categories"
+msgstr "Catégories de la barre latérale"
+
+msgid "Size (pt)"
+msgstr "Taille (pt)"
+
+msgid "Special & Formatting"
+msgstr "Caractères spéciaux et de formatage"
+
+msgid "Symbols"
+msgstr "Symboles"
+
+msgid "Technical"
+msgstr "Technique"
+
+msgid "Text is already normalized."
+msgstr "Le texte est déjà normalisé."
+
+msgid "Text or Code Points to Identify"
+msgstr "Texte ou points de code à identifier"
+
+msgid "Try another search or change the filters."
+msgstr "Essayez une autre recherche ou modifiez les filtres."
+
+msgid "Type a character name or code point; Enter inserts, Escape cancels."
+msgstr "Saisissez un nom de caractère ou un point de code ; Entrée insère, Échap annule."
+
+msgid "UTF-16 Code Units"
+msgstr "Unités de code UTF-16"
+
+msgid "UTF-32 Code Units"
+msgstr "Unités de code UTF-32"
+
+msgid "UTF-8 Bytes"
+msgstr "Octets UTF-8"
+
+msgid "Unavailable"
+msgstr "Indisponible"
+
+msgid "Unavailable Character"
+msgstr "Caractère indisponible"
+
+msgid "Undo"
+msgstr "Annuler"
+
+msgid "Unicode Blocks"
+msgstr "Blocs Unicode"
+
+msgid "Unicode Code Points"
+msgstr "Points de code Unicode"
+
+msgid "Unicode Escapes"
+msgstr "Séquences d’échappement Unicode"
+
+msgid "Unicode block"
+msgstr "Bloc Unicode"
+
+msgid "Unicode code points"
+msgstr "Points de code Unicode"
+
+msgid "Unicode version introduced"
+msgstr "Version Unicode d’introduction"
+
+msgid "Unknown"
+msgstr "Inconnu"
+
+msgid "Unknown Character"
+msgstr "Caractère inconnu"
+
+msgid "Unknown Font"
+msgstr "Police inconnue"
+
+msgid "Yes"
+msgstr "Oui"
+
+msgid "Only explicit character copies, composer additions, and input-source insertions are recorded."
+msgstr "Seules les copies explicites, les ajouts au composeur et les insertions via la méthode de saisie sont enregistrés."

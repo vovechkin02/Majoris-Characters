@@ -18,8 +18,14 @@ schema_target = custom_target(
 )
 
 install_data(schema_file, install_dir: get_option('datadir') / 'glib-2.0/schemas')
-install_data('desktop/com.majoris.characters.desktop',
-  install_dir: get_option('datadir') / 'applications')
+i18n.merge_file(
+  input: 'desktop/com.majoris.characters.desktop',
+  output: app_id + '.desktop',
+  type: 'desktop',
+  po_dir: '../po',
+  install: true,
+  install_dir: get_option('datadir') / 'applications',
+)
 install_data('desktop/com.majoris.characters.metainfo.xml',
   install_dir: get_option('datadir') / 'metainfo')
 install_data('icons/com.majoris.characters.svg',

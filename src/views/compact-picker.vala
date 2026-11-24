@@ -19,6 +19,10 @@ namespace Characters {
         private unowned Gtk.Button expand_button;
         /** Maximum visible results, independent of native repertoire size. */
         private const uint LIMIT = 80;
+        /** Owns shared preview preferences for the picker lifetime. */
+        private GLib.Settings settings;
+        /** Tracks the preference observer so it can be disconnected at close. */
+        private ulong settings_handler;
         /** Repository for explicit copies and saved collections. */
         private LibraryStore library;
         /** Serializes search work and discards superseded requests. */
@@ -34,10 +38,12 @@ namespace Characters {
         public CompactPicker (Application application) {
             Object (application: application);
             owner = application;
-            library = new LibraryStore (new GLib.Settings (APP_ID));
+            settings = new GLib.Settings (APP_ID);
+            library = new LibraryStore (settings);
             controller = new SearchController ();
             completion_handler = controller.completed.connect (on_completed);
             library_handler = library.changed.connect (on_library_changed);
+            settings_handler = settings.changed["grid-preview-size"].connect (reload);
             picker_scope.model = new Gtk.StringList ({ _("All Characters"), _("Emoji"),
                 _("Symbols"), _("Favorites"), _("Recently Used") });
             picker_scope.selected = 1;
@@ -125,6 +131,7 @@ namespace Characters {
                     }
                 }
                 uint shown = 0;
+                var folded = query.casefold ();
                 foreach (var text in values) {
                     var snapshot = Inspector.from_text (text);
                     if (snapshot == null) {
@@ -132,7 +139,6 @@ namespace Characters {
                     }
                     var name = snapshot.name () ?? "";
                     var code = snapshot.format (Inspector.Format.CODE) ?? "";
-                    var folded = query.casefold ();
                     if (folded != "" && !text.casefold ().contains (folded) &&
                         !name.casefold ().contains (folded) && !code.casefold ().contains (folded)) {
                         continue;
@@ -175,12 +181,14 @@ namespace Characters {
         private void append_result (string text, string display, string name, string code) {
             var label = new Gtk.Label (display);
             var attributes = new Pango.AttrList ();
-            attributes.insert (new Pango.AttrSize (24 * Pango.SCALE));
+            var size_pt = settings.get_int ("grid-preview-size");
+            attributes.insert (new Pango.AttrSize (size_pt * Pango.SCALE));
             label.attributes = attributes;
             var button = new Gtk.Button ();
             button.child = label;
-            button.width_request = 48;
-            button.height_request = 48;
+            var cell_size_px = size_pt * 2 > 48 ? size_pt * 2 : 48;
+            button.width_request = cell_size_px;
+            button.height_request = cell_size_px;
             var detail = "%s\n%s".printf (name, code);
             button.tooltip_text = detail;
             button.update_property (Gtk.AccessibleProperty.LABEL, detail);
@@ -209,6 +217,10 @@ namespace Characters {
                 controller.disconnect (completion_handler);
                 completion_handler = 0;
                 controller.shutdown ();
+            }
+            if (settings_handler != 0) {
+                settings.disconnect (settings_handler);
+                settings_handler = 0;
             }
             if (library_handler != 0) {
                 library.disconnect (library_handler);

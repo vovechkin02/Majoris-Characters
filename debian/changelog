@@ -1,3 +1,11 @@
+majoris-characters (1.0.0-1) unstable; urgency=medium
+
+  * Harden desktop input and honor shared picker preview preferences.
+  * Add French interface translations and release source validation.
+  * Document package, accessibility, and desktop qualification requirements.
+
+ -- Vlad Ovechkin <45165533+vovechkin02@users.noreply.github.com>  Wed, 25 Nov 2026 20:00:00 +1100
+
 majoris-characters (0.9.0-1) unstable; urgency=medium
 
   * Add the compact picker, desktop search provider and optional input source.

@@ -412,11 +412,24 @@ private void test_compact_picker (Characters.Application application, MainWindow
     }
     var first = results.get_child_at_index (0);
     assert (first != null && results.get_child_at_index (1) == null);
+    var settings = new GLib.Settings (Characters.APP_ID);
+    assert (settings.set_int ("grid-preview-size", 40));
+    deadline = get_monotonic_time () + WAIT_TIMEOUT_US;
+    while (get_monotonic_time () < deadline) {
+        context.iteration (false);
+        first = results.get_child_at_index (0);
+        if (first != null && first.get_child ().width_request == 80) {
+            break;
+        }
+        Thread.usleep (POLL_INTERVAL_US);
+    }
+    assert (first != null && first.get_child ().width_request == 80);
     var button = first.get_child () as Gtk.Button;
     assert (button != null);
     button.clicked ();
     expect_clipboard (picker, "👩‍💻");
     picker.close ();
+    settings.reset ("grid-preview-size");
     assert (window.visible);
 }
 

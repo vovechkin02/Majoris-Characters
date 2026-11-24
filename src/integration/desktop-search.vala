@@ -40,6 +40,28 @@ namespace Characters {
             return values;
         }
 
+        /** Reads an EOF-terminated query without exposing text in process arguments.
+         * Rejects NUL, read errors, invalid UTF-8, and inputs exceeding the byte limit.
+         * Called only by the local headless CLI; never on the graphical main context.
+         */
+        public static string? read_input_query () {
+            var query = new StringBuilder ();
+            while (true) {
+                int byte = stdin.getc ();
+                if (byte < 0) {
+                    if (!stdin.eof ()) {
+                        return null;
+                    }
+                    break;
+                }
+                if (byte == 0 || query.len >= MAX_QUERY_BYTES) {
+                    return null;
+                }
+                query.append_c ((char) byte);
+            }
+            return valid_query (query.str) ? query.str.dup () : null;
+        }
+
         /** Produces a line-oriented, base64-encoded text/name protocol for the input engine. */
         public static int print_input_results (string query) {
             if (!valid_query (query)) {

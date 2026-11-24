@@ -14,6 +14,7 @@
 #include "emoji-catalog.h"
 #include "unicode-engine.h"
 
+#define N_(message) (message)
 #define COUNT(array) (sizeof(array) / sizeof((array)[0]))
 #define SCALAR_LIMIT 0x110000u
 #define EMOJI_BASE SCALAR_LIMIT
@@ -63,23 +64,23 @@ enum SymbolCollection {
 
 /** Stable English labels corresponding to the SymbolCollection slots. */
 static const char *const symbol_names[] = {
-    [SYMBOL_PUNCTUATION] = "Punctuation",
-    [SYMBOL_ARROWS] = "Arrows",
-    [SYMBOL_BULLETS] = "Bullets & Stars",
-    [SYMBOL_PICTURES] = "Pictures & Shapes",
-    [SYMBOL_CURRENCY] = "Currencies",
-    [SYMBOL_MATH] = "Mathematics",
-    [SYMBOL_LETTERS] = "Letters",
-    [SYMBOL_NUMBERS] = "Numbers & Fractions",
-    [SYMBOL_TECHNICAL] = "Technical",
-    [SYMBOL_MUSIC] = "Music",
-    [SYMBOL_GAMES] = "Games",
-    [SYMBOL_BRAILLE] = "Braille",
-    [SYMBOL_MARKS] = "Combining Marks",
-    [SYMBOL_BOX_DRAWING] = "Box Drawing",
-    [SYMBOL_PHONETICS] = "Phonetics",
-    [SYMBOL_ENCLOSED] = "Enclosed",
-    [SYMBOL_SPECIAL] = "Special & Formatting",
+    [SYMBOL_PUNCTUATION] = N_("Punctuation"),
+    [SYMBOL_ARROWS] = N_("Arrows"),
+    [SYMBOL_BULLETS] = N_("Bullets & Stars"),
+    [SYMBOL_PICTURES] = N_("Pictures & Shapes"),
+    [SYMBOL_CURRENCY] = N_("Currencies"),
+    [SYMBOL_MATH] = N_("Mathematics"),
+    [SYMBOL_LETTERS] = N_("Letters"),
+    [SYMBOL_NUMBERS] = N_("Numbers & Fractions"),
+    [SYMBOL_TECHNICAL] = N_("Technical"),
+    [SYMBOL_MUSIC] = N_("Music"),
+    [SYMBOL_GAMES] = N_("Games"),
+    [SYMBOL_BRAILLE] = N_("Braille"),
+    [SYMBOL_MARKS] = N_("Combining Marks"),
+    [SYMBOL_BOX_DRAWING] = N_("Box Drawing"),
+    [SYMBOL_PHONETICS] = N_("Phonetics"),
+    [SYMBOL_ENCLOSED] = N_("Enclosed"),
+    [SYMBOL_SPECIAL] = N_("Special & Formatting"),
 };
 
 /** Broad Unicode general-category groups; also the index into category_names. */
@@ -104,14 +105,14 @@ enum CategoryGroup {
 
 /** Stable English labels corresponding to the CategoryGroup slots. */
 static const char *const category_names[] = {
-    [CATEGORY_LETTERS] = "Letters",
-    [CATEGORY_MARKS] = "Marks",
-    [CATEGORY_NUMBERS] = "Numbers",
-    [CATEGORY_PUNCTUATION] = "Punctuation",
-    [CATEGORY_SYMBOLS] = "Symbols",
-    [CATEGORY_SEPARATORS] = "Separators",
-    [CATEGORY_CONTROLS] = "Controls & Formatting",
-    [CATEGORY_PRIVATE_USE] = "Private Use",
+    [CATEGORY_LETTERS] = N_("Letters"),
+    [CATEGORY_MARKS] = N_("Marks"),
+    [CATEGORY_NUMBERS] = N_("Numbers"),
+    [CATEGORY_PUNCTUATION] = N_("Punctuation"),
+    [CATEGORY_SYMBOLS] = N_("Symbols"),
+    [CATEGORY_SEPARATORS] = N_("Separators"),
+    [CATEGORY_CONTROLS] = N_("Controls & Formatting"),
+    [CATEGORY_PRIVATE_USE] = N_("Private Use"),
 };
 
 /** The worker owns mutable result storage; only the cancellation flag is shared during run. */

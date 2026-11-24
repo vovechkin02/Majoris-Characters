@@ -204,7 +204,7 @@ namespace Characters {
             encoding_filter.selected = 0;
             var categories = new Gtk.StringList ({ _("All General Categories") });
             for (size_t index = 0; index < Search.category_count (); index++) {
-                categories.append (Search.category_name (index) ?? "");
+                categories.append (_(Search.category_name (index) ?? ""));
             }
             font_category.model = categories;
             font_category.selected = 0;
