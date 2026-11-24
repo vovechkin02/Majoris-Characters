@@ -105,6 +105,9 @@ namespace Characters {
             var code = new SimpleAction ("identify-code", null);
             code.activate.connect (identify_code);
             actions.add_action (code);
+            var fonts = new SimpleAction ("font-variations", null);
+            fonts.activate.connect (show_font_variations);
+            actions.add_action (fonts);
             insert_action_group ("inspect", actions);
         }
 
@@ -406,6 +409,14 @@ namespace Characters {
                 row.append (button);
             }
             target.append (row);
+        }
+
+        /** Compares installed faces for the selected scalar, not an inferred composite glyph. */
+        private void show_font_variations (Variant? parameter) {
+            if (snapshot == null || component_filter.selected >= snapshot.count ()) {
+                return;
+            }
+            new FontBrowser (false, snapshot.point (component_filter.selected)).present (this);
         }
 
         /** Copies an action's exact string parameter; never copies a preview placeholder. */

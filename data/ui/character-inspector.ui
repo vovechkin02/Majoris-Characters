@@ -144,6 +144,13 @@
                                   </object>
                                 </child>
                                 <child>
+                                  <object class="GtkButton">
+                                    <property name="label" translatable="yes">Font Variations</property>
+                                    <property name="action-name">inspect.font-variations</property>
+                                    <property name="tooltip-text" translatable="yes">Compare installed faces for the selected scalar</property>
+                                  </object>
+                                </child>
+                                <child>
                                   <object class="GtkBox">
                                     <property name="spacing">8</property>
                                     <child>

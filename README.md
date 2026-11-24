@@ -1,15 +1,15 @@
 # Majoris Characters
 
 Characters is a native GTK4/libadwaita character utility for the Majoris desktop.
-This development release adds a sequence-aware inspector, Unicode encoding
-representations, normalization, related-character navigation, and character
-identification to the existing Unicode browser and search engine.
+This development release adds installed font inspection, font coverage browsing,
+font comparisons, and legacy character sets to the existing Unicode browser
+and sequence-aware inspector.
 
 | Project metadata | Value |
 | --- | --- |
-| Version | 0.4.0 |
+| Version | 0.5.0 |
 | Platform target | Majoris OS / Debian 13 (Trixie) |
-| Development status | Stage 4 — character inspector |
+| Development status | Stage 5 — font inspection |
 | Application ID | `com.majoris.characters` |
 | Debian package | `majoris-characters` |
 | License | GPL-3.0-or-later |
@@ -61,20 +61,28 @@ identification to the existing Unicode browser and search engine.
   a report containing all sequence components. NUL-containing text cannot be
   copied through the GTK string clipboard; its numeric representations remain available.
 
+- Installed font family and face browsing, mapped Unicode coverage including
+  private-use scalars, font comparisons, and variable/color capability discovery.
+- Explicit preview fallback control, adjustable point size, manual and periodic
+  font inventory refresh, and nominal face-resolution checks.
+- Thirty-five ICU legacy character sets with exact byte lookup, alternate
+  byte mappings, repertoire search, and clipboard actions.
+
 The bundled catalog is Unicode 17.0.0; ICU 76 provides Unicode 16.0 properties,
 and the alias/named-sequence supplement is Unicode 15.0.0. Newer metadata not
 available in those sources is explicitly unavailable rather than fabricated.
-Script and general-category filters use ICU's assigned-property data. Font
-inspection, localized emoji annotations, dedicated emoji variation selection,
+Script and general-category filters use ICU's assigned-property data.
+Localized emoji annotations, dedicated emoji variation selection,
 multi-character composition, drag-and-drop, favorites, persistent usage history,
-and the compact picker remain later stages. The Stage 4 Vala/GTK source is
-implemented but not yet compiler- or runtime-qualified in the delivery environment.
+and the compact picker remain later stages. The Stage 5 Vala/GTK and Fontconfig/Pango source is implemented but not yet
+compiler- or runtime-qualified in the delivery environment.
 
 ## Requirements and dependencies
 
 Debian 13 is the intended build and runtime environment. The build requires Meson
 1.3 or newer, a Vala compiler, GCC or a compatible C compiler, Ninja, pkg-config,
-GTK 4.14+, libadwaita 1.7+, GIO/GLib 2.80+, ICU 76+, gettext, and Python 3. The integration
+GTK 4.14+, libadwaita 1.7+, GIO/GLib 2.80+, ICU 76+, Fontconfig 2.13+,
+PangoFT2 1.50+, gettext, and Python 3. The integration
 tests use Xvfb, xauth, a private D-Bus session and GLib command-line tools.
 The full Debian build dependency list is in [debian/control](debian/control).
 The application does not require unstable GNOME packages or GJS.
@@ -86,6 +94,7 @@ Install the build tools on Debian 13:
 ```sh
 sudo apt-get install build-essential valac meson ninja-build pkgconf \
   libgtk-4-dev libadwaita-1-dev libglib2.0-dev libglib2.0-bin libicu-dev gettext \
+  libfontconfig-dev libpango1.0-dev fonts-dejavu-core \
   python3 xvfb xauth dbus-daemon debhelper
 ```
 
@@ -114,7 +123,7 @@ For Debian binary packages (run from the repository root):
 
 ```sh
 dpkg-buildpackage -us -uc -b
-sudo apt install ../majoris-characters_0.4.0-1_$(dpkg --print-architecture).deb
+sudo apt install ../majoris-characters_0.5.0-1_$(dpkg --print-architecture).deb
 ```
 
 The source package uses `3.0 (quilt)` and requires the corresponding upstream
@@ -141,6 +150,12 @@ copy a representation, or navigate to a related character and back. Choose
 **Identify Characters** from the main menu to inspect pasted text or explicit
 code points without changing the browser search. See [character inspector](docs/character-inspector.md)
 for precise input, representation, and clipboard contracts.
+Choose **Fonts** or **Character Sets** from the sidebar or main menu. Select a
+family and face, filter the mapped repertoire, change preview size, or toggle
+font fallback. Use **Font Variations** in the inspector to compare the selected
+scalar across installed faces. For legacy character sets, enter `byte:80` or
+`byte:82 A0` to find an exact mapping in the selected encoding. See
+[font inspection](docs/font-inspection.md) for mapping and preview limitations.
 Ctrl+F focuses search; the main menu resets search and filters, shows version
 information, or closes the window. The window size is restored on subsequent
 launches. See [character browsing and search](docs/character-search.md) for query
@@ -160,6 +175,8 @@ D-Bus API, library ABI, or plugin API is provided.
 
 - `native/unicode/`: private C engine, search and inspector implementations, vendored catalog
   and generated supplement.
+- `native/fonts/`: Fontconfig face inventory, coverage, and Pango resolution checks.
+- `src/fonts/`: asynchronous font and encoding source loading.
 - `vapi/`: internal Vala bindings.
 - `tools/unicode/`: offline catalog generation.
 - `tests/unit/`: native engine, search, inspector, Vala binding, and supersession contracts.
@@ -176,14 +193,15 @@ See [architecture](docs/architecture.md) for ownership and design decisions.
 
 ## Security, resources and compatibility
 
-The application is unprivileged and performs no networking, system modification,
-or external process launching. Search runs in a bounded, cancellable native
+The application is unprivileged and performs no networking, font installation,
+font removal, or external process launching. Font inspection reads installed
+font metadata through Fontconfig, which may maintain standard font caches. Search runs in a bounded, cancellable native
 worker. Query and identification text are not persisted or transmitted. The
 inspector only accesses the system clipboard after an explicit copy action.
 Its temporary navigation history is discarded on close. Its only persistent application
 state is the three GSettings window keys. Native D-Bus activation is scoped to the user's session.
-The interface inherits system theme styling; no custom CSS, font override, or
-Majoris-specific runtime package is required. The app's original icon follows the
+The interface inherits system theme styling; no custom CSS or Majoris-specific runtime package is required. Font previews
+use explicit Pango attributes without changing the interface font. The app's original icon follows the
 Majoris color palette. GNOME-derived data and algorithms are attributed in [third-party notices](THIRD_PARTY_NOTICES.md).
 
 ## Testing and release qualification
@@ -194,7 +212,7 @@ meson test -C build --print-errorlogs
 meson test -C build --suite integration --print-errorlogs
 ```
 
-The default suite checks native Unicode, search and inspector contracts, Vala bindings and
+The default suite checks native Unicode, search, inspector, legacy encoding and font contracts, Vala bindings and
 request supersession, declaration documentation, CLI version/help/error handling,
 XML window startup, repeat activation, actions, clean close, settings persistence,
 and actual GTK browser paging, search, filtering, selection, inspector navigation,
@@ -207,13 +225,13 @@ After installing the Debian package, the same runtime tests can target the real
 installed executable:
 
 ```sh
-python3 tests/integration/test_application.py /usr/bin/majoris-characters 0.4.0 cli
+python3 tests/integration/test_application.py /usr/bin/majoris-characters 0.5.0 cli
 xvfb-run -a dbus-run-session -- python3 \
-  tests/integration/test_application.py /usr/bin/majoris-characters 0.4.0 gui
+  tests/integration/test_application.py /usr/bin/majoris-characters 0.5.0 gui
 ```
 
-See [Stage 4 qualification](docs/stage-4-qualification.md) for actual
-verification results and remaining build/package checks. Historical Stage 1–3
+See [Stage 5 qualification](docs/stage-5-qualification.md) for actual
+verification results and remaining build/package checks. Historical Stage 1–4
 reports are preserved under `docs/`. Source inspection is
 not equivalent to compilation or runtime validation.
 

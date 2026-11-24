@@ -171,6 +171,7 @@ namespace Characters {
             rebuild_collection_filter ();
             scope_list.select_row (scope_list.get_row_at_index (0));
             scope_list.row_selected.connect (on_scope_selected);
+            scope_list.row_activated.connect (on_source_activated);
             collection_filter.notify["selected"].connect (submit_search);
             category_filter.notify["selected"].connect (submit_search);
             search_entry.changed.connect (submit_search);
@@ -192,6 +193,32 @@ namespace Characters {
             var identify_action = new SimpleAction ("identify-character", null);
             identify_action.activate.connect (identify_character);
             add_action (identify_action);
+            var fonts_action = new SimpleAction ("browse-fonts", null);
+            fonts_action.activate.connect (browse_fonts);
+            add_action (fonts_action);
+            var encodings_action = new SimpleAction ("browse-encodings", null);
+            encodings_action.activate.connect (browse_encodings);
+            add_action (encodings_action);
+        }
+
+        /** Opens the installed-font browser without replacing the main search. */
+        private void browse_fonts (Variant? parameter) {
+            new FontBrowser ().present (this);
+        }
+
+        /** Opens legacy character-set browsing without changing the selected Unicode collection. */
+        private void browse_encodings (Variant? parameter) {
+            new FontBrowser (true).present (this);
+        }
+
+        /** The final two sidebar rows open independent source browsers, not native search scopes. */
+        private void on_source_activated (Gtk.ListBoxRow row) {
+            var index = row.get_index ();
+            if (index == (int) Search.Scope.NAMED + 1) {
+                browse_fonts (null);
+            } else if (index == (int) Search.Scope.NAMED + 2) {
+                browse_encodings (null);
+            }
         }
 
         /** Opens a snapshot independent of the current search result or selection lifetime. */
@@ -233,7 +260,7 @@ namespace Characters {
 
         /** Changes scope and rebuilds valid filters without publishing an intermediate request. */
         private void on_scope_selected (Gtk.ListBoxRow? row) {
-            if (row == null || updating_filters) {
+            if (row == null || updating_filters || row.get_index () > (int) Search.Scope.NAMED) {
                 return;
             }
             scope = (Search.Scope) row.get_index ();

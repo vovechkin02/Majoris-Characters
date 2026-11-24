@@ -109,3 +109,34 @@ allocation. The window manager controls placement. The standard normal-close
 path persists settings; an abrupt process termination need not save changes.
 The GUI integration test uses 800×600 under Xvfb; it verifies stored logical
 settings, not physical allocations or native Wayland behavior.
+
+## Stage 5: font and character-set sources
+
+The Fontconfig catalog owns a private configuration and an inventory of faces
+identified by file and face index, not by localized labels. Coverage is derived
+from the face's mapped scalar set. A worker owns the source request until its
+main-context completion transfers the immutable result. `FontSourceLoader`
+serializes inventory and repertoire operations and suppresses canceled or
+superseded completions; the existing search controller independently filters a
+copied, bounded repertoire. This is idiomatic asynchronous ownership, not a new
+pattern hierarchy. No source operation waits for a worker on the GTK thread.
+
+`FontBrowser` owns its dialog state, preview controls, source loader, search
+controller, and periodic freshness check. Closing the dialog stops publication
+and the periodic check. Pango descriptions are used only for presentation;
+Fontconfig file/index identity remains the coverage authority. Nominal Pango
+resolution is checked and substitution is reported rather than presented as
+exact coverage. No application-wide typeface is overridden.
+
+The legacy source builds an immutable scalar-to-byte mapping table with ICU's
+strict decoder. Alternate mappings remain available. The repertoire filter
+excludes additional catalog sequences and restricts all search results to the
+selected source. Search identity helpers accept valid mapped but unassigned
+scalars, while ordinary All Characters remains restricted to assigned scalars
+and catalog sequences. Explicit numeric inspector construction is used for
+mapped unassigned identities. Existing application IDs and settings remain
+unchanged. New window actions are `win.browse-fonts`, `win.browse-encodings`,
+and inspector action `inspect.font-variations`.
+
+See [font inspection](font-inspection.md) for operational boundaries and
+[Stage 5 qualification](stage-5-qualification.md) for evidence.

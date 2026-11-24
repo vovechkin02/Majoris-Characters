@@ -57,6 +57,10 @@ namespace Characters.Search {
     [CCode (cname = "characters_search_new")]
     public static Job? create (Scope scope, int filter, int category, string query);
 
+    /** Copies an explicit scalar repertoire; an empty repertoire remains empty. */
+    [CCode (cname = "characters_search_new_points", array_length_type = "size_t")]
+    public static Job? create_points (uint32[] points, int category, string query);
+
     /** Number of collection-specific filter slots, including unavailable slots. */
     [CCode (cname = "characters_search_filter_count")]
     public static size_t filter_count (Scope scope);

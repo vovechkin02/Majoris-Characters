@@ -123,6 +123,10 @@ struct CharactersSearch {
     int category;
     /** Bounded, owned input; NULL denotes invalid input or missing allocation. */
     char *query;
+    /** Optional copied scalar repertoire; NULL denotes ordinary catalog search. */
+    uint32_t *points;
+    /** Number of input scalars in the explicit repertoire. */
+    size_t point_count;
     /** Set by any thread; observed at bounded scan intervals. */
     atomic_bool canceled;
     /** Owned result identity vector. */
@@ -555,6 +559,21 @@ static bool scan_scalars(CharactersSearch *search, const struct Query *query) {
     return true;
 }
 
+/** Scan only the explicitly supplied repertoire, preserving its order and deduplicating results. */
+static bool scan_points(CharactersSearch *search, const struct Query *query) {
+    for (size_t index = 0; index < search->point_count; index++) {
+        if (index % CANCEL_INTERVAL == 0 && is_canceled(search)) {
+            return true;
+        }
+        uint32_t point = search->points[index];
+        if (scalar_matches(search, point) && scalar_query_matches(point, query) &&
+            !append_id(search, point)) {
+            return false;
+        }
+    }
+    return true;
+}
+
 /** Search a catalog sequence with exact sequence matching or English metadata terms. */
 static bool sequence_matches(const struct Query *query, const char *text, const char *name,
                              const char *group, uint32_t *points, size_t *count) {
@@ -659,9 +678,35 @@ CharactersSearch *characters_search_new(CharactersSearchScope scope, int filter,
     return search;
 }
 
+CharactersSearch *characters_search_new_points(const uint32_t *points, size_t length,
+                                               int category, const char *query) {
+    if (length > SCALAR_LIMIT || (length && !points)) {
+        return NULL;
+    }
+    CharactersSearch *search = characters_search_new(CHARACTERS_SEARCH_ALL, -1, category, query);
+    if (!search) {
+        return NULL;
+    }
+    search->points = malloc((length ? length : 1) * sizeof(*points));
+    if (!search->points) {
+        characters_search_free(search);
+        return NULL;
+    }
+    for (size_t index = 0; index < length; index++) {
+        if (!characters_unicode_is_scalar(points[index])) {
+            characters_search_free(search);
+            return NULL;
+        }
+        search->points[index] = points[index];
+    }
+    search->point_count = length;
+    return search;
+}
+
 void characters_search_free(CharactersSearch *search) {
     if (search) {
         free(search->query);
+        free(search->points);
         free(search->ids);
         free(search->seen);
         free(search);
@@ -703,14 +748,16 @@ CharactersSearchStatus characters_search_run(CharactersSearch *search) {
         return search->status;
     }
     bool success = true;
-    if (search->scope != CHARACTERS_SEARCH_EMOJI && search->scope != CHARACTERS_SEARCH_NAMED) {
+    if (search->points) {
+        success = scan_points(search, &query);
+    } else if (search->scope != CHARACTERS_SEARCH_EMOJI && search->scope != CHARACTERS_SEARCH_NAMED) {
         success = scan_scalars(search, &query);
     }
-    if (success && !is_canceled(search) &&
+    if (!search->points && success && !is_canceled(search) &&
         (search->scope == CHARACTERS_SEARCH_ALL || search->scope == CHARACTERS_SEARCH_EMOJI)) {
         success = scan_emoji(search, &query);
     }
-    if (success && !is_canceled(search) &&
+    if (!search->points && success && !is_canceled(search) &&
         (search->scope == CHARACTERS_SEARCH_ALL || search->scope == CHARACTERS_SEARCH_NAMED)) {
         success = scan_named(search, &query);
     }
@@ -778,7 +825,7 @@ const char *characters_search_category_name(size_t index) {
 
 char *characters_search_text(uint32_t id) {
     if (id < SCALAR_LIMIT) {
-        return characters_unicode_is_assigned(id) ? characters_unicode_encode(&id, 1) : NULL;
+        return characters_unicode_is_scalar(id) ? characters_unicode_encode(&id, 1) : NULL;
     }
     if (id < NAMED_BASE) {
         return characters_unicode_emoji_text(id - EMOJI_BASE);
@@ -787,7 +834,7 @@ char *characters_search_text(uint32_t id) {
 }
 
 char *characters_search_display(uint32_t id) {
-    if (id < SCALAR_LIMIT && characters_unicode_is_assigned(id)) {
+    if (id < SCALAR_LIMIT && characters_unicode_is_scalar(id)) {
         int category = category_for(id);
         if (category == CATEGORY_SEPARATORS || category == CATEGORY_CONTROLS ||
             id == 0x034F || id == 0x115F || id == 0x1160 || id == 0x3164 || id == 0xFFA0) {
@@ -803,8 +850,11 @@ char *characters_search_display(uint32_t id) {
 
 char *characters_search_name(uint32_t id) {
     if (id < SCALAR_LIMIT) {
-        if (!characters_unicode_is_assigned(id)) {
+        if (!characters_unicode_is_scalar(id)) {
             return NULL;
+        }
+        if (!characters_unicode_is_assigned(id)) {
+            return strdup("Unassigned Character");
         }
         char *name = characters_unicode_name(id);
         if (name) {
@@ -825,7 +875,7 @@ char *characters_search_name(uint32_t id) {
 char *characters_search_code(uint32_t id) {
     uint32_t points[MAX_SEQUENCE_POINTS];
     size_t count;
-    if (id < SCALAR_LIMIT && characters_unicode_is_assigned(id)) {
+    if (id < SCALAR_LIMIT && characters_unicode_is_scalar(id)) {
         points[0] = id;
         count = 1;
     } else {

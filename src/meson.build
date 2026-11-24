@@ -8,9 +8,15 @@ search_sources = files(
   'search/search-controller.vala',
   'search/search-request.vala',
 )
-application_sources = files('app/application.vala') + search_sources + files(
+font_sources = files(
+  'fonts/font-inventory.vala',
+  'fonts/font-source-loader.vala',
+  'fonts/font-source-request.vala',
+)
+application_sources = files('app/application.vala') + font_sources + search_sources + files(
   'views/character-inspector.vala',
   'views/character-tile.vala',
+  'views/font-browser.vala',
   'views/main-window.vala',
 )
 app_entry = files('app/main.vala')
@@ -19,7 +25,7 @@ app_vala_args = [
   '--gresourcesdir=' + (meson.project_source_root() / 'data'),
 ]
 app_c_args = ['-DGETTEXT_PACKAGE="' + gettext_package + '"']
-app_dependencies = [adwaita_dep, gio_dep, gtk_dep, unicode_dep]
+app_dependencies = [adwaita_dep, gio_dep, gtk_dep, font_dep, unicode_dep]
 
 characters_executable = executable(
   meson.project_name(),
@@ -29,6 +35,8 @@ characters_executable = executable(
   unicode_vapi,
   search_vapi,
   inspector_vapi,
+  font_vapi,
+  legacy_vapi,
   app_resources,
   dependencies: app_dependencies,
   vala_args: app_vala_args,

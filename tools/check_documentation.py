@@ -123,7 +123,8 @@ def scan_c(path: Path) -> list[tuple[str, int, bool]]:
             "*/", 0, len(preceding) - 2
         )
         if path.suffix == ".c" and name.startswith(("characters_unicode_", "characters_search_",
-                                                   "characters_inspector_")):
+                                                   "characters_inspector_", "characters_fonts_",
+                                                   "characters_legacy_")):
             # Public functions are documented once in their owning header.
             header = path.with_suffix(".h")
             if header.exists():
@@ -143,6 +144,8 @@ def main() -> int:
     files += sorted((root / "src").rglob("*.vala.in"))
     files += sorted((root / "vapi").glob("*.vapi"))
     files += sorted((root / "tests").rglob("*.vala"))
+    files += sorted((root / "native/fonts").glob("*.c"))
+    files += sorted((root / "native/fonts").glob("*.h"))
     files += sorted((root / "native/unicode").glob("*.c"))
     files += sorted((root / "native/unicode").glob("*.h"))
     files += sorted((root / "tests").rglob("*.c"))

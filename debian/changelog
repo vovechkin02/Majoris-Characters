@@ -1,3 +1,11 @@
+majoris-characters (0.5.0-1) unstable; urgency=medium
+
+  * Add installed font family and face browsing, exact cmap coverage, and font comparisons.
+  * Add legacy character sets, exact byte lookup, and repertoire-restricted search.
+  * Extend the inspector, source-worker lifecycle, and native/integration tests.
+
+ -- Vlad Ovechkin <45165533+vovechkin02@users.noreply.github.com>  Tue, 24 Nov 2026 19:30:00 +1100
+
 majoris-characters (0.4.0-1) unstable; urgency=medium
 
   * Add the sequence-aware character inspector, encoding representations, and normalization.

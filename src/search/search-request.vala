@@ -12,6 +12,11 @@ namespace Characters {
             job = Search.create (scope, filter, category, query);
         }
 
+        /** Copies a font or encoding repertoire into an independently owned native job. */
+        public SearchRequest.for_points (uint32[] points, int category, string query) {
+            job = Search.create_points (points, category, query);
+        }
+
         /** Runs on the worker exactly once and returns the status for main-context publication. */
         public Search.Status run () {
             if (job == null) {

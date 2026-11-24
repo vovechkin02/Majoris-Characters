@@ -64,6 +64,91 @@ private void expect_clipboard (Gtk.Widget widget, string expected) {
     assert (completed && copied == expected);
 }
 
+/** Exercises the native legacy byte browser and exact copied Unicode and encoded text. */
+private void test_legacy_browser (MainWindow window) {
+    var action = window.lookup_action ("browse-encodings");
+    assert (action != null);
+    action.activate (null);
+    var dialog = window.get_visible_dialog () as FontBrowser;
+    assert (dialog != null);
+    var encodings = find_widget (dialog, "encoding_filter") as Gtk.DropDown;
+    var entry = find_widget (dialog, "font_query") as Gtk.SearchEntry;
+    var grid = find_widget (dialog, "font_grid") as Gtk.GridView;
+    var copy = find_widget (dialog, "font_copy") as Gtk.Button;
+    var bytes = find_widget (dialog, "bytes_copy") as Gtk.Button;
+    var detail = find_widget (dialog, "font_detail") as Gtk.Label;
+    assert (encodings != null && entry != null && grid != null);
+    assert (copy != null && bytes != null && detail != null);
+    var selection = grid.model as Gtk.SingleSelection;
+    assert (selection != null);
+    for (uint index = 0; index < Legacy.count (); index++) {
+        if (Legacy.name (index) == "Windows-1252") {
+            encodings.selected = index;
+            break;
+        }
+    }
+    entry.text = "byte:80";
+    wait_for_page (selection, 1, "8364");
+    selection.selected = 0;
+    assert (detail.label.contains ("80") && copy.sensitive && bytes.sensitive);
+    copy.clicked ();
+    expect_clipboard (dialog, "€");
+    bytes.clicked ();
+    expect_clipboard (dialog, "80");
+    entry.text = "byte:00";
+    wait_for_page (selection, 1, "0");
+    selection.selected = 0;
+    assert (!copy.sensitive && bytes.sensitive);
+    entry.text = "byte:GG";
+    assert (selection.model == null && !bytes.sensitive);
+    assert (dialog.close ());
+}
+
+/** Selects an installed fixture family and searches the exact face without fallback. */
+private void test_font_browser (MainWindow window) {
+    var action = window.lookup_action ("browse-fonts");
+    assert (action != null);
+    action.activate (null);
+    var dialog = window.get_visible_dialog () as FontBrowser;
+    assert (dialog != null);
+    var families = find_widget (dialog, "family_filter") as Gtk.DropDown;
+    var entry = find_widget (dialog, "font_query") as Gtk.SearchEntry;
+    var grid = find_widget (dialog, "font_grid") as Gtk.GridView;
+    var fallback = find_widget (dialog, "font_fallback") as Gtk.CheckButton;
+    var preview = find_widget (dialog, "preview_size") as Gtk.SpinButton;
+    var detail = find_widget (dialog, "font_detail") as Gtk.Label;
+    assert (families != null && entry != null && grid != null && fallback != null);
+    assert (preview != null && detail != null && !fallback.active);
+    var context = MainContext.default ();
+    var deadline = get_monotonic_time () + WAIT_TIMEOUT_US;
+    while (families.model == null && get_monotonic_time () < deadline) {
+        context.iteration (false);
+        Thread.usleep (POLL_INTERVAL_US);
+    }
+    var family_names = families.model as Gtk.StringList;
+    assert (family_names != null);
+    bool found = false;
+    for (uint index = 0; index < family_names.get_n_items (); index++) {
+        if (family_names.get_string (index) == "DejaVu Sans") {
+            families.selected = index;
+            found = true;
+            break;
+        }
+    }
+    assert (found);
+    var selection = grid.model as Gtk.SingleSelection;
+    assert (selection != null);
+    entry.text = "U+0041";
+    wait_for_page (selection, 1, "65");
+    selection.selected = 0;
+    assert (detail.label.contains ("DejaVu Sans"));
+    preview.value = 36;
+    fallback.active = true;
+    assert (selection.selected == 0 && detail.label.contains ("DejaVu Sans"));
+    entry.text = "U+10FFFF";
+    assert (dialog.close ());
+}
+
 /** Exercises the mapped inspector, exact clipboard, invalid input and related navigation. */
 private void test_inspector (MainWindow window) {
     var action = window.lookup_action ("inspect-character");
@@ -149,6 +234,9 @@ private void test_browser () {
     var inspect = find_widget (window, "inspect_button") as Gtk.Button;
     assert (inspect != null && inspect.sensitive);
     test_inspector (window);
+    assert (selected_code.label == "U+20AC");
+    test_legacy_browser (window);
+    test_font_browser (window);
     assert (selected_code.label == "U+20AC");
 
     entry.text = "";

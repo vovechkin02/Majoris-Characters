@@ -131,6 +131,9 @@ static const UNormalizer2 *get_normalizer(const char *form, UErrorCode *error) {
 }
 
 CharactersInspector *characters_inspector_from_id(uint32_t id) {
+    if (id <= 0x10FFFFu && !characters_unicode_is_assigned(id)) {
+        return NULL;
+    }
     char *code = characters_search_code(id);
     CharactersInspector *snapshot = characters_inspector_from_code(code);
     free(code);

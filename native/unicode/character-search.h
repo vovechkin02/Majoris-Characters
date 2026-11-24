@@ -49,6 +49,19 @@ CharactersSearch *characters_search_new(CharactersSearchScope scope, int filter,
                                         int category, const char *query);
 
 /**
+ * characters_search_new_points:
+ * @points: (array length=length) (nullable): Exact source repertoire, copied before return.
+ * @length: Number of scalar identities (maximum Unicode scalar space).
+ * @category: General-category index, or -1 for all categories.
+ * @query: Bounded UTF-8 search text, copied by the request.
+ *
+ * Returns: (transfer full) (nullable): Single-run scalar-only search, or NULL on invalid
+ * repertoire/allocation failure. Duplicates are suppressed; unassigned mappings are allowed.
+ */
+CharactersSearch *characters_search_new_points(const uint32_t *points, size_t length,
+                                               int category, const char *query);
+
+/**
  * characters_search_free:
  * @search: (transfer full): Request no longer used by any thread.
  *

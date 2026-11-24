@@ -15,9 +15,6 @@
         <property name="vexpand">True</property>
         <property name="ellipsize">end</property>
         <property name="max-width-chars">5</property>
-        <attributes>
-          <attribute name="size" value="24576"/>
-        </attributes>
       </object>
     </child>
     <child>

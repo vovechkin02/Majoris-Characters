@@ -69,6 +69,8 @@ character_browser_test = executable(
   unicode_vapi,
   search_vapi,
   inspector_vapi,
+  font_vapi,
+  legacy_vapi,
   app_resources,
   dependencies: app_dependencies,
   vala_args: app_vala_args,
@@ -99,3 +101,33 @@ inspector_binding_test = executable(
   c_args: ['-UNDEBUG'],
 )
 test('Inspector Vala bindings', inspector_binding_test, suite: 'unit', timeout: 30)
+
+legacy_encoding_test = executable(
+  'test-legacy-encoding',
+  'unit/test-legacy-encoding.c',
+  dependencies: unicode_dep,
+  c_args: ['-UNDEBUG'],
+)
+test('Legacy encoding and repertoire contracts', legacy_encoding_test,
+  suite: 'unit', timeout: 30)
+
+font_catalog_test = executable(
+  'test-font-catalog',
+  'unit/test-font-catalog.c',
+  dependencies: font_dep,
+  c_args: ['-UNDEBUG'],
+)
+test('Installed font catalog contracts', font_catalog_test, suite: 'unit', timeout: 30)
+
+font_sources_test = executable(
+  'test-font-sources',
+  'unit/test-font-sources.vala',
+  font_sources,
+  font_vapi,
+  legacy_vapi,
+  search_vapi,
+  dependencies: [gio_dep, gtk_dep, font_dep, unicode_dep],
+  c_args: ['-UNDEBUG'],
+)
+test('Font and legacy source bindings and supersession', font_sources_test,
+  suite: 'unit', timeout: 30)
