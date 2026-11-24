@@ -1,3 +1,11 @@
+majoris-characters (0.6.0-1) unstable; urgency=medium
+
+  * Add exact catalog emoji variation selection, presentation choices, and clipboard actions.
+  * Add locale-aware emoji annotation search and offline annotation regeneration.
+  * Extend native, Vala binding, and GTK interaction tests.
+
+ -- Vlad Ovechkin <45165533+vovechkin02@users.noreply.github.com>  Tue, 24 Nov 2026 20:08:00 +1100
+
 majoris-characters (0.5.0-1) unstable; urgency=medium
 
   * Add installed font family and face browsing, exact cmap coverage, and font comparisons.

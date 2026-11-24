@@ -36,6 +36,9 @@ namespace Characters {
         /** Explains nonprinting previews, missing glyphs and embedded NUL limitations. */
         [GtkChild]
         private unowned Gtk.Label preview_note;
+        /** Opens catalog-supported emoji alternatives for the current snapshot. */
+        [GtkChild]
+        private unowned Gtk.Button emoji_button;
         /** Copies the exact original sequence only when representable as GTK text. */
         [GtkChild]
         private unowned Gtk.Button copy_character;
@@ -108,6 +111,9 @@ namespace Characters {
             var fonts = new SimpleAction ("font-variations", null);
             fonts.activate.connect (show_font_variations);
             actions.add_action (fonts);
+            var emoji = new SimpleAction ("emoji-variations", null);
+            emoji.activate.connect (show_emoji_variations);
+            actions.add_action (emoji);
             insert_action_group ("inspect", actions);
         }
 
@@ -206,6 +212,7 @@ namespace Characters {
             var text = snapshot.text ();
             preview.label = snapshot.display () ?? "";
             copy_character.sensitive = text != null;
+            emoji_button.visible = text != null && Emoji.is_candidate (text);
             if (text == null) {
                 preview_note.label = _("This sequence cannot be represented as clipboard text. " +
                     "Copy its code points or encodings instead.");
@@ -417,6 +424,14 @@ namespace Characters {
                 return;
             }
             new FontBrowser (false, snapshot.point (component_filter.selected)).present (this);
+        }
+
+        /** Opens an exact-sequence variation collection independently of the snapshot. */
+        private void show_emoji_variations (Variant? parameter) {
+            var text = snapshot != null ? snapshot.text () : null;
+            if (text != null && Emoji.is_candidate (text)) {
+                new EmojiVariations (text).present (this);
+            }
         }
 
         /** Copies an action's exact string parameter; never copies a preview placeholder. */

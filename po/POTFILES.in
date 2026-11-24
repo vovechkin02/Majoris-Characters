@@ -1,9 +1,11 @@
 data/ui/character-inspector.ui
 data/ui/character-tile.ui
+data/ui/emoji-variations.ui
 data/ui/font-browser.ui
 data/ui/main-window.ui
 src/app/application.vala
 src/views/character-inspector.vala
 src/views/character-tile.vala
+src/views/emoji-variations.vala
 src/views/font-browser.vala
 src/views/main-window.vala

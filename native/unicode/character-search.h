@@ -62,6 +62,15 @@ CharactersSearch *characters_search_new_points(const uint32_t *points, size_t le
                                                int category, const char *query);
 
 /**
+ * characters_search_set_locale:
+ * @search: Request not yet submitted to a worker.
+ * @locale: Locale identifier copied before execution; English is always a fallback.
+ *
+ * Changes only emoji annotation search. Do not call concurrently with run().
+ */
+void characters_search_set_locale(CharactersSearch *search, const char *locale);
+
+/**
  * characters_search_free:
  * @search: (transfer full): Request no longer used by any thread.
  *

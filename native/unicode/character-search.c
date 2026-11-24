@@ -11,6 +11,7 @@
 #include <unicode/uscript.h>
 #include <unicode/utf8.h>
 
+#include "emoji-catalog.h"
 #include "unicode-engine.h"
 
 #define COUNT(array) (sizeof(array) / sizeof((array)[0]))
@@ -123,6 +124,8 @@ struct CharactersSearch {
     int category;
     /** Bounded, owned input; NULL denotes invalid input or missing allocation. */
     char *query;
+    /** Locale captured before worker execution; defaults to English. */
+    char locale[64];
     /** Optional copied scalar repertoire; NULL denotes ordinary catalog search. */
     uint32_t *points;
     /** Number of input scalars in the explicit repertoire. */
@@ -157,6 +160,8 @@ struct Query {
     size_t point_count;
     /** Whether metadata matching is disabled for an exact numeric or literal query. */
     bool exact;
+    /** True for a single literal Unicode letter, usable as an emoji keyword. */
+    bool literal_letter;
 };
 
 /** Return an ASCII lowercase byte without dependence on the process locale. */
@@ -294,6 +299,8 @@ static bool parse_query(const char *input, struct Query *query) {
     }
     query->point_count = decode_text(query->text, query->points);
     if (query->point_count == 1) {
+        query->literal_letter = query->points[0] > 0x7F &&
+            u_isalpha((UChar32)query->points[0]);
         query->exact = true;
         return true;
     }
@@ -582,6 +589,23 @@ static bool sequence_matches(const struct Query *query, const char *text, const 
            matches_terms(query, name, NULL, NULL, NULL, group));
 }
 
+/** Match localized terms alongside the catalog name and category without changing exact queries. */
+static bool emoji_query_matches(const CharactersSearch *search, const struct Query *query,
+                                size_t entry, const char *name, const char *group) {
+    if (query->exact) {
+        return query->literal_letter && search->scope == CHARACTERS_SEARCH_EMOJI &&
+               characters_emoji_keyword_matches(entry, search->locale, query->text);
+    }
+    for (size_t index = 0; index < query->term_count; index++) {
+        const char *term = query->terms[index];
+        if (!contains_term(name, term) && !contains_term(group, term) &&
+            !characters_emoji_keyword_matches(entry, search->locale, term)) {
+            return false;
+        }
+    }
+    return true;
+}
+
 /** Scan emoji in semantic group order; global browsing merges single scalars. */
 static bool scan_emoji(CharactersSearch *search, const struct Query *query) {
     for (size_t group = 0; group < characters_unicode_emoji_group_count(); group++) {
@@ -603,6 +627,10 @@ static bool scan_emoji(CharactersSearch *search, const struct Query *query) {
             size_t count;
             bool match = sequence_matches(query, text, characters_unicode_emoji_label(entry),
                                           group_name, points, &count);
+            if (!match && count) {
+                match = emoji_query_matches(search, query, entry,
+                    characters_unicode_emoji_label(entry), group_name);
+            }
             free(text);
             if (!count) {
                 return false;
@@ -701,6 +729,13 @@ CharactersSearch *characters_search_new_points(const uint32_t *points, size_t le
     }
     search->point_count = length;
     return search;
+}
+
+void characters_search_set_locale(CharactersSearch *search, const char *locale) {
+    if (search && !search->started && locale &&
+        strnlen(locale, sizeof(search->locale)) < sizeof(search->locale)) {
+        strcpy(search->locale, locale);
+    }
 }
 
 void characters_search_free(CharactersSearch *search) {

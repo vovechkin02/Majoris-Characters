@@ -1,15 +1,14 @@
 # Majoris Characters
 
 Characters is a native GTK4/libadwaita character utility for the Majoris desktop.
-This development release adds installed font inspection, font coverage browsing,
-font comparisons, and legacy character sets to the existing Unicode browser
-and sequence-aware inspector.
+This development release adds exact emoji variation selection and multilingual
+annotation search to the existing Unicode, font, and legacy character browsers.
 
 | Project metadata | Value |
 | --- | --- |
-| Version | 0.5.0 |
+| Version | 0.6.0 |
 | Platform target | Majoris OS / Debian 13 (Trixie) |
-| Development status | Stage 5 — font inspection |
+| Development status | Stage 6 — emoji functionality |
 | Application ID | `com.majoris.characters` |
 | Debian package | `majoris-characters` |
 | License | GPL-3.0-or-later |
@@ -67,15 +66,23 @@ and sequence-aware inspector.
   font inventory refresh, and nominal face-resolution checks.
 - Thirty-five ICU legacy character sets with exact byte lookup, alternate
   byte mappings, repertoire search, and clipboard actions.
+- Searchable emoji variations with exact sequence copying and inspection.
+- Locale-aware annotation keywords with English fallback and Unicode case folding.
 
 The bundled catalog is Unicode 17.0.0; ICU 76 provides Unicode 16.0 properties,
 and the alias/named-sequence supplement is Unicode 15.0.0. Newer metadata not
 available in those sources is explicitly unavailable rather than fabricated.
 Script and general-category filters use ICU's assigned-property data.
-Localized emoji annotations, dedicated emoji variation selection,
-multi-character composition, drag-and-drop, favorites, persistent usage history,
-and the compact picker remain later stages. The Stage 5 Vala/GTK and Fontconfig/Pango source is implemented but not yet
-compiler- or runtime-qualified in the delivery environment.
+Emoji annotations from Debian GTK 3.24.49-3 (Emojibase-derived data) are
+bundled for 24 languages; they do not cover all Unicode 17 entries. Direct
+CLDR XML imports are supported by the offline generator. The picker exposes
+catalog-backed skin tone, gender, hair, direction, relationship, flag and
+keycap choices, and presentation pairs derived from the catalog. Color glyphs
+are rendered by Pango with installed emoji fonts. See [emoji functionality](docs/emoji-functionality.md)
+for coverage and rendering boundaries. Multi-character composition, drag-and-drop,
+favorites, persistent usage history, and the compact picker remain later stages.
+The Vala/GTK and Fontconfig/Pango source is not yet compiler- or runtime-qualified
+in the delivery environment.
 
 ## Requirements and dependencies
 
@@ -94,7 +101,7 @@ Install the build tools on Debian 13:
 ```sh
 sudo apt-get install build-essential valac meson ninja-build pkgconf \
   libgtk-4-dev libadwaita-1-dev libglib2.0-dev libglib2.0-bin libicu-dev gettext \
-  libfontconfig-dev libpango1.0-dev fonts-dejavu-core \
+  libfontconfig-dev libpango1.0-dev fonts-dejavu-core fonts-noto-color-emoji \
   python3 xvfb xauth dbus-daemon debhelper
 ```
 
@@ -123,7 +130,7 @@ For Debian binary packages (run from the repository root):
 
 ```sh
 dpkg-buildpackage -us -uc -b
-sudo apt install ../majoris-characters_0.5.0-1_$(dpkg --print-architecture).deb
+sudo apt install ../majoris-characters_0.6.0-1_$(dpkg --print-architecture).deb
 ```
 
 The source package uses `3.0 (quilt)` and requires the corresponding upstream
@@ -156,6 +163,10 @@ font fallback. Use **Font Variations** in the inspector to compare the selected
 scalar across installed faces. For legacy character sets, enter `byte:80` or
 `byte:82 A0` to find an exact mapping in the selected encoding. See
 [font inspection](docs/font-inspection.md) for mapping and preview limitations.
+Select **Emoji**, search by a name or annotation keyword in the current locale,
+then select an entry and choose **Emoji Variations**. The same action is available
+in the inspector for recognized sequences. Choose an alternative to see its
+actual code points; Copy Emoji preserves modifiers, joiners, and selectors.
 Ctrl+F focuses search; the main menu resets search and filters, shows version
 information, or closes the window. The window size is restored on subsequent
 launches. See [character browsing and search](docs/character-search.md) for query
@@ -216,7 +227,7 @@ The default suite checks native Unicode, search, inspector, legacy encoding and 
 request supersession, declaration documentation, CLI version/help/error handling,
 XML window startup, repeat activation, actions, clean close, settings persistence,
 and actual GTK browser paging, search, filtering, selection, inspector navigation,
-and clipboard copying in a private D-Bus
+and exact emoji variation clipboard copying in a private D-Bus
 session and Xvfb display. The test runner isolates the home and configuration
 directories and treats GTK warnings as fatal. Native search and inspector contracts are tested without a
 graphical display. Native timings are not a substitute for GTK responsiveness or platform performance qualification.
@@ -225,13 +236,13 @@ After installing the Debian package, the same runtime tests can target the real
 installed executable:
 
 ```sh
-python3 tests/integration/test_application.py /usr/bin/majoris-characters 0.5.0 cli
+python3 tests/integration/test_application.py /usr/bin/majoris-characters 0.6.0 cli
 xvfb-run -a dbus-run-session -- python3 \
-  tests/integration/test_application.py /usr/bin/majoris-characters 0.5.0 gui
+  tests/integration/test_application.py /usr/bin/majoris-characters 0.6.0 gui
 ```
 
-See [Stage 5 qualification](docs/stage-5-qualification.md) for actual
-verification results and remaining build/package checks. Historical Stage 1–4
+See [Stage 6 qualification](docs/stage-6-qualification.md) for actual
+verification results and remaining build/package checks. Historical Stage 1–5
 reports are preserved under `docs/`. Source inspection is
 not equivalent to compilation or runtime validation.
 

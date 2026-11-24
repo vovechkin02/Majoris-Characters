@@ -7,7 +7,7 @@
 | 3 | Virtualized character browsing, scripts, blocks, search and filters | Source implemented; native search tests passed; Vala and GTK qualification pending |
 | 4 | Inspector, relationships, encodings, normalization, and identification | Source implemented; native tests passed; Vala and GTK qualification pending |
 | 5 | Installed fonts, coverage, variations, legacy encodings | Source implemented; ICU legacy tests passed; font backend and GTK qualification pending |
-| 6 | Emoji sequences, annotations and variations | Not started |
+| 6 | Emoji sequences, annotations and variations | Core implemented; native tests passed; annotation coverage and GTK qualification limited |
 | 7 | Composer, clipboard and drag-and-drop | Not started |
 | 8 | Favorites, recent/frequent history and preferences | Not started |
 | 9 | Compact picker, desktop search and native insertion | Not started |

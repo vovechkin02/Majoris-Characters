@@ -10,6 +10,7 @@
 #include <unicode/utf16.h>
 
 #include "character-search.h"
+#include "emoji-catalog.h"
 #include "unicode-engine.h"
 
 /** Maximum number of scalars accepted by the bounded snapshot. */
@@ -196,9 +197,11 @@ char *characters_inspector_display(const CharactersInspector *snapshot) {
         return characters_search_display(first);
     }
     // Render known emoji sequences intact; escape invisible controls in arbitrary text previews.
-    if (characters_unicode_emoji_index(snapshot->points, snapshot->count) != SIZE_MAX) {
-        return characters_inspector_text(snapshot);
+    char *emoji_text = characters_inspector_text(snapshot);
+    if (characters_emoji_is_candidate(emoji_text)) {
+        return emoji_text;
     }
+    free(emoji_text);
     uint8_t buffer[(MAX_POINTS + 1) * 4 + 1];
     int32_t offset = 0;
     int8_t category = u_charType((UChar32)first);

@@ -340,6 +340,14 @@
                         <property name="halign">start</property>
                       </object>
                     </child>
+                    <child>
+                      <object class="GtkButton" id="emoji_button">
+                        <property name="label" translatable="yes">Emoji Variations</property>
+                        <property name="action-name">win.emoji-variations</property>
+                        <property name="visible">False</property>
+                        <property name="halign">start</property>
+                      </object>
+                    </child>
                   </object>
                 </child>
               </object>

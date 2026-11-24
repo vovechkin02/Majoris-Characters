@@ -65,6 +65,7 @@ class CommandLineTest(ApplicationTest):
         self.assertRegex(result.stdout, r"Catalog: \d+\.\d+\.\d+")
         self.assertRegex(result.stdout, r"Properties: \d+\.\d+")
         self.assertRegex(result.stdout, r"Supplement: \d+\.\d+\.\d+")
+        self.assertIn("Emoji annotations:", result.stdout)
 
     def test_help(self) -> None:
         """Advertise the supported local version option."""

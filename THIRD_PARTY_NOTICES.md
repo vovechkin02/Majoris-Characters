@@ -21,3 +21,13 @@ reproducible from these two local files. No Perl source code is incorporated.
 ICU is a system dependency, not vendored or modified. Its Unicode property and
 normalization data version is reported at runtime. See
 https://github.com/unicode-org/icu for its licensing and source.
+
+## Emoji annotations
+
+Stage 6 includes annotation records exported from Debian GTK 3.24.49-3 emoji
+chooser resources (Emojibase-derived). The original GTK Debian copyright file
+is preserved in `data/unicode/emoji/GTK-DEBIAN-COPYRIGHT`; it identifies the
+Emojibase source as Expat-licensed, copyright 2017–2019 Miles Johnson. Unicode
+source data retain their Unicode license, included under `data/unicode/supplement/`.
+The source export and generated lookup tables are data, not a GTK3 runtime
+requirement. See `data/unicode/emoji/README.md` for exact provenance and regeneration.

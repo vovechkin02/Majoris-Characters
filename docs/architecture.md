@@ -140,3 +140,22 @@ and inspector action `inspect.font-variations`.
 
 See [font inspection](font-inspection.md) for operational boundaries and
 [Stage 5 qualification](stage-5-qualification.md) for evidence.
+
+## Stage 6: emoji variation and annotation catalog
+
+`emoji-catalog.c` owns variant grouping and immutable annotation tables. The
+variant key exists only for comparison; all copyable identities are exact
+catalog entries, except explicitly supported scalar presentation choices.
+`CharactersEmojiVariants` owns its strings and exposes borrowed immutable values
+until release. The dialog copies a value before handing it to another inspector
+or clipboard. Catalog-sized bounded work is performed only when opening a picker;
+no global mutable variant cache or new framework is introduced. This is a direct
+catalog lookup and composition, not a speculative Strategy or Factory hierarchy.
+
+Search jobs capture their locale before worker execution. Annotation lookups use
+immutable locale records and ICU case folding, so they introduce no shared
+mutable state or new cancellation protocol. The existing worker and selection
+contracts remain unchanged. New window action `win.emoji-variations` and inspector
+action `inspect.emoji-variations` open the XML-backed `EmojiVariations` dialog.
+Existing IDs, GSettings, installed paths, and clipboard semantics are preserved.
+See [emoji functionality](emoji-functionality.md) for the coverage boundaries.

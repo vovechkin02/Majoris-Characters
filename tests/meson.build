@@ -71,6 +71,7 @@ character_browser_test = executable(
   inspector_vapi,
   font_vapi,
   legacy_vapi,
+  emoji_vapi,
   app_resources,
   dependencies: app_dependencies,
   vala_args: app_vala_args,
@@ -131,3 +132,21 @@ font_sources_test = executable(
 )
 test('Font and legacy source bindings and supersession', font_sources_test,
   suite: 'unit', timeout: 30)
+
+emoji_catalog_test = executable(
+  'test-emoji-catalog',
+  'unit/test-emoji-catalog.c',
+  dependencies: unicode_dep,
+  c_args: ['-UNDEBUG'],
+)
+test('Emoji variations and localized annotation search', emoji_catalog_test,
+  suite: 'unit', timeout: 30)
+
+emoji_binding_test = executable(
+  'test-emoji-bindings',
+  'unit/test-emoji-bindings.vala',
+  emoji_vapi,
+  dependencies: [gio_dep, unicode_dep],
+  c_args: ['-UNDEBUG'],
+)
+test('Emoji Vala bindings', emoji_binding_test, suite: 'unit', timeout: 30)

@@ -16,6 +16,7 @@ font_sources = files(
 application_sources = files('app/application.vala') + font_sources + search_sources + files(
   'views/character-inspector.vala',
   'views/character-tile.vala',
+  'views/emoji-variations.vala',
   'views/font-browser.vala',
   'views/main-window.vala',
 )
@@ -37,6 +38,7 @@ characters_executable = executable(
   inspector_vapi,
   font_vapi,
   legacy_vapi,
+  emoji_vapi,
   app_resources,
   dependencies: app_dependencies,
   vala_args: app_vala_args,

@@ -28,9 +28,10 @@ Vcs-Browser: https://github.com/vovechkin02/Majoris-Characters
 
 Package: majoris-characters
 Architecture: any
-Depends: ${misc:Depends}, ${shlibs:Depends}
+Depends: ${misc:Depends}, ${shlibs:Depends}, fonts-noto-color-emoji
 Description: Native character utility for Majoris
  Provides a native GTK Unicode character browser with a virtualized grid,
  names and code point search, emoji and symbol collections, Unicode block
  and script filters, sequence-aware inspection, installed font coverage,
- font comparisons, and legacy character sets.
+ font comparisons, legacy character sets, exact emoji variations, and
+ localized emoji annotation search.

@@ -10,6 +10,9 @@ namespace Characters {
         /** Creates a request with a copied query and immutable filter parameters. */
         public SearchRequest (Search.Scope scope, int filter, int category, string query) {
             job = Search.create (scope, filter, category, query);
+            if (job != null) {
+                job.set_locale (Intl.get_language_names ()[0]);
+            }
         }
 
         /** Copies a font or encoding repertoire into an independently owned native job. */

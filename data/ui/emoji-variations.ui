@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface domain="majoris-characters">
+  <requires lib="gtk" version="4.14"/>
+  <template class="CharactersEmojiVariations" parent="AdwDialog">
+    <property name="title" translatable="yes">Emoji Variations</property>
+    <property name="content-width">480</property>
+    <property name="content-height">400</property>
+    <property name="child">
+      <object class="AdwToastOverlay" id="toast_overlay">
+        <property name="child">
+          <object class="AdwToolbarView">
+            <child type="top">
+              <object class="AdwHeaderBar"/>
+            </child>
+            <property name="content">
+              <object class="GtkScrolledWindow">
+                <property name="hscrollbar-policy">never</property>
+                <child>
+                  <object class="GtkBox">
+                    <property name="orientation">vertical</property>
+                    <property name="spacing">8</property>
+                    <property name="margin-start">16</property>
+                    <property name="margin-end">16</property>
+                    <property name="margin-top">16</property>
+                    <property name="margin-bottom">16</property>
+                    <child>
+                      <object class="GtkLabel" id="preview">
+                        <property name="wrap">True</property>
+                        <property name="justify">center</property>
+                        <attributes><attribute name="size" value="65536"/></attributes>
+                        <accessibility><property name="label" translatable="yes">Emoji Preview</property></accessibility>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="preview_name">
+                        <property name="wrap">True</property>
+                        <property name="justify">center</property>
+                        <style><class name="title-3"/></style>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="preview_code">
+                        <property name="wrap">True</property>
+                        <property name="wrap-mode">char</property>
+                        <property name="selectable">True</property>
+                        <property name="justify">center</property>
+                        <style><class name="monospace"/></style>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="preview_note">
+                        <property name="wrap">True</property>
+                        <property name="justify">center</property>
+                        <style><class name="dim-label"/></style>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="variant_count">
+                        <property name="xalign">0</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkDropDown" id="variant_filter">
+                        <property name="enable-search">True</property>
+                        <accessibility><property name="label" translatable="yes">Choose Emoji Variation</property></accessibility>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkButton" id="copy_button">
+                        <property name="label" translatable="yes">Copy Emoji</property>
+                        <style><class name="suggested-action"/></style>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkButton" id="inspect_button">
+                        <property name="label" translatable="yes">Inspect Sequence</property>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+              </object>
+            </property>
+          </object>
+        </property>
+      </object>
+    </property>
+  </template>
+</interface>

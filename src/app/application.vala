@@ -20,6 +20,7 @@ namespace Characters {
                 print ("Catalog: %s\nProperties: %s\nSupplement: %s\n",
                     Unicode.catalog_version (), Unicode.properties_version () ?? "unknown",
                     Unicode.supplement_version ());
+                print ("Emoji annotations: %s\n", Emoji.annotation_source ());
                 return 0;
             }
             return -1;

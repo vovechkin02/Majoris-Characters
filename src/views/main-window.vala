@@ -58,6 +58,10 @@ namespace Characters {
         [GtkChild]
         private unowned Gtk.Button inspect_button;
 
+        /** Opens the exact selected emoji family, independent of browser results. */
+        [GtkChild]
+        private unowned Gtk.Button emoji_button;
+
         /** Owns persistent geometry settings for this window. */
         private GLib.Settings settings;
         /** Serializes native worker jobs independently of GTK widgets. */
@@ -190,6 +194,9 @@ namespace Characters {
             var inspect_action = new SimpleAction ("inspect-character", null);
             inspect_action.activate.connect (inspect_selected);
             add_action (inspect_action);
+            var emoji_action = new SimpleAction ("emoji-variations", null);
+            emoji_action.activate.connect (show_emoji_variations);
+            add_action (emoji_action);
             var identify_action = new SimpleAction ("identify-character", null);
             identify_action.activate.connect (identify_character);
             add_action (identify_action);
@@ -231,6 +238,18 @@ namespace Characters {
             if (initial != null) {
                 var dialog = new CharacterInspector ((owned) initial);
                 dialog.present (this);
+            }
+        }
+
+        /** Opens the variation picker for the selected exact sequence. */
+        private void show_emoji_variations (Variant? parameter) {
+            var item = selection.selected_item as Gtk.StringObject;
+            if (item == null) {
+                return;
+            }
+            var text = Search.text ((uint32) uint.parse (item.get_string ()));
+            if (text != null && Emoji.is_candidate (text)) {
+                new EmojiVariations (text).present (this);
             }
         }
 
@@ -383,6 +402,8 @@ namespace Characters {
             selected_name.label = Search.name (id) ?? _("Unknown Character");
             selected_code.label = Search.code (id) ?? "";
             inspect_button.sensitive = true;
+            var text = Search.text (id);
+            emoji_button.visible = text != null && Emoji.is_candidate (text);
         }
 
         /** Removes the old selection summary before a new page or search is displayed. */
@@ -390,6 +411,7 @@ namespace Characters {
             selected_name.label = _("No Character Selected");
             selected_code.label = "";
             inspect_button.sensitive = false;
+            emoji_button.visible = false;
         }
 
         /** Disconnects the window from the worker before cancellation; closing never joins GTK. */

@@ -192,6 +192,34 @@ private void test_inspector (MainWindow window) {
     dialog.force_close ();
 }
 
+/** Selects an exact skin-tone variation through the real dialog and checks its clipboard. */
+private void test_emoji_variations (MainWindow window) {
+    var action = window.lookup_action ("emoji-variations");
+    assert (action != null);
+    action.activate (null);
+    var dialog = window.get_visible_dialog () as EmojiVariations;
+    assert (dialog != null);
+    var filter = find_widget (dialog, "variant_filter") as Gtk.DropDown;
+    var preview = find_widget (dialog, "preview") as Gtk.Label;
+    var copy = find_widget (dialog, "copy_button") as Gtk.Button;
+    assert (filter != null && preview != null && copy != null);
+    var model = filter.model as Gtk.StringList;
+    assert (model != null && model.get_n_items () == 6);
+    assert (preview.label == "👍");
+    bool found = false;
+    for (uint index = 0; index < model.get_n_items (); index++) {
+        if (model.get_string (index).has_prefix ("👍🏿 —")) {
+            filter.selected = index;
+            found = true;
+            break;
+        }
+    }
+    assert (found && preview.label == "👍🏿");
+    copy.clicked ();
+    expect_clipboard (dialog, "👍🏿");
+    assert (dialog.close ());
+}
+
 /** Exercises actual widget models, search supersession, filters, reset and selection. */
 private void test_browser () {
     var application = new Characters.Application ();
@@ -238,6 +266,14 @@ private void test_browser () {
     test_legacy_browser (window);
     test_font_browser (window);
     assert (selected_code.label == "U+20AC");
+
+    entry.text = "U+1F44D";
+    scope_list.select_row (scope_list.get_row_at_index ((int) Search.Scope.EMOJI));
+    wait_for_page (selection, 1);
+    selection.selected = 0;
+    assert (selected_code.label == "U+1F44D");
+    test_emoji_variations (window);
+    assert (selected_code.label == "U+1F44D");
 
     entry.text = "";
     scope_list.select_row (scope_list.get_row_at_index ((int) Search.Scope.BLOCK));

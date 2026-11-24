@@ -36,5 +36,6 @@ install_data(
   '../native/unicode/vendor/gnome/COPYING',
   '../native/unicode/vendor/gnome/COPYINGv2',
   'unicode/supplement/LICENSE.unicode',
+  'unicode/emoji/GTK-DEBIAN-COPYRIGHT',
   install_dir: get_option('datadir') / 'doc' / meson.project_name(),
 )

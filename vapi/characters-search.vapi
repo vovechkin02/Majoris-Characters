@@ -36,6 +36,10 @@ namespace Characters.Search {
     [CCode (cname = "CharactersSearch", free_function = "characters_search_free",
         has_type_id = false)]
     public class Job {
+        /** Capture the annotation locale before handing the request to its worker. */
+        [CCode (cname = "characters_search_set_locale")]
+        public void set_locale (string locale);
+
         /** Request cancellation without waiting for its worker. */
         [CCode (cname = "characters_search_cancel")]
         public void cancel ();
