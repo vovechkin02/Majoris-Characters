@@ -30,3 +30,11 @@ configure_file(
   configuration: configuration,
   install_dir: get_option('datadir') / 'dbus-1/services',
 )
+
+install_data(
+  '../THIRD_PARTY_NOTICES.md',
+  '../native/unicode/vendor/gnome/COPYING',
+  '../native/unicode/vendor/gnome/COPYINGv2',
+  'unicode/supplement/LICENSE.unicode',
+  install_dir: get_option('datadir') / 'doc' / meson.project_name(),
+)

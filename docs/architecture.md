@@ -17,9 +17,19 @@ uses the reverse-DNS application ID for its default resource base path and D-Bus
 identity. The Meson project version is the source of the runtime version string.
 Desktop/AppStream and Debian release metadata are maintained together per release.
 
-No domain engine is included yet. Stage 2 owns the Unicode engine and database
-adoption. The existing application must not acquire dependencies on database
-internals; future views consume domain services as they become necessary.
+Stage 2 adds an internal native Unicode engine. The app links a private static
+library and consumes its VAPI, not ICU or generated table internals. The engine
+owns no mutable global state and has no UI dependency. Its catalog is immutable;
+ICU handles standard property and normalization semantics. See
+[Unicode engine](unicode-engine.md) for contracts and data versions.
+
+The native interface is an adapter-like boundary over ICU and GNOME data, not a
+claim of a full GoF Adapter hierarchy. There is one concrete engine and no
+interchangeable backend requirement. The internal library allocates strings
+using the system allocator (GLib 2.46+ uses the same allocator on Linux).
+Borrowed catalog strings are immutable and process-lifetime. Related vectors
+transfer ownership to the caller. No worker or callback is created at this
+stage; Stage 3 must run expensive searches off the GTK main context.
 
 ## GoF applicability and lifecycle
 

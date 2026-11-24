@@ -1,14 +1,14 @@
 # Majoris Characters
 
 Characters is a native GTK4/libadwaita character utility for the Majoris desktop.
-This initial development release establishes the application foundation; Unicode
-browsing and inspection are not yet available.
+This development release adds a headless Unicode engine to the application
+foundation; interactive browsing and inspection are not yet available.
 
 | Project metadata | Value |
 | --- | --- |
-| Version | 0.1.0 |
+| Version | 0.2.0 |
 | Platform target | Majoris OS / Debian 13 (Trixie) |
-| Development status | Stage 1 — application foundation |
+| Development status | Stage 2 — Unicode engine |
 | Application ID | `com.majoris.characters` |
 | Debian package | `majoris-characters` |
 | License | GPL-3.0-or-later |
@@ -35,15 +35,22 @@ browsing and inspection are not yet available.
 - Shared system theme and light/dark appearance through libadwaita.
 - Gettext catalog infrastructure; English is currently the only supplied UI language.
 
-The main window explicitly identifies the foundation-only status. Character data,
-search, emoji, font inspection, copying, favorites, history, and the compact
-picker are not implemented. No controls for these unimplemented features are shown.
+- Native Unicode names, aliases, scalar properties, scripts, blocks, named
+  sequences, emoji catalogs, normalization, and related-character queries.
+- Independently versioned data and local database generation tools.
+
+The engine is accessible to Vala through an internal VAPI. The main window
+retains a development status page; browsing, search, font inspection, emoji
+selection, copying, favorites, history, and the compact picker are not yet
+implemented. The bundled catalog is Unicode 17.0.0; ICU 76 provides Unicode
+16.0 properties, and the supplement is Unicode 15.0.0. Newer metadata not
+available in those sources is explicitly unavailable rather than fabricated.
 
 ## Requirements and dependencies
 
 Debian 13 is the intended build and runtime environment. The build requires Meson
 1.3 or newer, a Vala compiler, GCC or a compatible C compiler, Ninja, pkg-config,
-GTK 4.14+, libadwaita 1.7+, GIO/GLib 2.80+, gettext, and Python 3. The integration
+GTK 4.14+, libadwaita 1.7+, GIO/GLib 2.80+, ICU 76+, gettext, and Python 3. The integration
 tests use Xvfb, xauth, a private D-Bus session and GLib command-line tools.
 The full Debian build dependency list is in [debian/control](debian/control).
 The application does not require unstable GNOME packages or GJS.
@@ -54,7 +61,7 @@ Install the build tools on Debian 13:
 
 ```sh
 sudo apt-get install build-essential valac meson ninja-build pkgconf \
-  libgtk-4-dev libadwaita-1-dev libglib2.0-dev libglib2.0-bin gettext \
+  libgtk-4-dev libadwaita-1-dev libglib2.0-dev libglib2.0-bin libicu-dev gettext \
   python3 xvfb xauth dbus-daemon debhelper
 ```
 
@@ -83,7 +90,7 @@ For Debian binary packages (run from the repository root):
 
 ```sh
 dpkg-buildpackage -us -uc -b
-sudo apt install ../majoris-characters_0.1.0-1_$(dpkg --print-architecture).deb
+sudo apt install ../majoris-characters_0.2.0-1_$(dpkg --print-architecture).deb
 ```
 
 The source package uses `3.0 (quilt)` and requires the corresponding upstream
@@ -101,14 +108,19 @@ information or close the window. The size is restored on subsequent launches.
 ```sh
 majoris-characters --help
 majoris-characters --version
+majoris-characters --unicode-version
 ```
 
-These two options do not need a graphical display. The registered D-Bus service
+These options do not need a graphical display. The registered D-Bus service
 uses the standard GApplication activation and action interfaces; no custom public
 D-Bus API, library ABI, or plugin API is provided.
 
 ## Architecture and source layout
 
+- `native/unicode/`: private C engine, vendored catalog and generated supplement.
+- `vapi/`: internal Vala bindings.
+- `tools/unicode/`: offline catalog generation.
+- `tests/unit/`: native engine and Vala binding contracts.
 - `src/app/`: thin entry point and application lifecycle/actions.
 - `src/views/`: window presentation and settings persistence.
 - `data/`: UI templates, GResources, schema, application icon and desktop metadata.
@@ -126,7 +138,7 @@ or external process launching. Its only persistent application state is the thre
 GSettings window keys. Native D-Bus activation is scoped to the user's session.
 The interface inherits system theme styling; no custom CSS, font override, or
 Majoris-specific runtime package is required. The app's original icon follows the
-Majoris color palette. No GNOME Characters source is incorporated in Stage 1.
+Majoris color palette. GNOME-derived data and algorithms are attributed in [third-party notices](THIRD_PARTY_NOTICES.md).
 
 ## Testing and release qualification
 
@@ -136,7 +148,8 @@ meson test -C build --print-errorlogs
 meson test -C build --suite integration --print-errorlogs
 ```
 
-The default suite checks declaration documentation, CLI version/help/error
+The default suite checks native Unicode and binding contracts, declaration
+documentation, CLI version/help/error
 handling, XML window startup, repeat activation, actions, clean close, and
 settings persistence in a private D-Bus session and Xvfb display. The test
 runner isolates the home and configuration directories and treats GTK warnings
@@ -146,12 +159,12 @@ After installing the Debian package, the same runtime tests can target the real
 installed executable:
 
 ```sh
-python3 tests/integration/test_application.py /usr/bin/majoris-characters 0.1.0 cli
+python3 tests/integration/test_application.py /usr/bin/majoris-characters 0.2.0 cli
 xvfb-run -a dbus-run-session -- python3 \
-  tests/integration/test_application.py /usr/bin/majoris-characters 0.1.0 gui
+  tests/integration/test_application.py /usr/bin/majoris-characters 0.2.0 gui
 ```
 
-See [Stage 1 qualification](docs/stage-1-qualification.md) for the actual
+See [Stage 2 qualification](docs/stage-2-qualification.md) for the actual
 verification results and remaining build/package checks. Source inspection is
 not equivalent to compilation or runtime validation.
 
@@ -167,5 +180,7 @@ and the [development roadmap](docs/roadmap.md).
 
 Project-owned source is licensed under GPL-3.0-or-later (see [LICENSE](LICENSE)).
 AppStream metadata is CC0-1.0. The application icon is original to this project.
-No upstream GNOME code or third-party artwork is distributed in this stage.
+See [Unicode engine](docs/unicode-engine.md) for data provenance and limitations.
+GNOME-derived components and Unicode data retain their upstream licenses; see
+[third-party notices](THIRD_PARTY_NOTICES.md).
 See [debian/copyright](debian/copyright) for packaging license information.

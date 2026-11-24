@@ -23,3 +23,20 @@ test('Application window lifecycle', find_program('xvfb-run'),
   suite: 'integration',
   timeout: 60,
 )
+
+unicode_native_test = executable(
+  'test-unicode-engine',
+  'unit/test-unicode-engine.c',
+  dependencies: unicode_dep,
+  c_args: ['-UNDEBUG'],
+)
+test('Unicode engine contracts', unicode_native_test, suite: 'unit', timeout: 30)
+
+unicode_binding_test = executable(
+  'test-unicode-bindings',
+  'unit/test-unicode-bindings.vala',
+  unicode_vapi,
+  dependencies: [gio_dep, unicode_dep],
+  c_args: ['-UNDEBUG'],
+)
+test('Unicode Vala bindings', unicode_binding_test, suite: 'unit', timeout: 30)

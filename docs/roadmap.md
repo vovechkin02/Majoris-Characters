@@ -3,7 +3,7 @@
 | Stage | Scope | Status |
 | --- | --- | --- |
 | 1 | Vala app, XML UI, Meson, resources, GSettings, theme, Debian packaging | Source implemented; build/runtime qualification pending |
-| 2 | Unicode engine, GNOME C reuse and Vala bindings, database and metadata | Not started |
+| 2 | Unicode engine, GNOME C reuse and Vala bindings, database and metadata | Core implemented; native tests passed; full Unicode 17 properties and Vala qualification pending |
 | 3 | Virtualized character browsing, scripts, blocks, search and filters | Not started |
 | 4 | Inspector, relationships, encodings and normalization | Not started |
 | 5 | Installed fonts, coverage, variations, legacy encodings | Not started |
@@ -15,5 +15,5 @@
 
 The scope is the Linux-native equivalent of Windows Character Map, macOS
 Character Viewer and GNOME Characters. No AI, vendor accounts, Microsoft/Apple
-services or external clipboard history are required. GNOME Characters is a
-future upstream reference for Stage 2, not a Stage 1 runtime dependency.
+services or external clipboard history are required. GNOME Characters data and algorithms are incorporated in Stage 2; the GNOME
+application and GJS are not runtime dependencies.

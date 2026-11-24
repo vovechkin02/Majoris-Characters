@@ -6,12 +6,20 @@ namespace Characters {
             Object (application_id: APP_ID, flags: ApplicationFlags.DEFAULT_FLAGS);
             add_main_option ("version", 'v', OptionFlags.NONE, OptionArg.NONE,
                 _("Show the application version"), null);
+            add_main_option ("unicode-version", 0, OptionFlags.NONE, OptionArg.NONE,
+                _("Show the Unicode database versions"), null);
         }
 
         /** Answers version requests locally without requiring a graphical session. */
         protected override int handle_local_options (VariantDict options) {
             if (options.contains ("version")) {
                 print ("Characters %s\n", VERSION);
+                return 0;
+            }
+            if (options.contains ("unicode-version")) {
+                print ("Catalog: %s\nProperties: %s\nSupplement: %s\n",
+                    Unicode.catalog_version (), Unicode.properties_version () ?? "unknown",
+                    Unicode.supplement_version ());
                 return 0;
             }
             return -1;

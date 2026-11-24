@@ -39,7 +39,7 @@
           <object class="AdwStatusPage">
             <property name="icon-name">com.majoris.characters</property>
             <property name="title" translatable="yes">Characters</property>
-            <property name="description" translatable="yes">The application foundation is ready. Character browsing and search are not available in this version.</property>
+            <property name="description" translatable="yes">The Unicode engine is ready. Character browsing and search are not available in this version.</property>
           </object>
         </property>
       </object>

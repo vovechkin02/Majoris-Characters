@@ -1,0 +1,236 @@
+#ifndef CHARACTERS_UNICODE_ENGINE_H
+#define CHARACTERS_UNICODE_ENGINE_H
+
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
+
+/**
+ * characters_unicode_is_scalar:
+ * @point: Numeric Unicode code point.
+ *
+ * Returns: Whether @point is within Unicode and not a surrogate.
+ */
+bool characters_unicode_is_scalar(uint32_t point);
+
+/**
+ * characters_unicode_is_assigned:
+ * @point: Numeric Unicode code point.
+ *
+ * Returns: Whether ICU assigns the scalar, or the catalog has an explicit name
+ * or single-code-point emoji entry. Private-use scalars count as assigned.
+ */
+bool characters_unicode_is_assigned(uint32_t point);
+
+/**
+ * characters_unicode_properties_version:
+ *
+ * Returns: (transfer full): The Unicode version supported by the loaded ICU data.
+ */
+char *characters_unicode_properties_version(void);
+
+/**
+ * characters_unicode_catalog_version:
+ *
+ * Returns: (transfer none): The immutable GNOME-derived catalog version.
+ */
+const char *characters_unicode_catalog_version(void);
+
+/**
+ * characters_unicode_supplement_version:
+ *
+ * Returns: (transfer none): The immutable alias and named-sequence data version.
+ */
+const char *characters_unicode_supplement_version(void);
+
+/**
+ * characters_unicode_name:
+ * @point: Numeric Unicode scalar.
+ *
+ * Returns: (transfer full) (nullable): Canonical name, or NULL when unavailable.
+ * Controls, private-use characters and unnamed scalars do not have canonical names.
+ */
+char *characters_unicode_name(uint32_t point);
+
+/**
+ * characters_unicode_aliases:
+ * @point: Numeric Unicode scalar.
+ *
+ * Returns: (transfer full) (nullable): Semicolon-separated official aliases,
+ * or NULL when none are available. No alias is represented as a canonical name.
+ */
+char *characters_unicode_aliases(uint32_t point);
+
+/**
+ * characters_unicode_property:
+ * @point: Numeric Unicode scalar.
+ * @property: Supported UCD property name (see the Unicode engine documentation).
+ *
+ * Returns: (transfer full) (nullable): Property value, or NULL for unsupported
+ * queries, invalid scalars, or scalars not assigned in the ICU property data.
+ * Plane is available for all valid scalars.
+ */
+char *characters_unicode_property(uint32_t point, const char *property);
+
+/**
+ * characters_unicode_block_count:
+ *
+ * Returns: Number of blocks in the independently versioned catalog.
+ */
+size_t characters_unicode_block_count(void);
+
+/**
+ * characters_unicode_block_name:
+ * @index: Zero-based block index.
+ *
+ * Returns: (transfer none) (nullable): Catalog block name, or NULL out of range.
+ */
+const char *characters_unicode_block_name(size_t index);
+
+/**
+ * characters_unicode_block_start:
+ * @index: Zero-based block index.
+ *
+ * Returns: Inclusive start or UINT32_MAX out of range.
+ */
+uint32_t characters_unicode_block_start(size_t index);
+
+/**
+ * characters_unicode_block_end:
+ * @index: Zero-based block index.
+ *
+ * Returns: Inclusive end or UINT32_MAX out of range.
+ */
+uint32_t characters_unicode_block_end(size_t index);
+
+/**
+ * characters_unicode_find_block:
+ * @point: Numeric Unicode code point, including surrogate code points.
+ *
+ * Returns: (transfer none) (nullable): Block name or NULL outside a defined block.
+ */
+const char *characters_unicode_find_block(uint32_t point);
+
+/**
+ * characters_unicode_encode:
+ * @points: (array length=length): Unicode scalars.
+ * @length: Number of scalars, from 1 to 32.
+ *
+ * Returns: (transfer full) (nullable): UTF-8 text, or NULL for invalid input,
+ * embedded NUL or allocation failure. No normalization is performed.
+ */
+char *characters_unicode_encode(const uint32_t *points, size_t length);
+
+/**
+ * characters_unicode_sequence_name:
+ * @points: (array length=length): Unicode scalars.
+ * @length: Number of scalars, from 1 to 32.
+ *
+ * Returns: (transfer full) (nullable): Canonical scalar name, named sequence
+ * name or emoji label; NULL for unknown sequences. Scalar emoji labels are
+ * available separately through the emoji catalog.
+ */
+char *characters_unicode_sequence_name(const uint32_t *points, size_t length);
+
+/**
+ * characters_unicode_normalize:
+ * @text: NUL-terminated UTF-8 text, at most 1 MiB.
+ * @form: NFC, NFD, NFKC or NFKD.
+ *
+ * Returns: (transfer full) (nullable): Normalized UTF-8, or NULL for invalid
+ * text, form, size or allocation failure. The original text is not modified.
+ */
+char *characters_unicode_normalize(const char *text, const char *form);
+
+/**
+ * characters_unicode_emoji_group_count:
+ *
+ * Returns: Number of semantic emoji groups.
+ */
+size_t characters_unicode_emoji_group_count(void);
+
+/**
+ * characters_unicode_emoji_group_name:
+ * @group: Zero-based group index.
+ *
+ * Returns: (transfer none) (nullable): Stable English group name or NULL.
+ */
+const char *characters_unicode_emoji_group_name(size_t group);
+
+/**
+ * characters_unicode_emoji_group_size:
+ * @group: Zero-based group index.
+ *
+ * Returns: Number of entries, zero for invalid group.
+ */
+size_t characters_unicode_emoji_group_size(size_t group);
+
+/**
+ * characters_unicode_emoji_group_index:
+ * @group: Zero-based group index.
+ * @index: Position in the group's display order.
+ *
+ * Returns: Catalog index or SIZE_MAX for invalid arguments.
+ */
+size_t characters_unicode_emoji_group_index(size_t group, size_t index);
+
+/**
+ * characters_unicode_emoji_count:
+ *
+ * Returns: Number of fully qualified emoji sequences in the catalog.
+ */
+size_t characters_unicode_emoji_count(void);
+
+/**
+ * characters_unicode_emoji_text:
+ * @index: Zero-based catalog index.
+ *
+ * Returns: (transfer full) (nullable): Exact UTF-8 sequence or NULL.
+ */
+char *characters_unicode_emoji_text(size_t index);
+
+/**
+ * characters_unicode_emoji_label:
+ * @index: Zero-based catalog index.
+ *
+ * Returns: (transfer none) (nullable): Catalog label or NULL.
+ */
+const char *characters_unicode_emoji_label(size_t index);
+
+/**
+ * characters_unicode_named_count:
+ *
+ * Returns: Number of standardized named sequences in the supplement.
+ */
+size_t characters_unicode_named_count(void);
+
+/**
+ * characters_unicode_named_name:
+ * @index: Zero-based named-sequence index.
+ *
+ * Returns: (transfer none) (nullable): Standardized name or NULL.
+ */
+const char *characters_unicode_named_name(size_t index);
+
+/**
+ * characters_unicode_named_text:
+ * @index: Zero-based named-sequence index.
+ *
+ * Returns: (transfer full) (nullable): Exact UTF-8 sequence or NULL.
+ */
+char *characters_unicode_named_text(size_t index);
+
+/**
+ * characters_unicode_related:
+ * @points: (array length=length): Unicode scalars.
+ * @length: Number of scalars, from 1 to 32.
+ *
+ * Returns: (transfer full) (array zero-terminated=1) (nullable): Sorted,
+ * deduplicated UTF-8 alternatives, excluding the input. Empty results are
+ * allocated empty vectors; NULL indicates invalid input or allocation failure.
+ * A lone NUL returns an empty vector; embedded NUL is rejected.
+ * C callers free each string and the vector using free; Vala uses g_strfreev.
+ */
+char **characters_unicode_related(const uint32_t *points, size_t length);
+
+#endif

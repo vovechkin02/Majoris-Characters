@@ -1,4 +1,4 @@
-"""Check declaration documentation in project-owned Vala and Python sources."""
+"""Check declaration documentation in project-owned C, Vala, VAPI, and Python sources."""
 
 import argparse
 import ast
@@ -94,6 +94,36 @@ def scan_python(path: Path) -> list[tuple[str, int, bool]]:
     ]
 
 
+def scan_c(path: Path) -> list[tuple[str, int, bool]]:
+    """Check top-level C functions and structs in the project's declaration style.
+
+    Public implementation definitions inherit the documentation from their header.
+    This conservative scan is paired with compiler validation, not a C parser.
+    """
+    source = path.read_text(encoding="utf-8")
+    declarations = re.compile(
+        r"^(?:static )?(?:[A-Za-z_][\w ]*?(?:\s+|\s*\*{1,2}\s*))"
+        r"([A-Za-z_]\w*)\s*\([^;{}]*?\)\s*[;{]|"
+        r"^struct ([A-Za-z_]\w*)\s*{", re.MULTILINE,
+    )
+    results = []
+    for match in declarations.finditer(source):
+        name = match.group(1) or match.group(2)
+        preceding = source[:match.start()].rstrip()
+        present = preceding.endswith("*/") and preceding.rfind("/**") > preceding.rfind(
+            "*/", 0, len(preceding) - 2
+        )
+        if path.suffix == ".c" and name.startswith("characters_unicode_"):
+            # Public functions are documented once in their owning header.
+            header = path.with_suffix(".h")
+            if header.exists():
+                present = bool(re.search(
+                    r"/\*\*\s*\*\s*" + re.escape(name) + r":", header.read_text()
+                ))
+        results.append((name, source.count("\n", 0, match.start()) + 1, present))
+    return results
+
+
 def main() -> int:
     """Report documented declarations and exit nonzero for missing summaries."""
     parser = argparse.ArgumentParser(description=__doc__)
@@ -101,11 +131,21 @@ def main() -> int:
     root = parser.parse_args().root.resolve()
     files = sorted((root / "src").rglob("*.vala"))
     files += sorted((root / "src").rglob("*.vala.in"))
+    files += sorted((root / "vapi").glob("*.vapi"))
+    files += sorted((root / "tests").rglob("*.vala"))
+    files += sorted((root / "native/unicode").glob("*.c"))
+    files += sorted((root / "native/unicode").glob("*.h"))
+    files += sorted((root / "tests").rglob("*.c"))
     for directory in ("tools", "tests"):
         files += sorted((root / directory).rglob("*.py"))
     total = missing = 0
     for path in files:
-        scanner = scan_python if path.suffix == ".py" else scan_vala
+        if path.suffix == ".py":
+            scanner = scan_python
+        elif path.suffix in (".c", ".h"):
+            scanner = scan_c
+        else:
+            scanner = scan_vala
         declarations = scanner(path)
         if not declarations:
             raise ValueError(f"No declarations found in {path}")

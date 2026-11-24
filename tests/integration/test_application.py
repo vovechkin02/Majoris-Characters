@@ -57,6 +57,13 @@ class CommandLineTest(ApplicationTest):
         result = self.run_command(EXECUTABLE, "--version")
         self.assertEqual(result.stdout.strip(), f"Characters {VERSION}")
 
+    def test_unicode_version(self) -> None:
+        """Report each independent Unicode database version without a display."""
+        result = self.run_command(EXECUTABLE, "--unicode-version")
+        self.assertRegex(result.stdout, r"Catalog: \d+\.\d+\.\d+")
+        self.assertRegex(result.stdout, r"Properties: \d+\.\d+")
+        self.assertRegex(result.stdout, r"Supplement: \d+\.\d+\.\d+")
+
     def test_help(self) -> None:
         """Advertise the supported local version option."""
         result = self.run_command(EXECUTABLE, "--help")
