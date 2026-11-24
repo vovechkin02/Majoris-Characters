@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface domain="majoris-characters">
+  <requires lib="gtk" version="4.14"/>
+  <template class="CharactersComposerView" parent="GtkBox">
+    <property name="orientation">vertical</property>
+    <child>
+      <object class="GtkExpander" id="composer_expander">
+        <property name="label" translatable="yes">Character Composer</property>
+        <property name="margin-start">16</property>
+        <property name="margin-end">16</property>
+        <property name="margin-top">8</property>
+        <property name="margin-bottom">8</property>
+        <child>
+          <object class="GtkScrolledWindow">
+            <property name="hscrollbar-policy">never</property>
+            <property name="min-content-height">144</property>
+            <property name="max-content-height">288</property>
+            <property name="propagate-natural-height">True</property>
+            <child>
+              <object class="GtkBox">
+                <property name="orientation">vertical</property>
+                <property name="spacing">8</property>
+                <property name="margin-top">8</property>
+                <child>
+                  <object class="GtkScrolledWindow">
+                    <property name="has-frame">True</property>
+                    <property name="min-content-height">80</property>
+                    <property name="max-content-height">120</property>
+                    <property name="hscrollbar-policy">never</property>
+                    <child>
+                      <object class="GtkTextView" id="composer_input">
+                        <property name="wrap-mode">word-char</property>
+                        <property name="top-margin">8</property>
+                        <property name="bottom-margin">8</property>
+                        <property name="left-margin">8</property>
+                        <property name="right-margin">8</property>
+                        <accessibility>
+                          <property name="label" translatable="yes">Composed Text</property>
+                        </accessibility>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkBox">
+                    <property name="spacing">4</property>
+                      <child>
+                        <object class="GtkButton" id="composer_undo">
+                          <property name="icon-name">edit-undo-symbolic</property>
+                          <property name="tooltip-text" translatable="yes">Undo</property>
+                          <accessibility><property name="label" translatable="yes">Undo</property></accessibility>
+                        </object>
+                      </child>
+                      <child>
+                        <object class="GtkButton" id="composer_redo">
+                          <property name="icon-name">edit-redo-symbolic</property>
+                          <property name="tooltip-text" translatable="yes">Redo</property>
+                          <accessibility><property name="label" translatable="yes">Redo</property></accessibility>
+                        </object>
+                      </child>
+                      <child>
+                        <object class="GtkButton" id="composer_cut">
+                          <property name="icon-name">edit-cut-symbolic</property>
+                          <property name="tooltip-text" translatable="yes">Cut Selection</property>
+                          <accessibility><property name="label" translatable="yes">Cut Selection</property></accessibility>
+                        </object>
+                      </child>
+                      <child>
+                        <object class="GtkButton" id="composer_copy">
+                          <property name="icon-name">edit-copy-symbolic</property>
+                          <property name="tooltip-text" translatable="yes">Copy Selection</property>
+                          <accessibility><property name="label" translatable="yes">Copy Selection</property></accessibility>
+                        </object>
+                      </child>
+                      <child>
+                        <object class="GtkButton" id="composer_paste">
+                          <property name="icon-name">edit-paste-symbolic</property>
+                          <property name="tooltip-text" translatable="yes">Paste</property>
+                          <accessibility><property name="label" translatable="yes">Paste</property></accessibility>
+                        </object>
+                      </child>
+                      <child>
+                        <object class="GtkButton" id="composer_clear">
+                          <property name="icon-name">edit-clear-all-symbolic</property>
+                          <property name="tooltip-text" translatable="yes">Clear Text</property>
+                          <accessibility><property name="label" translatable="yes">Clear Text</property></accessibility>
+                        </object>
+                      </child>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkBox">
+                    <property name="spacing">8</property>
+                      <child>
+                        <object class="GtkButton" id="composer_copy_all">
+                          <property name="label" translatable="yes">Copy Text</property>
+                        </object>
+                      </child>
+                      <child>
+                        <object class="GtkButton" id="composer_inspect">
+                          <property name="label" translatable="yes">Inspect Text</property>
+                        </object>
+                      </child>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkBox">
+                    <property name="spacing">8</property>
+                    <child>
+                      <object class="GtkDropDown" id="composer_format">
+                        <property name="hexpand">True</property>
+                        <accessibility><property name="label" translatable="yes">Copy Format</property></accessibility>
+                      </object>
+                    </child>
+                      <child>
+                        <object class="GtkButton" id="composer_copy_format">
+                          <property name="label" translatable="yes">Copy Format</property>
+                        </object>
+                      </child>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkBox">
+                    <property name="spacing">8</property>
+                    <child>
+                      <object class="GtkDropDown" id="composer_normalization">
+                        <property name="hexpand">True</property>
+                        <accessibility><property name="label" translatable="yes">Normalization Form</property></accessibility>
+                      </object>
+                    </child>
+                      <child>
+                        <object class="GtkButton" id="composer_normalize">
+                          <property name="label" translatable="yes">Normalize</property>
+                        </object>
+                      </child>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkLabel">
+                    <property name="label" translatable="yes">Format, normalize, or inspect the selection; otherwise use all text.</property>
+                    <property name="wrap">True</property>
+                    <property name="xalign">0</property>
+                    <style><class name="caption"/></style>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkLabel" id="composer_counts">
+                    <property name="wrap">True</property>
+                    <property name="xalign">0</property>
+                    <style><class name="caption"/></style>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkLabel" id="composer_status">
+                    <property name="wrap">True</property>
+                    <property name="xalign">0</property>
+                    <style><class name="caption"/></style>
+                  </object>
+                </child>
+              </object>
+            </child>
+          </object>
+        </child>
+      </object>
+    </child>
+  </template>
+</interface>

@@ -40,8 +40,9 @@ static CharactersInspector *create_snapshot(const uint32_t *points, size_t count
 }
 
 /** Format scalars without converting the underlying text or dropping NUL code points. */
-static char *format_points(const uint32_t *points, size_t count, CharactersInspectorFormat format) {
-    if (!count || count > (SIZE_MAX - 1) / FORMAT_BYTES_PER_POINT) {
+char *characters_inspector_format_points(const uint32_t *points, size_t count,
+                                         CharactersInspectorFormat format) {
+    if (!points || !count || count > (SIZE_MAX - 1) / FORMAT_BYTES_PER_POINT) {
         return NULL;
     }
     size_t capacity = count * FORMAT_BYTES_PER_POINT + 1;
@@ -52,6 +53,10 @@ static char *format_points(const uint32_t *points, size_t count, CharactersInspe
     size_t offset = 0;
     for (size_t index = 0; index < count; index++) {
         unsigned point = points[index];
+        if (!characters_unicode_is_scalar(point)) {
+            free(output);
+            return NULL;
+        }
         const char *separator = index ? " " : "";
         char *cursor = output + offset;
         size_t remaining = capacity - offset;
@@ -226,7 +231,7 @@ char *characters_inspector_display(const CharactersInspector *snapshot) {
 
 char *characters_inspector_format(const CharactersInspector *snapshot,
                                   CharactersInspectorFormat format) {
-    return snapshot ? format_points(snapshot->points, snapshot->count, format) : NULL;
+    return snapshot ? characters_inspector_format_points(snapshot->points, snapshot->count, format) : NULL;
 }
 
 char *characters_inspector_normalize(const CharactersInspector *snapshot, const char *form) {
@@ -269,7 +274,7 @@ char *characters_inspector_normalize(const CharactersInspector *snapshot, const 
             points[count++] = (uint32_t)point;
         }
     }
-    char *result = format_points(points, count, CHARACTERS_INSPECTOR_CODE);
+    char *result = characters_inspector_format_points(points, count, CHARACTERS_INSPECTOR_CODE);
     free(normalized);
     free(points);
     return result;

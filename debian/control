@@ -34,4 +34,5 @@ Description: Native character utility for Majoris
  names and code point search, emoji and symbol collections, Unicode block
  and script filters, sequence-aware inspection, installed font coverage,
  font comparisons, legacy character sets, exact emoji variations, and
- localized emoji annotation search.
+ localized emoji annotation search, and a multi-character composer with
+ native editing and exact clipboard representations.

@@ -85,3 +85,23 @@ namespace Characters.Inspector {
     [CCode (cname = "characters_inspector_from_code")]
     public static Snapshot? from_code (string code);
 }
+
+/** Bounded composition analysis and exact format conversion. */
+[CCode (cheader_filename = "composition.h")]
+namespace Characters.Composition {
+    /** Maximum scalar count for technical operations, not a text-editor limit. */
+    [CCode (cname = "CHARACTERS_COMPOSITION_MAX_POINTS")]
+    public const int MAX_POINTS;
+
+    /** ICU extended grapheme count; -1 if the input is invalid or too large. */
+    [CCode (cname = "characters_composition_graphemes")]
+    public static int graphemes (string text);
+
+    /** Returns an owned numeric representation, or null on failure. */
+    [CCode (cname = "characters_composition_format")]
+    public static string? format (string text, Inspector.Format format);
+
+    /** Returns explicitly normalized text, or null when unavailable or too large. */
+    [CCode (cname = "characters_composition_normalize")]
+    public static string? normalize (string text, string form);
+}

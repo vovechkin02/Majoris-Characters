@@ -1,3 +1,11 @@
+majoris-characters (0.7.0-1) unstable; urgency=medium
+
+  * Add a shared character composer with exact text editing, clipboard, and drag-and-drop.
+  * Add Unicode counts, explicit normalization, and representation copying.
+  * Extend native and GTK interaction tests.
+
+ -- Vlad Ovechkin <45165533+vovechkin02@users.noreply.github.com>  Tue, 24 Nov 2026 21:00:00 +1100
+
 majoris-characters (0.6.0-1) unstable; urgency=medium
 
   * Add exact catalog emoji variation selection, presentation choices, and clipboard actions.

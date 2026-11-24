@@ -150,3 +150,12 @@ emoji_binding_test = executable(
   c_args: ['-UNDEBUG'],
 )
 test('Emoji Vala bindings', emoji_binding_test, suite: 'unit', timeout: 30)
+
+composition_test = executable(
+  'test-composition',
+  'unit/test-composition.c',
+  dependencies: unicode_dep,
+  c_args: ['-UNDEBUG'],
+)
+test('Composition graphemes, representations and normalization', composition_test,
+  suite: 'unit', timeout: 30)

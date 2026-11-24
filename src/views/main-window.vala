@@ -62,6 +62,21 @@ namespace Characters {
         [GtkChild]
         private unowned Gtk.Button emoji_button;
 
+        /** Displays confirmation for direct browser clipboard operations. */
+        [GtkChild]
+        private unowned Adw.ToastOverlay browser_toasts;
+        /** Copies the selected original text, not its grid preview. */
+        [GtkChild]
+        private unowned Gtk.Button browser_copy;
+        /** Adds the selected original text to the session composition. */
+        [GtkChild]
+        private unowned Gtk.Button browser_add;
+        /** Hosts the independently defined XML composer view. */
+        [GtkChild]
+        private unowned Gtk.Box composer_slot;
+        /** One session-only editor shared by browser and transient dialogs. */
+        private ComposerView composer;
+
         /** Owns persistent geometry settings for this window. */
         private GLib.Settings settings;
         /** Serializes native worker jobs independently of GTK widgets. */
@@ -90,6 +105,8 @@ namespace Characters {
             if (settings.get_boolean ("window-maximized")) {
                 maximize ();
             }
+            composer = new ComposerView ();
+            composer_slot.append (composer);
             controller = new SearchController ();
             completion_handler = controller.completed.connect (on_search_completed);
             configure_grid ();
@@ -206,16 +223,53 @@ namespace Characters {
             var encodings_action = new SimpleAction ("browse-encodings", null);
             encodings_action.activate.connect (browse_encodings);
             add_action (encodings_action);
+            var composer_action = new SimpleAction ("open-composer", null);
+            composer_action.activate.connect (open_composer);
+            add_action (composer_action);
+            var add = new SimpleAction ("add-character", null);
+            add.activate.connect (add_selected);
+            add_action (add);
+            var copy = new SimpleAction ("copy-character", null);
+            copy.activate.connect (copy_selected);
+            add_action (copy);
+        }
+
+        /** Opens the editor without modifying the current browser selection. */
+        private void open_composer (Variant? parameter) {
+            composer.open ();
+        }
+
+        /** Returns the exact selected UTF-8 identity or null for an unavailable text value. */
+        private string? selected_text () {
+            var item = selection.selected_item as Gtk.StringObject;
+            return item == null ? null : Search.text ((uint32) uint.parse (item.get_string ()));
+        }
+
+        /** Appends the exact selected identity, keeping the browsing context intact. */
+        private void add_selected (Variant? parameter) {
+            var text = selected_text ();
+            if (text != null) {
+                composer.append_text (text);
+            }
+        }
+
+        /** Copies a browser identity directly without opening the inspector. */
+        private void copy_selected (Variant? parameter) {
+            var text = selected_text ();
+            if (text != null) {
+                get_clipboard ().set_text (text);
+                browser_toasts.add_toast (new Adw.Toast (_("Copied to Clipboard")));
+            }
         }
 
         /** Opens the installed-font browser without replacing the main search. */
         private void browse_fonts (Variant? parameter) {
-            new FontBrowser ().present (this);
+            new FontBrowser (false, uint32.MAX, composer).present (this);
         }
 
         /** Opens legacy character-set browsing without changing the selected Unicode collection. */
         private void browse_encodings (Variant? parameter) {
-            new FontBrowser (true).present (this);
+            new FontBrowser (true, uint32.MAX, composer).present (this);
         }
 
         /** The final two sidebar rows open independent source browsers, not native search scopes. */
@@ -236,7 +290,7 @@ namespace Characters {
             }
             var initial = Inspector.from_id ((uint32) uint.parse (item.get_string ()));
             if (initial != null) {
-                var dialog = new CharacterInspector ((owned) initial);
+                var dialog = new CharacterInspector ((owned) initial, composer);
                 dialog.present (this);
             }
         }
@@ -249,13 +303,13 @@ namespace Characters {
             }
             var text = Search.text ((uint32) uint.parse (item.get_string ()));
             if (text != null && Emoji.is_candidate (text)) {
-                new EmojiVariations (text).present (this);
+                new EmojiVariations (text, composer).present (this);
             }
         }
 
         /** Opens identification without requiring a character to be selected. */
         private void identify_character (Variant? parameter) {
-            var dialog = new CharacterInspector ();
+            var dialog = new CharacterInspector (null, composer);
             dialog.present (this);
         }
 
@@ -404,6 +458,8 @@ namespace Characters {
             inspect_button.sensitive = true;
             var text = Search.text (id);
             emoji_button.visible = text != null && Emoji.is_candidate (text);
+            browser_copy.sensitive = text != null;
+            browser_add.sensitive = text != null;
         }
 
         /** Removes the old selection summary before a new page or search is displayed. */
@@ -412,6 +468,8 @@ namespace Characters {
             selected_code.label = "";
             inspect_button.sensitive = false;
             emoji_button.visible = false;
+            browser_copy.sensitive = false;
+            browser_add.sensitive = false;
         }
 
         /** Disconnects the window from the worker before cancellation; closing never joins GTK. */

@@ -194,6 +194,12 @@
                       </object>
                     </child>
                     <child>
+                      <object class="GtkButton" id="font_add">
+                        <property name="label" translatable="yes">Add to Composer</property>
+                        <property name="visible">False</property>
+                      </object>
+                    </child>
+                    <child>
                       <object class="GtkBox">
                         <property name="spacing">8</property>
                         <child>

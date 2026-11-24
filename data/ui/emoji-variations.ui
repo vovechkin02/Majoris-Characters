@@ -72,6 +72,12 @@
                       </object>
                     </child>
                     <child>
+                      <object class="GtkButton" id="emoji_add">
+                        <property name="label" translatable="yes">Add to Composer</property>
+                        <property name="visible">False</property>
+                      </object>
+                    </child>
+                    <child>
                       <object class="GtkButton" id="inspect_button">
                         <property name="label" translatable="yes">Inspect Sequence</property>
                       </object>

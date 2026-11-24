@@ -95,10 +95,15 @@ private void test_legacy_browser (MainWindow window) {
     expect_clipboard (dialog, "€");
     bytes.clicked ();
     expect_clipboard (dialog, "80");
+    var add = find_widget (dialog, "font_add") as Gtk.Button;
+    var editor = find_widget (window, "composer_input") as Gtk.TextView;
+    assert (add != null && editor != null && add.sensitive);
+    add.clicked ();
+    assert (editor.buffer.text == "👩‍💻€");
     entry.text = "byte:00";
     wait_for_page (selection, 1, "0");
     selection.selected = 0;
-    assert (!copy.sensitive && bytes.sensitive);
+    assert (!copy.sensitive && bytes.sensitive && !add.sensitive);
     entry.text = "byte:GG";
     assert (selection.model == null && !bytes.sensitive);
     assert (dialog.close ());
@@ -145,6 +150,11 @@ private void test_font_browser (MainWindow window) {
     preview.value = 36;
     fallback.active = true;
     assert (selection.selected == 0 && detail.label.contains ("DejaVu Sans"));
+    var add = find_widget (dialog, "font_add") as Gtk.Button;
+    var editor = find_widget (window, "composer_input") as Gtk.TextView;
+    assert (add != null && editor != null && add.sensitive);
+    add.clicked ();
+    assert (editor.buffer.text == "👩‍💻€A");
     entry.text = "U+10FFFF";
     assert (dialog.close ());
 }
@@ -176,6 +186,11 @@ private void test_inspector (MainWindow window) {
     components.selected = 1;
     assert (dialog.activate_action_variant ("inspect.copy-character", null));
     expect_clipboard (dialog, "👩‍💻");
+    var add = find_widget (dialog, "inspect_add") as Gtk.Button;
+    var editor = find_widget (window, "composer_input") as Gtk.TextView;
+    assert (add != null && editor != null && add.sensitive);
+    add.clicked ();
+    assert (editor.buffer.text == "👩‍💻");
     assert (dialog.activate_action_variant ("inspect.related", new Variant.string ("U+1F469")));
     assert (identity.label == "U+1F469");
     assert (dialog.activate_action_variant ("inspect.back", null));
@@ -186,7 +201,7 @@ private void test_inspector (MainWindow window) {
     assert (error_label.visible && identity.label == "U+1F469 U+200D U+1F4BB");
     input.buffer.text = "U+0000";
     assert (dialog.activate_action_variant ("inspect.identify-code", null));
-    assert (!error_label.visible && identity.label == "U+0000" && !copy.sensitive);
+    assert (!error_label.visible && identity.label == "U+0000" && !copy.sensitive && !add.sensitive);
     assert (dialog.activate_action_variant ("inspect.copy", new Variant.string ("00")));
     expect_clipboard (dialog, "00");
     dialog.force_close ();
@@ -217,7 +232,90 @@ private void test_emoji_variations (MainWindow window) {
     assert (found && preview.label == "👍🏿");
     copy.clicked ();
     expect_clipboard (dialog, "👍🏿");
+    var add = find_widget (dialog, "emoji_add") as Gtk.Button;
+    var editor = find_widget (window, "composer_input") as Gtk.TextView;
+    assert (add != null && editor != null && add.sensitive);
+    add.clicked ();
+    assert (editor.buffer.text == "👩‍💻€A👍🏿");
     assert (dialog.close ());
+}
+
+/** Exercises the shared composer with exact text, native edit history and conversions. */
+private void test_composer (MainWindow window) {
+    var open = window.lookup_action ("open-composer");
+    assert (open != null);
+    open.activate (null);
+    var entry = find_widget (window, "composer_input") as Gtk.TextView;
+    var expander = find_widget (window, "composer_expander") as Gtk.Expander;
+    var add = find_widget (window, "browser_add") as Gtk.Button;
+    var copy = find_widget (window, "browser_copy") as Gtk.Button;
+    var undo = find_widget (window, "composer_undo") as Gtk.Button;
+    var redo = find_widget (window, "composer_redo") as Gtk.Button;
+    var clear = find_widget (window, "composer_clear") as Gtk.Button;
+    var copy_all = find_widget (window, "composer_copy_all") as Gtk.Button;
+    var normalize = find_widget (window, "composer_normalize") as Gtk.Button;
+    var format = find_widget (window, "composer_copy_format") as Gtk.Button;
+    var inspect = find_widget (window, "composer_inspect") as Gtk.Button;
+    var counts = find_widget (window, "composer_counts") as Gtk.Label;
+    var cut = find_widget (window, "composer_cut") as Gtk.Button;
+    var paste = find_widget (window, "composer_paste") as Gtk.Button;
+    assert (entry != null && expander != null && add != null && copy != null);
+    assert (undo != null && redo != null && clear != null && copy_all != null);
+    assert (normalize != null && format != null && inspect != null && counts != null);
+    assert (cut != null && paste != null);
+    assert (add.sensitive && copy.sensitive);
+    copy.clicked ();
+    expect_clipboard (window, "€");
+    add.clicked ();
+    assert (expander.expanded && entry.buffer.text == "€" && undo.sensitive);
+    undo.clicked ();
+    assert (entry.buffer.text == "" && redo.sensitive);
+    redo.clicked ();
+    assert (entry.buffer.text == "€");
+    entry.buffer.text = "e\u0301👩‍💻";
+    assert (counts.label.contains ("5 code points") && counts.label.contains ("2 graphemes"));
+    Gtk.TextIter start;
+    Gtk.TextIter end;
+    entry.buffer.get_iter_at_offset (out start, 0);
+    entry.buffer.get_iter_at_offset (out end, 2);
+    entry.buffer.select_range (start, end);
+    normalize.clicked ();
+    assert (entry.buffer.text == "é👩‍💻");
+    undo.clicked ();
+    assert (entry.buffer.text == "e\u0301👩‍💻");
+    entry.buffer.get_bounds (out start, out end);
+    entry.buffer.place_cursor (end);
+    format.clicked ();
+    expect_clipboard (window, "U+0065 U+0301 U+1F469 U+200D U+1F4BB");
+    copy_all.clicked ();
+    expect_clipboard (window, "e\u0301👩‍💻");
+    inspect.clicked ();
+    var dialog = window.get_visible_dialog () as CharacterInspector;
+    assert (dialog != null);
+    var identity = find_widget (dialog, "identity_code") as Gtk.Label;
+    assert (identity != null && identity.label == "U+0065 U+0301 U+1F469 U+200D U+1F4BB");
+    dialog.force_close ();
+    entry.buffer.get_iter_at_offset (out start, 0);
+    entry.buffer.get_iter_at_offset (out end, 2);
+    entry.buffer.select_range (start, end);
+    assert (cut.sensitive);
+    cut.clicked ();
+    assert (entry.buffer.text == "👩‍💻");
+    expect_clipboard (window, "e\u0301");
+    paste.clicked ();
+    var deadline = get_monotonic_time () + WAIT_TIMEOUT_US;
+    var context = MainContext.default ();
+    while (entry.buffer.text != "e\u0301👩‍💻" && get_monotonic_time () < deadline) {
+        context.iteration (false);
+        Thread.usleep (POLL_INTERVAL_US);
+    }
+    assert (entry.buffer.text == "e\u0301👩‍💻");
+    clear.clicked ();
+    assert (entry.buffer.text == "");
+    undo.clicked ();
+    assert (entry.buffer.text == "e\u0301👩‍💻");
+    clear.clicked ();
+    expander.expanded = false;
 }
 
 /** Exercises actual widget models, search supersession, filters, reset and selection. */
@@ -261,6 +359,7 @@ private void test_browser () {
     assert (selected_code.label == "U+20AC");
     var inspect = find_widget (window, "inspect_button") as Gtk.Button;
     assert (inspect != null && inspect.sensitive);
+    test_composer (window);
     test_inspector (window);
     assert (selected_code.label == "U+20AC");
     test_legacy_browser (window);

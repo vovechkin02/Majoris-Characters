@@ -39,6 +39,7 @@ namespace Characters {
             add_action (quit_action);
             set_accels_for_action ("app.quit", { "<Primary>q" });
             set_accels_for_action ("win.search", { "<Primary>f" });
+            set_accels_for_action ("win.open-composer", { "<Primary>m" });
         }
 
         /** Presents the existing main window or constructs one for a new session. */

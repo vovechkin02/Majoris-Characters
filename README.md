@@ -1,14 +1,14 @@
 # Majoris Characters
 
 Characters is a native GTK4/libadwaita character utility for the Majoris desktop.
-This development release adds exact emoji variation selection and multilingual
-annotation search to the existing Unicode, font, and legacy character browsers.
+This development release adds a session-only character composer and exact clipboard
+operations to the existing Unicode, emoji, font, and legacy character browsers.
 
 | Project metadata | Value |
 | --- | --- |
-| Version | 0.6.0 |
+| Version | 0.7.0 |
 | Platform target | Majoris OS / Debian 13 (Trixie) |
-| Development status | Stage 6 — emoji functionality |
+| Development status | Stage 7 — composition and clipboard |
 | Application ID | `com.majoris.characters` |
 | Debian package | `majoris-characters` |
 | License | GPL-3.0-or-later |
@@ -68,6 +68,11 @@ annotation search to the existing Unicode, font, and legacy character browsers.
   byte mappings, repertoire search, and clipboard actions.
 - Searchable emoji variations with exact sequence copying and inspection.
 - Locale-aware annotation keywords with English fallback and Unicode case folding.
+- Collapsible character composer shared across browser, inspector, font and emoji dialogs.
+- Native text editing, selection, cut/copy/paste, undo/redo, and copy-only character tile drags.
+- Direct raw text copying, nine encoding representations, explicit four-form normalization,
+  scalar and UTF-8 byte counts, and ICU extended grapheme counts.
+- Inspect selected composed text (up to 32 scalars) without modifying the editor.
 
 The bundled catalog is Unicode 17.0.0; ICU 76 provides Unicode 16.0 properties,
 and the alias/named-sequence supplement is Unicode 15.0.0. Newer metadata not
@@ -79,8 +84,8 @@ CLDR XML imports are supported by the offline generator. The picker exposes
 catalog-backed skin tone, gender, hair, direction, relationship, flag and
 keycap choices, and presentation pairs derived from the catalog. Color glyphs
 are rendered by Pango with installed emoji fonts. See [emoji functionality](docs/emoji-functionality.md)
-for coverage and rendering boundaries. Multi-character composition, drag-and-drop,
-favorites, persistent usage history, and the compact picker remain later stages.
+for coverage and rendering boundaries. Favorites, persistent usage history, and
+the compact picker remain later stages.
 The Vala/GTK and Fontconfig/Pango source is not yet compiler- or runtime-qualified
 in the delivery environment.
 
@@ -130,7 +135,7 @@ For Debian binary packages (run from the repository root):
 
 ```sh
 dpkg-buildpackage -us -uc -b
-sudo apt install ../majoris-characters_0.6.0-1_$(dpkg --print-architecture).deb
+sudo apt install ../majoris-characters_0.7.0-1_$(dpkg --print-architecture).deb
 ```
 
 The source package uses `3.0 (quilt)` and requires the corresponding upstream
@@ -167,6 +172,11 @@ Select **Emoji**, search by a name or annotation keyword in the current locale,
 then select an entry and choose **Emoji Variations**. The same action is available
 in the inspector for recognized sequences. Choose an alternative to see its
 actual code points; Copy Emoji preserves modifiers, joiners, and selectors.
+Choose **Add to Composer** from the browser or a dialog to append exact text.
+Open the composer from the menu or Ctrl+M, edit text or drag a character tile
+into the editor, then copy the whole string or a selected representation.
+Normalization is explicit and undoable. See [composition and clipboard](docs/composition.md)
+for selection semantics, analysis limits, and exact-text guarantees.
 Ctrl+F focuses search; the main menu resets search and filters, shows version
 information, or closes the window. The window size is restored on subsequent
 launches. See [character browsing and search](docs/character-search.md) for query
@@ -184,7 +194,7 @@ D-Bus API, library ABI, or plugin API is provided.
 
 ## Architecture and source layout
 
-- `native/unicode/`: private C engine, search and inspector implementations, vendored catalog
+- `native/unicode/`: private C engine, search, inspector and composition operations, vendored catalog
   and generated supplement.
 - `native/fonts/`: Fontconfig face inventory, coverage, and Pango resolution checks.
 - `src/fonts/`: asynchronous font and encoding source loading.
@@ -193,7 +203,7 @@ D-Bus API, library ABI, or plugin API is provided.
 - `tests/unit/`: native engine, search, inspector, Vala binding, and supersession contracts.
 - `src/app/`: thin entry point and application lifecycle/actions.
 - `src/search/`: bounded asynchronous request lifecycle and native result ownership.
-- `src/views/`: window presentation, virtualized tiles, filtering, selection, and the inspector dialog.
+- `src/views/`: window presentation, virtualized tiles, filtering, selection, inspector dialogs, and composer.
 - `data/`: UI templates, GResources, schema, application icon and desktop metadata.
 - `po/`: translation catalog inputs.
 - `tests/integration/`: real executable CLI and GUI lifecycle tests, plus browser and inspector interaction.
@@ -207,8 +217,8 @@ See [architecture](docs/architecture.md) for ownership and design decisions.
 The application is unprivileged and performs no networking, font installation,
 font removal, or external process launching. Font inspection reads installed
 font metadata through Fontconfig, which may maintain standard font caches. Search runs in a bounded, cancellable native
-worker. Query and identification text are not persisted or transmitted. The
-inspector only accesses the system clipboard after an explicit copy action.
+worker. Query, identification, and composed text are not persisted or transmitted. Clipboard
+access and drag-and-drop are initiated by the user through native GTK controls.
 Its temporary navigation history is discarded on close. Its only persistent application
 state is the three GSettings window keys. Native D-Bus activation is scoped to the user's session.
 The interface inherits system theme styling; no custom CSS or Majoris-specific runtime package is required. Font previews
@@ -227,7 +237,7 @@ The default suite checks native Unicode, search, inspector, legacy encoding and 
 request supersession, declaration documentation, CLI version/help/error handling,
 XML window startup, repeat activation, actions, clean close, settings persistence,
 and actual GTK browser paging, search, filtering, selection, inspector navigation,
-and exact emoji variation clipboard copying in a private D-Bus
+exact emoji variation copying, and composer editing, normalization and clipboard copying in a private D-Bus
 session and Xvfb display. The test runner isolates the home and configuration
 directories and treats GTK warnings as fatal. Native search and inspector contracts are tested without a
 graphical display. Native timings are not a substitute for GTK responsiveness or platform performance qualification.
@@ -236,13 +246,13 @@ After installing the Debian package, the same runtime tests can target the real
 installed executable:
 
 ```sh
-python3 tests/integration/test_application.py /usr/bin/majoris-characters 0.6.0 cli
+python3 tests/integration/test_application.py /usr/bin/majoris-characters 0.7.0 cli
 xvfb-run -a dbus-run-session -- python3 \
-  tests/integration/test_application.py /usr/bin/majoris-characters 0.6.0 gui
+  tests/integration/test_application.py /usr/bin/majoris-characters 0.7.0 gui
 ```
 
-See [Stage 6 qualification](docs/stage-6-qualification.md) for actual
-verification results and remaining build/package checks. Historical Stage 1–5
+See [Stage 7 qualification](docs/stage-7-qualification.md) for actual
+verification results and remaining build/package checks. Historical Stage 1–6
 reports are preserved under `docs/`. Source inspection is
 not equivalent to compilation or runtime validation.
 

@@ -159,3 +159,36 @@ contracts remain unchanged. New window action `win.emoji-variations` and inspect
 action `inspect.emoji-variations` open the XML-backed `EmojiVariations` dialog.
 Existing IDs, GSettings, installed paths, and clipboard semantics are preserved.
 See [emoji functionality](emoji-functionality.md) for the coverage boundaries.
+
+## Stage 7: composition and clipboard
+
+`MainWindow` owns one `ComposerView` and its XML-backed native `GtkTextBuffer`.
+The composer keeps session text and native edit history in memory only. Dialogs
+receive a non-owning reference to the parent editor; nested dialogs pass the
+same reference along. The parent window owns the editor and the presentation
+lifecycle of those dialogs. Closing the window discards the editor. Adding text
+expands the panel without stealing focus from the browser or dialog.
+
+GTK owns editing, clipboard paste, bidirectional layout, selection, undo/redo,
+and text drop behavior. Its text buffer is the only mutable composition model;
+no duplicate editor state, custom Command/Memento implementation, or clipboard
+service is needed. Each programmatic append, clear, or normalization is grouped
+as one native user action. Clipboard and drop interactions use exact UTF-8, not
+preview text. Recycled CharacterTile instances clear their drag text on unbind;
+GDK owns a copied string value after drag preparation. Drag sources offer COPY
+only, while the text view retains native editing behavior.
+
+`composition.c` is a private bounded ICU bridge for extended grapheme counting
+and conversion. It reuses the inspector's shared scalar formatter and Unicode
+normalizer. Technical operations run synchronously on explicit input of at
+most 16,384 scalars (and normalization output is checked against the same
+bound). The count update checks GTK's scalar count before extracting text.
+The existing 32-scalar inspector contract is unchanged. ICU's grapheme result
+is version-dependent. No new mutable native service or pattern hierarchy is
+introduced. See [composition](composition.md) for limits and interaction rules.
+
+New window actions are `win.open-composer`, `win.add-character`, and
+`win.copy-character`. The new resource is `ui/composer-view.ui`; installed IDs,
+GSettings keys, native inspection snapshot semantics, and previous actions
+remain unchanged. ICU i18n is linked for grapheme segmentation via the existing
+Debian `libicu-dev` build dependency.

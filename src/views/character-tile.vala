@@ -9,6 +9,27 @@ namespace Characters {
         [GtkChild]
         private unowned Gtk.Label code_label;
 
+        /** Exact bound text; cleared when GTK unbinds the recycled tile. */
+        private string? drag_text;
+
+        /** Provides copy-only plain-text drag data, captured at drag preparation. */
+        construct {
+            var source = new Gtk.DragSource ();
+            source.actions = Gdk.DragAction.COPY;
+            source.prepare.connect (prepare_drag);
+            add_controller (source);
+        }
+
+        /** Returns immutable text content, or null when no copyable identity is bound. */
+        private Gdk.ContentProvider? prepare_drag (double x, double y) {
+            if (drag_text == null) {
+                return null;
+            }
+            var value = Value (typeof (string));
+            value.set_string (drag_text);
+            return new Gdk.ContentProvider.for_value (value);
+        }
+
         /** Replaces all data when GTK binds this recycled cell to a new identity. */
         public void bind_id (uint32 id) {
             var code = Search.code (id) ?? "";
@@ -19,6 +40,7 @@ namespace Characters {
         /** Renders a scalar using typed Pango attributes, never markup or injected font labels. */
         public void bind_preview (uint32 id, string? description, int size_pt, bool fallback,
                                   string caption, string detail, bool wide_caption = false) {
+            drag_text = Search.text (id);
             var attributes = new Pango.AttrList ();
             if (description != null) {
                 var font = Pango.FontDescription.from_string (description);
@@ -38,6 +60,7 @@ namespace Characters {
 
         /** Clears recycled content so an unbound cell cannot expose a stale character. */
         public void clear () {
+            drag_text = null;
             glyph_label.set_text ("");
             glyph_label.attributes = null;
             code_label.label = "";

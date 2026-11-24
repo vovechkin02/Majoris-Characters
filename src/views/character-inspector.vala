@@ -42,6 +42,9 @@ namespace Characters {
         /** Copies the exact original sequence only when representable as GTK text. */
         [GtkChild]
         private unowned Gtk.Button copy_character;
+        /** Adds the exact inspected text to the main-window editor. */
+        [GtkChild]
+        private unowned Gtk.Button inspect_add;
         /** Selects one constituent scalar for detailed property inspection. */
         [GtkChild]
         private unowned Gtk.DropDown component_filter;
@@ -64,6 +67,8 @@ namespace Characters {
         [GtkChild]
         private unowned Gtk.Button back_button;
 
+        /** Non-owning reference to the session editor; absent in standalone inspectors. */
+        private weak ComposerView? composer;
         /** Owns the inspected identity independently of the browser and its worker. */
         private Inspector.Snapshot? snapshot;
         /** Code notation for previously inspected identities; never persists on disk. */
@@ -74,7 +79,12 @@ namespace Characters {
         private string report = "";
 
         /** Constructs an XML inspector, optionally taking ownership of a selected identity. */
-        public CharacterInspector (owned Inspector.Snapshot? initial = null) {
+        public CharacterInspector (owned Inspector.Snapshot? initial = null,
+                                   ComposerView? composer = null) {
+            this.composer = composer;
+            inspect_add.visible = composer != null;
+            inspect_add.sensitive = false;
+            inspect_add.clicked.connect (add_to_composer);
             configure_actions ();
             component_filter.notify["selected"].connect (update_component);
             if (initial != null) {
@@ -212,6 +222,7 @@ namespace Characters {
             var text = snapshot.text ();
             preview.label = snapshot.display () ?? "";
             copy_character.sensitive = text != null;
+            inspect_add.sensitive = text != null && composer != null;
             emoji_button.visible = text != null && Emoji.is_candidate (text);
             if (text == null) {
                 preview_note.label = _("This sequence cannot be represented as clipboard text. " +
@@ -423,14 +434,14 @@ namespace Characters {
             if (snapshot == null || component_filter.selected >= snapshot.count ()) {
                 return;
             }
-            new FontBrowser (false, snapshot.point (component_filter.selected)).present (this);
+            new FontBrowser (false, snapshot.point (component_filter.selected), composer).present (this);
         }
 
         /** Opens an exact-sequence variation collection independently of the snapshot. */
         private void show_emoji_variations (Variant? parameter) {
             var text = snapshot != null ? snapshot.text () : null;
             if (text != null && Emoji.is_candidate (text)) {
-                new EmojiVariations (text).present (this);
+                new EmojiVariations (text, composer).present (this);
             }
         }
 
@@ -446,6 +457,15 @@ namespace Characters {
             var text = snapshot != null ? snapshot.text () : null;
             if (text != null) {
                 copy_text (text);
+            }
+        }
+
+        /** Appends the exact original sequence, keeping metadata and browser state intact. */
+        private void add_to_composer () {
+            var text = snapshot != null ? snapshot.text () : null;
+            if (text != null && composer != null) {
+                composer.append_text (text);
+                toast_overlay.add_toast (new Adw.Toast (_("Added to Composer")));
             }
         }
 

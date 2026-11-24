@@ -89,6 +89,12 @@ namespace Characters {
         [GtkChild]
         private unowned Gtk.Button bytes_copy;
 
+        /** Adds the mapped scalar, never the encoded bytes or the preview placeholder. */
+        [GtkChild]
+        private unowned Gtk.Button font_add;
+        /** Non-owning editor reference passed on to the inspector. */
+        private weak ComposerView? composer;
+
         /** Serializes source discovery and extraction without blocking GTK. */
         private FontSourceLoader loader = new FontSourceLoader ();
         /** Reuses cancellable, latest-request-only native Unicode search. */
@@ -133,7 +139,12 @@ namespace Characters {
         private ulong search_handler = 0;
 
         /** Opens the font or encoding browser, optionally comparing a selected Unicode scalar. */
-        public FontBrowser (bool legacy_mode = false, uint32 compare_point = uint32.MAX) {
+        public FontBrowser (bool legacy_mode = false, uint32 compare_point = uint32.MAX,
+                            ComposerView? composer = null) {
+            this.composer = composer;
+            font_add.visible = composer != null;
+            font_add.sensitive = false;
+            font_add.clicked.connect (add_to_composer);
             this.compare_point = compare_point;
             configure_grid ();
             configure_controls (legacy_mode);
@@ -713,6 +724,7 @@ namespace Characters {
                 Search.code (point) ?? "");
             font_inspect.sensitive = true;
             font_copy.sensitive = Search.text (point) != null;
+            font_add.sensitive = font_copy.sensitive && composer != null;
             bytes_copy.sensitive = false;
             if (mode == FontBrowserMode.ENCODINGS && mapping != null) {
                 var bytes = mapping.bytes (point);
@@ -738,6 +750,7 @@ namespace Characters {
             font_detail.label = "";
             font_inspect.sensitive = false;
             font_copy.sensitive = false;
+            font_add.sensitive = false;
             bytes_copy.sensitive = false;
         }
 
@@ -749,7 +762,7 @@ namespace Characters {
             }
             var snapshot = Inspector.from_code ("U+%04X".printf (point));
             if (snapshot != null) {
-                new CharacterInspector ((owned) snapshot).present (this);
+                new CharacterInspector ((owned) snapshot, composer).present (this);
             }
         }
 
@@ -758,6 +771,15 @@ namespace Characters {
             var text = Search.text (selected_point ());
             if (text != null) {
                 copy_text (text);
+            }
+        }
+
+        /** Appends a mapped scalar to the session editor without changing source selection. */
+        private void add_to_composer () {
+            var text = Search.text (selected_point ());
+            if (text != null && composer != null) {
+                composer.append_text (text);
+                font_toasts.add_toast (new Adw.Toast (_("Added to Composer")));
             }
         }
 

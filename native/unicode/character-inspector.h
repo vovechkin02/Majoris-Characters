@@ -113,6 +113,19 @@ char *characters_inspector_format(const CharactersInspector *snapshot,
                                   CharactersInspectorFormat format);
 
 /**
+ * characters_inspector_format_points:
+ * @points: Array of valid Unicode scalars, including NUL if needed.
+ * @count: Number of scalars in @points; must be nonzero.
+ * @format: Numeric representation.
+ *
+ * Shared sequence formatter for the inspector and bounded composition operations.
+ *
+ * Returns: (transfer full) (nullable): Allocated ASCII text, freed with free().
+ */
+char *characters_inspector_format_points(const uint32_t *points, size_t count,
+                                         CharactersInspectorFormat format);
+
+/**
  * characters_inspector_normalize:
  * @snapshot: Borrowed immutable snapshot.
  * @form: NFC, NFD, NFKC or NFKD.

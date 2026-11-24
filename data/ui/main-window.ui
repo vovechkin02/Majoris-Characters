@@ -4,6 +4,10 @@
   <menu id="primary_menu">
     <section>
       <item>
+        <attribute name="label" translatable="yes">Character Composer</attribute>
+        <attribute name="action">win.open-composer</attribute>
+      </item>
+      <item>
         <attribute name="label" translatable="yes">Identify Characters</attribute>
         <attribute name="action">win.identify-character</attribute>
       </item>
@@ -38,318 +42,347 @@
     <property name="width-request">320</property>
     <property name="height-request">320</property>
     <property name="content">
-      <object class="AdwToolbarView">
-        <child type="top">
-          <object class="AdwHeaderBar">
-            <child type="start">
-              <object class="GtkToggleButton" id="sidebar_toggle">
-                <property name="icon-name">sidebar-show-symbolic</property>
-                <property name="tooltip-text" translatable="yes">Show Categories</property>
-                <accessibility>
-                  <property name="label" translatable="yes">Show Categories</property>
-                </accessibility>
-              </object>
-            </child>
-            <child type="end">
-              <object class="GtkMenuButton">
-                <property name="icon-name">open-menu-symbolic</property>
-                <property name="tooltip-text" translatable="yes">Main Menu</property>
-                <property name="menu-model">primary_menu</property>
-                <accessibility>
-                  <property name="label" translatable="yes">Main Menu</property>
-                </accessibility>
-              </object>
-            </child>
-          </object>
-        </child>
-        <property name="content">
-          <object class="AdwOverlaySplitView" id="split_view">
-            <property name="show-sidebar">True</property>
-            <property name="min-sidebar-width">192</property>
-            <property name="max-sidebar-width">256</property>
-            <property name="sidebar-width-fraction">0.23</property>
-            <property name="sidebar">
-              <object class="GtkScrolledWindow">
-                <property name="hscrollbar-policy">never</property>
-                <child>
-                  <object class="GtkListBox" id="scope_list">
-                    <property name="selection-mode">single</property>
-                    <style><class name="navigation-sidebar"/></style>
+      <object class="AdwToastOverlay" id="browser_toasts">
+        <property name="child">
+          <object class="AdwToolbarView">
+            <child type="top">
+              <object class="AdwHeaderBar">
+                <child type="start">
+                  <object class="GtkToggleButton" id="sidebar_toggle">
+                    <property name="icon-name">sidebar-show-symbolic</property>
+                    <property name="tooltip-text" translatable="yes">Show Categories</property>
                     <accessibility>
-                      <property name="label" translatable="yes">Character Collections</property>
+                      <property name="label" translatable="yes">Show Categories</property>
                     </accessibility>
-                    <child>
-                      <object class="GtkLabel">
-                        <property name="label" translatable="yes">All Characters</property>
-                        <property name="xalign">0</property>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkLabel">
-                        <property name="label" translatable="yes">Emoji</property>
-                        <property name="xalign">0</property>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkLabel">
-                        <property name="label" translatable="yes">Symbols</property>
-                        <property name="xalign">0</property>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkLabel">
-                        <property name="label" translatable="yes">Scripts</property>
-                        <property name="xalign">0</property>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkLabel">
-                        <property name="label" translatable="yes">Unicode Blocks</property>
-                        <property name="xalign">0</property>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkLabel">
-                        <property name="label" translatable="yes">Named Sequences</property>
-                        <property name="xalign">0</property>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkListBoxRow">
-                        <property name="selectable">False</property>
-                        <property name="activatable">True</property>
-                        <child>
-                          <object class="GtkLabel">
-                            <property name="label" translatable="yes">Fonts</property>
-                            <property name="xalign">0</property>
-                          </object>
-                        </child>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkListBoxRow">
-                        <property name="selectable">False</property>
-                        <property name="activatable">True</property>
-                        <child>
-                          <object class="GtkLabel">
-                            <property name="label" translatable="yes">Character Sets</property>
-                            <property name="xalign">0</property>
-                          </object>
-                        </child>
-                      </object>
-                    </child>
+                  </object>
+                </child>
+                <child type="end">
+                  <object class="GtkMenuButton">
+                    <property name="icon-name">open-menu-symbolic</property>
+                    <property name="tooltip-text" translatable="yes">Main Menu</property>
+                    <property name="menu-model">primary_menu</property>
+                    <accessibility>
+                      <property name="label" translatable="yes">Main Menu</property>
+                    </accessibility>
                   </object>
                 </child>
               </object>
-            </property>
+            </child>
             <property name="content">
-              <object class="GtkBox">
-                <property name="orientation">vertical</property>
-                <child>
-                  <object class="GtkBox">
-                    <property name="orientation">vertical</property>
-                    <property name="spacing">8</property>
-                    <property name="margin-start">16</property>
-                    <property name="margin-end">16</property>
-                    <property name="margin-top">8</property>
-                    <property name="margin-bottom">8</property>
+              <object class="AdwOverlaySplitView" id="split_view">
+                <property name="show-sidebar">True</property>
+                <property name="min-sidebar-width">192</property>
+                <property name="max-sidebar-width">256</property>
+                <property name="sidebar-width-fraction">0.23</property>
+                <property name="sidebar">
+                  <object class="GtkScrolledWindow">
+                    <property name="hscrollbar-policy">never</property>
                     <child>
-                      <object class="GtkSearchEntry" id="search_entry">
-                        <property name="placeholder-text" translatable="yes">Search by name or code point</property>
-                        <property name="hexpand">True</property>
-                        <property name="tooltip-text" translatable="yes">Search names, keywords, aliases, characters, U+ notation, or dec: values</property>
+                      <object class="GtkListBox" id="scope_list">
+                        <property name="selection-mode">single</property>
+                        <style><class name="navigation-sidebar"/></style>
                         <accessibility>
-                          <property name="label" translatable="yes">Search Characters</property>
+                          <property name="label" translatable="yes">Character Collections</property>
                         </accessibility>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkDropDown" id="collection_filter">
-                        <property name="enable-search">True</property>
-                        <property name="hexpand">True</property>
-                        <property name="visible">False</property>
-                        <accessibility>
-                          <property name="label" translatable="yes">Collection Filter</property>
-                        </accessibility>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkDropDown" id="category_filter">
-                        <property name="enable-search">True</property>
-                        <property name="hexpand">True</property>
-                        <accessibility>
-                          <property name="label" translatable="yes">General Category Filter</property>
-                        </accessibility>
-                      </object>
-                    </child>
-                  </object>
-                </child>
-                <child>
-                  <object class="GtkSeparator"/>
-                </child>
-                <child>
-                  <object class="GtkStack" id="results_stack">
-                    <property name="vexpand">True</property>
-                    <property name="hhomogeneous">False</property>
-                    <property name="vhomogeneous">False</property>
-                    <child>
-                      <object class="GtkStackPage">
-                        <property name="name">results</property>
-                        <property name="child">
-                          <object class="GtkScrolledWindow" id="grid_scroll">
-                            <property name="hscrollbar-policy">never</property>
-                            <property name="vexpand">True</property>
-                            <child>
-                              <object class="GtkGridView" id="character_grid">
-                                <property name="min-columns">1</property>
-                                <property name="max-columns">20</property>
-                                <property name="enable-rubberband">False</property>
-                                <property name="margin-start">8</property>
-                                <property name="margin-end">8</property>
-                                <property name="margin-top">8</property>
-                                <property name="margin-bottom">8</property>
-                                <accessibility>
-                                  <property name="label" translatable="yes">Characters</property>
-                                </accessibility>
-                              </object>
-                            </child>
+                        <child>
+                          <object class="GtkLabel">
+                            <property name="label" translatable="yes">All Characters</property>
+                            <property name="xalign">0</property>
                           </object>
-                        </property>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkStackPage">
-                        <property name="name">loading</property>
-                        <property name="child">
-                          <object class="GtkBox">
-                            <property name="orientation">vertical</property>
-                            <property name="spacing">8</property>
-                            <property name="valign">center</property>
-                            <property name="halign">center</property>
-                            <child>
-                              <object class="GtkSpinner" id="loading_spinner">
-                                <property name="width-request">32</property>
-                                <property name="height-request">32</property>
-                                <property name="halign">center</property>
-                              </object>
-                            </child>
+                        </child>
+                        <child>
+                          <object class="GtkLabel">
+                            <property name="label" translatable="yes">Emoji</property>
+                            <property name="xalign">0</property>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkLabel">
+                            <property name="label" translatable="yes">Symbols</property>
+                            <property name="xalign">0</property>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkLabel">
+                            <property name="label" translatable="yes">Scripts</property>
+                            <property name="xalign">0</property>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkLabel">
+                            <property name="label" translatable="yes">Unicode Blocks</property>
+                            <property name="xalign">0</property>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkLabel">
+                            <property name="label" translatable="yes">Named Sequences</property>
+                            <property name="xalign">0</property>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkListBoxRow">
+                            <property name="selectable">False</property>
+                            <property name="activatable">True</property>
                             <child>
                               <object class="GtkLabel">
-                                <property name="label" translatable="yes">Searching Characters…</property>
+                                <property name="label" translatable="yes">Fonts</property>
+                                <property name="xalign">0</property>
                               </object>
                             </child>
                           </object>
-                        </property>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkStackPage">
-                        <property name="name">empty</property>
-                        <property name="child">
-                          <object class="AdwStatusPage">
-                            <property name="icon-name">system-search-symbolic</property>
-                            <property name="title" translatable="yes">No Characters Found</property>
-                            <property name="description" translatable="yes">Try another search or change the filters.</property>
-                            <style><class name="compact"/></style>
+                        </child>
+                        <child>
+                          <object class="GtkListBoxRow">
+                            <property name="selectable">False</property>
+                            <property name="activatable">True</property>
+                            <child>
+                              <object class="GtkLabel">
+                                <property name="label" translatable="yes">Character Sets</property>
+                                <property name="xalign">0</property>
+                              </object>
+                            </child>
                           </object>
-                        </property>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkStackPage">
-                        <property name="name">error</property>
-                        <property name="child">
-                          <object class="AdwStatusPage" id="error_page">
-                            <property name="icon-name">dialog-error-symbolic</property>
-                            <property name="title" translatable="yes">Search Unavailable</property>
-                            <style><class name="compact"/></style>
-                          </object>
-                        </property>
+                        </child>
                       </object>
                     </child>
                   </object>
-                </child>
-                <child>
-                  <object class="GtkSeparator"/>
-                </child>
-                <child>
-                  <object class="GtkBox">
-                    <property name="spacing">8</property>
-                    <property name="margin-start">16</property>
-                    <property name="margin-end">16</property>
-                    <property name="margin-top">8</property>
-                    <property name="margin-bottom">8</property>
-                    <child>
-                      <object class="GtkButton" id="previous_button">
-                        <property name="icon-name">go-previous-symbolic</property>
-                        <property name="tooltip-text" translatable="yes">Previous Page</property>
-                        <property name="sensitive">False</property>
-                        <accessibility>
-                          <property name="label" translatable="yes">Previous Page</property>
-                        </accessibility>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkLabel" id="result_count">
-                        <property name="hexpand">True</property>
-                        <property name="wrap">True</property>
-                        <property name="justify">center</property>
-                        <style><class name="caption"/></style>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkButton" id="next_button">
-                        <property name="icon-name">go-next-symbolic</property>
-                        <property name="tooltip-text" translatable="yes">Next Page</property>
-                        <property name="sensitive">False</property>
-                        <accessibility>
-                          <property name="label" translatable="yes">Next Page</property>
-                        </accessibility>
-                      </object>
-                    </child>
-                  </object>
-                </child>
-                <child>
+                </property>
+                <property name="content">
                   <object class="GtkBox">
                     <property name="orientation">vertical</property>
-                    <property name="spacing">4</property>
-                    <property name="margin-start">16</property>
-                    <property name="margin-end">16</property>
-                    <property name="margin-bottom">8</property>
                     <child>
-                      <object class="GtkLabel" id="selected_name">
-                        <property name="label" translatable="yes">No Character Selected</property>
-                        <property name="ellipsize">end</property>
-                        <property name="xalign">0</property>
-                        <style><class name="heading"/></style>
+                      <object class="GtkBox">
+                        <property name="orientation">vertical</property>
+                        <property name="spacing">8</property>
+                        <property name="margin-start">16</property>
+                        <property name="margin-end">16</property>
+                        <property name="margin-top">8</property>
+                        <property name="margin-bottom">8</property>
+                        <child>
+                          <object class="GtkSearchEntry" id="search_entry">
+                            <property name="placeholder-text" translatable="yes">Search by name or code point</property>
+                            <property name="hexpand">True</property>
+                            <property name="tooltip-text" translatable="yes">Search names, keywords, aliases, characters, U+ notation, or dec: values</property>
+                            <accessibility>
+                              <property name="label" translatable="yes">Search Characters</property>
+                            </accessibility>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkDropDown" id="collection_filter">
+                            <property name="enable-search">True</property>
+                            <property name="hexpand">True</property>
+                            <property name="visible">False</property>
+                            <accessibility>
+                              <property name="label" translatable="yes">Collection Filter</property>
+                            </accessibility>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkDropDown" id="category_filter">
+                            <property name="enable-search">True</property>
+                            <property name="hexpand">True</property>
+                            <accessibility>
+                              <property name="label" translatable="yes">General Category Filter</property>
+                            </accessibility>
+                          </object>
+                        </child>
                       </object>
                     </child>
                     <child>
-                      <object class="GtkLabel" id="selected_code">
-                        <property name="selectable">True</property>
-                        <property name="ellipsize">end</property>
-                        <property name="xalign">0</property>
-                        <style><class name="dim-label"/></style>
+                      <object class="GtkSeparator"/>
+                    </child>
+                    <child>
+                      <object class="GtkStack" id="results_stack">
+                        <property name="vexpand">True</property>
+                        <property name="hhomogeneous">False</property>
+                        <property name="vhomogeneous">False</property>
+                        <child>
+                          <object class="GtkStackPage">
+                            <property name="name">results</property>
+                            <property name="child">
+                              <object class="GtkScrolledWindow" id="grid_scroll">
+                                <property name="hscrollbar-policy">never</property>
+                                <property name="vexpand">True</property>
+                                <child>
+                                  <object class="GtkGridView" id="character_grid">
+                                    <property name="min-columns">1</property>
+                                    <property name="max-columns">20</property>
+                                    <property name="enable-rubberband">False</property>
+                                    <property name="margin-start">8</property>
+                                    <property name="margin-end">8</property>
+                                    <property name="margin-top">8</property>
+                                    <property name="margin-bottom">8</property>
+                                    <accessibility>
+                                      <property name="label" translatable="yes">Characters</property>
+                                    </accessibility>
+                                  </object>
+                                </child>
+                              </object>
+                            </property>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkStackPage">
+                            <property name="name">loading</property>
+                            <property name="child">
+                              <object class="GtkBox">
+                                <property name="orientation">vertical</property>
+                                <property name="spacing">8</property>
+                                <property name="valign">center</property>
+                                <property name="halign">center</property>
+                                <child>
+                                  <object class="GtkSpinner" id="loading_spinner">
+                                    <property name="width-request">32</property>
+                                    <property name="height-request">32</property>
+                                    <property name="halign">center</property>
+                                  </object>
+                                </child>
+                                <child>
+                                  <object class="GtkLabel">
+                                    <property name="label" translatable="yes">Searching Characters…</property>
+                                  </object>
+                                </child>
+                              </object>
+                            </property>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkStackPage">
+                            <property name="name">empty</property>
+                            <property name="child">
+                              <object class="AdwStatusPage">
+                                <property name="icon-name">system-search-symbolic</property>
+                                <property name="title" translatable="yes">No Characters Found</property>
+                                <property name="description" translatable="yes">Try another search or change the filters.</property>
+                                <style><class name="compact"/></style>
+                              </object>
+                            </property>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkStackPage">
+                            <property name="name">error</property>
+                            <property name="child">
+                              <object class="AdwStatusPage" id="error_page">
+                                <property name="icon-name">dialog-error-symbolic</property>
+                                <property name="title" translatable="yes">Search Unavailable</property>
+                                <style><class name="compact"/></style>
+                              </object>
+                            </property>
+                          </object>
+                        </child>
                       </object>
                     </child>
                     <child>
-                      <object class="GtkButton" id="inspect_button">
-                        <property name="label" translatable="yes">Inspect Character</property>
-                        <property name="action-name">win.inspect-character</property>
-                        <property name="sensitive">False</property>
-                        <property name="halign">start</property>
+                      <object class="GtkSeparator"/>
+                    </child>
+                    <child>
+                      <object class="GtkBox">
+                        <property name="spacing">8</property>
+                        <property name="margin-start">16</property>
+                        <property name="margin-end">16</property>
+                        <property name="margin-top">8</property>
+                        <property name="margin-bottom">8</property>
+                        <child>
+                          <object class="GtkButton" id="previous_button">
+                            <property name="icon-name">go-previous-symbolic</property>
+                            <property name="tooltip-text" translatable="yes">Previous Page</property>
+                            <property name="sensitive">False</property>
+                            <accessibility>
+                              <property name="label" translatable="yes">Previous Page</property>
+                            </accessibility>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkLabel" id="result_count">
+                            <property name="hexpand">True</property>
+                            <property name="wrap">True</property>
+                            <property name="justify">center</property>
+                            <style><class name="caption"/></style>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkButton" id="next_button">
+                            <property name="icon-name">go-next-symbolic</property>
+                            <property name="tooltip-text" translatable="yes">Next Page</property>
+                            <property name="sensitive">False</property>
+                            <accessibility>
+                              <property name="label" translatable="yes">Next Page</property>
+                            </accessibility>
+                          </object>
+                        </child>
                       </object>
                     </child>
                     <child>
-                      <object class="GtkButton" id="emoji_button">
-                        <property name="label" translatable="yes">Emoji Variations</property>
-                        <property name="action-name">win.emoji-variations</property>
-                        <property name="visible">False</property>
-                        <property name="halign">start</property>
+                      <object class="GtkBox">
+                        <property name="orientation">vertical</property>
+                        <property name="spacing">4</property>
+                        <property name="margin-start">16</property>
+                        <property name="margin-end">16</property>
+                        <property name="margin-bottom">8</property>
+                        <child>
+                          <object class="GtkLabel" id="selected_name">
+                            <property name="label" translatable="yes">No Character Selected</property>
+                            <property name="ellipsize">end</property>
+                            <property name="xalign">0</property>
+                            <style><class name="heading"/></style>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkLabel" id="selected_code">
+                            <property name="selectable">True</property>
+                            <property name="ellipsize">end</property>
+                            <property name="xalign">0</property>
+                            <style><class name="dim-label"/></style>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkButton" id="inspect_button">
+                            <property name="label" translatable="yes">Inspect Character</property>
+                            <property name="action-name">win.inspect-character</property>
+                            <property name="sensitive">False</property>
+                            <property name="halign">start</property>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkBox">
+                            <property name="spacing">8</property>
+                            <child>
+                              <object class="GtkButton" id="browser_copy">
+                                <property name="label" translatable="yes">Copy</property>
+                                <property name="action-name">win.copy-character</property>
+                                <property name="sensitive">False</property>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="GtkButton" id="browser_add">
+                                <property name="label" translatable="yes">Add to Composer</property>
+                                <property name="action-name">win.add-character</property>
+                                <property name="sensitive">False</property>
+                              </object>
+                            </child>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkButton" id="emoji_button">
+                            <property name="label" translatable="yes">Emoji Variations</property>
+                            <property name="action-name">win.emoji-variations</property>
+                            <property name="visible">False</property>
+                            <property name="halign">start</property>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                    <child><object class="GtkSeparator"/></child>
+                    <child>
+                      <object class="GtkBox" id="composer_slot">
+                        <property name="orientation">vertical</property>
                       </object>
                     </child>
                   </object>
-                </child>
+                </property>
               </object>
             </property>
           </object>

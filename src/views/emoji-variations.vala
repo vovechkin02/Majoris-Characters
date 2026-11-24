@@ -30,11 +30,20 @@ namespace Characters {
         [GtkChild]
         private unowned Gtk.Button inspect_button;
 
+        /** Adds the selected exact sequence to the session editor. */
+        [GtkChild]
+        private unowned Gtk.Button emoji_add;
+        /** Non-owning editor reference for this and nested dialogs. */
+        private weak ComposerView? composer;
+
         /** Immutable native collection owned by the dialog for its lifetime. */
         private Emoji.Variants? variants;
 
         /** Builds a searchable selection list; preserves the incoming identity if available. */
-        public EmojiVariations (string text) {
+        public EmojiVariations (string text, ComposerView? composer = null) {
+            this.composer = composer;
+            emoji_add.visible = composer != null;
+            emoji_add.clicked.connect (add_to_composer);
             variants = Emoji.create_variants (text);
             var model = new Gtk.StringList (null);
             uint selected = 0;
@@ -70,6 +79,7 @@ namespace Characters {
         private void update_preview () {
             var text = selected_text ();
             copy_button.sensitive = text != null;
+            emoji_add.sensitive = text != null && composer != null;
             inspect_button.sensitive = text != null;
             if (text == null || variants == null) {
                 preview.label = "";
@@ -97,6 +107,15 @@ namespace Characters {
             }
         }
 
+        /** Appends the chosen sequence without altering its modifiers or selectors. */
+        private void add_to_composer () {
+            var text = selected_text ();
+            if (text != null && composer != null) {
+                composer.append_text (text);
+                toast_overlay.add_toast (new Adw.Toast (_("Added to Composer")));
+            }
+        }
+
         /** Opens an independent inspector without normalizing or modifying the selection. */
         private void inspect_selected () {
             var text = selected_text ();
@@ -105,7 +124,7 @@ namespace Characters {
             }
             var snapshot = Inspector.from_text (text);
             if (snapshot != null) {
-                new CharacterInspector ((owned) snapshot).present (this);
+                new CharacterInspector ((owned) snapshot, composer).present (this);
             }
         }
     }

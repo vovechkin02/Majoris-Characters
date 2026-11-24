@@ -8,7 +8,7 @@
 | 4 | Inspector, relationships, encodings, normalization, and identification | Source implemented; native tests passed; Vala and GTK qualification pending |
 | 5 | Installed fonts, coverage, variations, legacy encodings | Source implemented; ICU legacy tests passed; font backend and GTK qualification pending |
 | 6 | Emoji sequences, annotations and variations | Core implemented; native tests passed; annotation coverage and GTK qualification limited |
-| 7 | Composer, clipboard and drag-and-drop | Not started |
+| 7 | Composer, clipboard and drag-and-drop | Source implemented; native tests passed; GTK qualification pending |
 | 8 | Favorites, recent/frequent history and preferences | Not started |
 | 9 | Compact picker, desktop search and native insertion | Not started |
 | 10 | Accessibility, localization, performance, regression and ISO integration | Not started |
