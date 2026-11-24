@@ -181,3 +181,9 @@ test('Saved collections across process restarts', python,
   suite: 'integration',
   timeout: 45,
 )
+
+test('Input source response protocol', python,
+  args: [files('unit/test_input_protocol.py')],
+  suite: 'unit',
+  timeout: 10,
+)

@@ -1,0 +1,7 @@
+{
+  "uuid": "characters-picker@majoris.com",
+  "name": "Characters Picker Shortcut",
+  "description": "Open the Majoris Characters clipboard picker with a global shortcut.",
+  "shell-version": ["48"],
+  "settings-schema": "com.majoris.characters"
+}

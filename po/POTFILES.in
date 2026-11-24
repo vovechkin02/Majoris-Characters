@@ -1,5 +1,6 @@
 data/ui/character-inspector.ui
 data/ui/character-tile.ui
+data/ui/compact-picker.ui
 data/ui/composer-view.ui
 data/ui/emoji-variations.ui
 data/ui/font-browser.ui
@@ -9,9 +10,11 @@ data/ui/preferences-dialog.ui
 src/app/application.vala
 src/views/character-inspector.vala
 src/views/character-tile.vala
+src/views/compact-picker.vala
 src/views/composer-view.vala
 src/views/emoji-variations.vala
 src/views/font-browser.vala
 src/views/library-dialog.vala
 src/views/main-window.vala
 src/views/preferences-dialog.vala
+tools/input/characters_input.py

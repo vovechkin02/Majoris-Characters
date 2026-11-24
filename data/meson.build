@@ -39,3 +39,19 @@ install_data(
   'unicode/emoji/GTK-DEBIAN-COPYRIGHT',
   install_dir: get_option('datadir') / 'doc' / meson.project_name(),
 )
+
+install_data('desktop/com.majoris.characters.search-provider.ini',
+  install_dir: get_option('datadir') / 'gnome-shell/search-providers')
+install_data('shell/extension.js', 'shell/metadata.json',
+  install_dir: get_option('datadir') / 'gnome-shell/extensions/characters-picker@majoris.com')
+configure_file(
+  input: 'ibus/majoris-characters.xml.in',
+  output: 'majoris-characters.xml',
+  configuration: configuration,
+  install_dir: get_option('datadir') / 'ibus/component',
+)
+install_data('../tools/input/characters_input.py',
+  install_dir: get_option('libexecdir') / 'majoris-characters',
+  install_mode: 'rwxr-xr-x')
+install_data('../tools/input/input_protocol.py',
+  install_dir: get_option('libexecdir') / 'majoris-characters')

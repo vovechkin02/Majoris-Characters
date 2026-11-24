@@ -4,6 +4,10 @@
   <menu id="primary_menu">
     <section>
       <item>
+        <attribute name="label" translatable="yes">Character Picker</attribute>
+        <attribute name="action">app.picker</attribute>
+      </item>
+      <item>
         <attribute name="label" translatable="yes">Character Composer</attribute>
         <attribute name="action">win.open-composer</attribute>
       </item>

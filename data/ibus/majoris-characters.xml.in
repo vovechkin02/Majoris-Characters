@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component>
+  <name>com.majoris.Characters.Input</name>
+  <description>Majoris Characters input source</description>
+  <exec>@INPUT_ENGINE@ --ibus</exec>
+  <version>@VERSION@</version>
+  <license>GPL-3.0-or-later</license>
+  <author>Majoris</author>
+  <homepage>https://github.com/vovechkin02/Majoris-Characters</homepage>
+  <textdomain>majoris-characters</textdomain>
+  <engines>
+    <engine>
+      <name>majoris-characters</name>
+      <longname>Characters</longname>
+      <description>Search and insert Unicode characters</description>
+      <language>other</language>
+      <license>GPL-3.0-or-later</license>
+      <author>Majoris</author>
+      <icon>com.majoris.characters</icon>
+      <layout>default</layout>
+      <rank>0</rank>
+      <symbol>Ω</symbol>
+    </engine>
+  </engines>
+</component>

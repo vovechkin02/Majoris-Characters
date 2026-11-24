@@ -1,6 +1,7 @@
 """Exercise the real executable in isolated CLI and graphical sessions."""
 
 import argparse
+import base64
 import os
 from pathlib import Path
 import subprocess
@@ -67,6 +68,18 @@ class CommandLineTest(ApplicationTest):
         self.assertRegex(result.stdout, r"Supplement: \d+\.\d+\.\d+")
         self.assertIn("Emoji annotations:", result.stdout)
 
+    def test_input_search(self) -> None:
+        """Return an exact composite sequence without a display or session bus."""
+        result = self.run_command(EXECUTABLE, "--input-search=U+1F469 U+200D U+1F4BB")
+        rows = [line.split("\t") for line in result.stdout.splitlines()]
+        self.assertEqual(len(rows), 1)
+        self.assertEqual(base64.b64decode(rows[0][0]).decode(), "👩‍💻")
+        self.assertTrue(base64.b64decode(rows[0][1]).decode())
+        empty = self.run_command(EXECUTABLE, "--input-search=U+0000")
+        self.assertEqual(empty.stdout, "")
+        invalid = self.run_command(EXECUTABLE, "--input-search=", check=False)
+        self.assertNotEqual(invalid.returncode, 0)
+
     def test_help(self) -> None:
         """Advertise the supported local version option."""
         result = self.run_command(EXECUTABLE, "--help")
@@ -114,6 +127,55 @@ class LifecycleTest(ApplicationTest):
                 for key, expected in (("window-width", "800"), ("window-height", "600")):
                     result = self.run_command("gsettings", "get", APP_ID, key)
                     self.assertEqual(result.stdout.strip(), expected, key)
+            finally:
+                if process.poll() is None:
+                    process.kill()
+                    process.wait(timeout=5)
+                log.seek(0)
+                print(log.read(), end="")
+
+
+    def test_desktop_search_and_picker(self) -> None:
+        """Exercise the real SearchProvider2 export and remote application actions."""
+        path = "/com/majoris/characters/SearchProvider"
+        interface = "org.gnome.Shell.SearchProvider2"
+        with tempfile.TemporaryFile(mode="w+t") as log:
+            process = subprocess.Popen([EXECUTABLE, "--picker"], env=self.env,
+                                       stdout=log, stderr=subprocess.STDOUT, text=True)
+            try:
+                deadline = time.monotonic() + 10
+                while time.monotonic() < deadline:
+                    self.assertIsNone(process.poll())
+                    introspection = self.run_command(
+                        "gdbus", "introspect", "--session", "--dest", APP_ID,
+                        "--object-path", path, check=False,
+                    )
+                    if interface in introspection.stdout:
+                        break
+                    time.sleep(0.05)
+                else:
+                    self.fail("Search provider was not exported")
+                common = ("gdbus", "call", "--session", "--dest", APP_ID,
+                          "--object-path", path, "--method")
+                initial = self.run_command(*common, interface + ".GetInitialResultSet",
+                                           "['U+20AC']")
+                self.assertIn("U+20AC", initial.stdout)
+                refined = self.run_command(*common, interface + ".GetSubsearchResultSet",
+                                           "['U+20AC']", "['U+1F600']")
+                self.assertIn("U+1F600", refined.stdout)
+                meta = self.run_command(*common, interface + ".GetResultMetas",
+                                        "['U+20AC', 'invalid']")
+                self.assertIn("EURO SIGN", meta.stdout)
+                self.assertNotIn("invalid", meta.stdout)
+                self.run_command(EXECUTABLE, "--picker")
+                self.run_command(EXECUTABLE, "--search=U+20AC")
+                self.run_command(*common, interface + ".ActivateResult", "U+20AC",
+                                 "['U+20AC']", "0")
+                self.run_command(EXECUTABLE, "--record-insertion=👩‍💻")
+                history = self.run_command("gsettings", "get", APP_ID, "usage-history")
+                self.assertIn("👩‍💻", history.stdout)
+                self.run_command("gapplication", "action", APP_ID, "quit")
+                self.assertEqual(process.wait(timeout=10), 0)
             finally:
                 if process.poll() is None:
                     process.kill()

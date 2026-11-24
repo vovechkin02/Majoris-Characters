@@ -220,3 +220,41 @@ The three existing window geometry keys and previous application actions retain
 their contracts. Stage 8 adds schema keys, XML templates, and `win.favorites`,
 `win.recent`, `win.frequent`, `win.save-favorite`, and `win.preferences` actions.
 The app has no public library ABI. No new package dependencies are needed.
+
+
+## Stage 9: desktop integration
+
+The application exports the standard `org.gnome.Shell.SearchProvider2` interface
+at `/com/majoris/characters/SearchProvider` in addition to GApplication's
+existing actions. `SearchProvider` owns at most two running native jobs and
+cancels stale requests; waiting invocations check their generation before
+starting. A strong local application reference and GApplication hold span
+asynchronous requests. The provider's application field is weak, and unexport
+cancels work. Results are limited to 20 copyable identities represented by
+canonical Unicode code notation, rather than catalog-local integer indexes.
+The provider publishes metadata without changing user data; activating a result
+opens the existing inspector. The Home menu can use the same provider protocol.
+
+`CompactPicker` is an independent GTK application window, using the existing
+`SearchController` and `LibraryStore`. It owns its model widgets, disconnects
+subscriptions on close, and displays up to 80 results. The application holds
+its clipboard owner until external replacement or explicit Quit, avoiding a
+picker-only process exiting immediately after a copy. `DesktopSearch` supplies
+the bounded query/result rules for both desktop search and the headless input
+lookup command.
+
+| Decision | Pattern / idiom | Contract |
+| --- | --- | --- |
+| Shell provider | Adapter | Translates the fixed external SearchProvider2 protocol into existing native requests and inspector activation; no new provider hierarchy. |
+| Compact picker | Direct composition and GObject Observer | GTK owns controls; the picker disconnects its search and library observers on close. |
+| IBus engine | Framework adapter | IBus owns the current context; the Python engine queries a bounded local CLI protocol and commits only explicitly selected, current candidates. |
+| Shortcut extension | Framework integration | Registers one GSettings-based binding and removes it on disable; no input interception or shell private API for injection. |
+
+IBus requests are process-isolated from the application UI. The Python engine
+cancels obsolete searches and rejects malformed results, then calls the native
+IBus commit interface for the focused client. It does not synthesize keyboard
+input or use the clipboard. Explicit insertion history is routed through the
+primary application, respecting the existing retention and opt-out policy.
+No external service or new public library ABI is introduced. Existing actions,
+application identity and GSettings keys are preserved. See [desktop integration](desktop-integration.md)
+for installation, protocol contracts and runtime boundaries.

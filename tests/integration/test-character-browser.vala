@@ -384,6 +384,42 @@ private void test_library (MainWindow window) {
     settings.reset ("grid-preview-size");
 }
 
+/** Verifies compact picker activation, supersession, exact copy and independent closure. */
+private void test_compact_picker (Characters.Application application, MainWindow window) {
+    var action = application.lookup_action ("picker");
+    assert (action != null);
+    action.activate (null);
+    CompactPicker? picker = null;
+    foreach (var candidate in application.get_windows ()) {
+        if (candidate is CompactPicker) {
+            picker = (CompactPicker) candidate;
+        }
+    }
+    assert (picker != null);
+    picker.set_default_size (400, 480);
+    var scope = find_widget (picker, "picker_scope") as Gtk.DropDown;
+    var query = find_widget (picker, "picker_query") as Gtk.SearchEntry;
+    var results = find_widget (picker, "picker_results") as Gtk.FlowBox;
+    assert (scope != null && query != null && results != null);
+    scope.selected = 0;
+    query.text = "letter";
+    query.text = "U+1F469 U+200D U+1F4BB";
+    var deadline = get_monotonic_time () + WAIT_TIMEOUT_US;
+    var context = MainContext.default ();
+    while (get_monotonic_time () < deadline && results.get_child_at_index (0) == null) {
+        context.iteration (false);
+        Thread.usleep (POLL_INTERVAL_US);
+    }
+    var first = results.get_child_at_index (0);
+    assert (first != null && results.get_child_at_index (1) == null);
+    var button = first.get_child () as Gtk.Button;
+    assert (button != null);
+    button.clicked ();
+    expect_clipboard (picker, "👩‍💻");
+    picker.close ();
+    assert (window.visible);
+}
+
 /** Exercises actual widget models, search supersession, filters, reset and selection. */
 private void test_browser () {
     var application = new Characters.Application ();
@@ -454,6 +490,7 @@ private void test_browser () {
     wait_for_page (selection, 512, "0");
     assert (entry.text == "" && category.selected == 0);
     assert (!inspect.sensitive);
+    test_compact_picker (application, window);
     entry.text = "letter";
     window.close ();
 }

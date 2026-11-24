@@ -3,6 +3,7 @@
   <gresource prefix="/com/majoris/characters">
     <file>ui/character-inspector.ui</file>
     <file>ui/character-tile.ui</file>
+    <file>ui/compact-picker.ui</file>
     <file>ui/composer-view.ui</file>
     <file>ui/emoji-variations.ui</file>
     <file>ui/font-browser.ui</file>

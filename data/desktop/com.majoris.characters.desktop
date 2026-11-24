@@ -9,3 +9,8 @@ Categories=GTK;Utility;
 Keywords=Unicode;Character;Symbol;Emoji;
 StartupNotify=true
 DBusActivatable=true
+Actions=picker;
+
+[Desktop Action picker]
+Name=Character Picker
+Exec=majoris-characters --picker

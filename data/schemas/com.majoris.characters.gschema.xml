@@ -91,5 +91,10 @@
       <summary>Show encodings</summary>
       <description>Show this browsing category in the sidebar.</description>
     </key>
+    <key name="picker-shortcut" type="as">
+      <default>['&lt;Super&gt;period']</default>
+      <summary>Global character picker shortcut</summary>
+      <description>Keybinding used by the optional GNOME Shell shortcut extension.</description>
+    </key>
   </schema>
 </schemalist>

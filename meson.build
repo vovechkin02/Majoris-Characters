@@ -1,7 +1,7 @@
 project(
   'majoris-characters',
   ['c', 'vala'],
-  version: '0.8.0',
+  version: '0.9.0',
   meson_version: '>=1.3.0',
   default_options: ['c_std=gnu11', 'warning_level=2'],
   license: 'GPL-3.0-or-later',
@@ -26,6 +26,9 @@ configuration.set('APP_ID', app_id)
 configuration.set('GETTEXT_PACKAGE', gettext_package)
 configuration.set('LOCALEDIR', get_option('prefix') / get_option('localedir'))
 configuration.set('EXECUTABLE', get_option('prefix') / get_option('bindir') / meson.project_name())
+
+configuration.set('INPUT_ENGINE', get_option('prefix') / get_option('libexecdir') /
+  'majoris-characters' / 'characters_input.py')
 
 subdir('data')
 subdir('native/fonts')

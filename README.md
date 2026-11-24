@@ -6,9 +6,9 @@ privacy, sidebar visibility, and preview preferences to the existing character u
 
 | Project metadata | Value |
 | --- | --- |
-| Version | 0.8.0 |
+| Version | 0.9.0 |
 | Platform target | Majoris OS / Debian 13 (Trixie) |
-| Development status | Stage 8 — favorites, history and preferences |
+| Development status | Stage 9 — desktop integration |
 | Application ID | `com.majoris.characters` |
 | Debian package | `majoris-characters` |
 | License | GPL-3.0-or-later |
@@ -78,6 +78,9 @@ privacy, sidebar visibility, and preview preferences to the existing character u
 - Configurable history retention and recording opt-out; favorites remain independent.
 - Searchable saved collections with copy, inspect, and add-to-composer actions.
 - Persistent sidebar category visibility, grid and font preview sizes, and font fallback.
+- Compact picker with catalog, emoji, symbols, favorites and recent collections.
+- GNOME Shell SearchProvider2, desktop action, and single-instance CLI activation.
+- Configurable opt-in GNOME Shell 48 shortcut and native IBus candidate insertion.
 
 The bundled catalog is Unicode 17.0.0; ICU 76 provides Unicode 16.0 properties,
 and the alias/named-sequence supplement is Unicode 15.0.0. Newer metadata not
@@ -89,8 +92,9 @@ CLDR XML imports are supported by the offline generator. The picker exposes
 catalog-backed skin tone, gender, hair, direction, relationship, flag and
 keycap choices, and presentation pairs derived from the catalog. Color glyphs
 are rendered by Pango with installed emoji fonts. See [emoji functionality](docs/emoji-functionality.md)
-for coverage and rendering boundaries. The compact picker and system-wide insertion
-remain later stages.
+for coverage and rendering boundaries. Desktop integration is provided through the
+compact picker, SearchProvider2, an opt-in Shell shortcut, and an optional IBus input
+source. See [desktop integration](docs/desktop-integration.md) for setup and limits.
 The Vala/GTK and Fontconfig/Pango source is not yet compiler- or runtime-qualified
 in the delivery environment.
 
@@ -102,7 +106,9 @@ GTK 4.14+, libadwaita 1.7+, GIO/GLib 2.80+, ICU 76+, Fontconfig 2.13+,
 PangoFT2 1.50+, gettext, and Python 3. The integration
 tests use Xvfb, xauth, a private D-Bus session and GLib command-line tools.
 The full Debian build dependency list is in [debian/control](debian/control).
-The application does not require unstable GNOME packages or GJS.
+The application does not require unstable GNOME packages or GJS. The optional
+GNOME Shell 48 extension runs inside the Shell; the optional IBus source needs
+`ibus`, `gir1.2-ibus-1.0`, and `python3-gi` (Debian recommended packages).
 
 ## Building and installing
 
@@ -140,7 +146,7 @@ For Debian binary packages (run from the repository root):
 
 ```sh
 dpkg-buildpackage -us -uc -b
-sudo apt install ../majoris-characters_0.8.0-1_$(dpkg --print-architecture).deb
+sudo apt install ../majoris-characters_0.9.0-1_$(dpkg --print-architecture).deb
 ```
 
 The source package uses `3.0 (quilt)` and requires the corresponding upstream
@@ -149,6 +155,23 @@ not require it. Debian packaging uses debhelper's Meson integration and
 standard installation triggers; `debian/rules` is executable.
 
 ## Quick start and usage
+
+Open the independent compact picker with `majoris-characters --picker`, the
+Character Picker desktop action, or the application menu. Ctrl+Shift+Period
+opens it while Characters has focus. The optional Shell extension enables
+Super+Period globally after explicit activation:
+
+```sh
+gnome-extensions enable characters-picker@majoris.com
+```
+
+The compact picker copies exact text. For direct insertion without clipboard
+replacement, select the Characters IBus input source and use Ctrl+Shift+Period
+in a compatible application; type a query and choose a candidate. See the
+[desktop integration guide](docs/desktop-integration.md) for setup, keybinding
+configuration, and Wayland limitations.
+
+Launch a full catalog query with `majoris-characters --search=U+20AC`.
 
 Open **Characters** from the desktop application launcher, or execute
 `majoris-characters` in a graphical session. Launching it again presents the
@@ -236,10 +259,14 @@ Its temporary navigation history is discarded on close. Persistent state consist
 of window geometry, explicit favorite identities, opt-out-controlled character usage,
 and presentation preferences in the local GSettings backend. Arbitrary clipboard
 contents, typed composition text and copied metadata are not recorded. Usage is
-recorded only by explicit character copy or composer addition actions (including
-explicitly identified sequences). Disabling history clears retained records when
+recorded only by explicit character copy, composer addition, or IBus insertion
+actions (including explicitly identified sequences). Disabling history clears retained records when
 settings are writable; deletion is not a secure erase of storage or backups.
-Native D-Bus activation is scoped to the user's session.
+Native D-Bus activation is scoped to the user's session. Desktop searches do not
+change history or the clipboard; activating a result opens its inspector.
+The optional IBus source blocks input in clients declaring password, PIN or private
+input and cancels search on focus loss. The input query is passed to a local
+subprocess (visible to processes permitted to inspect its command line).
 The interface inherits system theme styling; no custom CSS or Majoris-specific runtime package is required. Font previews
 use explicit Pango attributes without changing the interface font. The app's original icon follows the
 Majoris color palette. GNOME-derived data and algorithms are attributed in [third-party notices](THIRD_PARTY_NOTICES.md).
@@ -257,23 +284,23 @@ request supersession, declaration documentation, CLI version/help/error handling
 XML window startup, repeat activation, actions, clean close, settings persistence,
 and actual GTK browser paging, search, filtering, selection, inspector navigation,
 exact emoji variation copying, composer editing, normalization and clipboard copying,
-and saved-collection interactions in a private D-Bus
+saved-collection interactions, compact picker copying and desktop search in a private D-Bus
 session and Xvfb display. Headless library tests and a separate-process keyfile
 persistence test cover the new settings repository. The test runner isolates the home and configuration
-directories and treats GTK warnings as fatal. Native search and inspector contracts are tested without a
-graphical display. Native timings are not a substitute for GTK responsiveness or platform performance qualification.
+directories and treats GTK warnings as fatal. Native search and inspector contracts and the Python input response protocol are
+tested without a graphical display. Native timings are not a substitute for GTK responsiveness or platform performance qualification.
 
 After installing the Debian package, the same runtime tests can target the real
 installed executable:
 
 ```sh
-python3 tests/integration/test_application.py /usr/bin/majoris-characters 0.8.0 cli
+python3 tests/integration/test_application.py /usr/bin/majoris-characters 0.9.0 cli
 xvfb-run -a dbus-run-session -- python3 \
-  tests/integration/test_application.py /usr/bin/majoris-characters 0.8.0 gui
+  tests/integration/test_application.py /usr/bin/majoris-characters 0.9.0 gui
 ```
 
-See [Stage 8 qualification](docs/stage-8-qualification.md) for actual
-verification results and remaining build/package checks. Historical Stage 1–7
+See [Stage 9 qualification](docs/stage-9-qualification.md) for actual
+verification results and remaining build/package checks. Historical Stage 1–8
 reports are preserved under `docs/`. Source inspection is
 not equivalent to compilation or runtime validation.
 

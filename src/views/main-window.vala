@@ -405,6 +405,21 @@ namespace Characters {
             }
         }
 
+        /** Presents a desktop query in the unconstrained full catalog. */
+        public void search_catalog (string query) {
+            reset_search (null);
+            search_entry.text = query;
+            search_entry.grab_focus ();
+        }
+
+        /** Opens an independently validated desktop identity in the full inspector. */
+        public void inspect_code (string code) {
+            var snapshot = Inspector.from_code (code);
+            if (snapshot != null) {
+                new CharacterInspector ((owned) snapshot, composer, library).present (this);
+            }
+        }
+
         /** Opens identification without requiring a character to be selected. */
         private void identify_character (Variant? parameter) {
             var dialog = new CharacterInspector (null, composer, library);
