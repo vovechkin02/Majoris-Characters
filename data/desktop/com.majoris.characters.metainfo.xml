@@ -4,16 +4,17 @@
   <metadata_license>CC0-1.0</metadata_license>
   <project_license>GPL-3.0-or-later</project_license>
   <name>Characters</name>
-  <summary>Native character utility</summary>
+  <summary>Browse and search Unicode characters</summary>
   <developer id="com.majoris">
     <name>Majoris</name>
   </developer>
   <description>
-    <p>Characters is the foundation of a native character utility for the Majoris desktop. This development release provides the application window, desktop integration, and an internal Unicode engine. Character browsing and search are not yet implemented.</p>
+    <p>Browse Unicode characters, emoji, symbols, scripts, Unicode blocks, and named sequences. Search by name, keyword, alias, literal character, or code point, and view the name and Unicode values for a selected character.</p>
   </description>
   <launchable type="desktop-id">com.majoris.characters.desktop</launchable>
   <url type="homepage">https://github.com/vovechkin02/Majoris-Characters</url>
   <releases>
+    <release version="0.3.0" date="2026-11-24" type="development"/>
     <release version="0.2.0" date="2026-11-24" type="development"/>
     <release version="0.1.0" date="2026-11-24" type="development"/>
   </releases>

@@ -20,7 +20,7 @@ typedef uint32_t gunichar;
 #include "generated/catalog-version.h"
 
 #define COUNT(array) (sizeof(array) / sizeof((array)[0]))
-#define MAX_SEQUENCE_LENGTH 32
+#define MAX_SEQUENCE_LENGTH CHARACTERS_UNICODE_MAX_SEQUENCE_LENGTH
 #define MAX_TEXT_BYTES (1024 * 1024)
 
 /** An official alias and its UCD classification. */
@@ -594,6 +594,11 @@ size_t characters_unicode_emoji_group_index(size_t group, size_t index) {
         return SIZE_MAX;
     }
     return emoji_groups[group].indices[index];
+}
+
+size_t characters_unicode_emoji_index(const uint32_t *points, size_t length) {
+    const struct EmojiCharacter *entry = find_emoji(points, length);
+    return entry ? (size_t)(entry - emoji_characters) : SIZE_MAX;
 }
 
 size_t characters_unicode_emoji_count(void) {

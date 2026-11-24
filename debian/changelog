@@ -1,3 +1,10 @@
+majoris-characters (0.3.0-1) unstable; urgency=medium
+
+  * Add virtualized character browsing, collection filters, and asynchronous search.
+  * Add sequence-aware selection, native search tests, and GTK browser tests.
+
+ -- Vlad Ovechkin <45165533+vovechkin02@users.noreply.github.com>  Tue, 24 Nov 2026 16:28:00 +1100
+
 majoris-characters (0.2.0-1) unstable; urgency=medium
 
   * Add the Unicode catalog, native engine, Vala bindings, and tests.

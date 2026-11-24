@@ -54,7 +54,16 @@ def scan_vala(path: Path) -> list[tuple[str, int, bool]]:
             paren_depth += 1
         elif token == ")" and paren_depth:
             paren_depth -= 1
-        if token in ("{", ";") and not paren_depth:
+        if scopes[-1] == "enum" and token in (",", "}") and not paren_depth:
+            if declaration:
+                words = [item.group() for item in declaration]
+                line = source.count("\n", 0, declaration[0].start()) + 1
+                results.append((" ".join(words), line, documented))
+                declaration = []
+            documented = False
+            if token == "}":
+                scopes.pop()
+        elif token in ("{", ";") and not paren_depth:
             if declaration:
                 words = [item.group() for item in declaration]
                 line = source.count("\n", 0, declaration[0].start()) + 1
@@ -66,7 +75,7 @@ def scan_vala(path: Path) -> list[tuple[str, int, bool]]:
                         if any(word in words for word in (
                             "class", "struct", "interface", "enum", "errordomain"
                         )) and "(" not in words:
-                            scopes.append("type")
+                            scopes.append("enum" if "enum" in words else "type")
                         else:
                             body_depth = 1
                 declaration = []
@@ -113,7 +122,7 @@ def scan_c(path: Path) -> list[tuple[str, int, bool]]:
         present = preceding.endswith("*/") and preceding.rfind("/**") > preceding.rfind(
             "*/", 0, len(preceding) - 2
         )
-        if path.suffix == ".c" and name.startswith("characters_unicode_"):
+        if path.suffix == ".c" and name.startswith(("characters_unicode_", "characters_search_")):
             # Public functions are documented once in their owning header.
             header = path.with_suffix(".h")
             if header.exists():

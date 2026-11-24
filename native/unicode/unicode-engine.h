@@ -5,6 +5,9 @@
 #include <stddef.h>
 #include <stdint.h>
 
+/** Maximum number of scalars in a supported catalog sequence. */
+#define CHARACTERS_UNICODE_MAX_SEQUENCE_LENGTH 32
+
 /**
  * characters_unicode_is_scalar:
  * @point: Numeric Unicode code point.
@@ -173,6 +176,15 @@ size_t characters_unicode_emoji_group_size(size_t group);
  * Returns: Catalog index or SIZE_MAX for invalid arguments.
  */
 size_t characters_unicode_emoji_group_index(size_t group, size_t index);
+
+/**
+ * characters_unicode_emoji_index:
+ * @points: (array length=length): Exact Unicode sequence.
+ * @length: Number of scalars in the sequence.
+ *
+ * Returns: Catalog index, or SIZE_MAX if the sequence is not an exact entry.
+ */
+size_t characters_unicode_emoji_index(const uint32_t *points, size_t length);
 
 /**
  * characters_unicode_emoji_count:

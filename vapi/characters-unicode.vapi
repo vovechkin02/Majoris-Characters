@@ -102,6 +102,10 @@ namespace Characters.Unicode {
     [CCode (cname = "characters_unicode_emoji_group_index")]
     public static size_t emoji_group_index (size_t group, size_t index);
 
+    /** Exact emoji catalog index, or SIZE_MAX for unknown sequences. */
+    [CCode (cname = "characters_unicode_emoji_index")]
+    public static size_t emoji_index ([CCode (array_length_type = "size_t")] uint32[] points);
+
     /** Number of fully qualified emoji sequences in the catalog. */
     [CCode (cname = "characters_unicode_emoji_count")]
     public static size_t emoji_count ();

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface domain="majoris-characters">
+  <requires lib="gtk" version="4.14"/>
+  <template class="CharactersCharacterTile" parent="GtkBox">
+    <property name="orientation">vertical</property>
+    <property name="spacing">4</property>
+    <property name="width-request">72</property>
+    <property name="height-request">64</property>
+    <property name="margin-top">4</property>
+    <property name="margin-bottom">4</property>
+    <property name="margin-start">4</property>
+    <property name="margin-end">4</property>
+    <child>
+      <object class="GtkLabel" id="glyph_label">
+        <property name="vexpand">True</property>
+        <property name="ellipsize">end</property>
+        <property name="max-width-chars">5</property>
+        <attributes>
+          <attribute name="size" value="24576"/>
+        </attributes>
+      </object>
+    </child>
+    <child>
+      <object class="GtkLabel" id="code_label">
+        <property name="ellipsize">end</property>
+        <property name="max-width-chars">10</property>
+        <style>
+          <class name="caption"/>
+          <class name="dim-label"/>
+        </style>
+      </object>
+    </child>
+  </template>
+</interface>

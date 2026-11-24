@@ -27,6 +27,6 @@ Package: majoris-characters
 Architecture: any
 Depends: ${misc:Depends}, ${shlibs:Depends}
 Description: Native character utility for Majoris
- Provides a native GTK application foundation and internal Unicode engine
- for names, properties, blocks, scripts, emoji, and related characters.
- Interactive character browsing is planned for a subsequent release.
+ Provides a native GTK Unicode character browser with a virtualized grid,
+ names and code point search, emoji and symbol collections, Unicode block
+ and script filters, and sequence-aware selection.

@@ -34,10 +34,12 @@ class ApplicationTest(unittest.TestCase):
         self.env.update(GSETTINGS_BACKEND="keyfile", LC_ALL="C.UTF-8",
                         GTK_A11Y="none", G_DEBUG="fatal-warnings")
 
-    def run_command(self, *args: str, check: bool = True) -> subprocess.CompletedProcess:
+    def run_command(
+        self, *args: str, check: bool = True, timeout: int = 10
+    ) -> subprocess.CompletedProcess:
         """Run a bounded subprocess and preserve its diagnostics for failures."""
         result = subprocess.run(args, env=self.env, text=True, capture_output=True,
-                                timeout=10, check=False)
+                                timeout=timeout, check=False)
         if check:
             self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         return result
@@ -119,17 +121,29 @@ class LifecycleTest(ApplicationTest):
                 print(log.read(), end="")
 
 
+class BrowserTest(ApplicationTest):
+    """Exercise the compiled GTK browser in the same isolated user environment."""
+
+    def test_interaction(self) -> None:
+        """Run the real template, model, filtering, paging, and supersession test."""
+        self.env["GSETTINGS_BACKEND"] = "memory"
+        result = self.run_command(EXECUTABLE, timeout=45)
+        print(result.stdout, end="")
+
+
 def main() -> int:
     """Run the selected integration profile and return its test status."""
     global EXECUTABLE, VERSION
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("executable", type=Path)
     parser.add_argument("version")
-    parser.add_argument("profile", choices=("cli", "gui"))
+    parser.add_argument("profile", choices=("cli", "gui", "browser"))
     args = parser.parse_args()
     EXECUTABLE = str(args.executable.resolve())
     VERSION = args.version
-    case = CommandLineTest if args.profile == "cli" else LifecycleTest
+    case = {
+        "cli": CommandLineTest, "gui": LifecycleTest, "browser": BrowserTest,
+    }[args.profile]
     suite = unittest.defaultTestLoader.loadTestsFromTestCase(case)
     return int(not unittest.TextTestRunner(verbosity=2).run(suite).wasSuccessful())
 

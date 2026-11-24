@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <gresources>
   <gresource prefix="/com/majoris/characters">
+    <file>ui/character-tile.ui</file>
     <file>ui/main-window.ui</file>
     <file alias="icons/scalable/apps/com.majoris.characters.svg">icons/com.majoris.characters.svg</file>
   </gresource>

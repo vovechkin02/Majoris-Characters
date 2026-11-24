@@ -37,6 +37,7 @@ namespace Characters {
             quit_action.activate.connect (close_window);
             add_action (quit_action);
             set_accels_for_action ("app.quit", { "<Primary>q" });
+            set_accels_for_action ("win.search", { "<Primary>f" });
         }
 
         /** Presents the existing main window or constructs one for a new session. */

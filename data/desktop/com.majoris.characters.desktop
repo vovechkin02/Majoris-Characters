@@ -1,6 +1,6 @@
 [Desktop Entry]
 Name=Characters
-Comment=Open the Characters utility
+Comment=Browse and search Unicode characters
 Exec=majoris-characters
 Icon=com.majoris.characters
 Terminal=false
