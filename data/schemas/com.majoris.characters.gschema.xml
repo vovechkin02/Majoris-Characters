@@ -81,6 +81,21 @@
       <summary>Show named</summary>
       <description>Show this browsing category in the sidebar.</description>
     </key>
+    <key name="show-languages" type="b">
+      <default>true</default>
+      <summary>Show languages</summary>
+      <description>Show this browsing category in the sidebar.</description>
+    </key>
+    <key name="show-radicals" type="b">
+      <default>true</default>
+      <summary>Show Han radical groups</summary>
+      <description>Show this browsing category in the sidebar.</description>
+    </key>
+    <key name="show-strokes" type="b">
+      <default>true</default>
+      <summary>Show Han stroke groups</summary>
+      <description>Show this browsing category in the sidebar.</description>
+    </key>
     <key name="show-fonts" type="b">
       <default>true</default>
       <summary>Show fonts</summary>

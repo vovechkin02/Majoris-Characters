@@ -47,6 +47,13 @@ const char *characters_unicode_catalog_version(void);
 const char *characters_unicode_supplement_version(void);
 
 /**
+ * characters_unicode_unihan_version:
+ *
+ * Returns: (transfer none): Official Unihan version, or "none" for fallback-only data.
+ */
+const char *characters_unicode_unihan_version(void);
+
+/**
  * characters_unicode_name:
  * @point: Numeric Unicode scalar.
  *
@@ -67,7 +74,7 @@ char *characters_unicode_aliases(uint32_t point);
 /**
  * characters_unicode_property:
  * @point: Numeric Unicode scalar.
- * @property: Supported UCD property name (see the Unicode engine documentation).
+ * @property: Supported UCD or Han metadata key (see the Unicode engine documentation).
  *
  * Returns: (transfer full) (nullable): Property value, or NULL for unsupported
  * queries, invalid scalars, or scalars not assigned in the scalar property snapshot.

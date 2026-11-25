@@ -17,3 +17,11 @@ The scope is the Linux-native equivalent of Windows Character Map, macOS
 Character Viewer and GNOME Characters. No AI, vendor accounts, Microsoft/Apple
 services or external clipboard history are required. GNOME Characters data and algorithms are incorporated in Stage 2; the GNOME
 application and GJS are not runtime dependencies of the main application. The optional Shell extension uses GJS.
+
+## Post-stage priorities
+
+- Priority 1: Unicode 17 scalar properties and normalization core implemented;
+  official normalization and supplement conformance remains outstanding.
+- Priority 2: International browsing, script extensions, configured XKB scopes,
+  Han search and metadata import implemented; full official Unihan acquisition
+  and runtime GUI qualification remain outstanding. See international-browsing.md.

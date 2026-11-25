@@ -40,6 +40,7 @@ namespace Characters {
                     Unicode.catalog_version (), Unicode.properties_version () ?? "unknown",
                     Unicode.supplement_version ());
                 print ("Emoji annotations: %s\n", Emoji.annotation_source ());
+                print ("Official Unihan: %s\n", Unicode.unihan_version ());
                 return 0;
             }
             var input = options.lookup_value ("input-search", VariantType.STRING);

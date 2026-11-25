@@ -12,6 +12,7 @@
 
 #include "normalization.h"
 #include "scalar-properties.h"
+#include "unihan.h"
 
 /* GNOME generated headers use GLib's unsigned 32-bit scalar spelling. */
 typedef uint32_t gunichar;
@@ -429,6 +430,10 @@ char *characters_unicode_aliases(uint32_t point) {
     return result;
 }
 
+const char *characters_unicode_unihan_version(void) {
+    return characters_unihan_version();
+}
+
 char *characters_unicode_property(uint32_t point, const char *property) {
     if (!property || !characters_unicode_is_scalar(point)) {
         return NULL;
@@ -438,7 +443,8 @@ char *characters_unicode_property(uint32_t point, const char *property) {
         snprintf(text, sizeof(text), "%u", (unsigned)(point >> 16));
         return strdup(text);
     }
-    return characters_scalar_property(point, property);
+    char *value = characters_scalar_property(point, property);
+    return value ? value : characters_unihan_property(point, property);
 }
 
 size_t characters_unicode_block_count(void) {

@@ -30,8 +30,9 @@ The CLI reports effective property and catalog versions. The supplement version
 identifies its target release, not a byte-for-byte official-file verification.
 The raw UCD archive could not be acquired in the delivery environment. Full
 UCD source comparison and the official normalization conformance suite remain
-required for formal conformance. Unihan, full CLDR annotations, official emoji
-variation data, and script-extension-aware browsing are separate priorities.
+required for formal conformance. Script-extension-aware browsing and a partial
+Han database with official Unihan import are provided in Priority 2; full CLDR
+annotations and official emoji variation data remain separate priorities.
 
 ## Query API
 

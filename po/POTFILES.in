@@ -9,6 +9,7 @@ data/ui/library-dialog.ui
 data/ui/main-window.ui
 data/ui/preferences-dialog.ui
 native/unicode/character-search.c
+native/unicode/language-collections.c
 src/app/application.vala
 src/views/character-inspector.vala
 src/views/character-tile.vala

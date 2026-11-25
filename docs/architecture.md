@@ -275,3 +275,15 @@ primary application command. No new service or speculative pattern hierarchy
 is introduced. Native English metadata and identifiers remain stable; interface
 labels can be translated without changing search results. Source-level
 release checks complement, but do not replace, actual GTK and desktop testing.
+
+### International collections (Priority 2)
+
+The native Han and language lookup modules own immutable generated data and
+expose borrowed labels or owned property strings. The search request resolves
+language filters once, using a bounded snapshot of configured XKB source IDs;
+its worker owns all subsequent matching state. Script-extension predicates
+reuse the Unicode property snapshot without allocating per-character strings.
+The main window observes optional GSettings input-source changes and disconnects
+on closure; the existing request controller handles cancellation/supersession.
+This uses native Observer signals and a direct data lookup rather than speculative
+strategy hierarchies. Formal Han properties and fallbacks have separate contracts.

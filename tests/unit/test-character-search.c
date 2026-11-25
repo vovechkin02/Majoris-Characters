@@ -263,6 +263,82 @@ static void test_cancellation(void) {
     characters_search_free(job);
 }
 
+/** Shared Japanese marks appear in both Hiragana and Katakana script collections. */
+static void test_script_extensions(void) {
+    int hiragana = find_filter(CHARACTERS_SEARCH_SCRIPT, "Hiragana");
+    int katakana = find_filter(CHARACTERS_SEARCH_SCRIPT, "Katakana");
+    CharactersSearch *job = search(CHARACTERS_SEARCH_SCRIPT, hiragana, -1, "U+30FC");
+    assert(contains_id(job, 0x30FC));
+    characters_search_free(job);
+    job = search(CHARACTERS_SEARCH_SCRIPT, katakana, -1, "U+30FC");
+    assert(contains_id(job, 0x30FC));
+    characters_search_free(job);
+}
+
+/** Language collections combine associated scripts and configured keyboard layouts. */
+static void test_language_collections(void) {
+    int japanese = find_filter(CHARACTERS_SEARCH_LANGUAGE, "Japanese");
+    CharactersSearch *job = search(CHARACTERS_SEARCH_LANGUAGE, japanese, -1, "");
+    assert(contains_id(job, 0x3042) && contains_id(job, 0x30A2));
+    assert(contains_id(job, 0x4E2D) && !contains_id(job, 0x0410));
+    characters_search_free(job);
+
+    job = characters_search_new(CHARACTERS_SEARCH_LANGUAGE, 0, -1, "");
+    assert(job);
+    characters_search_set_locale(job, "ko_KR.UTF-8");
+    assert(characters_search_run(job) == CHARACTERS_SEARCH_OK);
+    assert(contains_id(job, 0xAC00) && contains_id(job, 0x4E2D));
+    characters_search_free(job);
+
+    job = characters_search_new(CHARACTERS_SEARCH_LANGUAGE, 1, -1, "");
+    assert(job);
+    characters_search_set_input_sources(job, "us,ru,unknown-layout");
+    assert(characters_search_run(job) == CHARACTERS_SEARCH_OK);
+    assert(contains_id(job, 'A') && contains_id(job, 0x0410));
+    assert(!contains_id(job, 0x3042));
+    characters_search_free(job);
+
+    job = search(CHARACTERS_SEARCH_LANGUAGE, 1, -1, "");
+    assert(characters_search_count(job) == 0);
+    characters_search_free(job);
+}
+
+/** Reading searches, collation groups, combined filters and missing data stay distinct. */
+static void test_han_search(void) {
+    CharactersSearch *job = search(CHARACTERS_SEARCH_ALL, -1, -1, "mandarin:ZHŌNG");
+    assert(contains_id(job, 0x4E2D) && !contains_id(job, 'A'));
+    characters_search_free(job);
+    job = search(CHARACTERS_SEARCH_ALL, -1, -1, "mandarin:hang");
+    assert(contains_id(job, 0x884C));
+    characters_search_free(job);
+    job = search(CHARACTERS_SEARCH_ALL, -1, -1, "korean:중");
+    assert(contains_id(job, 0x4E2D));
+    characters_search_free(job);
+    job = search(CHARACTERS_SEARCH_ALL, -1, -1, "radical:2 strokes:4 mandarin:zhong");
+    assert(contains_id(job, 0x4E2D));
+    characters_search_free(job);
+    int radical = find_filter(CHARACTERS_SEARCH_RADICAL, "085 水");
+    job = search(CHARACTERS_SEARCH_RADICAL, radical, -1, "");
+    assert(contains_id(job, 0x6C34) && contains_id(job, 0x6F22));
+    assert(!contains_id(job, 'A'));
+    characters_search_free(job);
+    int strokes = find_filter(CHARACTERS_SEARCH_STROKES, "4");
+    job = search(CHARACTERS_SEARCH_STROKES, strokes, -1, "U+4E2D");
+    assert(contains_id(job, 0x4E2D));
+    characters_search_free(job);
+    job = search(CHARACTERS_SEARCH_ALL, -1, -1, "radical:215");
+    assert(characters_search_count(job) == 0);
+    characters_search_free(job);
+
+    char *value = characters_unicode_property(0x4E2D, "Mandarin_Fallback");
+    assert(value && strstr(value, "zhōng"));
+    free(value);
+    value = characters_unicode_property(0x4E2D, "Hangul_Fallback");
+    assert(value && strcmp(value, "중") == 0);
+    free(value);
+    assert(characters_unicode_property('A', "Mandarin_Fallback") == NULL);
+}
+
 /** Execute focused native search contracts, with assertions enabled by the test target. */
 int main(void) {
     test_complete_repertoire();
@@ -272,6 +348,9 @@ int main(void) {
     test_display();
     test_invalid();
     test_cancellation();
-    puts("7 character search contract groups passed");
+    test_script_extensions();
+    test_language_collections();
+    test_han_search();
+    puts("10 character search contract groups passed");
     return 0;
 }

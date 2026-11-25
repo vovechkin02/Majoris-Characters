@@ -82,6 +82,10 @@ namespace Characters {
 
         /** Owns persistent geometry settings for this window. */
         private GLib.Settings settings;
+        /** Optional GNOME input-source settings; read-only and desktop-independent otherwise. */
+        private GLib.Settings? input_settings;
+        /** Input-source subscription, disconnected when this window closes. */
+        private ulong input_sources_handler;
         /** Shared local collection repository, independent of search and clipboard state. */
         private LibraryStore library;
         /** Cached grid size in points, updated only when the preference changes. */
@@ -122,6 +126,7 @@ namespace Characters {
             configure_grid ();
             configure_filters ();
             configure_actions ();
+            configure_input_sources ();
             preferences_handler = settings.changed.connect (on_preferences_changed);
             apply_category_preferences ();
             grid_size_pt = settings.get_int ("grid-preview-size");
@@ -296,7 +301,8 @@ namespace Characters {
         /** Applies category visibility without renumbering native scope rows. */
         private void apply_category_preferences () {
             string[] keys = { "show-emoji", "show-symbols", "show-scripts", "show-blocks",
-                "show-named", "show-fonts", "show-encodings" };
+                "show-named", "show-languages", "show-radicals", "show-strokes",
+                "show-fonts", "show-encodings" };
             for (var index = 0; index < keys.length; index++) {
                 var row = scope_list.get_row_at_index (index + 1);
                 if (row == null) {
@@ -367,15 +373,15 @@ namespace Characters {
         /** Trailing sidebar rows open independent source or saved-collection dialogs. */
         private void on_source_activated (Gtk.ListBoxRow row) {
             var index = row.get_index ();
-            if (index == (int) Search.Scope.NAMED + 1) {
+            if (index == (int) Search.Scope.STROKES + 1) {
                 browse_fonts (null);
-            } else if (index == (int) Search.Scope.NAMED + 2) {
+            } else if (index == (int) Search.Scope.STROKES + 2) {
                 browse_encodings (null);
-            } else if (index == (int) Search.Scope.NAMED + 3) {
+            } else if (index == (int) Search.Scope.STROKES + 3) {
                 open_favorites (null);
-            } else if (index == (int) Search.Scope.NAMED + 4) {
+            } else if (index == (int) Search.Scope.STROKES + 4) {
                 open_recent (null);
-            } else if (index == (int) Search.Scope.NAMED + 5) {
+            } else if (index == (int) Search.Scope.STROKES + 5) {
                 open_frequent (null);
             }
         }
@@ -446,7 +452,7 @@ namespace Characters {
 
         /** Changes scope and rebuilds valid filters without publishing an intermediate request. */
         private void on_scope_selected (Gtk.ListBoxRow? row) {
-            if (row == null || updating_filters || row.get_index () > (int) Search.Scope.NAMED) {
+            if (row == null || updating_filters || row.get_index () > (int) Search.Scope.STROKES) {
                 return;
             }
             scope = (Search.Scope) row.get_index ();
@@ -469,13 +475,68 @@ namespace Characters {
             for (size_t index = 0; index < Search.filter_count (scope); index++) {
                 unowned string? label = Search.filter_name (scope, index);
                 if (label != null) {
-                    model.append (scope == Search.Scope.SYMBOLS ? _(label) : label);
+                    model.append (scope == Search.Scope.SYMBOLS || scope == Search.Scope.LANGUAGE ?
+                        _(label) : label);
                     filter_slots += (int) index;
                 }
             }
             collection_filter.model = model;
-            collection_filter.selected = 0;
+            collection_filter.selected = scope == Search.Scope.LANGUAGE ? 1 : 0;
             collection_filter.visible = filter_slots.length > 1;
+            if (scope == Search.Scope.LANGUAGE) {
+                collection_filter.tooltip_text = _("Writing systems, not an exact language alphabet. " +
+                    "Configured keyboard languages use registered XKB sources.");
+            } else if (scope == Search.Scope.RADICAL || scope == Search.Scope.STROKES) {
+                collection_filter.tooltip_text = _("Uses official Unihan where available, otherwise " +
+                    "ICU collation groups. Characters without group data are excluded.");
+            } else {
+                collection_filter.tooltip_text = null;
+            }
+        }
+
+        /** Subscribe only when the optional GNOME schema has its expected source contract. */
+        private void configure_input_sources () {
+            var schemas = SettingsSchemaSource.get_default ();
+            if (schemas == null) {
+                return;
+            }
+            var schema = schemas.lookup ("org.gnome.desktop.input-sources", true);
+            if (schema == null || !schema.has_key ("sources")) {
+                return;
+            }
+            input_settings = new GLib.Settings.full (schema, null, null);
+            input_sources_handler = input_settings.changed["sources"].connect (() => {
+                if (scope == Search.Scope.LANGUAGE && collection_filter.selected == 2) {
+                    submit_search ();
+                }
+            });
+        }
+
+        /** Capture bounded configured XKB source IDs; never write or infer an IBus engine. */
+        private string configured_keyboard_sources () {
+            if (input_settings == null) {
+                return "";
+            }
+            var sources = input_settings.get_value ("sources");
+            if (!sources.is_of_type (new VariantType ("a(ss)"))) {
+                return "";
+            }
+            var result = new StringBuilder ();
+            for (size_t index = 0; index < sources.n_children (); index++) {
+                var source = sources.get_child_value (index);
+                var kind_value = source.get_child_value (0);
+                var id_value = source.get_child_value (1);
+                unowned string kind = kind_value.get_string ();
+                unowned string id = id_value.get_string ();
+                if (kind != "xkb" || id.contains (",") || result.len + id.length + 1 > 1023) {
+                    continue;
+                }
+                if (result.len > 0) {
+                    result.append_c (',');
+                }
+                result.append (id);
+            }
+            return result.str.dup ();
         }
 
         /** Clears stale results, requests cancellation, and submits current controls. */
@@ -497,7 +558,9 @@ namespace Characters {
             result_count.label = _("Searching…");
             results_stack.visible_child_name = "loading";
             loading_spinner.start ();
-            controller.submit (scope, filter, category, search_entry.text);
+            var sources = scope == Search.Scope.LANGUAGE && filter == 1 ?
+                configured_keyboard_sources () : "";
+            controller.submit (scope, filter, category, search_entry.text, sources);
         }
 
         /** Receives only the latest request; restores a bounded page or a useful status state. */
@@ -593,6 +656,10 @@ namespace Characters {
             if (preferences_handler != 0) {
                 settings.disconnect (preferences_handler);
                 preferences_handler = 0;
+            }
+            if (input_sources_handler != 0 && input_settings != null) {
+                input_settings.disconnect (input_sources_handler);
+                input_sources_handler = 0;
             }
             if (completion_handler != 0) {
                 controller.disconnect (completion_handler);

@@ -36,3 +36,15 @@ Emojibase source as Expat-licensed, copyright 2017–2019 Miles Johnson. Unicode
 source data retain their Unicode license, included under `data/unicode/supplement/`.
 The source export and generated lookup tables are data, not a GTK3 runtime
 requirement. See `data/unicode/emoji/README.md` for exact provenance and regeneration.
+
+## International browsing data
+
+The Han fallback includes readings extracted from xpinyin (Qing Lee,
+2012–2022, LPPL 1.3c or later) and XeTeXko 4.4 (Dohyun Kim, 2013–2025,
+LPPL 1.3c or later). Their original source tables are retained unchanged in
+`data/unicode/han/sources/`. ICU 76.1 supplies collation groups and language
+labels, and the XKB registry supplies configured keyboard language mappings.
+Full original copyright notices, source hashes, and the LPPL license are
+retained in `data/unicode/han/`. The derived snapshot and generated tables
+retain the source data attribution and licensing. Official Unihan files are
+not bundled; any later imported official data retain the Unicode data license.

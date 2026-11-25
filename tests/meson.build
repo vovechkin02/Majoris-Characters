@@ -200,3 +200,9 @@ test('French translation formats', find_program('msgfmt'),
   suite: 'source',
   timeout: 10,
 )
+
+test('Unihan offline importer contracts', python,
+  args: [files('unit/test_unihan_import.py')],
+  suite: 'unit',
+  timeout: 10,
+)

@@ -10,12 +10,18 @@ namespace Characters.Search {
         EMOJI,
         /** Semantic symbol and typography collections. */
         SYMBOLS,
-        /** Primary Unicode script browsing. */
+        /** Unicode Script and Script_Extensions browsing. */
         SCRIPT,
         /** Unicode block browsing. */
         BLOCK,
         /** Standardized named sequences. */
-        NAMED
+        NAMED,
+        /** Language-associated writing systems. */
+        LANGUAGE,
+        /** Han radical groups. */
+        RADICAL,
+        /** Han stroke-count groups. */
+        STROKES
     }
 
     /** Native worker completion status; only OK exposes results. */
@@ -39,6 +45,10 @@ namespace Characters.Search {
         /** Capture the annotation locale before handing the request to its worker. */
         [CCode (cname = "characters_search_set_locale")]
         public void set_locale (string locale);
+
+        /** Capture the configured XKB source identifiers before worker execution. */
+        [CCode (cname = "characters_search_set_input_sources")]
+        public void set_input_sources (string sources);
 
         /** Request cancellation without waiting for its worker. */
         [CCode (cname = "characters_search_cancel")]

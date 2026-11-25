@@ -117,6 +117,21 @@
                       </object>
                     </child>
                     <child>
+                      <object class="AdwSwitchRow" id="show_languages">
+                        <property name="title" translatable="yes">Languages</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="AdwSwitchRow" id="show_radicals">
+                        <property name="title" translatable="yes">Han Radical Groups</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="AdwSwitchRow" id="show_strokes">
+                        <property name="title" translatable="yes">Han Stroke Groups</property>
+                      </object>
+                    </child>
+                    <child>
                       <object class="AdwSwitchRow" id="show_fonts">
                         <property name="title" translatable="yes">Fonts</property>
                       </object>

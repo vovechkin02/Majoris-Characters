@@ -15,7 +15,8 @@ main browser query or filters.
 
 Preferences provides history recording and retention, grid and font preview
 sizes (12–72 points), font preview fallback, and visibility of the Emoji,
-Symbols, Scripts, Unicode Blocks, Named Sequences, Fonts, and Character Sets
+Symbols, Scripts, Unicode Blocks, Named Sequences, Languages, Radical Groups,
+Stroke Groups, Fonts, and Character Sets
 sidebar entries. All Characters and saved collections remain accessible. If
 an active native scope is hidden, the browser switches to All Characters.
 Hiding an entry does not remove any catalog content or disable the Fonts and
@@ -37,7 +38,7 @@ Existing window keys, application ID, D-Bus name and package paths are unchanged
 | `grid-preview-size` | `i` | `24` | Main character grid, 12–72 pt |
 | `font-preview-size` | `i` | `24` | Font/legacy grid, 12–72 pt |
 | `font-fallback` | `b` | `false` | Preview fallback only, not coverage |
-| `show-emoji`, `show-symbols`, `show-scripts`, `show-blocks`, `show-named`, `show-fonts`, `show-encodings` | `b` | `true` | Sidebar visibility |
+| `show-emoji`, `show-symbols`, `show-scripts`, `show-blocks`, `show-named`, `show-languages`, `show-radicals`, `show-strokes`, `show-fonts`, `show-encodings` | `b` | `true` | Sidebar visibility |
 
 Favorites allow up to 512 independent identities. Each retained identity
 must be nonempty valid UTF-8 with at most 32 Unicode scalars; embedded NUL

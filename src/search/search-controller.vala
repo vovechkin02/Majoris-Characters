@@ -14,8 +14,9 @@ namespace Characters {
         private bool closed = false;
 
         /** Replaces any pending search and cancels the active job without blocking GTK. */
-        public void submit (Search.Scope scope, int filter, int category, string query) {
-            enqueue (new SearchRequest (scope, filter, category, query));
+        public void submit (Search.Scope scope, int filter, int category, string query,
+                            string input_sources = "") {
+            enqueue (new SearchRequest (scope, filter, category, query, input_sources));
         }
 
         /** Searches only a copied repertoire, retaining the normal cancellation contract. */

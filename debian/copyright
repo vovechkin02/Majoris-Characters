@@ -137,3 +137,32 @@ License: Expat
  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  THE SOFTWARE.
+
+Files: data/unicode/han/sources/xpinyin-database.def
+Copyright: 2012-2022 Qing Lee
+License: LPPL-1.3c+
+
+Files: data/unicode/han/sources/hanja*_hangul.tab
+Copyright: 2013-2025 Dohyun Kim
+License: LPPL-1.3c+
+
+Files: data/unicode/han/sources/evdev.xml
+Copyright: X Keyboard Configuration contributors
+License: XKB-registry
+Comment: Complete original copyright and license notices are retained in
+ data/unicode/han/XKB-DEBIAN-COPYRIGHT.
+
+Files: data/unicode/han/fallback.json.gz native/unicode/generated/unihan.h
+       native/unicode/generated/languages.h
+Copyright: Qing Lee, Dohyun Kim, Unicode, Inc., XKB contributors
+License: LPPL-1.3c+ and Unicode-3.0 and XKB-registry
+Comment: Derived reading, collation and keyboard registry data. ICU and XKB
+ notices and the LPPL license are included in data/unicode/han/.
+
+License: LPPL-1.3c+
+ The complete LaTeX Project Public License version 1.3c is retained in
+ data/unicode/han/LPPL-1.3c.tex and installed with the package notices.
+
+License: XKB-registry
+ The full applicable permissions and copyright notices are retained in
+ data/unicode/han/XKB-DEBIAN-COPYRIGHT and installed with the package notices.

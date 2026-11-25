@@ -307,6 +307,40 @@ namespace Characters {
                 add_field (target, metadata, labels[index],
                     Unicode.get_property_value (point, keys[index]));
             }
+            append_han_properties (target, metadata, point);
+        }
+
+        /** Expose official Unihan fields and independently attributed fallback data for Han. */
+        private void append_han_properties (Gtk.Box? target, StringBuilder? metadata,
+                                            uint32 point) {
+            if (Unicode.get_property_value (point, "Script") != "Hani") {
+                return;
+            }
+            var version = Unicode.unihan_version ();
+            add_field (target, metadata, _("Official Unihan version"),
+                version == "none" ? _("Not bundled") : version, false);
+            string[] keys = { "kMandarin", "kCantonese", "kJapaneseOn", "kJapaneseKun",
+                "kJapanese", "kKorean", "kHangul", "kDefinition", "kRSUnicode", "kTotalStrokes" };
+            string[] labels = { _("Mandarin (Unihan)"), _("Cantonese (Unihan)"),
+                _("Japanese on reading (Unihan)"), _("Japanese kun reading (Unihan)"),
+                _("Japanese (Unihan)"), _("Korean (Unihan)"), _("Hangul (Unihan)"),
+                _("Definition (Unihan)"), _("Radical and residual strokes (Unihan)"),
+                _("Total strokes (Unihan)") };
+            for (var index = 0; index < keys.length; index++) {
+                add_field (target, metadata, labels[index],
+                    Unicode.get_property_value (point, keys[index]));
+            }
+            string[] fallback_keys = { "Mandarin_Fallback", "Hangul_Fallback",
+                "Radical_Collation", "Stroke_Collation" };
+            string[] fallback_labels = { _("Mandarin (xpinyin, Unicode 14)"),
+                _("Hangul reading (XeTeXko 4.4)"), _("Radical group (ICU 76 collation)"),
+                _("Stroke group (ICU 76 collation)") };
+            for (var index = 0; index < fallback_keys.length; index++) {
+                var value = Unicode.get_property_value (point, fallback_keys[index]);
+                if (value != null) {
+                    add_field (target, metadata, fallback_labels[index], value);
+                }
+            }
         }
 
         /** Shows exact encodings and the emoji label independently of the canonical name. */

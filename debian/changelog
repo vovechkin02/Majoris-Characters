@@ -1,3 +1,11 @@
+majoris-characters (1.0.2-1) unstable; urgency=medium
+
+  * Add script-extension, language and configured keyboard browsing.
+  * Add Han reading search, labeled collation groups and offline Unihan import.
+  * Add inspector metadata and international collection preferences.
+
+ -- Vlad Ovechkin <45165533+vovechkin02@users.noreply.github.com>  Wed, 25 Nov 2026 22:00:00 +1100
+
 majoris-characters (1.0.1-1) unstable; urgency=medium
 
   * Synchronize scalar assignment, properties, names and scripts to Unicode 17.

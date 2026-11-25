@@ -12,7 +12,7 @@ Surrogates, unassigned scalars and noncharacters are not treated as characters.
 
 The Emoji scope retains exact fully qualified sequences and their upstream
 names, including single-scalar emoji. The Symbols scope provides 17 overlapping
-semantic collections. The Scripts scope uses the Unicode 17 primary Script property;
+semantic collections. The Scripts scope uses the Unicode 17 Script and Script_Extensions properties;
 Unicode Blocks uses the independently versioned GNOME block table. Named
 Sequences exposes the standardized supplement. The collection dropdown offers
 all nine emoji groups, encoded script slots, 346 Unicode blocks, or symbol
@@ -21,8 +21,8 @@ scalar results; it is hidden for the dedicated emoji and named-sequence scopes.
 When a general-category filter is selected in All Characters, multi-scalar
 sequences are excluded because they do not have one scalar category.
 
-Script filtering is not Script_Extensions matching; this is a separate
-international browsing improvement. The full assigned repertoire uses the
+Shared script characters match each applicable script. Language and configured
+keyboard collections resolve to script unions. The full assigned repertoire uses the
 bundled Unicode 17 property snapshot. Unicode block entries that
 contain only unassigned or surrogate points return an empty grid. Symbols use
 explicit Unicode ranges and general categories, not an exhaustive semantic
@@ -62,7 +62,9 @@ Search is constrained by the current collection and filters. Reset Search and
 Filters in the main menu restores global browsing with no query or constraint.
 Names, aliases, category and group labels provide keyword matching; localized
 CLDR annotations, synonyms derived from CLDR and emoji variant selection remain
-Stage 6. Unihan readings and font/legacy encoding filters are not implemented.
+Stage 6. Han readings and CJK field queries are supported as described in
+[international browsing](international-browsing.md). Font and legacy scopes use
+repertoire constraints.
 
 ## Presentation and selection
 

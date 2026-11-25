@@ -11,8 +11,10 @@
 #include <unicode/utf8.h>
 
 #include "emoji-catalog.h"
-#include "unicode-engine.h"
+#include "language-collections.h"
 #include "scalar-properties.h"
+#include "unicode-engine.h"
+#include "unihan.h"
 
 #define N_(message) (message)
 #define COUNT(array) (sizeof(array) / sizeof((array)[0]))
@@ -127,6 +129,10 @@ struct CharactersSearch {
     char *query;
     /** Locale captured before worker execution; defaults to English. */
     char locale[64];
+    /** Configured XKB layout IDs captured before execution. */
+    char input_sources[1024];
+    /** Script membership mask resolved once before scanning a language collection. */
+    bool scripts[CHARACTERS_LANGUAGE_SCRIPT_LIMIT];
     /** Optional copied scalar repertoire; NULL denotes ordinary catalog search. */
     uint32_t *points;
     /** Number of input scalars in the explicit repertoire. */
@@ -155,6 +161,10 @@ struct Query {
     char *terms[MAX_TERMS];
     /** Number of parsed AND terms. */
     size_t term_count;
+    /** Independently folded Han search terms; empty if folding was unavailable. */
+    char han_terms[MAX_TERMS][MAX_QUERY_BYTES * 3 + 1];
+    /** An explicit Han field disables non-Han sequence matching. */
+    bool han_field;
     /** Decoded exact scalar sequence, never normalized. */
     uint32_t points[MAX_SEQUENCE_POINTS];
     /** Number of valid scalars in points. */
@@ -343,6 +353,13 @@ static bool parse_query(const char *input, struct Query *query) {
             *cursor++ = '\0';
         }
     }
+    for (size_t index = 0; index < query->term_count; index++) {
+        if (!characters_unihan_fold(query->terms[index], query->han_terms[index],
+                                   sizeof(query->han_terms[index]))) {
+            query->han_terms[index][0] = '\0';
+        }
+        query->han_field |= characters_unihan_is_field_query(query->han_terms[index]);
+    }
     return true;
 }
 
@@ -469,7 +486,7 @@ static bool symbol_matches(uint32_t point, int filter) {
     }
 }
 
-/** Whether the scalar passes the selected collection and category; scripts use primary Script. */
+/** Whether the scalar passes the collection, script extensions and category constraints. */
 static bool scalar_matches(const CharactersSearch *search, uint32_t point) {
     if (search->category >= 0 && category_for(point) != search->category) {
         return false;
@@ -478,8 +495,15 @@ static bool scalar_matches(const CharactersSearch *search, uint32_t point) {
         return symbol_matches(point, search->filter);
     }
     if (search->scope == CHARACTERS_SEARCH_SCRIPT && search->filter >= 0) {
-        return characters_scalar_script(point) == search->filter &&
+        return characters_scalar_has_script(point, search->filter) &&
                characters_scalar_category(point) != U_UNASSIGNED;
+    }
+    if (search->scope == CHARACTERS_SEARCH_LANGUAGE && search->filter >= 0) {
+        return characters_scalar_matches_scripts(point, search->scripts, COUNT(search->scripts));
+    }
+    if (search->scope == CHARACTERS_SEARCH_RADICAL || search->scope == CHARACTERS_SEARCH_STROKES) {
+        return characters_unihan_group_matches(point, search->scope == CHARACTERS_SEARCH_RADICAL,
+                                               search->filter);
     }
     return true;
 }
@@ -530,13 +554,40 @@ static bool scalar_query_matches(uint32_t point, const struct Query *query) {
     if (!query->term_count) {
         return true;
     }
+    /* Explicit field-only searches need no allocation of scalar name metadata. */
+    bool needs_metadata = false;
+    for (size_t index = 0; index < query->term_count; index++) {
+        if (characters_unihan_is_field_query(query->han_terms[index])) {
+            if (!characters_unihan_matches(point, query->han_terms[index])) {
+                return false;
+            }
+        } else {
+            needs_metadata = true;
+        }
+    }
+    if (!needs_metadata) {
+        return true;
+    }
     char *name = characters_search_name(point);
     char *aliases = characters_unicode_aliases(point);
     const char *block = characters_unicode_find_block(point);
     const char *script = characters_scalar_category(point) != U_UNASSIGNED ?
         characters_scalar_script_name((size_t)characters_scalar_script(point)) : NULL;
     const char *category = characters_search_category_name((size_t)category_for(point));
-    bool matches = matches_terms(query, name, aliases, block, script, category);
+    bool matches = true;
+    for (size_t index = 0; index < query->term_count; index++) {
+        const char *term = query->terms[index];
+        const char *han_term = query->han_terms[index];
+        if (characters_unihan_is_field_query(han_term)) {
+            continue;
+        }
+        if (!contains_term(name, term) && !contains_term(aliases, term) &&
+            !contains_term(block, term) && !contains_term(script, term) &&
+            !contains_term(category, term) && !characters_unihan_matches(point, han_term)) {
+            matches = false;
+            break;
+        }
+    }
     free(name);
     free(aliases);
     return matches;
@@ -740,6 +791,13 @@ void characters_search_set_locale(CharactersSearch *search, const char *locale) 
     }
 }
 
+void characters_search_set_input_sources(CharactersSearch *search, const char *sources) {
+    if (search && !search->started && sources &&
+        strnlen(sources, sizeof(search->input_sources)) < sizeof(search->input_sources)) {
+        strcpy(search->input_sources, sources);
+    }
+}
+
 void characters_search_free(CharactersSearch *search) {
     if (search) {
         free(search->query);
@@ -762,7 +820,7 @@ CharactersSearchStatus characters_search_run(CharactersSearch *search) {
     }
     search->started = true;
     struct Query query = { 0 };
-    if (search->scope < CHARACTERS_SEARCH_ALL || search->scope > CHARACTERS_SEARCH_NAMED ||
+    if (search->scope < CHARACTERS_SEARCH_ALL || search->scope > CHARACTERS_SEARCH_STROKES ||
         search->filter < -1 || (search->filter >= 0 &&
         !characters_search_filter_name(search->scope, (size_t)search->filter)) ||
         search->category < -1 || search->category >= (int)COUNT(category_names) ||
@@ -772,6 +830,10 @@ CharactersSearchStatus characters_search_run(CharactersSearch *search) {
     if (is_canceled(search)) {
         search->status = CHARACTERS_SEARCH_CANCELED;
         return search->status;
+    }
+    if (search->scope == CHARACTERS_SEARCH_LANGUAGE && search->filter >= 0) {
+        characters_language_scripts(search->filter, search->locale, search->input_sources,
+                                    search->scripts);
     }
     size_t emoji_count = characters_unicode_emoji_count();
     if (emoji_count > NAMED_BASE - EMOJI_BASE ||
@@ -790,11 +852,11 @@ CharactersSearchStatus characters_search_run(CharactersSearch *search) {
     } else if (search->scope != CHARACTERS_SEARCH_EMOJI && search->scope != CHARACTERS_SEARCH_NAMED) {
         success = scan_scalars(search, &query);
     }
-    if (!search->points && success && !is_canceled(search) &&
+    if (!search->points && success && !query.han_field && !is_canceled(search) &&
         (search->scope == CHARACTERS_SEARCH_ALL || search->scope == CHARACTERS_SEARCH_EMOJI)) {
         success = scan_emoji(search, &query);
     }
-    if (!search->points && success && !is_canceled(search) &&
+    if (!search->points && success && !query.han_field && !is_canceled(search) &&
         (search->scope == CHARACTERS_SEARCH_ALL || search->scope == CHARACTERS_SEARCH_NAMED)) {
         success = scan_named(search, &query);
     }
@@ -828,6 +890,12 @@ size_t characters_search_filter_count(CharactersSearchScope scope) {
             return characters_scalar_script_count();
         case CHARACTERS_SEARCH_BLOCK:
             return characters_unicode_block_count();
+        case CHARACTERS_SEARCH_LANGUAGE:
+            return characters_language_count();
+        case CHARACTERS_SEARCH_RADICAL:
+            return characters_unihan_group_count(true);
+        case CHARACTERS_SEARCH_STROKES:
+            return characters_unihan_group_count(false);
         default:
             return 0;
     }
@@ -846,6 +914,12 @@ const char *characters_search_filter_name(CharactersSearchScope scope, size_t in
             return characters_scalar_script_name(index);
         case CHARACTERS_SEARCH_BLOCK:
             return characters_unicode_block_name(index);
+        case CHARACTERS_SEARCH_LANGUAGE:
+            return characters_language_name(index);
+        case CHARACTERS_SEARCH_RADICAL:
+            return characters_unihan_group_name(true, index);
+        case CHARACTERS_SEARCH_STROKES:
+            return characters_unihan_group_name(false, index);
         default:
             return NULL;
     }

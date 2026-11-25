@@ -35,6 +35,15 @@ namespace Characters {
         /** Controls visibility of the named-sequence sidebar category. */
         [GtkChild]
         private unowned Adw.SwitchRow show_named;
+        /** Controls visibility of the language sidebar category. */
+        [GtkChild]
+        private unowned Adw.SwitchRow show_languages;
+        /** Controls visibility of the Han radical sidebar category. */
+        [GtkChild]
+        private unowned Adw.SwitchRow show_radicals;
+        /** Controls visibility of the Han stroke sidebar category. */
+        [GtkChild]
+        private unowned Adw.SwitchRow show_strokes;
         /** Controls visibility of the font sidebar entry. */
         [GtkChild]
         private unowned Adw.SwitchRow show_fonts;
@@ -64,6 +73,9 @@ namespace Characters {
             settings.bind ("show-scripts", show_scripts, "active", SettingsBindFlags.DEFAULT);
             settings.bind ("show-blocks", show_blocks, "active", SettingsBindFlags.DEFAULT);
             settings.bind ("show-named", show_named, "active", SettingsBindFlags.DEFAULT);
+            settings.bind ("show-languages", show_languages, "active", SettingsBindFlags.DEFAULT);
+            settings.bind ("show-radicals", show_radicals, "active", SettingsBindFlags.DEFAULT);
+            settings.bind ("show-strokes", show_strokes, "active", SettingsBindFlags.DEFAULT);
             settings.bind ("show-fonts", show_fonts, "active", SettingsBindFlags.DEFAULT);
             settings.bind ("show-encodings", show_encodings, "active", SettingsBindFlags.DEFAULT);
             clear_history.clicked.connect (confirm_clear);

@@ -75,6 +75,69 @@ const char *characters_scalar_script_name(size_t index) {
     return index < COUNT(script_entries) ? script_entries[index].name : NULL;
 }
 
+/** Resolve a four-letter ISO 15924 code to its snapshot ID. */
+int characters_scalar_script_index(const char *code) {
+    if (!code) {
+        return -1;
+    }
+    for (size_t index = 0; index < COUNT(script_entries); index++) {
+        if (strcmp(code, script_entries[index].code) == 0) {
+            return (int)index;
+        }
+    }
+    return -1;
+}
+
+/** Match primary Script or a space-delimited four-letter extension code. */
+bool characters_scalar_has_script(uint32_t point, int script) {
+    const struct PropertyRange *row = lookup(point);
+    if (!row || script < 0 || (size_t)script >= COUNT(script_entries)) {
+        return false;
+    }
+    if (row->script == script) {
+        return true;
+    }
+    const char *extensions = extension_sets[row->extensions];
+    if (extensions) {
+        for (const char *code = extensions; *code; code += 5) {
+            if (strncmp(code, script_entries[script].code, 4) == 0) {
+                return true;
+            }
+            if (!code[4]) {
+                break;
+            }
+        }
+    }
+    return false;
+}
+
+/** Match one of the selected script IDs without allocating property strings. */
+bool characters_scalar_matches_scripts(uint32_t point, const bool *scripts, size_t length) {
+    const struct PropertyRange *row = lookup(point);
+    if (!row || !scripts) {
+        return false;
+    }
+    if (row->script < length && scripts[row->script]) {
+        return true;
+    }
+    const char *extensions = extension_sets[row->extensions];
+    if (extensions) {
+        for (const char *code = extensions; *code; code += 5) {
+            char tag[5];
+            memcpy(tag, code, 4);
+            tag[4] = '\0';
+            int index = characters_scalar_script_index(tag);
+            if (index >= 0 && (size_t)index < length && scripts[index]) {
+                return true;
+            }
+            if (!code[4]) {
+                break;
+            }
+        }
+    }
+    return false;
+}
+
 /** Return the borrowed snapshot Unicode version. */
 const char *characters_scalar_version(void) {
     return PROPERTY_VERSION;

@@ -12,12 +12,18 @@ typedef enum {
     CHARACTERS_SEARCH_EMOJI,
     /** Semantic symbol and typography collections. */
     CHARACTERS_SEARCH_SYMBOLS,
-    /** Primary Unicode Script property. */
+    /** Primary Script and explicit Script_Extensions membership. */
     CHARACTERS_SEARCH_SCRIPT,
     /** Catalog Unicode blocks. */
     CHARACTERS_SEARCH_BLOCK,
     /** Standardized named sequences. */
-    CHARACTERS_SEARCH_NAMED
+    CHARACTERS_SEARCH_NAMED,
+    /** Language-associated writing systems, including current locale and XKB languages. */
+    CHARACTERS_SEARCH_LANGUAGE,
+    /** Han radical groups, using official data or labeled collation fallback. */
+    CHARACTERS_SEARCH_RADICAL,
+    /** Han stroke-count groups, using official data or labeled collation fallback. */
+    CHARACTERS_SEARCH_STROKES
 } CharactersSearchScope;
 
 /** Completion status; canceled or failed jobs never expose partial results. */
@@ -66,9 +72,18 @@ CharactersSearch *characters_search_new_points(const uint32_t *points, size_t le
  * @search: Request not yet submitted to a worker.
  * @locale: Locale identifier copied before execution; English is always a fallback.
  *
- * Changes only emoji annotation search. Do not call concurrently with run().
+ * Selects emoji annotation and current-locale language collections. Do not call concurrently with run().
  */
 void characters_search_set_locale(CharactersSearch *search, const char *locale);
+
+/**
+ * characters_search_set_input_sources:
+ * @search: Request not yet submitted to a worker.
+ * @sources: Comma-separated configured XKB layout IDs (at most 1023 bytes).
+ *
+ * Captures registered input-source IDs before run(); unknown layouts are ignored.
+ */
+void characters_search_set_input_sources(CharactersSearch *search, const char *sources);
 
 /**
  * characters_search_free:
@@ -127,7 +142,7 @@ size_t characters_search_filter_count(CharactersSearchScope scope);
  * @index: Filter slot.
  *
  * Returns: (transfer none) (nullable): Immutable English label or NULL for an
- * unavailable slot. Script slots refer to ICU's actual encoded scripts.
+ * unavailable slot. Script slots refer to the bundled Unicode snapshot.
  */
 const char *characters_search_filter_name(CharactersSearchScope scope, size_t index);
 

@@ -24,6 +24,10 @@ namespace Characters.Unicode {
     [CCode (cname = "characters_unicode_supplement_version")]
     public static unowned string supplement_version ();
 
+    /** Official Unihan release, or "none" for the separately attributed fallback. */
+    [CCode (cname = "characters_unicode_unihan_version")]
+    public static unowned string unihan_version ();
+
     /**
      * Canonical name, or NULL when unavailable. Controls, private-use characters and unnamed
      * scalars do not have canonical names.

@@ -20,6 +20,15 @@ size_t characters_scalar_script_count(void);
 /** Return the borrowed long script name or NULL for an invalid index. */
 const char *characters_scalar_script_name(size_t index);
 
+/** Resolve a four-letter ISO 15924 code to the snapshot ID, or -1. */
+int characters_scalar_script_index(const char *code);
+
+/** Match primary Script or any explicitly declared Script_Extensions member. */
+bool characters_scalar_has_script(uint32_t point, int script);
+
+/** Match a bounded mask of snapshot script IDs against primary or extension scripts. */
+bool characters_scalar_matches_scripts(uint32_t point, const bool *scripts, size_t length);
+
 /** Return the borrowed snapshot Unicode version. */
 const char *characters_scalar_version(void);
 

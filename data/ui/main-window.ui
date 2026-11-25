@@ -143,6 +143,24 @@
                           </object>
                         </child>
                         <child>
+                          <object class="GtkLabel">
+                            <property name="label" translatable="yes">Languages</property>
+                            <property name="xalign">0</property>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkLabel">
+                            <property name="label" translatable="yes">Han Radical Groups</property>
+                            <property name="xalign">0</property>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkLabel">
+                            <property name="label" translatable="yes">Han Stroke Groups</property>
+                            <property name="xalign">0</property>
+                          </object>
+                        </child>
+                        <child>
                           <object class="GtkListBoxRow">
                             <property name="selectable">False</property>
                             <property name="activatable">True</property>
@@ -220,6 +238,7 @@
                         <child>
                           <object class="GtkSearchEntry" id="search_entry">
                             <property name="placeholder-text" translatable="yes">Search by name or code point</property>
+                            <property name="tooltip-text" translatable="yes">Search by name, code point, reading, or Han field (mandarin:, cantonese:, japanese:, korean:, definition:, radical:, strokes:).</property>
                             <property name="hexpand">True</property>
                             <property name="tooltip-text" translatable="yes">Search names, keywords, aliases, characters, U+ notation, or dec: values</property>
                             <accessibility>

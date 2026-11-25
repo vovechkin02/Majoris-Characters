@@ -8,10 +8,12 @@ namespace Characters {
         private Search.Job? job;
 
         /** Creates a request with a copied query and immutable filter parameters. */
-        public SearchRequest (Search.Scope scope, int filter, int category, string query) {
+        public SearchRequest (Search.Scope scope, int filter, int category, string query,
+                              string input_sources = "") {
             job = Search.create (scope, filter, category, query);
             if (job != null) {
                 job.set_locale (Intl.get_language_names ()[0]);
+                job.set_input_sources (input_sources);
             }
         }
 

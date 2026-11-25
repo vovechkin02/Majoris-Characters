@@ -6,7 +6,7 @@ stages with desktop input hardening, accessibility, localization, and release ch
 
 | Project metadata | Value |
 | --- | --- |
-| Version | 1.0.1 |
+| Version | 1.0.2 |
 | Platform target | Majoris OS / Debian 13 (Trixie) |
 | Development status | Stage 10 — qualification candidate (not a verified stable release) |
 | Application ID | `com.majoris.characters` |
@@ -40,6 +40,10 @@ stages with desktop input hardening, accessibility, localization, and release ch
 - Virtualized character grid with bounded pages and total result counts.
 - All Characters, Emoji, Symbols, Scripts, Unicode Blocks, and Named Sequences
   browsing scopes, with collection and general-category filters.
+- Language collections, current-locale and configured XKB keyboard collections,
+  script-extension matching, and CJK radical and stroke browsing.
+- Han reading search and inspection with explicit fallback provenance; an offline
+  importer supports formal Unihan readings, definitions and classification data.
 - Cancellable asynchronous search by English names, aliases, metadata keywords,
   literal catalog sequences, and hexadecimal or explicitly decimal code points.
 - Character selection with complete code point notation, including composite emoji.
@@ -89,6 +93,9 @@ The alias supplement includes the eight documented additions since Unicode 15;
 the 461 named-sequence records are retained pending full official-file comparison.
 Normalization uses ICU 76 with the Unicode 17 combining-class and compatibility
 delta. See [Unicode engine](docs/unicode-engine.md) for provenance and limits.
+See [international browsing](docs/international-browsing.md) for CJK query syntax,
+source coverage and official Unihan import instructions. The bundled fallback is
+not the full official Unihan database.
 Emoji annotations from Debian GTK 3.24.49-3 (Emojibase-derived data) are
 bundled for 24 languages; they do not cover all Unicode 17 entries. Direct
 CLDR XML imports are supported by the offline generator. The picker exposes
@@ -149,7 +156,7 @@ For Debian binary packages (run from the repository root):
 
 ```sh
 dpkg-buildpackage -us -uc -b
-sudo apt install ../majoris-characters_1.0.1-1_$(dpkg --print-architecture).deb
+sudo apt install ../majoris-characters_1.0.2-1_$(dpkg --print-architecture).deb
 ```
 
 The source package uses `3.0 (quilt)` and requires the corresponding upstream
@@ -299,9 +306,9 @@ After installing the Debian package, the same runtime tests can target the real
 installed executable:
 
 ```sh
-python3 tests/integration/test_application.py /usr/bin/majoris-characters 1.0.1 cli
+python3 tests/integration/test_application.py /usr/bin/majoris-characters 1.0.2 cli
 xvfb-run -a dbus-run-session -- python3 \
-  tests/integration/test_application.py /usr/bin/majoris-characters 1.0.1 gui
+  tests/integration/test_application.py /usr/bin/majoris-characters 1.0.2 gui
 ```
 
 For a fresh, fail-closed automated build/test and optional Debian package gate:
