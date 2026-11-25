@@ -6,6 +6,7 @@ data/ui/composer-view.ui
 data/ui/emoji-variations.ui
 data/ui/font-browser.ui
 data/ui/font-face-dialog.ui
+data/ui/legacy-sequence-dialog.ui
 data/ui/library-dialog.ui
 data/ui/main-window.ui
 data/ui/preferences-dialog.ui
@@ -19,6 +20,7 @@ src/views/composer-view.vala
 src/views/emoji-variations.vala
 src/views/font-browser.vala
 src/views/font-face-dialog.vala
+src/views/legacy-sequence-dialog.vala
 src/views/library-dialog.vala
 src/views/main-window.vala
 src/views/preferences-dialog.vala

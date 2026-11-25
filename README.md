@@ -6,7 +6,7 @@ Unicode, international browsing, emoji data, and exact font inspection improveme
 
 | Project metadata | Value |
 | --- | --- |
-| Version | 1.0.4 |
+| Version | 1.0.5 |
 | Platform target | Majoris OS / Debian 13 (Trixie) |
 | Development status | Priority 4 — qualification candidate (not a verified stable release) |
 | Application ID | `com.majoris.characters` |
@@ -70,8 +70,9 @@ Unicode, international browsing, emoji data, and exact font inspection improveme
   selected-instance reset, and separate Microsoft Symbol cmap inspection.
 - Explicit preview fallback control, adjustable point size, manual and periodic
   font inventory refresh, and nominal face-resolution checks.
-- Thirty-five ICU legacy character sets with exact byte lookup, alternate
-  byte mappings, repertoire search, and clipboard actions.
+- Seventy-seven ICU legacy character sets, including GB18030-2022, EUC and
+  contextual ISO-2022, HZ and ISCII. Browse scalar repertoires, inspect exact
+  byte alternatives or canonical bytes, and decode or encode multi-scalar sequences.
 - Searchable emoji variations with exact sequence copying and inspection.
 - Locale-aware annotation keywords with English fallback and Unicode case folding.
 - Collapsible character composer shared across browser, inspector, font and emoji dialogs.
@@ -161,7 +162,7 @@ For Debian binary packages (run from the repository root):
 
 ```sh
 dpkg-buildpackage -us -uc -b
-sudo apt install ../majoris-characters_1.0.4-1_$(dpkg --print-architecture).deb
+sudo apt install ../majoris-characters_1.0.5-1_$(dpkg --print-architecture).deb
 ```
 
 The source package uses `3.0 (quilt)` and requires the corresponding upstream
@@ -211,8 +212,11 @@ font fallback. Use **Font Variations** in the inspector to compare the selected
 scalar across installed faces. Choose **Inspect Font Face and Symbol Map**
 for exact glyph previews, design-axis adjustments and raw symbol codes.
 For legacy character sets, enter `byte:80` or
-`byte:82 A0` to find an exact mapping in the selected encoding. See
-[font inspection](docs/font-inspection.md) for mapping and preview limitations.
+`byte:82 A0` or `byte:94 39 FC 36` to find an exact scalar mapping in the selected
+encoding. Choose **Inspect Byte Sequence** to decode stateful or multi-scalar input,
+encode literal text or explicit code points, copy the original or canonical bytes,
+and open the shared Unicode inspector. See [legacy encodings](docs/legacy-encodings.md)
+and [font inspection](docs/font-inspection.md) for mapping and preview limitations.
 Select **Emoji**, search by a name or annotation keyword in the current locale,
 then select an entry and choose **Emoji Variations**. The same action is available
 in the inspector for recognized sequences. Choose an alternative to see its
@@ -314,9 +318,9 @@ After installing the Debian package, the same runtime tests can target the real
 installed executable:
 
 ```sh
-python3 tests/integration/test_application.py /usr/bin/majoris-characters 1.0.4 cli
+python3 tests/integration/test_application.py /usr/bin/majoris-characters 1.0.5 cli
 xvfb-run -a dbus-run-session -- python3 \
-  tests/integration/test_application.py /usr/bin/majoris-characters 1.0.4 gui
+  tests/integration/test_application.py /usr/bin/majoris-characters 1.0.5 gui
 ```
 
 For a fresh, fail-closed automated build/test and optional Debian package gate:

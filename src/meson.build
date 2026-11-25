@@ -30,6 +30,7 @@ application_sources = files('app/application.vala') + integration_sources + font
   'views/font-browser.vala',
   'views/font-face-dialog.vala',
   'views/font-preview.vala',
+  'views/legacy-sequence-dialog.vala',
   'views/library-dialog.vala',
   'views/main-window.vala',
   'views/preferences-dialog.vala',

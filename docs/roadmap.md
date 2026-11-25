@@ -32,5 +32,8 @@ application and GJS are not runtime dependencies of the main application. The op
   file comparison remain outstanding.
 - Priority 4: Exact selected-face rasterization, variable-axis controls and raw
   Microsoft Symbol cmap inspection implemented at source level; native font and
-  GTK qualification remain outstanding. Next functional priority: legacy
-  encoding expansion.
+  GTK qualification remain outstanding.
+- Priority 5: Expanded legacy repertoire, GB18030-2022 and EUC mappings,
+  contextual canonical scalar browsing, and strict multi-scalar conversion
+  implemented. Native encoding contracts passed; GTK qualification remains
+  outstanding. Next functional priority: inspector and browsing refinements.

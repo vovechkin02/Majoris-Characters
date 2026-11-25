@@ -143,7 +143,20 @@ contracts. The direct rendering paths and Vala adapter require target build and
 runtime qualification.
 
 The legacy source builds an immutable scalar-to-byte mapping table with ICU's
-strict decoder. Alternate mappings remain available. The repertoire filter
+strict decoder. Independent units retain alternate mappings, enumerated using
+bounded one- through four-byte grammars. Contextual encodings instead enumerate
+ICU's round-trip set and verify each standalone scalar. Canonical bytes are
+computed on demand; the table never claims to enumerate arbitrary stateful
+streams. The source worker owns construction and publishes only the latest
+request; large GB18030 repertoires reuse the existing bounded grid and search.
+`LegacySequenceDialog` captures the encoding index and delegates bounded,
+length-aware conversion to fresh strict ICU converters. It keeps original bytes
+on decode and only accepts encoding when a reverse conversion reproduces the
+input exactly. The existing character inspector owns sequence metadata and
+Unicode actions. The native ICU integration is an adapter with a fixed bounded
+conversion contract; a new strategy hierarchy or duplicate clipboard service is
+not warranted. See [legacy encodings](legacy-encodings.md).
+The repertoire filter
 excludes additional catalog sequences and restricts all search results to the
 selected source. Search identity helpers accept valid mapped but unassigned
 scalars, while ordinary All Characters remains restricted to assigned scalars

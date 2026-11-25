@@ -29,6 +29,28 @@ private void test_mapping_bindings () {
     assert (job.count () == 1 && job.id (0) == 0x20AC);
 }
 
+/** Exercises sequence array ownership and exact contextual re-encoding through Vala. */
+private void test_sequence_bindings () {
+    var encoding = encoding_index ("ISCII Devanagari");
+    assert (Legacy.is_contextual (encoding));
+    var decoded = Legacy.decode_sequence (encoding, "E8 E8");
+    assert (decoded != null && decoded.length == 2);
+    assert (decoded[0] == 0x094D && decoded[1] == 0x200C);
+    var bytes = Legacy.encode_sequence (encoding, decoded);
+    assert (bytes != null);
+    var round_trip = Legacy.decode_sequence (encoding, bytes);
+    assert (round_trip != null && round_trip.length == 2);
+    assert (round_trip[0] == decoded[0] && round_trip[1] == decoded[1]);
+    encoding = encoding_index ("GB18030-2022");
+    uint32[] points = { 0, 0x1F600 };
+    bytes = Legacy.encode_sequence (encoding, points);
+    assert (bytes == "00 94 39 FC 36");
+    decoded = Legacy.decode_sequence (encoding, bytes);
+    assert (decoded != null && decoded.length == 2 && decoded[0] == 0);
+    assert (decoded[1] == 0x1F600);
+    assert (Legacy.decode_sequence (encoding, "94 39 FC") == null);
+}
+
 /** Supersedes source workers and verifies only the last selected encoding is published. */
 private void test_latest_source () {
     var loader = new FontSourceLoader ();
@@ -85,6 +107,7 @@ int main (string[] args) {
     Test.init (ref args);
     Test.add_func ("/characters/fonts/mapping-bindings", test_mapping_bindings);
     Test.add_func ("/characters/fonts/latest-source", test_latest_source);
+    Test.add_func ("/characters/fonts/sequence-bindings", test_sequence_bindings);
     Test.add_func ("/characters/fonts/exact-face-bindings", test_exact_face_bindings);
     return Test.run ();
 }

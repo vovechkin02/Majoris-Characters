@@ -109,6 +109,66 @@ private void test_legacy_browser (MainWindow window) {
     assert (dialog.close ());
 }
 
+/** Converts multi-scalar ISCII and GB18030 bytes with independent dialog lifetimes. */
+private void test_legacy_sequence_dialog (MainWindow window) {
+    var action = window.lookup_action ("browse-encodings");
+    assert (action != null);
+    action.activate (null);
+    var browser = window.get_visible_dialog () as FontBrowser;
+    assert (browser != null);
+    var encodings = find_widget (browser, "encoding_filter") as Gtk.DropDown;
+    var search = find_widget (browser, "font_query") as Gtk.SearchEntry;
+    var open = find_widget (browser, "inspect_bytes") as Gtk.Button;
+    assert (encodings != null && search != null && open != null);
+    for (uint index = 0; index < Legacy.count (); index++) {
+        if (Legacy.name (index) == "ISCII Devanagari") {
+            encodings.selected = index;
+            break;
+        }
+    }
+    search.text = "byte:E8 E8";
+    open.clicked ();
+    var dialog = window.get_visible_dialog () as LegacySequenceDialog;
+    assert (dialog != null);
+    var hex = find_widget (dialog, "byte_input") as Gtk.Entry;
+    var code = find_widget (dialog, "unicode_input") as Gtk.Entry;
+    var copy = find_widget (dialog, "copy_sequence_bytes") as Gtk.Button;
+    var decode = find_widget (dialog, "decode_bytes") as Gtk.Button;
+    var encode = find_widget (dialog, "encode_codes") as Gtk.Button;
+    var inspect = find_widget (dialog, "inspect_sequence") as Gtk.Button;
+    assert (hex != null && code != null && copy != null && decode != null);
+    assert (encode != null && inspect != null);
+    assert (hex.text == "E8 E8" && code.text == "U+094D U+200C");
+    assert (copy.sensitive && inspect.sensitive);
+    copy.clicked ();
+    expect_clipboard (dialog, "E8 E8");
+    hex.text = "GG";
+    assert (!copy.sensitive && !inspect.sensitive);
+    decode.clicked ();
+    assert (!copy.sensitive);
+    code.text = "U+094D U+200C";
+    encode.clicked ();
+    assert (copy.sensitive && inspect.sensitive);
+    inspect.clicked ();
+    var inspector = window.get_visible_dialog () as CharacterInspector;
+    assert (inspector != null && inspector.close ());
+    assert (dialog.close ());
+    for (uint index = 0; index < Legacy.count (); index++) {
+        if (Legacy.name (index) == "GB18030-2022") {
+            encodings.selected = index;
+            break;
+        }
+    }
+    search.text = "byte:94 39 FC 36";
+    open.clicked ();
+    dialog = window.get_visible_dialog () as LegacySequenceDialog;
+    assert (dialog != null);
+    code = find_widget (dialog, "unicode_input") as Gtk.Entry;
+    assert (code != null && code.text == "U+1F600");
+    assert (dialog.close ());
+    assert (browser.close ());
+}
+
 /** Selects an installed fixture family and searches the exact face without fallback. */
 private void test_font_browser (MainWindow window) {
     var action = window.lookup_action ("browse-fonts");
@@ -489,6 +549,7 @@ private void test_browser () {
     test_inspector (window);
     assert (selected_code.label == "U+20AC");
     test_legacy_browser (window);
+    test_legacy_sequence_dialog (window);
     test_font_browser (window);
     assert (selected_code.label == "U+20AC");
 

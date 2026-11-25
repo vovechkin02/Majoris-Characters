@@ -64,6 +64,12 @@
                   </object>
                 </child>
                 <child>
+                  <object class="GtkButton" id="inspect_bytes">
+                    <property name="label" translatable="yes">Inspect Byte Sequence</property>
+                    <property name="visible">False</property>
+                  </object>
+                </child>
+                <child>
                   <object class="GtkSearchEntry" id="font_query">
                     <property name="placeholder-text" translatable="yes">Search characters by name or code point</property>
                     <accessibility><property name="label" translatable="yes">Search Current Repertoire</property></accessibility>

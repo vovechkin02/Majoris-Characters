@@ -1,3 +1,12 @@
+majoris-characters (1.0.5-1) unstable; urgency=medium
+
+  * Expand the legacy encoding catalog to 77 ICU character sets.
+  * Enumerate independent three- and four-byte character mappings.
+  * Add contextual repertoire browsing and strict byte-sequence conversion.
+  * Preserve multi-scalar results and original bytes for inspection and copying.
+
+ -- Vlad Ovechkin <45165533+vovechkin02@users.noreply.github.com>  Wed, 25 Nov 2026 20:19:00 +1100
+
 majoris-characters (1.0.4-1) unstable; urgency=medium
 
   * Inspect exact FreeType file and face identities without Pango substitution.

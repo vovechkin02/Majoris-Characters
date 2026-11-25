@@ -40,6 +40,9 @@ namespace Characters {
         /** Chooses an explicitly supported legacy encoding. */
         [GtkChild]
         private unowned Gtk.DropDown encoding_filter;
+        /** Opens bounded exact byte-sequence conversion for the selected encoding. */
+        [GtkChild]
+        private unowned Gtk.Button inspect_bytes;
         /** Searches the current scalar repertoire or comparison face names. */
         [GtkChild]
         private unowned Gtk.SearchEntry font_query;
@@ -228,6 +231,7 @@ namespace Characters {
             inspect_face.clicked.connect (inspect_current_face);
             font_copy.clicked.connect (copy_character);
             bytes_copy.clicked.connect (copy_bytes);
+            inspect_bytes.clicked.connect (open_byte_inspector);
         }
 
         /** Changes sources atomically, invalidating any old selection and queued publication. */
@@ -247,6 +251,7 @@ namespace Characters {
             refresh_fonts.visible = mode != FontBrowserMode.ENCODINGS;
             font_category.visible = mode != FontBrowserMode.VARIATIONS;
             bytes_copy.visible = mode == FontBrowserMode.ENCODINGS;
+            inspect_bytes.visible = mode == FontBrowserMode.ENCODINGS;
             inspect_face.visible = mode != FontBrowserMode.ENCODINGS;
             inspect_face.sensitive = false;
             exact_face = null;
@@ -490,8 +495,11 @@ namespace Characters {
             repertoire = null;
             mapping = null;
             clear_page ();
-            source_note.label = _("ICU byte mappings; search byte:80 or byte:82 A0 for exact bytes. " +
-                "Undefined, truncated and multi-scalar mappings are omitted.");
+            source_note.label = Legacy.is_contextual (encoding_filter.selected) ?
+                _("Standalone round-trip scalars and canonical bytes. " +
+                "Inspect Byte Sequence accepts state shifts and multi-scalar results.") :
+                _("Independent scalar mappings and byte alternatives. Search byte:80 or byte:82 A0. " +
+                "Inspect Byte Sequence accepts longer inputs and multi-scalar results.");
             set_loading (_("Reading Character Set…"));
             loader.submit (new FontSourceRequest.for_encoding (encoding_filter.selected));
         }
@@ -516,7 +524,11 @@ namespace Characters {
                 var point = mapping != null ? mapping.decode (byte_query.substring (5).strip ()) :
                     uint32.MAX;
                 if (point == uint32.MAX) {
-                    set_status (_("Invalid or Unmapped Byte Sequence"));
+                    var decoded = Legacy.decode_sequence (encoding_filter.selected,
+                        byte_query.substring (5).strip ());
+                    set_status (decoded != null ?
+                        _("Valid Sequence Outside the Scalar Grid. Choose Inspect Byte Sequence.") :
+                        _("Invalid or Unmapped Byte Sequence"));
                     return;
                 }
                 query = "U+%04X".printf (point);
@@ -780,7 +792,9 @@ namespace Characters {
             bytes_copy.sensitive = false;
             if (mode == FontBrowserMode.ENCODINGS && mapping != null) {
                 var bytes = mapping.bytes (point);
-                font_detail.label = _("Encoded bytes: %s").printf (bytes ?? _("Unavailable"));
+                var format = Legacy.is_contextual (encoding_filter.selected) ?
+                    _("Canonical bytes: %s") : _("Encoded bytes: %s");
+                font_detail.label = format.printf (bytes ?? _("Unavailable"));
                 bytes_copy.sensitive = bytes != null;
             } else if (inventory != null) {
                 unowned Fonts.Catalog catalog = inventory.get_catalog ();
@@ -864,6 +878,25 @@ namespace Characters {
                 composer.append_text (text);
                 font_toasts.add_toast (new Adw.Toast (_("Added to Composer")));
             }
+        }
+
+        /** Opens independent byte conversion, retaining a typed alias or selected byte unit. */
+        private void open_byte_inspector () {
+            if (mode != FontBrowserMode.ENCODINGS || encoding_filter.selected >= Legacy.count ()) {
+                return;
+            }
+            var query = font_query.text.strip ();
+            string initial = "";
+            if (query.down ().has_prefix ("byte:")) {
+                initial = query.substring (5).strip ();
+            } else if (mapping != null) {
+                var bytes = mapping.bytes (selected_point ());
+                if (bytes != null) {
+                    initial = bytes.split (",", 2)[0];
+                }
+            }
+            new LegacySequenceDialog (encoding_filter.selected, initial,
+                composer, library).present (this);
         }
 
         /** Copies exact byte notation, not a lossy conversion into the system clipboard format. */

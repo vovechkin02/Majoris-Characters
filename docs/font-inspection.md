@@ -53,30 +53,10 @@ require desktop qualification.
 
 ## Legacy character sets
 
-Select Character Sets, then an encoding. Browse distinct mapped scalars, inspect
-all associated bytes, copy byte notation, or copy the Unicode text. `byte:80`
-and `byte:82 A0` are explicit exact-byte queries; ordinary Unicode queries are
-also supported. Invalid, truncated and multi-scalar byte mappings are excluded.
-NUL cannot be copied through GTK's string clipboard but its byte and code-point
-representations can be copied.
-
-The 35 encodings available with the tested ICU 76 installation are:
-
-- US-ASCII.
-- ISO-8859-1 through ISO-8859-10, and ISO-8859-13 through ISO-8859-15.
-- Windows-1250 through Windows-1258, and Windows-874.
-- IBM 437, 850, 852 and 866.
-- KOI8-R and KOI8-U.
-- Macintosh Roman.
-- Windows-932 (Shift JIS), Windows-936 (GBK), Windows-949 (Korean), and
-  Windows-950 (Big5).
-
-Only available stateless single- and double-byte ICU converters are exposed.
-ISO-8859-16 is unavailable on the tested ICU installation. The catalog reflects
-ICU decoding, including its defined aliases; it is not a guarantee that
-re-encoding produces the original bytes or that other platforms use identical
-mapping tables. Stateful encodings and multi-scalar mappings are outside this
-stage. The encoding browser does not change the process or system locale.
+The encoding browser supports 77 ICU character sets, with independent scalar
+mappings (up to four bytes), contextual canonical repertoires, and exact sequence
+conversion. See [legacy encodings](legacy-encodings.md) for the full catalog,
+conversion semantics, examples and explicit limitations.
 
 ## Ownership and resources
 

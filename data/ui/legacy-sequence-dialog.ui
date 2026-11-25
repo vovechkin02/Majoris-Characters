@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface domain="majoris-characters">
+  <requires lib="gtk" version="4.14"/>
+  <template class="CharactersLegacySequenceDialog" parent="AdwDialog">
+    <property name="title" translatable="yes">Inspect Byte Sequence</property>
+    <property name="content-width">480</property>
+    <property name="content-height">440</property>
+    <property name="child">
+      <object class="AdwToolbarView">
+        <child type="top">
+          <object class="AdwHeaderBar"/>
+        </child>
+        <property name="content">
+          <object class="GtkScrolledWindow">
+            <property name="hscrollbar-policy">never</property>
+            <child>
+              <object class="GtkBox">
+                <property name="orientation">vertical</property>
+                <property name="spacing">8</property>
+                <property name="margin-start">16</property>
+                <property name="margin-end">16</property>
+                <property name="margin-top">16</property>
+                <property name="margin-bottom">16</property>
+                <child>
+                  <object class="GtkLabel" id="encoding_name">
+                    <property name="xalign">0</property>
+                    <property name="wrap">True</property>
+                    <style><class name="heading"/></style>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkLabel">
+                    <property name="label" translatable="yes">Enter up to 128 hexadecimal bytes or 32 Unicode scalars. Each conversion begins in the encoding's initial state. Encoding rejects any lossy round trip.</property>
+                    <property name="wrap">True</property>
+                    <property name="xalign">0</property>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkEntry" id="byte_input">
+                    <property name="placeholder-text">1B 24 42 24 22 1B 28 42</property>
+                    <accessibility><property name="label" translatable="yes">Hexadecimal Bytes</property></accessibility>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkButton" id="decode_bytes">
+                    <property name="label" translatable="yes">Decode Bytes</property>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkEntry" id="unicode_input">
+                    <property name="placeholder-text" translatable="yes">Unicode notation or literal text</property>
+                    <accessibility><property name="label" translatable="yes">Unicode Input</property></accessibility>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkBox">
+                    <property name="spacing">8</property>
+                    <child>
+                      <object class="GtkButton" id="encode_codes">
+                        <property name="label" translatable="yes">Encode Code Points</property>
+                        <property name="hexpand">True</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkButton" id="encode_text">
+                        <property name="label" translatable="yes">Encode Literal Text</property>
+                        <property name="hexpand">True</property>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkLabel" id="sequence_status">
+                    <property name="label" translatable="yes">Choose a Conversion Action</property>
+                    <property name="xalign">0</property>
+                    <property name="wrap">True</property>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkButton" id="copy_sequence_bytes">
+                    <property name="label" translatable="yes">Copy Bytes</property>
+                    <property name="sensitive">False</property>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkButton" id="inspect_sequence">
+                    <property name="label" translatable="yes">Inspect Unicode Sequence</property>
+                    <property name="sensitive">False</property>
+                  </object>
+                </child>
+              </object>
+            </child>
+          </object>
+        </property>
+      </object>
+    </property>
+  </template>
+</interface>
