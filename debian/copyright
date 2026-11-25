@@ -6,6 +6,13 @@ Files: *
 Copyright: 2026 Majoris contributors
 License: GPL-3+
 
+Files: po/*.po
+Copyright: 2026 Majoris contributors
+           2004-2025 Unicode, Inc. (CLDR script display names)
+License: GPL-3+ and Unicode-3.0
+Comment: CLDR-derived names from Babel 2.18.0 locale data retain the Unicode
+ license included in po/LICENSE.cldr. No Babel runtime code is bundled.
+
 Files: data/desktop/com.majoris.characters.metainfo.xml
 Copyright: 2026 Majoris contributors
 License: CC0-1.0

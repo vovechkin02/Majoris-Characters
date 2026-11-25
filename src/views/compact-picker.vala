@@ -138,7 +138,8 @@ namespace Characters {
                 close ();
                 return true;
             }
-            if (keyval == Gdk.Key.f && (state & Gdk.ModifierType.CONTROL_MASK) != 0) {
+            var modifiers = state & Gtk.accelerator_get_default_mod_mask ();
+            if (keyval == Gdk.Key.f && modifiers == Gdk.ModifierType.CONTROL_MASK) {
                 focus_query ();
                 return true;
             }
@@ -359,6 +360,7 @@ namespace Characters {
             if (offset >= PAGE_SIZE) {
                 offset -= PAGE_SIZE;
                 show_page ();
+                picker_count.announce (picker_count.label, Gtk.AccessibleAnnouncementPriority.MEDIUM);
             }
         }
 
@@ -367,6 +369,7 @@ namespace Characters {
             if (offset + PAGE_SIZE < total_count ()) {
                 offset += PAGE_SIZE;
                 show_page ();
+                picker_count.announce (picker_count.label, Gtk.AccessibleAnnouncementPriority.MEDIUM);
             }
         }
 
@@ -439,6 +442,7 @@ namespace Characters {
             var saved = library.record_use (text);
             picker_status.label = saved ? _("Character copied. Paste it into your application.") :
                 _("Copied to Clipboard; Usage History Could Not Be Saved");
+            picker_status.announce (picker_status.label, Gtk.AccessibleAnnouncementPriority.MEDIUM);
         }
 
         /** Opens the existing emoji family selector, with the same delivery path as the grid. */

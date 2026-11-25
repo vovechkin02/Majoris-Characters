@@ -10,8 +10,11 @@ data/ui/legacy-sequence-dialog.ui
 data/ui/library-dialog.ui
 data/ui/main-window.ui
 data/ui/preferences-dialog.ui
+data/ui/shortcuts-dialog.ui
 native/unicode/character-search.c
+native/unicode/generated/properties.h
 native/unicode/language-collections.c
+native/unicode/unicode-engine.c
 src/app/application.vala
 src/views/character-inspector.vala
 src/views/character-tile.vala
@@ -24,4 +27,6 @@ src/views/legacy-sequence-dialog.vala
 src/views/library-dialog.vala
 src/views/main-window.vala
 src/views/preferences-dialog.vala
+src/views/property-labels.vala
+src/views/shortcuts-dialog.vala
 tools/input/characters_input.py

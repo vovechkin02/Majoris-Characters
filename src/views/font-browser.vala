@@ -713,11 +713,14 @@ namespace Characters {
                 tile.bind_preview (point, description, size_pt, fallback,
                     caption, detail, mode == FontBrowserMode.VARIATIONS);
             }
+            item.accessible_label = tile.tooltip_text;
         }
 
         /** Releases stale accessibility and display data before a cell is recycled. */
         private static void unbind_tile (GLib.Object object) {
-            var tile = (CharacterTile) ((Gtk.ListItem) object).child;
+            var item = (Gtk.ListItem) object;
+            var tile = (CharacterTile) item.child;
+            item.accessible_label = null;
             tile.clear ();
         }
 

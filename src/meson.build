@@ -34,6 +34,8 @@ application_sources = files('app/application.vala', 'library/library-query.vala'
   'views/library-dialog.vala',
   'views/main-window.vala',
   'views/preferences-dialog.vala',
+  'views/property-labels.vala',
+  'views/shortcuts-dialog.vala',
 )
 app_entry = files('app/main.vala')
 app_vala_args = [

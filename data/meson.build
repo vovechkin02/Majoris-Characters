@@ -39,6 +39,8 @@ configure_file(
 
 install_data(
   '../THIRD_PARTY_NOTICES.md',
+  '../po/LICENSE.cldr',
+  '../po/LICENSE.babel',
   '../native/unicode/vendor/gnome/COPYING',
   '../native/unicode/vendor/gnome/COPYINGv2',
   'unicode/supplement/LICENSE.unicode',

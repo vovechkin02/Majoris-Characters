@@ -61,3 +61,14 @@ https://github.com/unicode-org/cldr/blob/release-48/common/annotations/en.xml.
 These Unicode data are licensed under Unicode-3.0; see the included license
 under `data/unicode/supplement/`. The remaining annotation data retain the
 original GTK/Emojibase attribution and licensing.
+
+## Priority 8 localization
+
+The French, German and Spanish catalogs in `po/` include script display names
+from CLDR locale data distributed with Babel 2.18.0 (`Locale.scripts`). These
+names are Unicode data, copyright 2004–2025 Unicode, Inc., and retain the exact
+Unicode License V3 notice in `po/LICENSE.cldr`. Babel's BSD license notice is
+preserved in `po/LICENSE.babel` for provenance. No Babel library or Python
+implementation is shipped or required to build or run Characters. Original
+interface translations and property descriptions are project-owned; all three
+catalogs are partial and require native-speaker review.

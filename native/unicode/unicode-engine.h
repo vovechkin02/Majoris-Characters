@@ -72,6 +72,14 @@ char *characters_unicode_name(uint32_t point);
 char *characters_unicode_aliases(uint32_t point);
 
 /**
+ * characters_unicode_script_name:
+ * @code: ISO 15924 script code.
+ *
+ * Returns: (transfer none) (nullable): Stable script name, or NULL for an unknown code.
+ */
+const char *characters_unicode_script_name(const char *code);
+
+/**
  * characters_unicode_property:
  * @point: Numeric Unicode scalar.
  * @property: Supported UCD or Han metadata key (see the Unicode engine documentation).

@@ -121,7 +121,7 @@ def generate() -> str:
     output = ['/* Generated Unicode 17 data; see docs/unicode-engine.md. */',
               '#define PROPERTY_VERSION "17.0.0"',
               'static const struct ScriptEntry script_entries[] = {']
-    output.extend(f'    {{ "{code}", "{Scripts.NAMES[code]}" }},' for code in codes)
+    output.extend(f'    {{ "{code}", N_("{Scripts.NAMES[code]}") }},' for code in codes)
     output.extend(['};', 'static const char *const extension_sets[] = {', '    NULL,'])
     output.extend('    ' + json.dumps(' '.join(value)) + ',' for value in sets)
     output.append('};')

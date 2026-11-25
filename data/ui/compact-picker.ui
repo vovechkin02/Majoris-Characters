@@ -9,6 +9,16 @@
       <object class="AdwToolbarView">
         <child type="top">
           <object class="AdwHeaderBar">
+            <child type="start">
+              <object class="GtkButton">
+                <property name="icon-name">preferences-desktop-keyboard-shortcuts-symbolic</property>
+                <property name="action-name">app.shortcuts</property>
+                <property name="tooltip-text" translatable="yes">Keyboard Shortcuts</property>
+                <accessibility>
+                  <property name="label" translatable="yes">Keyboard Shortcuts</property>
+                </accessibility>
+              </object>
+            </child>
             <child type="end">
               <object class="GtkButton" id="expand_button">
                 <property name="icon-name">view-fullscreen-symbolic</property>

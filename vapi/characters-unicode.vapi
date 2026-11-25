@@ -42,6 +42,10 @@ namespace Characters.Unicode {
     [CCode (cname = "characters_unicode_aliases")]
     public static string? aliases (uint32 point);
 
+    /** Stable script name for an ISO 15924 code, or null for an unknown code. */
+    [CCode (cname = "characters_unicode_script_name")]
+    public static unowned string? script_name (string code);
+
     /**
      * Property value, or NULL for unsupported queries, invalid scalars, or scalars not assigned in
      * the scalar property snapshot. Plane is available for all valid scalars.

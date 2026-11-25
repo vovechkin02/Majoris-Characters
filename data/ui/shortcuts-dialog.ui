@@ -1,0 +1,298 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface domain="majoris-characters">
+  <requires lib="gtk" version="4.14"/>
+  <template class="CharactersShortcutsDialog" parent="AdwDialog">
+    <property name="title" translatable="yes">Keyboard Shortcuts</property>
+    <property name="content-width">560</property>
+    <property name="content-height">600</property>
+    <property name="child">
+      <object class="AdwToolbarView">
+        <child type="top"><object class="AdwHeaderBar"/></child>
+        <property name="content">
+          <object class="AdwPreferencesPage">
+            <child>
+              <object class="AdwPreferencesGroup" id="shortcuts_application">
+                <property name="title" translatable="yes">Application</property>
+                <child>
+                  <object class="AdwActionRow">
+                    <property name="title" translatable="yes">Focus search</property>
+                    <child type="suffix">
+                      <object class="GtkLabel" id="shortcut_search">
+                        <property name="valign">center</property>
+                        <property name="wrap">true</property>
+                        <property name="xalign">1</property>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+                <child>
+                  <object class="AdwActionRow">
+                    <property name="title" translatable="yes">Open character composer</property>
+                    <child type="suffix">
+                      <object class="GtkLabel" id="shortcut_composer">
+                        <property name="valign">center</property>
+                        <property name="wrap">true</property>
+                        <property name="xalign">1</property>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+                <child>
+                  <object class="AdwActionRow">
+                    <property name="title" translatable="yes">Open character picker</property>
+                    <child type="suffix">
+                      <object class="GtkLabel" id="shortcut_picker">
+                        <property name="valign">center</property>
+                        <property name="wrap">true</property>
+                        <property name="xalign">1</property>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+                <child>
+                  <object class="AdwActionRow">
+                    <property name="title" translatable="yes">Quit Characters</property>
+                    <child type="suffix">
+                      <object class="GtkLabel" id="shortcut_quit">
+                        <property name="valign">center</property>
+                        <property name="wrap">true</property>
+                        <property name="xalign">1</property>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="AdwPreferencesGroup">
+                <property name="title" translatable="yes">Character Picker</property>
+                <child>
+                  <object class="AdwActionRow">
+                    <property name="title" translatable="yes">Keyboard Shortcuts</property>
+                    <child type="suffix">
+                      <object class="GtkLabel" id="shortcut_help">
+                        <property name="valign">center</property>
+                        <property name="wrap">true</property>
+                        <property name="xalign">1</property>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+                <child>
+                  <object class="AdwActionRow">
+                    <property name="title" translatable="yes">Focus search in picker</property>
+                    <child type="suffix">
+                      <object class="GtkLabel">
+                        <property name="valign">center</property>
+                        <property name="wrap">true</property>
+                        <property name="xalign">1</property>
+                        <property name="label" translatable="yes">Ctrl+F</property>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+                <child>
+                  <object class="AdwActionRow">
+                    <property name="title" translatable="yes">Move between controls</property>
+                    <child type="suffix">
+                      <object class="GtkLabel">
+                        <property name="valign">center</property>
+                        <property name="wrap">true</property>
+                        <property name="xalign">1</property>
+                        <property name="label" translatable="yes">Tab / Shift+Tab</property>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+                <child>
+                  <object class="AdwActionRow">
+                    <property name="title" translatable="yes">Move between characters</property>
+                    <child type="suffix">
+                      <object class="GtkLabel">
+                        <property name="valign">center</property>
+                        <property name="wrap">true</property>
+                        <property name="xalign">1</property>
+                        <property name="label" translatable="yes">Arrow keys</property>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+                <child>
+                  <object class="AdwActionRow">
+                    <property name="title" translatable="yes">Use selected character</property>
+                    <child type="suffix">
+                      <object class="GtkLabel">
+                        <property name="valign">center</property>
+                        <property name="wrap">true</property>
+                        <property name="xalign">1</property>
+                        <property name="label" translatable="yes">Enter</property>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+                <child>
+                  <object class="AdwActionRow">
+                    <property name="title" translatable="yes">Close picker</property>
+                    <child type="suffix">
+                      <object class="GtkLabel">
+                        <property name="valign">center</property>
+                        <property name="wrap">true</property>
+                        <property name="xalign">1</property>
+                        <property name="label" translatable="yes">Escape</property>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="AdwPreferencesGroup" id="shortcuts_browser">
+                <property name="title" translatable="yes">Character Browser</property>
+                <child>
+                  <object class="AdwActionRow">
+                    <property name="title" translatable="yes">Move between controls</property>
+                    <child type="suffix">
+                      <object class="GtkLabel">
+                        <property name="valign">center</property>
+                        <property name="wrap">true</property>
+                        <property name="xalign">1</property>
+                        <property name="label" translatable="yes">Tab / Shift+Tab</property>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+                <child>
+                  <object class="AdwActionRow">
+                    <property name="title" translatable="yes">Move between characters</property>
+                    <child type="suffix">
+                      <object class="GtkLabel">
+                        <property name="valign">center</property>
+                        <property name="wrap">true</property>
+                        <property name="xalign">1</property>
+                        <property name="label" translatable="yes">Arrow keys</property>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+                <child>
+                  <object class="AdwActionRow">
+                    <property name="title" translatable="yes">Inspect selected character</property>
+                    <child type="suffix">
+                      <object class="GtkLabel">
+                        <property name="valign">center</property>
+                        <property name="wrap">true</property>
+                        <property name="xalign">1</property>
+                        <property name="label" translatable="yes">Enter</property>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="AdwPreferencesGroup" id="shortcuts_composer_group">
+                <property name="title" translatable="yes">Composer Editing</property>
+                <child>
+                  <object class="AdwActionRow">
+                    <property name="title" translatable="yes">Cut / Copy / Paste</property>
+                    <child type="suffix">
+                      <object class="GtkLabel">
+                        <property name="valign">center</property>
+                        <property name="wrap">true</property>
+                        <property name="xalign">1</property>
+                        <property name="label" translatable="yes">Ctrl+X / Ctrl+C / Ctrl+V</property>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+                <child>
+                  <object class="AdwActionRow">
+                    <property name="title" translatable="yes">Select all text</property>
+                    <child type="suffix">
+                      <object class="GtkLabel">
+                        <property name="valign">center</property>
+                        <property name="wrap">true</property>
+                        <property name="xalign">1</property>
+                        <property name="label" translatable="yes">Ctrl+A</property>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+                <child>
+                  <object class="AdwActionRow">
+                    <property name="title" translatable="yes">Undo / Redo</property>
+                    <child type="suffix">
+                      <object class="GtkLabel">
+                        <property name="valign">center</property>
+                        <property name="wrap">true</property>
+                        <property name="xalign">1</property>
+                        <property name="label" translatable="yes">Ctrl+Z / Ctrl+Shift+Z</property>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="AdwPreferencesGroup">
+                <property name="title" translatable="yes">Desktop Integration</property>
+                <property name="description" translatable="yes">The global shortcut requires an enabled Shell extension or a desktop binding. IBus shortcuts require the Characters input source.</property>
+                <child>
+                  <object class="AdwActionRow">
+                    <property name="title" translatable="yes">Configured global picker shortcut</property>
+                    <child type="suffix">
+                      <object class="GtkLabel" id="shortcut_global">
+                        <property name="valign">center</property>
+                        <property name="wrap">true</property>
+                        <property name="xalign">1</property>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+                <child>
+                  <object class="AdwActionRow">
+                    <property name="title" translatable="yes">Open IBus character search</property>
+                    <child type="suffix">
+                      <object class="GtkLabel">
+                        <property name="valign">center</property>
+                        <property name="wrap">true</property>
+                        <property name="xalign">1</property>
+                        <property name="label" translatable="yes">Ctrl+Shift+Period</property>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+                <child>
+                  <object class="AdwActionRow">
+                    <property name="title" translatable="yes">Navigate IBus candidates</property>
+                    <child type="suffix">
+                      <object class="GtkLabel">
+                        <property name="valign">center</property>
+                        <property name="wrap">true</property>
+                        <property name="xalign">1</property>
+                        <property name="label" translatable="yes">Arrow keys / Page Up / Page Down</property>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+                <child>
+                  <object class="AdwActionRow">
+                    <property name="title" translatable="yes">Insert or cancel IBus selection</property>
+                    <child type="suffix">
+                      <object class="GtkLabel">
+                        <property name="valign">center</property>
+                        <property name="wrap">true</property>
+                        <property name="xalign">1</property>
+                        <property name="label" translatable="yes">Enter / Escape</property>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+              </object>
+            </child>
+          </object>
+        </property>
+      </object>
+    </property>
+  </template>
+</interface>

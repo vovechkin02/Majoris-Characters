@@ -19,7 +19,7 @@ from qualify import expected_tests, verify_test_log
 NAMED_CONTROLS = {
     "GtkButton", "GtkToggleButton", "GtkMenuButton", "GtkDropDown", "GtkSearchEntry",
     "GtkEntry", "GtkSpinButton", "GtkGridView", "GtkTextView", "GtkFlowBox", "GtkListBox",
-    "GtkSwitch", "GtkScale", "GtkCheckButton", "AdwSwitchRow", "AdwSpinRow",
+    "GtkSwitch", "GtkScale", "GtkCheckButton", "GtkListView", "AdwSwitchRow", "AdwSpinRow",
 }
 
 
@@ -123,6 +123,31 @@ class SourceContractsTest(unittest.TestCase):
             if locale and not locale.startswith("#"):
                 self.assertTrue((ROOT / f"po/{locale}.po").is_file(), locale)
 
+
+    def test_localization_and_accessibility_wiring(self) -> None:
+        """Check translated shortcut entry points and recycled item label cleanup."""
+        for name in ("main-window", "compact-picker"):
+            template = ET.parse(ROOT / f"data/ui/{name}.ui")
+            self.assertTrue(any(node.text == "app.shortcuts" for node in template.iter()))
+        application = (ROOT / "src/app/application.vala").read_text()
+        self.assertIn('set_accels_for_action ("app.shortcuts"', application)
+        dialog = (ROOT / "src/views/shortcuts-dialog.vala").read_text()
+        for action in ("win.search", "win.open-composer", "app.picker", "app.quit",
+                       "app.shortcuts"):
+            self.assertIn(f'get_accels_for_action ("{action}")', dialog)
+        for name in ("main-window", "font-browser", "library-dialog"):
+            source = (ROOT / f"src/views/{name}.vala").read_text()
+            self.assertIn("item.accessible_label =", source)
+            self.assertIn("item.accessible_label = null;", source)
+        inspector = (ROOT / "src/views/character-inspector.vala").read_text()
+        self.assertIn("PropertyLabels.describe (keys[index], value)", inspector)
+        self.assertIn("new Variant.string (value)", inspector)
+        for locale in ("de", "es", "fr"):
+            catalog = (ROOT / f"po/{locale}.po").read_text()
+            for message in ("Keyboard Shortcuts", "Uppercase letter", "Right-to-left",
+                            "Canonical", "Latin", "Hiragana", "Not assigned"):
+                self.assertIn(f'msgid "{message}"', catalog)
+            self.assertIn(f'"Language: {locale}\\n"', catalog)
 
     def test_release_gate(self) -> None:
         """Prove missing and skipped test records cannot pass the release log gate."""

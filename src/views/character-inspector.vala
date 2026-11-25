@@ -238,6 +238,8 @@ namespace Characters {
             }
             identity_name.label = name;
             identity_code.label = code;
+            preview.update_property (Gtk.AccessibleProperty.LABEL,
+                _("Character preview: %s — %s").printf (name, code));
             var text = snapshot.text ();
             preview.label = snapshot.display () ?? "";
             copy_character.sensitive = text != null;
@@ -320,8 +322,9 @@ namespace Characters {
                 _("Decomposition type"), _("East Asian width"), _("Emoji property"),
                 _("Emoji presentation"), _("Emoji modifier") };
             for (var index = 0; index < keys.length; index++) {
-                add_field (target, metadata, labels[index],
-                    Unicode.get_property_value (point, keys[index]));
+                var value = Unicode.get_property_value (point, keys[index]);
+                add_field (target, metadata, labels[index], value, true,
+                    PropertyLabels.describe (keys[index], value));
             }
             var decomposition = Inspector.decomposition (point);
             var decomposition_type = Unicode.get_property_value (point, "Decomposition_Type");
@@ -454,6 +457,8 @@ namespace Characters {
                 label.wrap_mode = Pango.WrapMode.WORD_CHAR;
                 label.xalign = 0;
                 button.child = label;
+                button.update_property (Gtk.AccessibleProperty.LABEL,
+                    _("Inspect %s — %s").printf (name, code));
                 button.set_action_target_value (new Variant.string (code));
                 button.action_name = "inspect.related";
                 related_rows.append (button);
@@ -471,10 +476,10 @@ namespace Characters {
 
         /** Adds a plain-text, wrapping metadata row and optional exact-value copy action. */
         private void add_field (Gtk.Box? target, StringBuilder? metadata, string title,
-                                string? value, bool can_copy = true) {
-            var display = value ?? _("Unavailable");
+                                string? value, bool can_copy = true, string? display_value = null) {
+            var display = display_value ?? value ?? _("Unavailable");
             if (metadata != null) {
-                metadata.append_printf ("%s: %s\n", title, display);
+                metadata.append_printf ("%s: %s\n", title, value ?? _("Unavailable"));
             }
             if (target == null) {
                 return;

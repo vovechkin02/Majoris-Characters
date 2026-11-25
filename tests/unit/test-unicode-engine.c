@@ -35,6 +35,11 @@ static void test_scalar_metadata(void) {
     free(aliases);
     expect_text(characters_unicode_property('A', "General_Category"), "Lu");
     expect_text(characters_unicode_property('A', "Script"), "Latn");
+    assert(strcmp(characters_unicode_script_name("Latn"), "Latin") == 0);
+    assert(strcmp(characters_unicode_script_name("Hira"), "Hiragana") == 0);
+    assert(strcmp(characters_unicode_script_name("Berf"), "Beria_Erfe") == 0);
+    assert(!characters_unicode_script_name("invalid"));
+    assert(!characters_unicode_script_name(NULL));
     expect_text(characters_unicode_property('A', "Age"), "1.1");
     expect_text(characters_unicode_property(0x301, "Canonical_Combining_Class"), "230");
     expect_text(characters_unicode_property(0x1F600, "Plane"), "1");

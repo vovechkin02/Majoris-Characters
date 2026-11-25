@@ -17,3 +17,10 @@ checks as not run. Review documentation coverage and meaning, and keep package
 rules executable. Do not add generated build files, caches or binary packages to
 source archives. If adopting upstream code later, retain its exact license and
 copyright notices and record the source revision and modifications.
+
+For localization changes, preserve normative Unicode identifiers and exact copied
+values. Mark all new user-visible messages for gettext extraction and update
+`po/POTFILES.in` when adding resources. Do not translate search syntax, format
+placeholders, application IDs or schema keys. Use the native accessibility
+properties of interactive GTK controls, including clearing recycled item labels
+on unbind. Record incomplete translation and screen-reader qualification honestly.

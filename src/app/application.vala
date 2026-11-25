@@ -73,6 +73,10 @@ namespace Characters {
         /** Registers application actions once on the primary instance. */
         protected override void startup () {
             base.startup ();
+            var shortcuts_action = new SimpleAction ("shortcuts", null);
+            shortcuts_action.activate.connect (show_shortcuts);
+            add_action (shortcuts_action);
+            set_accels_for_action ("app.shortcuts", { "<Primary>question" });
             if (client_mode) {
                 return;
             }
@@ -298,6 +302,14 @@ namespace Characters {
                 website = "https://github.com/vovechkin02/Majoris-Characters"
             };
             dialog.present (window);
+        }
+
+        /** Opens the shortcut reference for the current window, including private pickers. */
+        private void show_shortcuts (Variant? parameter) {
+            var window = active_window;
+            if (window != null) {
+                new ShortcutsDialog (this).present (window);
+            }
         }
 
         /** Routes Quit through normal window closing so its settings are saved. */

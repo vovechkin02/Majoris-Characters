@@ -45,3 +45,8 @@ application and GJS are not runtime dependencies of the main application. The op
   state-preserving expansion and private client selection implemented at source
   level. GTK and client integration tests remain to be run. Next functional
   priority: accessibility and localization.
+- Priority 8: Native keyboard shortcuts reference, accessible result labels and
+  announcements, localized Unicode property descriptions and expanded French,
+  German, and Spanish catalogs implemented. Translation and assistive-technology
+  review and target GTK qualification remain outstanding. Next priorities:
+  external Desktop Shell/ISO integration, then full release qualification.

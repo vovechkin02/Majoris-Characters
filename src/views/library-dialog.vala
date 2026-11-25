@@ -75,6 +75,7 @@ namespace Characters {
             var factory = new Gtk.SignalListItemFactory ();
             factory.setup.connect (setup_row);
             factory.bind.connect (bind_row);
+            factory.unbind.connect (unbind_row);
             library_list.factory = factory;
             library_list.model = selection;
             selection.notify["selected-item"].connect (update_actions);
@@ -134,6 +135,7 @@ namespace Characters {
             var snapshot = Inspector.from_text (text);
             if (snapshot == null) {
                 label.label = _("Unavailable Character");
+                item.accessible_label = label.label;
                 return;
             }
             var name = snapshot.name () ?? _("Character Sequence");
@@ -143,6 +145,18 @@ namespace Characters {
                 detail += "\n" + _("Recorded uses: %u").printf (counts.lookup (text));
             }
             label.label = detail;
+            item.accessible_label = "%s\n%s".printf (name, code);
+            item.accessible_description = mode != LibraryMode.FAVORITES ?
+                _("Recorded uses: %u").printf (counts.lookup (text)) : null;
+        }
+
+        /** Clears the recycled row and its accessible identity before reuse. */
+        private static void unbind_row (GLib.Object object) {
+            var item = (Gtk.ListItem) object;
+            var label = (Gtk.Label) item.child;
+            label.label = "";
+            item.accessible_label = null;
+            item.accessible_description = null;
         }
 
         /** Rebuilds at most 512 identities and preserves the selected text when possible. */

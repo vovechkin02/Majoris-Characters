@@ -608,6 +608,38 @@ private void test_compact_picker (Characters.Application application, MainWindow
     assert (full_scope.get_selected_row ().get_index () == 1 && full_filter.selected == 1);
 }
 
+/** Checks native shortcut labels and human-readable properties with stable code identifiers. */
+private void test_shortcuts (Characters.Application application, MainWindow window) {
+    var action = application.lookup_action ("shortcuts");
+    assert (action != null);
+    action.activate (null);
+    var dialog = window.get_visible_dialog () as ShortcutsDialog;
+    assert (dialog != null);
+    var search = find_widget (dialog, "shortcut_search") as Gtk.Label;
+    var help = find_widget (dialog, "shortcut_help") as Gtk.Label;
+    var global = find_widget (dialog, "shortcut_global") as Gtk.Label;
+    assert (search != null && help != null && global != null);
+    uint key;
+    Gdk.ModifierType modifiers;
+    var accelerators = application.get_accels_for_action ("win.search");
+    assert (accelerators.length == 1);
+    assert (Gtk.accelerator_parse (accelerators[0], out key, out modifiers));
+    assert (search.label == Gtk.accelerator_get_label (key, modifiers));
+    assert (help.label != "" && global.label != "");
+    assert (PropertyLabels.describe ("General_Category", "Lu") == "Uppercase letter (Lu)");
+    assert (PropertyLabels.describe ("Script", "Latn") == "Latin (Latn)");
+    assert (PropertyLabels.describe ("Script_Extensions", "Hira Kana") ==
+        "Hiragana (Hira), Katakana (Kana)");
+    assert (PropertyLabels.describe ("Bidi_Class", "R") == "Right-to-left (R)");
+    assert (PropertyLabels.describe ("Decomposition_Type", "Can") == "Canonical (Can)");
+    assert (PropertyLabels.describe ("East_Asian_Width", "W") == "Wide (W)");
+    assert (PropertyLabels.describe ("Emoji", "N") == "No (N)");
+    assert (PropertyLabels.describe ("Age", "17.0") == "17.0");
+    assert (PropertyLabels.describe ("General_Category", "future") == "future");
+    assert (PropertyLabels.describe ("Script", null) == null);
+    assert (dialog.close ());
+}
+
 /** Exercises actual widget models, search supersession, filters, reset and selection. */
 private void test_browser () {
     var application = new Characters.Application ();
@@ -635,6 +667,7 @@ private void test_browser () {
     var selection = grid.model as Gtk.SingleSelection;
     assert (selection != null);
     wait_for_page (selection, 512, "0");
+    test_shortcuts (application, window);
     assert (next.sensitive && !previous.sensitive);
     next.clicked ();
     assert (previous.sensitive);

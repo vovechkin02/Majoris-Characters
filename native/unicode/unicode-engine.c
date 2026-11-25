@@ -50,17 +50,18 @@ struct EmojiGroup {
     size_t count;
 };
 
+#define N_(message) (message)
 #define GROUP(name, array) { name, array, COUNT(array) }
 static const struct EmojiGroup emoji_groups[] = {
-    GROUP("Smileys & Emotion", emoji_smileys_characters),
-    GROUP("People & Body", emoji_people_characters),
-    GROUP("Animals & Nature", emoji_animals_characters),
-    GROUP("Food & Drink", emoji_food_characters),
-    GROUP("Travel & Places", emoji_travel_characters),
-    GROUP("Activities", emoji_activities_characters),
-    GROUP("Objects", emoji_objects_characters),
-    GROUP("Symbols", emoji_symbols_characters),
-    GROUP("Flags", emoji_flags_characters),
+    GROUP(N_("Smileys & Emotion"), emoji_smileys_characters),
+    GROUP(N_("People & Body"), emoji_people_characters),
+    GROUP(N_("Animals & Nature"), emoji_animals_characters),
+    GROUP(N_("Food & Drink"), emoji_food_characters),
+    GROUP(N_("Travel & Places"), emoji_travel_characters),
+    GROUP(N_("Activities"), emoji_activities_characters),
+    GROUP(N_("Objects"), emoji_objects_characters),
+    GROUP(N_("Symbols"), emoji_symbols_characters),
+    GROUP(N_("Flags"), emoji_flags_characters),
 };
 
 /** A bounded sequence used for lexicographic catalog lookup. */
@@ -433,6 +434,12 @@ char *characters_unicode_aliases(uint32_t point) {
 
 const char *characters_unicode_unihan_version(void) {
     return characters_unihan_version();
+}
+
+/** Resolve an ISO script code through the same snapshot used by browsing. */
+const char *characters_unicode_script_name(const char *code) {
+    int index = characters_scalar_script_index(code);
+    return index < 0 ? NULL : characters_scalar_script_name((size_t)index);
 }
 
 char *characters_unicode_property(uint32_t point, const char *property) {

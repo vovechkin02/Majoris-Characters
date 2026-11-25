@@ -371,3 +371,28 @@ The existing library settings backend is shared across processes; concurrent
 mutations are subject to its existing last-writer behavior. No new runtime
 dependency or schema migration is required. GUI lifecycle, exact handoff, and
 client output tests are registered in the existing integration test profiles.
+
+## Priority 8: accessibility and localization
+
+`ShortcutsDialog` presents the existing application accelerators through GTK's
+accelerator parser and localized label formatter. It reads the configured
+Shell shortcut from GSettings when opened and does not modify it. Contextual
+picker, composer and IBus guidance is declarative XML. The private client picker
+hides unavailable application/browser/composer sections. No new shortcut
+registry or custom key event framework is introduced.
+
+`PropertyLabels` is a presentation formatter, not a data source or an additional
+Unicode engine. It resolves script codes through the native immutable snapshot,
+uses gettext for display names and translates enumerated scalar properties.
+The browser retains native filter indexes; the inspector retains raw property
+values for individual copies and metadata reports. Canonical names, sequence
+identities and persisted settings remain unchanged. Extraction markers on the
+native tables do not change the native search or inspection contracts.
+
+GTK list item accessibility labels are assigned during factory binding and
+cleared on unbind, including font and saved-collection rows. Explicit paging
+and picker clipboard notifications use GTK 4.14 accessibility announcements;
+existing GTK keyboard navigation, selection state and toast infrastructure are
+retained. No custom Observer, Adapter or event bus is needed for these ordinary
+presentation responsibilities. The full GTK integration suite and manual
+screen-reader checks remain required to validate the runtime behavior.

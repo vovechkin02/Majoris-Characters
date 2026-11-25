@@ -196,12 +196,14 @@ namespace Characters {
             var tile = (CharacterTile) item.child;
             var id = (uint32) uint.parse (value.get_string ());
             tile.bind_id (id, grid_size_pt);
+            item.accessible_label = tile.tooltip_text;
         }
 
         /** Clears the tile before reuse; no result objects are retained by the cell. */
         private static void unbind_tile (GLib.Object object) {
             var item = (Gtk.ListItem) object;
             var tile = (CharacterTile) item.child;
+            item.accessible_label = null;
             tile.clear ();
         }
 
@@ -515,9 +517,8 @@ namespace Characters {
             for (size_t index = 0; index < Search.filter_count (scope); index++) {
                 unowned string? label = Search.filter_name (scope, index);
                 if (label != null) {
-                    model.append (scope == Search.Scope.SYMBOLS || scope == Search.Scope.LANGUAGE ||
-                        scope == Search.Scope.PLANE || scope == Search.Scope.UNASSIGNED ?
-                        _(label) : label);
+                    model.append (scope == Search.Scope.SCRIPT ?
+                        PropertyLabels.script_label (label) : _(label));
                     filter_slots += (int) index;
                 }
             }
@@ -679,6 +680,7 @@ namespace Characters {
             if (offset >= PAGE_SIZE) {
                 offset -= PAGE_SIZE;
                 show_page ();
+                result_count.announce (result_count.label, Gtk.AccessibleAnnouncementPriority.MEDIUM);
             }
         }
 
@@ -687,6 +689,7 @@ namespace Characters {
             if (results != null && offset + PAGE_SIZE < results.count ()) {
                 offset += PAGE_SIZE;
                 show_page ();
+                result_count.announce (result_count.label, Gtk.AccessibleAnnouncementPriority.MEDIUM);
             }
         }
 

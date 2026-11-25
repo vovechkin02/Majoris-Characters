@@ -12,6 +12,7 @@
     <file>ui/library-dialog.ui</file>
     <file>ui/main-window.ui</file>
     <file>ui/preferences-dialog.ui</file>
+    <file>ui/shortcuts-dialog.ui</file>
     <file alias="icons/scalable/apps/com.majoris.characters.svg">icons/com.majoris.characters.svg</file>
   </gresource>
 </gresources>

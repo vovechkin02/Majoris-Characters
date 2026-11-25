@@ -198,6 +198,20 @@ test('Release source contracts', python,
   timeout: 10,
 )
 
+test('German translation formats', find_program('msgfmt'),
+  args: ['--check-format', '-o', '/dev/null',
+         meson.project_source_root() / 'po/de.po'],
+  suite: 'source',
+  timeout: 10,
+)
+
+test('Spanish translation formats', find_program('msgfmt'),
+  args: ['--check-format', '-o', '/dev/null',
+         meson.project_source_root() / 'po/es.po'],
+  suite: 'source',
+  timeout: 10,
+)
+
 test('French translation formats', find_program('msgfmt'),
   args: ['--check-format', '-o', '/dev/null',
          meson.project_source_root() / 'po/fr.po'],

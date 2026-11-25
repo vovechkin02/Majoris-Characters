@@ -29,6 +29,7 @@ struct PropertyRange {
     uint8_t flags;
 };
 
+#define N_(message) (message)
 #include "generated/properties.h"
 
 /** Binary search comparator for inclusive scalar ranges. */
