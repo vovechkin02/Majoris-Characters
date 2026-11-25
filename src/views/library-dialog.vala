@@ -145,19 +145,6 @@ namespace Characters {
             label.label = detail;
         }
 
-        /** Tests local search against the identity and independently derived metadata. */
-        private static bool matches (string text, string query) {
-            if (query == "" || text.casefold ().contains (query)) {
-                return true;
-            }
-            var snapshot = Inspector.from_text (text);
-            if (snapshot == null) {
-                return false;
-            }
-            return (snapshot.name () ?? "").casefold ().contains (query) ||
-                (snapshot.format (Inspector.Format.CODE) ?? "").casefold ().contains (query);
-        }
-
         /** Rebuilds at most 512 identities and preserves the selected text when possible. */
         private void reload () {
             var previous = selected_text ();
@@ -175,7 +162,7 @@ namespace Characters {
             string[] visible = {};
             uint selected = Gtk.INVALID_LIST_POSITION;
             foreach (var text in values) {
-                if (matches (text, query)) {
+                if (LibraryQuery.matches (text, query)) {
                     if (previous == text) {
                         selected = (uint) visible.length;
                     }
@@ -188,6 +175,27 @@ namespace Characters {
                 _("Showing %d of %d Characters").printf (visible.length, values.length);
             library_clear.sensitive = values.length > 0;
             update_actions ();
+        }
+
+        /** Restores the compact picker's filter, selected identity and approximate scroll position. */
+        public void restore_context (string query, string? text, uint offset) {
+            library_query.text = query;
+            var model = selection.model;
+            if (model == null || model.get_n_items () == 0) {
+                return;
+            }
+            uint position = offset < model.get_n_items () ? offset : model.get_n_items () - 1;
+            if (text != null) {
+                for (uint index = 0; index < model.get_n_items (); index++) {
+                    var item = model.get_item (index) as Gtk.StringObject;
+                    if (item != null && item.get_string () == text) {
+                        selection.selected = index;
+                        position = index;
+                        break;
+                    }
+                }
+            }
+            library_list.scroll_to (position, Gtk.ListScrollFlags.NONE, null);
         }
 
         /** Returns the exact selected identity, independent of the current model lifetime. */

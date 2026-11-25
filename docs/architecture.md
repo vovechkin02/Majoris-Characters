@@ -264,7 +264,7 @@ opens the existing inspector. The Home menu can use the same provider protocol.
 
 `CompactPicker` is an independent GTK application window, using the existing
 `SearchController` and `LibraryStore`. It owns its model widgets, disconnects
-subscriptions on close, and displays up to 80 results. The application holds
+subscriptions on close, and displays up to 80 results per page. The application holds
 its clipboard owner until external replacement or explicit Quit, avoiding a
 picker-only process exiting immediately after a copy. `DesktopSearch` supplies
 the bounded query/result rules for both desktop search and the headless input
@@ -343,3 +343,31 @@ formatter; it deliberately differs from recursive normalization. The inspector
 reuses its navigation action and owned snapshot for the mapping. GTK's existing
 settings observers handle new sidebar visibility keys. No new GoF hierarchy is
 needed: these are extensions of existing native adapters and declarative views.
+
+
+## Priority 7: complete compact picker
+
+`CompactPicker` retains a completed `SearchRequest` and constructs at most 80
+native FlowBox cells at a time. Saved identities are bounded by `LibraryStore`;
+`LibraryQuery` centralizes matching for both the compact and full saved views.
+The picker uses native selection events (Observer), not a custom event bus or
+separate emoji engine. The existing `EmojiVariations` dialog can delegate its
+explicit selection to the invoking picker, which owns delivery and history
+recording. Normal dialog behavior remains unchanged for other callers.
+Catalog expansion transfers the native filter and absolute result position;
+the full browser re-runs its request and restores the selected ID, with stale
+handoffs discarded by the existing search controller. Saved expansion restores
+exact text, not a catalog-local numeric ID. Preference changes repaint the
+current page instead of restarting a completed search.
+
+The private `--pick-text` entry point runs a non-unique application instance.
+Its stdout pipe is a narrow subprocess boundary: a single exact identity on
+success, no output on cancellation, and no clipboard replacement. The caller
+owns insertion and cancellation; no general input-injection service or extra
+D-Bus API is introduced. This is direct composition with two delivery paths,
+not a speculative Strategy hierarchy. The standard picker retains its existing
+single-instance and clipboard hold contract, including nested dialog copies.
+The existing library settings backend is shared across processes; concurrent
+mutations are subject to its existing last-writer behavior. No new runtime
+dependency or schema migration is required. GUI lifecycle, exact handoff, and
+client output tests are registered in the existing integration test profiles.

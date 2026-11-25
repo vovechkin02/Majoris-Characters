@@ -157,7 +157,7 @@ namespace Characters {
             var code = selected_code ();
             var glyph = face.glyph (code, true);
             if (glyph != 0) {
-                get_clipboard ().set_text ("0x%04X — %u".printf (code, glyph));
+                Application.copy_widget_text (this, "0x%04X — %u".printf (code, glyph));
                 face_status.label = _("Copied Raw Code and Glyph Index");
             }
         }

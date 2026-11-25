@@ -136,7 +136,7 @@ namespace Characters {
         /** Copies only hexadecimal notation, never an opaque byte buffer as GTK text. */
         private void copy_bytes () {
             if (result_code != "") {
-                get_clipboard ().set_text (byte_input.text);
+                Application.copy_widget_text (this, byte_input.text);
                 sequence_status.label = _("Copied to Clipboard");
             }
         }

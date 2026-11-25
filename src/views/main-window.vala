@@ -106,6 +106,12 @@ namespace Characters {
         private uint offset = 0;
         /** Guards programmatic filter changes against recursive searches. */
         private bool updating_filters = false;
+        /** True only for the pending compact picker handoff request. */
+        private bool restore_picker = false;
+        /** Absolute index to restore when the handoff result is published. */
+        private uint restore_position;
+        /** Catalog-local identity, validated against the newly computed result. */
+        private uint32 restore_id = uint32.MAX;
         /** Signal handler ID, disconnected before shutdown. */
         private ulong completion_handler = 0;
 
@@ -419,6 +425,38 @@ namespace Characters {
             search_entry.grab_focus ();
         }
 
+        /** Restores a compact catalog scope and asynchronously selects its matching page. */
+        public void restore_picker_context (Search.Scope source, int filter, string query,
+                                            uint position, uint32 id) {
+            updating_filters = true;
+            scope = source;
+            var row = scope_list.get_row_at_index ((int) scope);
+            scope_list.select_row (row != null && row.visible ? row : null);
+            rebuild_collection_filter ();
+            for (uint index = 0; index < filter_slots.length; index++) {
+                if (filter_slots[index] == filter) {
+                    collection_filter.selected = index;
+                    break;
+                }
+            }
+            category_filter.selected = 0;
+            category_filter.visible = scope != Search.Scope.EMOJI;
+            search_entry.text = query;
+            updating_filters = false;
+            submit_search ();
+            restore_picker = true;
+            restore_position = position;
+            restore_id = id;
+        }
+
+        /** Opens the matching saved collection with the compact picker's selection intact. */
+        public void restore_library_context (LibraryMode mode, string query, string? text,
+                                             uint position) {
+            var dialog = new LibraryDialog (library, mode, composer);
+            dialog.present (this);
+            dialog.restore_context (query, text, position);
+        }
+
         /** Opens an independently validated desktop identity in the full inspector. */
         public void inspect_code (string code) {
             var snapshot = Inspector.from_code (code);
@@ -552,6 +590,7 @@ namespace Characters {
             if (updating_filters) {
                 return;
             }
+            restore_picker = false;
             var index = collection_filter.selected;
             var filter = index < (uint) filter_slots.length ? filter_slots[index] : -1;
             var category = category_filter.visible &&
@@ -589,6 +628,28 @@ namespace Characters {
                 return;
             }
             results_stack.visible_child_name = "results";
+            if (restore_picker) {
+                restore_picker = false;
+                var position = restore_position < request.count () ? restore_position :
+                    request.count () - 1;
+                bool found = restore_id != uint32.MAX && request.id (position) == restore_id;
+                if (!found && restore_id != uint32.MAX) {
+                    for (uint index = 0; index < request.count (); index++) {
+                        if (request.id (index) == restore_id) {
+                            position = index;
+                            found = true;
+                            break;
+                        }
+                    }
+                }
+                offset = position / PAGE_SIZE * PAGE_SIZE;
+                show_page ();
+                if (found) {
+                    selection.selected = position - offset;
+                }
+                character_grid.scroll_to (position - offset, Gtk.ListScrollFlags.NONE, null);
+                return;
+            }
             show_page ();
         }
 

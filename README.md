@@ -6,9 +6,9 @@ Unicode, international browsing, emoji data, and exact font inspection improveme
 
 | Project metadata | Value |
 | --- | --- |
-| Version | 1.0.6 |
+| Version | 1.0.7 |
 | Platform target | Majoris OS / Debian 13 (Trixie) |
-| Development status | Priority 6 — qualification candidate (not a verified stable release) |
+| Development status | Priority 7 — qualification candidate (not a verified stable release) |
 | Application ID | `com.majoris.characters` |
 | Debian package | `majoris-characters` |
 | License | GPL-3.0-or-later |
@@ -90,7 +90,8 @@ Unicode, international browsing, emoji data, and exact font inspection improveme
 - Configurable history retention and recording opt-out; favorites remain independent.
 - Searchable saved collections with copy, inspect, and add-to-composer actions.
 - Persistent sidebar category visibility, grid and font preview sizes, and font fallback.
-- Compact picker with catalog, emoji, symbols, favorites and recent collections.
+- Compact picker with emoji/symbol category filters, full pagination, favorites,
+  recent and frequent collections, variation selection and inspection.
 - GNOME Shell SearchProvider2, desktop action, and single-instance CLI activation.
 - Configurable opt-in GNOME Shell 48 shortcut and native IBus candidate insertion.
 
@@ -167,7 +168,7 @@ For Debian binary packages (run from the repository root):
 
 ```sh
 dpkg-buildpackage -us -uc -b
-sudo apt install ../majoris-characters_1.0.6-1_$(dpkg --print-architecture).deb
+sudo apt install ../majoris-characters_1.0.7-1_$(dpkg --print-architecture).deb
 ```
 
 The source package uses `3.0 (quilt)` and requires the corresponding upstream
@@ -186,7 +187,7 @@ Super+Period globally after explicit activation:
 gnome-extensions enable characters-picker@majoris.com
 ```
 
-The compact picker copies exact text. For direct insertion without clipboard
+The compact picker copies exact text, and cooperating applications can use the private `--pick-text` subprocess contract. For direct insertion without clipboard
 replacement, select the Characters IBus input source and use Ctrl+Shift+Period
 in a compatible application; type a query and choose a candidate. See the
 [desktop integration guide](docs/desktop-integration.md) for setup, keybinding
@@ -323,9 +324,9 @@ After installing the Debian package, the same runtime tests can target the real
 installed executable:
 
 ```sh
-python3 tests/integration/test_application.py /usr/bin/majoris-characters 1.0.6 cli
+python3 tests/integration/test_application.py /usr/bin/majoris-characters 1.0.7 cli
 xvfb-run -a dbus-run-session -- python3 \
-  tests/integration/test_application.py /usr/bin/majoris-characters 1.0.6 gui
+  tests/integration/test_application.py /usr/bin/majoris-characters 1.0.7 gui
 ```
 
 For a fresh, fail-closed automated build/test and optional Debian package gate:
@@ -335,7 +336,7 @@ python3 tools/qualification/qualify.py build-release --package
 ```
 
 See [ISO integration and desktop qualification](docs/release-integration.md) for
-installation and target runtime checks. See [Priority 6 qualification](docs/priority-6-qualification.md) for current evidence and
+installation and target runtime checks. See [Priority 7 qualification](docs/priority-7-qualification.md) for current evidence and
 [Stage 10 qualification](docs/stage-10-qualification.md) for historical
 verification results and remaining build/package checks. Historical Stage 1–9
 reports are preserved under `docs/`. Source inspection is

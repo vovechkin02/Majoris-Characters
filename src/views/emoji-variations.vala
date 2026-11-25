@@ -2,6 +2,10 @@ namespace Characters {
     /** Selects and copies exact catalog alternatives without altering the browser search. */
     [GtkTemplate (ui = "/com/majoris/characters/ui/emoji-variations.ui")]
     internal sealed class EmojiVariations : Adw.Dialog {
+        /** Emits an explicitly chosen exact sequence instead of writing to the clipboard. */
+        public signal void chosen (string text);
+        /** True when the invoking picker owns the final delivery operation. */
+        private bool delegated;
         /** Confirms explicit clipboard operations. */
         [GtkChild]
         private unowned Adw.ToastOverlay toast_overlay;
@@ -45,7 +49,15 @@ namespace Characters {
         private Emoji.Variants? variants;
 
         /** Builds a searchable selection list; preserves the incoming identity if available. */
-        public EmojiVariations (string text, ComposerView? composer = null, LibraryStore? library = null) {
+        public EmojiVariations (string text, ComposerView? composer = null,
+                                LibraryStore? library = null, bool delegated = false,
+                                bool client_mode = false) {
+            this.delegated = delegated;
+            if (delegated) {
+                copy_button.label = client_mode ? _("Insert Character") : _("Copy Character");
+                // The picker owns delivery and clipboard lifetime; inspect at the picker level.
+                inspect_button.visible = false;
+            }
             this.composer = composer;
             this.library = library;
             emoji_favorite.visible = library != null;
@@ -112,7 +124,14 @@ namespace Characters {
         private void copy_selected () {
             var text = selected_text ();
             if (text != null) {
-                get_clipboard ().set_text (text);
+                if (delegated) {
+                    // Close before notifying, because a client pick also closes its window.
+                    if (close ()) {
+                        chosen (text);
+                    }
+                    return;
+                }
+                Application.copy_widget_text (this, text);
                 var saved = library == null || library.record_use (text);
                 toast_overlay.add_toast (new Adw.Toast (saved ? _("Copied to Clipboard") :
                     _("Copied to Clipboard; Usage History Could Not Be Saved")));

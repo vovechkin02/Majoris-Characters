@@ -44,12 +44,20 @@
               </object>
             </child>
             <child>
-              <object class="GtkScrolledWindow">
+              <object class="GtkDropDown" id="picker_category">
+                <accessibility>
+                  <property name="label" translatable="yes">Character category</property>
+                </accessibility>
+              </object>
+            </child>
+            <child>
+              <object class="GtkScrolledWindow" id="picker_scroll">
                 <property name="vexpand">true</property>
                 <property name="hscrollbar-policy">never</property>
                 <child>
                   <object class="GtkFlowBox" id="picker_results">
-                    <property name="selection-mode">none</property>
+                    <property name="selection-mode">single</property>
+                    <property name="activate-on-single-click">false</property>
                     <accessibility>
                       <property name="label" translatable="yes">Character results</property>
                     </accessibility>
@@ -58,6 +66,75 @@
                     <property name="row-spacing">4</property>
                     <property name="column-spacing">4</property>
                     <property name="valign">start</property>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="GtkBox">
+                <property name="spacing">8</property>
+                <child>
+                  <object class="GtkButton" id="picker_previous">
+                    <property name="icon-name">go-previous-symbolic</property>
+                    <property name="tooltip-text" translatable="yes">Previous page</property>
+                    <accessibility>
+                      <property name="label" translatable="yes">Previous page</property>
+                    </accessibility>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkLabel" id="picker_count">
+                    <property name="hexpand">true</property>
+                    <property name="wrap">true</property>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkButton" id="picker_next">
+                    <property name="icon-name">go-next-symbolic</property>
+                    <property name="tooltip-text" translatable="yes">Next page</property>
+                    <accessibility>
+                      <property name="label" translatable="yes">Next page</property>
+                    </accessibility>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="GtkLabel" id="picker_selection">
+                <property name="wrap">true</property>
+                <property name="xalign">0</property>
+                <property name="max-width-chars">40</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkBox">
+                <property name="spacing">8</property>
+                <child>
+                  <object class="GtkButton" id="picker_commit">
+                    <property name="label" translatable="yes">Copy Character</property>
+                    <property name="hexpand">true</property>
+                    <style><class name="suggested-action"/></style>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkButton" id="picker_variations">
+                    <property name="label" translatable="yes">Variations</property>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="GtkBox">
+                <property name="spacing">8</property>
+                <child>
+                  <object class="GtkButton" id="picker_favorite">
+                    <property name="label" translatable="yes">Add to Favorites</property>
+                    <property name="hexpand">true</property>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkButton" id="picker_inspect">
+                    <property name="label" translatable="yes">Inspect Character</property>
                   </object>
                 </child>
               </object>

@@ -461,6 +461,21 @@ private void test_library (MainWindow window) {
     settings.reset ("grid-preview-size");
 }
 
+/** Waits for a compact page without assuming the native worker has completed. */
+private void wait_for_picker_page (Gtk.FlowBox results, int count) {
+    var deadline = get_monotonic_time () + WAIT_TIMEOUT_US;
+    var context = MainContext.default ();
+    while (get_monotonic_time () < deadline) {
+        context.iteration (false);
+        if ((count == 0 || results.get_child_at_index (count - 1) != null) &&
+            results.get_child_at_index (count) == null) {
+            return;
+        }
+        Thread.usleep (POLL_INTERVAL_US);
+    }
+    assert_not_reached ();
+}
+
 /** Verifies compact picker activation, supersession, exact copy and independent closure. */
 private void test_compact_picker (Characters.Application application, MainWindow window) {
     var action = application.lookup_action ("picker");
@@ -478,6 +493,26 @@ private void test_compact_picker (Characters.Application application, MainWindow
     var query = find_widget (picker, "picker_query") as Gtk.SearchEntry;
     var results = find_widget (picker, "picker_results") as Gtk.FlowBox;
     assert (scope != null && query != null && results != null);
+    var category = find_widget (picker, "picker_category") as Gtk.DropDown;
+    var next = find_widget (picker, "picker_next") as Gtk.Button;
+    var previous = find_widget (picker, "picker_previous") as Gtk.Button;
+    var commit = find_widget (picker, "picker_commit") as Gtk.Button;
+    var favorite = find_widget (picker, "picker_favorite") as Gtk.Button;
+    var variations = find_widget (picker, "picker_variations") as Gtk.Button;
+    var inspect = find_widget (picker, "picker_inspect") as Gtk.Button;
+    var expand = find_widget (picker, "expand_button") as Gtk.Button;
+    assert (category != null && next != null && previous != null && commit != null);
+    assert (favorite != null && variations != null && inspect != null && expand != null);
+    assert (scope.model.get_n_items () == 6 && category.model.get_n_items () == 10);
+    category.selected = 1;
+    wait_for_picker_page (results, 80);
+    assert (next.sensitive && !previous.sensitive);
+    next.clicked ();
+    assert (previous.sensitive);
+    previous.clicked ();
+    assert (!previous.sensitive);
+    scope.selected = 2;
+    assert (category.model.get_n_items () == 28);
     scope.selected = 0;
     query.text = "letter";
     query.text = "U+1F469 U+200D U+1F4BB";
@@ -501,13 +536,76 @@ private void test_compact_picker (Characters.Application application, MainWindow
         Thread.usleep (POLL_INTERVAL_US);
     }
     assert (first != null && first.get_child ().width_request == 80);
-    var button = first.get_child () as Gtk.Button;
-    assert (button != null);
-    button.clicked ();
+    results.select_child (first);
+    assert (commit.sensitive && variations.sensitive && inspect.sensitive);
+    settings.set_strv ("favorites", {});
+    favorite.clicked ();
+    assert (settings.get_strv ("favorites").length == 1);
+    assert (settings.get_strv ("favorites")[0] == "👩‍💻");
+    variations.clicked ();
+    var variant_dialog = picker.get_visible_dialog () as EmojiVariations;
+    assert (variant_dialog != null);
+    var variant_copy = find_widget (variant_dialog, "copy_button") as Gtk.Button;
+    assert (variant_copy != null);
+    variant_copy.clicked ();
     expect_clipboard (picker, "👩‍💻");
-    picker.close ();
+    inspect.clicked ();
+    var inspector = picker.get_visible_dialog () as CharacterInspector;
+    assert (inspector != null && inspector.close ());
+    commit.clicked ();
+    expect_clipboard (picker, "👩‍💻");
+    // Saved collection matches use the same literal-text filter as the full dialog.
+    query.text = "👩‍💻";
+    scope.selected = 3;
+    wait_for_picker_page (results, 1);
+    results.select_child (results.get_child_at_index (0));
+    favorite.clicked ();
+    assert (settings.get_strv ("favorites").length == 0);
+    assert (results.get_child_at_index (0) == null);
+    scope.selected = 5;
+    wait_for_picker_page (results, 1);
+    results.select_child (results.get_child_at_index (0));
+    expand.clicked ();
+    var library = window.get_visible_dialog () as LibraryDialog;
+    assert (library != null && library.title == "Frequently Used");
+    var list = find_widget (library, "library_list") as Gtk.ListView;
+    assert (list != null);
+    var saved_selection = list.model as Gtk.SingleSelection;
+    assert (saved_selection != null && saved_selection.selected == 0);
+    assert (library.close ());
     settings.reset ("grid-preview-size");
     assert (window.visible);
+
+    // A second-page selection must survive expansion into the full catalog.
+    action.activate (null);
+    foreach (var candidate in application.get_windows ()) {
+        if (candidate is CompactPicker && candidate.visible) {
+            picker = (CompactPicker) candidate;
+        }
+    }
+    results = find_widget (picker, "picker_results") as Gtk.FlowBox;
+    category = find_widget (picker, "picker_category") as Gtk.DropDown;
+    next = find_widget (picker, "picker_next") as Gtk.Button;
+    expand = find_widget (picker, "expand_button") as Gtk.Button;
+    assert (results != null && category != null && next != null && expand != null);
+    category.selected = 1;
+    wait_for_picker_page (results, 80);
+    next.clicked ();
+    results.select_child (results.get_child_at_index (0));
+    expand.clicked ();
+    var full_grid = find_widget (window, "character_grid") as Gtk.GridView;
+    var full_scope = find_widget (window, "scope_list") as Gtk.ListBox;
+    var full_filter = find_widget (window, "collection_filter") as Gtk.DropDown;
+    assert (full_grid != null && full_scope != null && full_filter != null);
+    var full_selection = full_grid.model as Gtk.SingleSelection;
+    assert (full_selection != null);
+    deadline = get_monotonic_time () + WAIT_TIMEOUT_US;
+    while (get_monotonic_time () < deadline && full_selection.selected != 80) {
+        context.iteration (false);
+        Thread.usleep (POLL_INTERVAL_US);
+    }
+    assert (full_selection.selected == 80);
+    assert (full_scope.get_selected_row ().get_index () == 1 && full_filter.selected == 1);
 }
 
 /** Exercises actual widget models, search supersession, filters, reset and selection. */
@@ -604,8 +702,48 @@ private void test_browser () {
     window.close ();
 }
 
+/** Drives the actual private picker window through the non-unique application lifecycle. */
+private int test_client_picker (string executable, bool cancel) {
+    var application = new Characters.Application (true);
+    Timeout.add (10, () => {
+        foreach (var window in application.get_windows ()) {
+            var picker = window as CompactPicker;
+            if (picker == null) {
+                continue;
+            }
+            var settings = new GLib.Settings (Characters.APP_ID);
+            settings.set_strv ("usage-history", {});
+            if (cancel) {
+                picker.close ();
+                return Source.REMOVE;
+            }
+            var query = find_widget (picker, "picker_query") as Gtk.SearchEntry;
+            var scope = find_widget (picker, "picker_scope") as Gtk.DropDown;
+            var results = find_widget (picker, "picker_results") as Gtk.FlowBox;
+            var commit = find_widget (picker, "picker_commit") as Gtk.Button;
+            assert (query != null && scope != null && results != null && commit != null);
+            picker.get_clipboard ().set_text ("unchanged");
+            scope.selected = 0;
+            query.text = "U+1F469 U+200D U+1F4BB";
+            wait_for_picker_page (results, 1);
+            results.select_child (results.get_child_at_index (0));
+            assert (commit.label == "Insert Character");
+            commit.clicked ();
+            assert (settings.get_strv ("usage-history").length == 0);
+            expect_clipboard (picker, "unchanged");
+            return Source.REMOVE;
+        }
+        return Source.CONTINUE;
+    });
+    return application.exit_status (application.run ({ executable, "--pick-text" }));
+}
+
 /** Runs the browser integration test in an isolated graphical and D-Bus session. */
 int main (string[] args) {
+    if (args.length == 2 && (args[1] == "--client-pick-test" ||
+        args[1] == "--client-cancel-test")) {
+        return test_client_picker (args[0], args[1] == "--client-cancel-test");
+    }
     Test.init (ref args);
     Test.add_func ("/characters/browser/interaction", test_browser);
     return Test.run ();

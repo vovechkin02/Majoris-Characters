@@ -102,6 +102,13 @@ class CommandLineTest(ApplicationTest):
         """Advertise the supported local version option."""
         result = self.run_command(EXECUTABLE, "--help")
         self.assertIn("--version", result.stdout)
+        self.assertIn("--pick-text", result.stdout)
+
+    def test_picker_argument_contract(self) -> None:
+        """Reject mixed private-picker arguments locally without a display."""
+        result = self.run_command(EXECUTABLE, "--pick-text", "--version", check=False)
+        self.assertEqual(result.returncode, 2)
+        self.assertEqual(result.stdout, "")
 
     def test_invalid_option(self) -> None:
         """Reject an unknown option rather than starting a window."""
@@ -210,6 +217,19 @@ class BrowserTest(ApplicationTest):
         self.env["GSETTINGS_BACKEND"] = "memory"
         result = self.run_command(EXECUTABLE, timeout=45)
         print(result.stdout, end="")
+
+    def test_private_picker_result(self) -> None:
+        """Validate exact unframed UTF-8 output and a separate canceled request."""
+        self.env["GSETTINGS_BACKEND"] = "memory"
+        for option, status, expected in (
+            ("--client-pick-test", 0, "👩‍💻".encode()),
+            ("--client-cancel-test", 1, b""),
+        ):
+            with self.subTest(option=option):
+                result = subprocess.run([EXECUTABLE, option], env=self.env,
+                                        capture_output=True, timeout=20, check=False)
+                self.assertEqual(result.returncode, status, result.stderr)
+                self.assertEqual(result.stdout, expected)
 
 
 def main() -> int:

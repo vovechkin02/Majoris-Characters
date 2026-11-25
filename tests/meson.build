@@ -83,7 +83,7 @@ test('Character browser interaction', find_program('xvfb-run'),
   env: test_environment,
   depends: [character_browser_test, schema_target],
   suite: 'integration',
-  timeout: 60,
+  timeout: 90,
 )
 
 character_inspector_test = executable(

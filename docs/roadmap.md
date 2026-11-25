@@ -40,4 +40,8 @@ application and GJS are not runtime dependencies of the main application. The op
 - Priority 6: Direct scalar decomposition, Linux Unicode entry guidance, 17-plane
   browsing, reserved/noncharacter inspection, and 27 semantic collections
   implemented. Native contracts passed; GTK qualification remains outstanding.
-  Next functional priority: compact picker improvements.
+- Priority 7: Compact picker category filters, bounded full-result pagination,
+  frequent history, favorites management, inspector and variation actions,
+  state-preserving expansion and private client selection implemented at source
+  level. GTK and client integration tests remain to be run. Next functional
+  priority: accessibility and localization.

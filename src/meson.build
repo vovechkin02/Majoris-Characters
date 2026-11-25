@@ -21,7 +21,7 @@ integration_sources = files(
   'integration/desktop-search.vala',
   'integration/search-provider.vala',
 )
-application_sources = files('app/application.vala') + integration_sources + font_sources + library_sources + search_sources + files(
+application_sources = files('app/application.vala', 'library/library-query.vala') + integration_sources + font_sources + library_sources + search_sources + files(
   'views/character-inspector.vala',
   'views/character-tile.vala',
   'views/compact-picker.vala',

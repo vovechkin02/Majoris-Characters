@@ -5,5 +5,7 @@ int main (string[] args) {
     Intl.bind_textdomain_codeset (Characters.GETTEXT_PACKAGE, "UTF-8");
     Intl.textdomain (Characters.GETTEXT_PACKAGE);
 
-    return new Characters.Application ().run (args);
+    var client_mode = args.length == 2 && args[1] == "--pick-text";
+    var application = new Characters.Application (client_mode);
+    return application.exit_status (application.run (args));
 }

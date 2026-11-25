@@ -13,20 +13,67 @@ within the current user's desktop/input session.
 
 The picker is an independent 400 × 480 logical-pixel default window. Opening it
 again presents the existing picker, not a new copy. Select All Characters,
-Emoji (default), Symbols, Favorites or Recently Used, and search within that
-collection. The catalog search is asynchronous and canceled on replacement.
-The view honors the persisted character grid preview size, and shows up to 80
-exact identities; refine the query for additional
-results. Click a character or press Enter from the search field to copy it.
-Keyboard navigation through the result buttons is provided by GTK. Escape
-closes the picker; the full browser remains independent. The header's expand
-button transfers the query to the full catalog. The picker stays open after a
-copy. The application retains its local clipboard ownership while needed,
-including after the picker closes. Normal clipboard limitations still apply;
-explicit Quit ends the process. NUL cannot be represented in a GTK text clipboard.
+Emoji (default), Symbols, Favorites, Recently Used or Frequently Used. Emoji
+and Symbols expose the same nine and 27 category filters as the full browser.
+Catalog queries are asynchronous and canceled on replacement. The view honors
+the saved grid preview size. Previous/Next page through the complete result
+set with at most 80 constructed cells; saved collections use the same filter
+and ordering policies as their full dialogs.
 
-The compact picker is a clipboard interface, not a privileged cross-application
-text injection interface. Paste into the target application normally.
+Select a character to inspect its name and code points. Copy Character or
+activate a cell (double-click or keyboard activation) to copy. Enter in the
+search field uses the selection or the first result. Ctrl+F focuses search;
+Escape closes the picker. Variations opens the existing catalog-backed emoji
+family selector, including skin tones. Its explicit copy uses the picker's
+clipboard and usage policy. Add to Favorites/Remove Favorite changes the
+independent saved collection; Inspect Character opens the shared inspector.
+NUL may be inspected but cannot be copied or returned as GTK text.
+
+The expand button transfers the collection, native category, query, absolute
+result position and selected identity into the full application. Catalog
+handoff re-runs the same asynchronous request and locates the exact catalog
+identity before selecting it on the full browser's 512-result page. Saved
+collections open their full dialog with the filter and selected text restored.
+When the relevant sidebar row is hidden by preferences, the handoff still
+retains its scope without overriding the user's visibility setting.
+
+The picker stays open after a copy. The application retains local clipboard
+ownership while needed, including after the picker closes. Normal clipboard
+limitations still apply; explicit Quit ends the process.
+
+## Private selection for cooperating applications
+
+Launch `majoris-characters --pick-text` as a child process using an argument
+vector (no shell), with stdout captured as bytes and stderr separate. This
+option must be used alone. It starts a non-unique application instance and
+never exports or takes over the primary desktop search provider. The normal
+picker and global shortcut remain independent.
+
+| Child exit status | Stdout contract |
+| --- | --- |
+| 0 | One exact UTF-8 identity, 1–32 scalars, at most 128 bytes, no terminator |
+| 1 | Canceled by closing the picker; no output |
+| 2 | Invalid invocation or output error; do not consume stdout |
+| Other nonzero | Startup or process failure; do not consume stdout |
+
+The private picker offers the same catalog, categories, pages, saved collections
+and variation selection. Insert Character (or cell activation) returns the
+exact text and closes the picker. It does not touch the clipboard, inject
+keystrokes, use a global input context, or record speculative usage. Expansion
+and the ordinary inspector are hidden in private mode to prevent alternate
+clipboard workflows. Favorites remain explicitly editable.
+
+The caller should launch asynchronously (for example with `Gio.Subprocess`
+and `communicate_utf8_async`), own the target editor or text buffer, retain only
+a valid insertion target, and cancel/terminate its child on document closure.
+After completion, accept status 0 only, validate nonempty UTF-8, reject embedded
+NUL and oversized output, and insert the unmodified sequence through the
+caller's own editor API. Do not strip whitespace, normalize, interpret as a
+command, or send it to another application. A caller may use the existing
+`--record-insertion=TEXT` command after confirmed insertion if appropriate for
+its privacy policy. Avoid invoking the private picker in sensitive inputs.
+There is no automatic insertion into unrelated Wayland clients; the ordinary
+clipboard picker and optional IBus path serve those separate use cases.
 
 ## Home menu and GNOME Shell search
 

@@ -9,10 +9,19 @@ namespace Characters {
         private Gdk.Clipboard? picker_clipboard;
         /** Signal subscription owned while the application holds clipboard text. */
         private ulong clipboard_handler;
+        /** Independent client process: no desktop bus ownership or clipboard commit. */
+        private bool client_mode;
+        /** Zero only after writing one exact selection to the client's stdout pipe. */
+        private int client_status = 1;
 
         /** Creates the application with its stable desktop identity and local version option. */
-        public Application () {
-            Object (application_id: APP_ID, flags: ApplicationFlags.HANDLES_COMMAND_LINE);
+        public Application (bool client_mode = false) {
+            Object (application_id: client_mode ? null : APP_ID,
+                flags: ApplicationFlags.HANDLES_COMMAND_LINE |
+                (client_mode ? ApplicationFlags.NON_UNIQUE : ApplicationFlags.FLAGS_NONE));
+            this.client_mode = client_mode;
+            add_main_option ("pick-text", 0, OptionFlags.NONE, OptionArg.NONE,
+                _("Return one explicitly selected character to the requesting application"), null);
             add_main_option ("version", 'v', OptionFlags.NONE, OptionArg.NONE,
                 _("Show the application version"), null);
             add_main_option ("unicode-version", 0, OptionFlags.NONE, OptionArg.NONE,
@@ -31,6 +40,10 @@ namespace Characters {
 
         /** Answers version requests locally without requiring a graphical session. */
         protected override int handle_local_options (VariantDict options) {
+            if (options.contains ("pick-text") && !client_mode) {
+                printerr (_("Use --pick-text without other arguments.\n"));
+                return 2;
+            }
             if (options.contains ("version")) {
                 print ("Characters %s\n", VERSION);
                 return 0;
@@ -60,6 +73,9 @@ namespace Characters {
         /** Registers application actions once on the primary instance. */
         protected override void startup () {
             base.startup ();
+            if (client_mode) {
+                return;
+            }
 
             var picker_action = new SimpleAction ("picker", null);
             picker_action.activate.connect (() => {
@@ -84,6 +100,9 @@ namespace Characters {
             throws Error {
             if (!base.dbus_register (connection, object_path)) {
                 return false;
+            }
+            if (client_mode) {
+                return true;
             }
             provider = new SearchProvider (this);
             try {
@@ -110,6 +129,10 @@ namespace Characters {
 
         /** Routes command-line activation through the primary graphical instance. */
         protected override int command_line (ApplicationCommandLine command) {
+            if (client_mode) {
+                open_picker ();
+                return 0;
+            }
             var options = command.get_options_dict ();
             var insertion = options.lookup_value ("record-insertion", VariantType.STRING);
             if (insertion != null) {
@@ -142,7 +165,11 @@ namespace Characters {
 
         /** Presents the main browser even when the compact picker is active. */
         protected override void activate () {
-            main_window ().present ();
+            if (client_mode) {
+                open_picker ();
+            } else {
+                main_window ().present ();
+            }
         }
 
         /** Reuses one full browser; the compact picker has a separate lifetime. */
@@ -176,11 +203,56 @@ namespace Characters {
             window.present_with_time (timestamp);
         }
 
+        /** Transfers the compact catalog context into the independent main window. */
+        public void open_picker_context (Search.Scope scope, int filter, string query,
+                                         uint position, uint32 id) {
+            var window = main_window ();
+            window.present ();
+            window.restore_picker_context (scope, filter, query, position, id);
+        }
+
+        /** Transfers a saved collection into its full browser dialog. */
+        public void open_library_context (LibraryMode mode, string query, string? text,
+                                          uint position) {
+            var window = main_window ();
+            window.present ();
+            window.restore_library_context (mode, query, text, position);
+        }
+
+        /** Returns whether the picker is serving a single private subprocess request. */
+        public bool is_client_picker () {
+            return client_mode;
+        }
+
+        /** Returns the exact selection without copying or recording speculative insertion. */
+        public void finish_client_pick (string text) {
+            if (!client_mode || client_status != 1 || !LibraryStore.is_valid (text)) {
+                return;
+            }
+            client_status = stdout.printf ("%s", text) >= 0 && stdout.flush () == 0 ? 0 : 2;
+        }
+
+        /** Preserves framework errors and reports a canceled private request as exit status 1. */
+        public int exit_status (int status) {
+            return status == 0 && client_mode ? client_status : status;
+        }
+
         /** Opens the selected Unicode identity in its own inspector. */
         public void open_identity (string code, uint timestamp) {
             var window = main_window ();
             window.present_with_time (timestamp);
             window.inspect_code (code);
+        }
+
+        /** Retains clipboard ownership for copies from a compact picker or its nested dialogs. */
+        public static void copy_widget_text (Gtk.Widget widget, string text) {
+            var picker = widget.get_root () as CompactPicker;
+            var application = picker != null ? picker.application as Application : null;
+            if (application != null && !application.is_client_picker ()) {
+                application.copy_from_picker (widget.get_clipboard (), text);
+            } else {
+                widget.get_clipboard ().set_text (text);
+            }
         }
 
         /** Retains the primary process until another owner replaces the picker clipboard. */

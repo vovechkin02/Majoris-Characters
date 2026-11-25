@@ -557,7 +557,7 @@ namespace Characters {
 
         /** Publishes text to the display clipboard after an explicit user action. */
         private void copy_text (string text, bool record = false) {
-            get_clipboard ().set_text (text);
+            Application.copy_widget_text (this, text);
             var saved = !record || library == null || library.record_use (text);
             toast_overlay.add_toast (new Adw.Toast (saved ? _("Copied to Clipboard") :
                 _("Copied to Clipboard; Usage History Could Not Be Saved")));
