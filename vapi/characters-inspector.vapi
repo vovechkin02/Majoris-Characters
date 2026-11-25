@@ -67,6 +67,10 @@ namespace Characters.Inspector {
         public string[]? related ();
     }
 
+    /** Direct decomposition mapping in U+ notation, or null if absent or unavailable. */
+    [CCode (cname = "characters_inspector_decomposition")]
+    public static string? decomposition (uint32 point);
+
     /** Opaque browsing identity. Snapshot or NULL for an invalid identity or allocation failure. */
     [CCode (cname = "characters_inspector_from_id")]
     public static Snapshot? from_id (uint32 id);

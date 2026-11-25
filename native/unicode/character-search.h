@@ -23,7 +23,11 @@ typedef enum {
     /** Han radical groups, using official data or labeled collation fallback. */
     CHARACTERS_SEARCH_RADICAL,
     /** Han stroke-count groups, using official data or labeled collation fallback. */
-    CHARACTERS_SEARCH_STROKES
+    CHARACTERS_SEARCH_STROKES,
+    /** Assigned scalars grouped by Unicode plane. */
+    CHARACTERS_SEARCH_PLANE,
+    /** Reserved and noncharacter scalar values grouped by plane. */
+    CHARACTERS_SEARCH_UNASSIGNED
 } CharactersSearchScope;
 
 /** Completion status; canceled or failed jobs never expose partial results. */

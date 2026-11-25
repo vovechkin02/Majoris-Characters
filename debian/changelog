@@ -1,3 +1,12 @@
+majoris-characters (1.0.6-1) unstable; urgency=medium
+
+  * Add browsing by Unicode plane and a reserved/noncharacter inspection scope.
+  * Expand semantic collections using Unicode properties and curated range tables.
+  * Inspect direct decomposition mappings and show Linux Unicode keyboard guidance.
+  * Add persistent category visibility and focused native and GTK contracts.
+
+ -- Vlad Ovechkin <45165533+vovechkin02@users.noreply.github.com>  Wed, 25 Nov 2026 21:00:00 +1100
+
 majoris-characters (1.0.5-1) unstable; urgency=medium
 
   * Expand the legacy encoding catalog to 77 ICU character sets.

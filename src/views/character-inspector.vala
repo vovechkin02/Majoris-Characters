@@ -226,6 +226,16 @@ namespace Characters {
             var code = snapshot.format (Inspector.Format.CODE) ?? "";
             var name = snapshot.name () ?? (snapshot.count () == 1 ?
                 _("No Canonical Name") : _("Character Sequence"));
+            var unassigned = false;
+            for (size_t index = 0; index < snapshot.count (); index++) {
+                if (!Unicode.is_assigned (snapshot.point (index))) {
+                    unassigned = true;
+                    break;
+                }
+            }
+            if (unassigned && snapshot.count () == 1) {
+                name = _(Search.name (snapshot.point (0)) ?? "Unassigned Character");
+            }
             identity_name.label = name;
             identity_code.label = code;
             var text = snapshot.text ();
@@ -237,6 +247,9 @@ namespace Characters {
             if (text == null) {
                 preview_note.label = _("This sequence cannot be represented as clipboard text. " +
                     "Copy its code points or encodings instead.");
+            } else if (unassigned) {
+                preview_note.label = _("This sequence contains reserved scalar values or " +
+                    "noncharacters. No assigned glyph is implied. Copying preserves the code points.");
             } else if (text != preview.label) {
                 preview_note.label = _("Placeholders show nonprinting or combining characters. " +
                     "Copy preserves the original sequence.");
@@ -290,6 +303,9 @@ namespace Characters {
         private void append_properties (Gtk.Box? target, StringBuilder? metadata, uint32 point) {
             add_field (target, metadata, _("Code point"), "U+%04X".printf (point));
             add_field (target, metadata, _("Canonical name"), Unicode.name (point));
+            if (!Unicode.is_assigned (point)) {
+                add_field (target, metadata, _("Scalar status"), _(Search.name (point) ?? "Unassigned Character"), false);
+            }
             add_field (target, metadata, _("Aliases"), Unicode.aliases (point));
             add_field (target, metadata, _("Assigned in catalog"),
                 Unicode.is_assigned (point) ? _("Yes") : _("No"));
@@ -306,6 +322,25 @@ namespace Characters {
             for (var index = 0; index < keys.length; index++) {
                 add_field (target, metadata, labels[index],
                     Unicode.get_property_value (point, keys[index]));
+            }
+            var decomposition = Inspector.decomposition (point);
+            var decomposition_type = Unicode.get_property_value (point, "Decomposition_Type");
+            add_field (target, metadata, _("Direct decomposition mapping"),
+                decomposition ?? (decomposition_type == "None" ? _("None") : null),
+                decomposition != null);
+            if (target != null && decomposition != null) {
+                var button = new Gtk.Button.with_label (_("Inspect Decomposition"));
+                button.set_action_target_value (new Variant.string (decomposition));
+                button.action_name = "inspect.related";
+                target.append (button);
+            }
+            if (point != 0 && Unicode.is_assigned (point)) {
+                add_field (target, metadata, _("Linux Unicode keyboard entry"),
+                    _("Ctrl+Shift+U, then %X, then Enter").printf (point));
+                add_field (target, metadata, _("Keyboard entry note"),
+                    _("Available in compatible GTK or input-method text fields. Other " +
+                      "applications may not support this shortcut. For a sequence, enter " +
+                      "each scalar separately or copy the complete sequence."), false);
             }
             append_han_properties (target, metadata, point);
         }

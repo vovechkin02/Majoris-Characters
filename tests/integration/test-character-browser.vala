@@ -266,9 +266,16 @@ private void test_inspector (MainWindow window) {
     assert (dialog.activate_action_variant ("inspect.back", null));
     assert (identity.label == "U+1F469 U+200D U+1F4BB");
 
+    input.buffer.text = "U+01FA";
+    assert (dialog.activate_action_variant ("inspect.identify-code", null));
+    assert (identity.label == "U+01FA");
+    assert (dialog.activate_action_variant ("inspect.related", new Variant.string ("U+00C5 U+0301")));
+    assert (identity.label == "U+00C5 U+0301");
+    assert (dialog.activate_action_variant ("inspect.back", null));
+    assert (identity.label == "U+01FA");
     input.buffer.text = "U+D800";
     assert (dialog.activate_action_variant ("inspect.identify-code", null));
-    assert (error_label.visible && identity.label == "U+1F469 U+200D U+1F4BB");
+    assert (error_label.visible && identity.label == "U+01FA");
     input.buffer.text = "U+0000";
     assert (dialog.activate_action_variant ("inspect.identify-code", null));
     assert (!error_label.visible && identity.label == "U+0000" && !copy.sensitive && !add.sensitive);
@@ -567,6 +574,24 @@ private void test_browser () {
     wait_for_page (selection, 128, "0");
     category.selected = 3;
     wait_for_page (selection, 10, "48");
+
+    entry.text = "U+1F600";
+    scope_list.select_row (scope_list.get_row_at_index ((int) Search.Scope.PLANE));
+    collection.selected = 2;
+    wait_for_page (selection, 1, "128512");
+    entry.text = "U+0378";
+    scope_list.select_row (scope_list.get_row_at_index ((int) Search.Scope.UNASSIGNED));
+    collection.selected = 1;
+    wait_for_page (selection, 1, "888");
+    selection.selected = 0;
+    assert (selected_name.label == "Unassigned Character" && inspect.sensitive);
+    assert (!category.visible);
+    inspect.clicked ();
+    var reserved_dialog = window.get_visible_dialog () as CharacterInspector;
+    assert (reserved_dialog != null);
+    var reserved_name = find_widget (reserved_dialog, "identity_name") as Gtk.Label;
+    assert (reserved_name != null && reserved_name.label == "Unassigned Character");
+    assert (reserved_dialog.close ());
 
     var reset = window.lookup_action ("reset-search");
     assert (reset != null);

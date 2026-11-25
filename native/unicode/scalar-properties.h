@@ -8,6 +8,9 @@
 /** Return the Unicode 17 general category in ICU UCharCategory numeric order. */
 int characters_scalar_category(uint32_t point);
 
+/** Return the Unicode 17 decomposition type in ICU UDecompositionType order. */
+int characters_scalar_decomposition_type(uint32_t point);
+
 /** Return the canonical combining class; zero for invalid code points. */
 unsigned characters_scalar_combining_class(uint32_t point);
 

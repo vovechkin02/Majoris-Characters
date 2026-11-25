@@ -96,6 +96,16 @@
       <summary>Show Han stroke groups</summary>
       <description>Show this browsing category in the sidebar.</description>
     </key>
+    <key name="show-planes" type="b">
+      <default>true</default>
+      <summary>Show Unicode planes</summary>
+      <description>Show this browsing category in the sidebar.</description>
+    </key>
+    <key name="show-unassigned" type="b">
+      <default>true</default>
+      <summary>Show unassigned scalars and noncharacters</summary>
+      <description>Show this inspection category in the sidebar.</description>
+    </key>
     <key name="show-fonts" type="b">
       <default>true</default>
       <summary>Show fonts</summary>

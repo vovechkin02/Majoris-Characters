@@ -149,6 +149,12 @@ bool characters_scalar_is_ignorable(uint32_t point) {
     return row && (row->flags & (1u << 4));
 }
 
+/** Return the Unicode 17 decomposition type without allocating a property string. */
+int characters_scalar_decomposition_type(uint32_t point) {
+    const struct PropertyRange *row = lookup(point);
+    return row ? row->decomposition : U_DT_NONE;
+}
+
 /** Return a newly allocated algorithmic name or NULL when not applicable. */
 char *characters_scalar_algorithmic_name(uint32_t point) {
     const struct PropertyRange *row = lookup(point);

@@ -8,16 +8,16 @@ emoji and named sequences. Scalars are ordered by code point. Emoji appear in
 upstream semantic group order; named sequences retain supplement order. The
 same exact sequence is emitted once in global results if both catalogs match;
 its catalog-specific identity remains available in its dedicated scope.
-Surrogates, unassigned scalars and noncharacters are not treated as characters.
+Surrogates, unassigned scalars and noncharacters are excluded from All Characters.
 
 The Emoji scope retains exact fully qualified sequences and their upstream
-names, including single-scalar emoji. The Symbols scope provides 17 overlapping
+names, including single-scalar emoji. The Symbols scope provides 27 overlapping
 semantic collections. The Scripts scope uses the Unicode 17 Script and Script_Extensions properties;
 Unicode Blocks uses the independently versioned GNOME block table. Named
 Sequences exposes the standardized supplement. The collection dropdown offers
 all nine emoji groups, encoded script slots, 346 Unicode blocks, or symbol
 collections as appropriate. A general-category dropdown can further constrain
-scalar results; it is hidden for the dedicated emoji and named-sequence scopes.
+scalar results; it is hidden for emoji, named sequences and unassigned scalars.
 When a general-category filter is selected in All Characters, multi-scalar
 sequences are excluded because they do not have one scalar category.
 
@@ -25,10 +25,33 @@ Shared script characters match each applicable script. Language and configured
 keyboard collections resolve to script unions. The full assigned repertoire uses the
 bundled Unicode 17 property snapshot. Unicode block entries that
 contain only unassigned or surrogate points return an empty grid. Symbols use
-explicit Unicode ranges and general categories, not an exhaustive semantic
-ontology; the global scope covers the complete available catalog regardless of
+indexed curated ranges, general categories, and Unicode decomposition and
+whitespace properties, not an exhaustive semantic ontology; the global scope covers the complete available catalog regardless of
 semantic classification. Underlying English catalog data and labels are not
 localized at this stage.
+
+### Planes and unassigned values
+
+Unicode Planes groups assigned scalars by their high sixteen bits, from plane 0
+through plane 16, including supplementary private-use planes. It does not include
+composite sequence identities, since a sequence is not a single plane member.
+Unassigned & Noncharacters uses the same filters to browse valid, unassigned
+scalar values; the 66 permanent noncharacters have a distinct display name.
+Surrogates are excluded from both modes. Reserved values and noncharacters use a
+placeholder, never an inferred glyph. Exact numeric values remain inspectable
+and copyable, as with legacy repertoire mappings. Both sidebar entries can be
+hidden in Preferences. The global assigned-character catalog is unchanged.
+
+### Expanded semantic collections
+
+Ten new overlapping collections retain existing slot numbers: Superscripts,
+Subscripts, Fractions, Whitespace, Quotation Marks, Accessibility Symbols,
+Letterlike Symbols, Religious Symbols, Variation Selectors, and Block Elements.
+The Technical collection also includes selected computing, engineering and
+keyboard symbols. Superscript/subscript/fraction membership uses Unicode 17
+Decomposition_Type; whitespace uses the stable Unicode White_Space property.
+Quotation and other semantic groups use curated ranges and general categories.
+These are convenience collections rather than a normative Unicode classification.
 
 ## Query syntax
 
@@ -52,7 +75,7 @@ four-to-six all-letter hex matches the scalar and metadata. A one-character
 query is treated as a literal scalar. Use explicit `U+` or `0x` for unambiguous
 numeric queries, including one-digit values, and `dec:` for decimal. Explicit
 numeric sequences require a base prefix on each value. Unassigned valid scalars
-return no result; malformed explicitly numeric input, invalid UTF-8, surrogate
+return no result in ordinary assigned scopes; malformed explicitly numeric input, invalid UTF-8, surrogate
 values and out-of-range values report invalid input. Input is bounded to 512
 UTF-8 bytes, 64 terms, and 32 scalars for a numeric sequence. Queries are not
 normalized: only exact catalog sequences are identified as sequences. Arbitrary

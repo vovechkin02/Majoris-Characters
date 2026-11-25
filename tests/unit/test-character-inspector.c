@@ -5,7 +5,10 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <unicode/uchar.h>
+
 #include "character-search.h"
+#include "scalar-properties.h"
 #include "unicode-engine.h"
 
 /** Check an owned value and release it once the expected representation is verified. */
@@ -174,7 +177,10 @@ static void test_invalid_input(void) {
     assert(!characters_inspector_from_text("012345678901234567890123456789012"));
     assert(!characters_inspector_from_id(UINT32_MAX));
     assert(!characters_inspector_from_id(0xD800));
-    assert(!characters_inspector_from_id(0x0378));
+    CharactersInspector *reserved = characters_inspector_from_id(0x0378);
+    assert(reserved && characters_inspector_count(reserved) == 1);
+    expect_text(characters_inspector_display(reserved), "·");
+    characters_inspector_free(reserved);
     assert(characters_inspector_count(NULL) == 0);
     assert(characters_inspector_point(NULL, 0) == UINT32_MAX);
     assert(!characters_inspector_display(NULL));
@@ -188,6 +194,39 @@ static void test_invalid_input(void) {
     characters_inspector_free(snapshot);
 }
 
+/** Raw decomposition differs from recursive normalization and includes the Unicode 17 delta. */
+static void test_direct_decomposition(void) {
+    expect_text(characters_inspector_decomposition(0x00E9), "U+0065 U+0301");
+    expect_text(characters_inspector_decomposition(0x01FA), "U+00C5 U+0301");
+    expect_text(characters_inspector_decomposition(0xAC01), "U+AC00 U+11A8");
+    expect_text(characters_inspector_decomposition(0x00BD), "U+0031 U+2044 U+0032");
+    expect_text(characters_inspector_decomposition(0xA7F1), "U+0053");
+    assert(!characters_inspector_decomposition('A'));
+    assert(!characters_inspector_decomposition(0x0378));
+    assert(!characters_inspector_decomposition(0xD800));
+    assert(!characters_inspector_decomposition(0x110000));
+    size_t mappings = 0;
+    for (uint32_t point = 0; point <= 0x10FFFF; point++) {
+        if (characters_scalar_decomposition_type(point) == U_DT_NONE) {
+            continue;
+        }
+        char *code = characters_inspector_decomposition(point);
+        assert(code);
+        CharactersInspector *mapping = characters_inspector_from_code(code);
+        assert(mapping && characters_inspector_count(mapping) > 0);
+        characters_inspector_free(mapping);
+        free(code);
+        mappings++;
+    }
+    assert(mappings > 10000);
+    printf("Direct decomposition mappings: %zu\n", mappings);
+    CharactersInspector *snapshot = characters_inspector_from_id(0x10FFFF);
+    assert(snapshot);
+    expect_text(characters_inspector_format(snapshot, CHARACTERS_INSPECTOR_CODE), "U+10FFFF");
+    expect_text(characters_inspector_display(snapshot), "·");
+    characters_inspector_free(snapshot);
+}
+
 /** Runs the native inspection contracts with assertions enabled. */
 int main(void) {
     test_encodings();
@@ -195,6 +234,7 @@ int main(void) {
     test_nonprinting();
     test_normalization();
     test_invalid_input();
-    puts("5 character inspector contract groups passed");
+    test_direct_decomposition();
+    puts("6 character inspector contract groups passed");
     return 0;
 }

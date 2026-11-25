@@ -132,6 +132,16 @@
                       </object>
                     </child>
                     <child>
+                      <object class="AdwSwitchRow" id="show_planes">
+                        <property name="title" translatable="yes">Unicode Planes</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="AdwSwitchRow" id="show_unassigned">
+                        <property name="title" translatable="yes">Unassigned &amp; Noncharacters</property>
+                      </object>
+                    </child>
+                    <child>
                       <object class="AdwSwitchRow" id="show_fonts">
                         <property name="title" translatable="yes">Fonts</property>
                       </object>

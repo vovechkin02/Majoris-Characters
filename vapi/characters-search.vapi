@@ -21,7 +21,11 @@ namespace Characters.Search {
         /** Han radical groups. */
         RADICAL,
         /** Han stroke-count groups. */
-        STROKES
+        STROKES,
+        /** Assigned Unicode scalars by plane. */
+        PLANE,
+        /** Reserved scalars and noncharacters by plane. */
+        UNASSIGNED
     }
 
     /** Native worker completion status; only OK exposes results. */

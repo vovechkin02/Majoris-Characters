@@ -38,7 +38,7 @@ Existing window keys, application ID, D-Bus name and package paths are unchanged
 | `grid-preview-size` | `i` | `24` | Main character grid, 12–72 pt |
 | `font-preview-size` | `i` | `24` | Font/legacy grid, 12–72 pt |
 | `font-fallback` | `b` | `false` | Preview fallback only, not coverage |
-| `show-emoji`, `show-symbols`, `show-scripts`, `show-blocks`, `show-named`, `show-languages`, `show-radicals`, `show-strokes`, `show-fonts`, `show-encodings` | `b` | `true` | Sidebar visibility |
+| `show-emoji`, `show-symbols`, `show-scripts`, `show-blocks`, `show-named`, `show-languages`, `show-radicals`, `show-strokes`, `show-planes`, `show-unassigned`, `show-fonts`, `show-encodings` | `b` | `true` | Sidebar visibility |
 
 Favorites allow up to 512 independent identities. Each retained identity
 must be nonempty valid UTF-8 with at most 32 Unicode scalars; embedded NUL

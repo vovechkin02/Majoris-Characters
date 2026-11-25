@@ -5,6 +5,7 @@
 #include <string.h>
 
 #include <unicode/uchar.h>
+#include <unicode/unorm2.h>
 #include <unicode/utf8.h>
 #include <unicode/utf16.h>
 
@@ -118,9 +119,6 @@ char *characters_inspector_format_points(const uint32_t *points, size_t count,
 }
 
 CharactersInspector *characters_inspector_from_id(uint32_t id) {
-    if (id <= 0x10FFFFu && !characters_unicode_is_assigned(id)) {
-        return NULL;
-    }
     char *code = characters_search_code(id);
     CharactersInspector *snapshot = characters_inspector_from_code(code);
     free(code);
@@ -176,8 +174,8 @@ char *characters_inspector_display(const CharactersInspector *snapshot) {
         return NULL;
     }
     uint32_t first = snapshot->points[0];
-    if (snapshot->count == 1 && characters_unicode_is_assigned(first)) {
-        if (u_hasBinaryProperty((UChar32)first, UCHAR_DEFAULT_IGNORABLE_CODE_POINT)) {
+    if (snapshot->count == 1) {
+        if (characters_scalar_is_ignorable(first)) {
             return strdup("·");
         }
         return characters_search_display(first);
@@ -200,7 +198,8 @@ char *characters_inspector_display(const CharactersInspector *snapshot) {
         category = characters_scalar_category(point);
         if (category == U_CONTROL_CHAR || category == U_FORMAT_CHAR ||
             category == U_LINE_SEPARATOR || category == U_PARAGRAPH_SEPARATOR ||
-            category == U_SPACE_SEPARATOR || characters_scalar_is_ignorable(point)) {
+            category == U_SPACE_SEPARATOR || category == U_UNASSIGNED ||
+            characters_scalar_is_ignorable(point)) {
             point = 0x00B7;
         }
         U8_APPEND_UNSAFE(buffer, offset, point);
@@ -212,6 +211,39 @@ char *characters_inspector_display(const CharactersInspector *snapshot) {
 char *characters_inspector_format(const CharactersInspector *snapshot,
                                   CharactersInspectorFormat format) {
     return snapshot ? characters_inspector_format_points(snapshot->points, snapshot->count, format) : NULL;
+}
+
+char *characters_inspector_decomposition(uint32_t point) {
+    if (!characters_unicode_is_assigned(point) ||
+        characters_scalar_decomposition_type(point) == U_DT_NONE) {
+        return NULL;
+    }
+    // Unicode 17 adds this compatibility mapping after ICU 76's Unicode 16 data.
+    if (point == 0xA7F1) {
+        return strdup("U+0053");
+    }
+    UErrorCode error = U_ZERO_ERROR;
+    const UNormalizer2 *normalizer = unorm2_getNFKCInstance(&error);
+    if (U_FAILURE(error)) {
+        return NULL;
+    }
+    UChar units[MAX_POINTS * 2];
+    int32_t length = unorm2_getRawDecomposition(normalizer, (UChar32)point, units,
+                                                MAX_POINTS * 2, &error);
+    if (U_FAILURE(error) || length <= 0) {
+        return NULL;
+    }
+    uint32_t points[MAX_POINTS];
+    size_t count = 0;
+    for (int32_t offset = 0; offset < length;) {
+        UChar32 component;
+        U16_NEXT(units, offset, length, component);
+        if (count == MAX_POINTS || !characters_unicode_is_scalar((uint32_t)component)) {
+            return NULL;
+        }
+        points[count++] = (uint32_t)component;
+    }
+    return characters_inspector_format_points(points, count, CHARACTERS_INSPECTOR_CODE);
 }
 
 char *characters_inspector_normalize(const CharactersInspector *snapshot, const char *form) {

@@ -6,9 +6,9 @@ Unicode, international browsing, emoji data, and exact font inspection improveme
 
 | Project metadata | Value |
 | --- | --- |
-| Version | 1.0.5 |
+| Version | 1.0.6 |
 | Platform target | Majoris OS / Debian 13 (Trixie) |
-| Development status | Priority 4 — qualification candidate (not a verified stable release) |
+| Development status | Priority 6 — qualification candidate (not a verified stable release) |
 | Application ID | `com.majoris.characters` |
 | Debian package | `majoris-characters` |
 | License | GPL-3.0-or-later |
@@ -40,6 +40,9 @@ Unicode, international browsing, emoji data, and exact font inspection improveme
 - Virtualized character grid with bounded pages and total result counts.
 - All Characters, Emoji, Symbols, Scripts, Unicode Blocks, and Named Sequences
   browsing scopes, with collection and general-category filters.
+- All 17 Unicode planes; a separate reserved/noncharacter scope with plane filters.
+- Twenty-seven overlapping semantic collections, including superscripts, subscripts,
+  fractions, whitespace, quotations, accessibility and variation selectors.
 - Language collections, current-locale and configured XKB keyboard collections,
   script-extension matching, and CJK radical and stroke browsing.
 - Han reading search and inspection with explicit fallback provenance; an offline
@@ -56,6 +59,8 @@ Unicode, international browsing, emoji data, and exact font inspection improveme
   emoji properties, subject to the installed data versions.
 - Exact hexadecimal and decimal code points, UTF-8 bytes, UTF-16/32 code units,
   HTML numeric references, Unicode escape notation and CSS escape notation.
+- Direct per-scalar decomposition mappings, navigable and copyable separately from
+  recursive normalization, plus Linux Unicode keyboard-entry guidance.
 - NFC, NFD, NFKC, and NFKD code-point results, with optional normalized-text copies.
 - Related-character navigation with bounded Back history; literal multiline text
   and explicit numeric identification of up to 32 scalars, including unassigned
@@ -162,7 +167,7 @@ For Debian binary packages (run from the repository root):
 
 ```sh
 dpkg-buildpackage -us -uc -b
-sudo apt install ../majoris-characters_1.0.5-1_$(dpkg --print-architecture).deb
+sudo apt install ../majoris-characters_1.0.6-1_$(dpkg --print-architecture).deb
 ```
 
 The source package uses `3.0 (quilt)` and requires the corresponding upstream
@@ -318,9 +323,9 @@ After installing the Debian package, the same runtime tests can target the real
 installed executable:
 
 ```sh
-python3 tests/integration/test_application.py /usr/bin/majoris-characters 1.0.5 cli
+python3 tests/integration/test_application.py /usr/bin/majoris-characters 1.0.6 cli
 xvfb-run -a dbus-run-session -- python3 \
-  tests/integration/test_application.py /usr/bin/majoris-characters 1.0.5 gui
+  tests/integration/test_application.py /usr/bin/majoris-characters 1.0.6 gui
 ```
 
 For a fresh, fail-closed automated build/test and optional Debian package gate:
@@ -330,7 +335,7 @@ python3 tools/qualification/qualify.py build-release --package
 ```
 
 See [ISO integration and desktop qualification](docs/release-integration.md) for
-installation and target runtime checks. See [Priority 4 qualification](docs/priority-4-qualification.md) for current evidence and
+installation and target runtime checks. See [Priority 6 qualification](docs/priority-6-qualification.md) for current evidence and
 [Stage 10 qualification](docs/stage-10-qualification.md) for historical
 verification results and remaining build/package checks. Historical Stage 1–9
 reports are preserved under `docs/`. Source inspection is

@@ -126,6 +126,15 @@ char *characters_inspector_format_points(const uint32_t *points, size_t count,
                                          CharactersInspectorFormat format);
 
 /**
+ * characters_inspector_decomposition:
+ * @point: Unicode scalar to inspect.
+ *
+ * Returns: (transfer full) (nullable): Direct (not recursively normalized) decomposition
+ * mapping in U+ notation, including algorithmic Hangul; NULL if absent or unavailable.
+ */
+char *characters_inspector_decomposition(uint32_t point);
+
+/**
  * characters_inspector_normalize:
  * @snapshot: Borrowed immutable snapshot.
  * @form: NFC, NFD, NFKC or NFKD.

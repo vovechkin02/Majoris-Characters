@@ -36,4 +36,8 @@ application and GJS are not runtime dependencies of the main application. The op
 - Priority 5: Expanded legacy repertoire, GB18030-2022 and EUC mappings,
   contextual canonical scalar browsing, and strict multi-scalar conversion
   implemented. Native encoding contracts passed; GTK qualification remains
-  outstanding. Next functional priority: inspector and browsing refinements.
+  outstanding.
+- Priority 6: Direct scalar decomposition, Linux Unicode entry guidance, 17-plane
+  browsing, reserved/noncharacter inspection, and 27 semantic collections
+  implemented. Native contracts passed; GTK qualification remains outstanding.
+  Next functional priority: compact picker improvements.

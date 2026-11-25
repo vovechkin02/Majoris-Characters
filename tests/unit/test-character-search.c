@@ -339,6 +339,81 @@ static void test_han_search(void) {
     assert(characters_unicode_property('A', "Mandarin_Fallback") == NULL);
 }
 
+/** Plane filters partition the assigned and reserved scalar spaces without surrogates. */
+static void test_planes_and_unassigned(void) {
+    assert(characters_search_filter_count(CHARACTERS_SEARCH_PLANE) == 17);
+    assert(characters_search_filter_count(CHARACTERS_SEARCH_UNASSIGNED) == 17);
+    size_t assigned_count = 0;
+    size_t reserved_count = 0;
+    for (int plane = 0; plane <= 16; plane++) {
+        CharactersSearch *assigned = search(CHARACTERS_SEARCH_PLANE, plane, -1, "");
+        CharactersSearch *reserved = search(CHARACTERS_SEARCH_UNASSIGNED, plane, -1, "");
+        size_t assigned_index = 0;
+        size_t reserved_index = 0;
+        for (uint32_t point = (uint32_t)plane << 16;
+             point < (((uint32_t)plane + 1) << 16); point++) {
+            if (!characters_unicode_is_scalar(point)) {
+                continue;
+            }
+            if (characters_unicode_is_assigned(point)) {
+                assert(characters_search_id(assigned, assigned_index++) == point);
+            } else {
+                assert(characters_search_id(reserved, reserved_index++) == point);
+            }
+        }
+        assert(assigned_index == characters_search_count(assigned));
+        assert(reserved_index == characters_search_count(reserved));
+        assigned_count += assigned_index;
+        reserved_count += reserved_index;
+        characters_search_free(assigned);
+        characters_search_free(reserved);
+    }
+    assert(assigned_count == 297334 && assigned_count + reserved_count == 0x110000 - 0x800);
+    CharactersSearch *job = search(CHARACTERS_SEARCH_UNASSIGNED, 0, -1, "U+0378");
+    assert(characters_search_count(job) == 1 && characters_search_id(job, 0) == 0x0378);
+    characters_search_free(job);
+    job = search(CHARACTERS_SEARCH_UNASSIGNED, 1, -1, "U+0378");
+    assert(characters_search_count(job) == 0);
+    characters_search_free(job);
+    job = search(CHARACTERS_SEARCH_UNASSIGNED, 16, -1, "U+10FFFF");
+    assert(characters_search_count(job) == 1);
+    characters_search_free(job);
+    char *name = characters_search_name(0x10FFFF);
+    assert(name && strcmp(name, "Noncharacter") == 0);
+    free(name);
+    char *display = characters_search_display(0x0378);
+    assert(display && strcmp(display, "·") == 0);
+    free(display);
+    job = characters_search_new(CHARACTERS_SEARCH_PLANE, 17, -1, "");
+    assert(job && characters_search_run(job) == CHARACTERS_SEARCH_INVALID);
+    characters_search_free(job);
+}
+
+/** Expanded semantic collections match Unicode properties and curated range entries. */
+static void test_semantic_collections(void) {
+    const struct {
+        /** Semantic collection label. */
+        const char *label;
+        /** Representative matching scalar. */
+        uint32_t point;
+    } cases[] = {
+        { "Superscripts", 0xA7F1 }, { "Subscripts", 0x2082 },
+        { "Fractions", 0x00BD }, { "Whitespace", 0x0009 },
+        { "Quotation Marks", 0x201C }, { "Accessibility Symbols", 0x267F },
+        { "Letterlike Symbols", 0x2122 }, { "Religious Symbols", 0x262F },
+        { "Variation Selectors", 0xE0100 }, { "Block Elements", 0x2588 },
+        { "Technical", 0x26A1 }
+    };
+    assert(characters_search_filter_count(CHARACTERS_SEARCH_SYMBOLS) == 27);
+    for (size_t index = 0; index < sizeof(cases) / sizeof(cases[0]); index++) {
+        int filter = find_filter(CHARACTERS_SEARCH_SYMBOLS, cases[index].label);
+        CharactersSearch *job = search(CHARACTERS_SEARCH_SYMBOLS, filter, -1, "");
+        assert(contains_id(job, cases[index].point));
+        assert(!contains_id(job, 'A'));
+        characters_search_free(job);
+    }
+}
+
 /** Execute focused native search contracts, with assertions enabled by the test target. */
 int main(void) {
     test_complete_repertoire();
@@ -351,6 +426,8 @@ int main(void) {
     test_script_extensions();
     test_language_collections();
     test_han_search();
-    puts("10 character search contract groups passed");
+    test_planes_and_unassigned();
+    test_semantic_collections();
+    puts("12 character search contract groups passed");
     return 0;
 }

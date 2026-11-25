@@ -328,3 +328,18 @@ GDK text for clipboard operations. This is a direct table lookup and domain
 policy, not a new GoF pattern hierarchy. All native lookups are immutable and
 thread-safe; variant allocations belong to the picker. Tests verify all bases,
 exact query behavior, existing family contracts and deterministic generation.
+
+
+## Priority 6: scalar inspection and browsing refinements
+
+Plane and reserved-scalar scopes append to the existing native enumeration and
+use the same single-run search request and virtualized GTK page model. The plane
+bounds are selected before scanning; assigned and unassigned values form a
+partition of the valid scalar space. Existing catalog-local identities remain
+unchanged. Semantic collections use indexed immutable range rules and the
+bundled Unicode 17 decomposition property. A direct mapping query uses ICU raw
+normalization mappings and the known Unicode 17 delta, then the shared sequence
+formatter; it deliberately differs from recursive normalization. The inspector
+reuses its navigation action and owned snapshot for the mapping. GTK's existing
+settings observers handle new sidebar visibility keys. No new GoF hierarchy is
+needed: these are extensions of existing native adapters and declarative views.

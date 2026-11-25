@@ -44,6 +44,12 @@ namespace Characters {
         /** Controls visibility of the Han stroke sidebar category. */
         [GtkChild]
         private unowned Adw.SwitchRow show_strokes;
+        /** Controls visibility of the Unicode plane sidebar category. */
+        [GtkChild]
+        private unowned Adw.SwitchRow show_planes;
+        /** Controls visibility of the unassigned scalar inspection category. */
+        [GtkChild]
+        private unowned Adw.SwitchRow show_unassigned;
         /** Controls visibility of the font sidebar entry. */
         [GtkChild]
         private unowned Adw.SwitchRow show_fonts;
@@ -76,6 +82,8 @@ namespace Characters {
             settings.bind ("show-languages", show_languages, "active", SettingsBindFlags.DEFAULT);
             settings.bind ("show-radicals", show_radicals, "active", SettingsBindFlags.DEFAULT);
             settings.bind ("show-strokes", show_strokes, "active", SettingsBindFlags.DEFAULT);
+            settings.bind ("show-planes", show_planes, "active", SettingsBindFlags.DEFAULT);
+            settings.bind ("show-unassigned", show_unassigned, "active", SettingsBindFlags.DEFAULT);
             settings.bind ("show-fonts", show_fonts, "active", SettingsBindFlags.DEFAULT);
             settings.bind ("show-encodings", show_encodings, "active", SettingsBindFlags.DEFAULT);
             clear_history.clicked.connect (confirm_clear);

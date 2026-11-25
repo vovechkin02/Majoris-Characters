@@ -27,6 +27,22 @@ Select a related character to inspect it independently of the browser. Back
 restores the previous identity, retaining at most 32 entries. The history is
 not the Stage 8 usage history and is discarded when the dialog closes.
 
+## Direct decomposition and keyboard entry
+
+For the selected scalar, Direct decomposition mapping shows the exact immediate
+Unicode mapping, not the recursively expanded NFD or NFKD result. For example,
+U+01FA maps directly to U+00C5 U+0301; its NFD expands U+00C5 further. The mapping
+is independently copyable and Inspect Decomposition navigates to its sequence
+using the existing Back history. Algorithmic Hangul mappings are supported.
+No mapping is labeled None; an unavailable mapping is labeled Unavailable.
+The same fields appear for every constituent in Copy Information.
+
+Linux Unicode keyboard entry shows Ctrl+Shift+U, hexadecimal scalar, then Enter
+for assigned non-NUL scalars. It is guidance for compatible GTK and input-method
+text fields, not a system-wide shortcut guarantee or simulated key injection.
+Composite sequences may be entered scalar by scalar, or copied intact. Reserved
+scalars and noncharacters display a distinct status and a non-glyph placeholder.
+
 ## Data and representation contract
 
 | Group | Meaning |

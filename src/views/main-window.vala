@@ -302,6 +302,7 @@ namespace Characters {
         private void apply_category_preferences () {
             string[] keys = { "show-emoji", "show-symbols", "show-scripts", "show-blocks",
                 "show-named", "show-languages", "show-radicals", "show-strokes",
+                "show-planes", "show-unassigned",
                 "show-fonts", "show-encodings" };
             for (var index = 0; index < keys.length; index++) {
                 var row = scope_list.get_row_at_index (index + 1);
@@ -373,15 +374,15 @@ namespace Characters {
         /** Trailing sidebar rows open independent source or saved-collection dialogs. */
         private void on_source_activated (Gtk.ListBoxRow row) {
             var index = row.get_index ();
-            if (index == (int) Search.Scope.STROKES + 1) {
+            if (index == (int) Search.Scope.UNASSIGNED + 1) {
                 browse_fonts (null);
-            } else if (index == (int) Search.Scope.STROKES + 2) {
+            } else if (index == (int) Search.Scope.UNASSIGNED + 2) {
                 browse_encodings (null);
-            } else if (index == (int) Search.Scope.STROKES + 3) {
+            } else if (index == (int) Search.Scope.UNASSIGNED + 3) {
                 open_favorites (null);
-            } else if (index == (int) Search.Scope.STROKES + 4) {
+            } else if (index == (int) Search.Scope.UNASSIGNED + 4) {
                 open_recent (null);
-            } else if (index == (int) Search.Scope.STROKES + 5) {
+            } else if (index == (int) Search.Scope.UNASSIGNED + 5) {
                 open_frequent (null);
             }
         }
@@ -452,14 +453,15 @@ namespace Characters {
 
         /** Changes scope and rebuilds valid filters without publishing an intermediate request. */
         private void on_scope_selected (Gtk.ListBoxRow? row) {
-            if (row == null || updating_filters || row.get_index () > (int) Search.Scope.STROKES) {
+            if (row == null || updating_filters || row.get_index () > (int) Search.Scope.UNASSIGNED) {
                 return;
             }
             scope = (Search.Scope) row.get_index ();
             updating_filters = true;
             rebuild_collection_filter ();
             category_filter.selected = 0;
-            category_filter.visible = scope != Search.Scope.EMOJI && scope != Search.Scope.NAMED;
+            category_filter.visible = scope != Search.Scope.EMOJI && scope != Search.Scope.NAMED &&
+                scope != Search.Scope.UNASSIGNED;
             updating_filters = false;
             if (split_view.collapsed) {
                 split_view.show_sidebar = false;
@@ -475,7 +477,8 @@ namespace Characters {
             for (size_t index = 0; index < Search.filter_count (scope); index++) {
                 unowned string? label = Search.filter_name (scope, index);
                 if (label != null) {
-                    model.append (scope == Search.Scope.SYMBOLS || scope == Search.Scope.LANGUAGE ?
+                    model.append (scope == Search.Scope.SYMBOLS || scope == Search.Scope.LANGUAGE ||
+                        scope == Search.Scope.PLANE || scope == Search.Scope.UNASSIGNED ?
                         _(label) : label);
                     filter_slots += (int) index;
                 }
@@ -489,6 +492,11 @@ namespace Characters {
             } else if (scope == Search.Scope.RADICAL || scope == Search.Scope.STROKES) {
                 collection_filter.tooltip_text = _("Uses official Unihan where available, otherwise " +
                     "ICU collation groups. Characters without group data are excluded.");
+            } else if (scope == Search.Scope.UNASSIGNED) {
+                collection_filter.tooltip_text = _("Reserved scalar values and noncharacters; " +
+                    "surrogates are excluded. No assigned glyph is implied.");
+            } else if (scope == Search.Scope.PLANE) {
+                collection_filter.tooltip_text = _("Assigned scalar values grouped by Unicode plane.");
             } else {
                 collection_filter.tooltip_text = null;
             }
@@ -629,7 +637,8 @@ namespace Characters {
                 return;
             }
             var id = (uint32) uint.parse (item.get_string ());
-            selected_name.label = Search.name (id) ?? _("Unknown Character");
+            var name = Search.name (id) ?? _("Unknown Character");
+            selected_name.label = scope == Search.Scope.UNASSIGNED ? _(name) : name;
             selected_code.label = Search.code (id) ?? "";
             inspect_button.sensitive = true;
             var text = Search.text (id);

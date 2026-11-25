@@ -63,6 +63,26 @@ enum SymbolCollection {
     SYMBOL_ENCLOSED,
     /** Special & Formatting collection slot. */
     SYMBOL_SPECIAL,
+    /** Superscripts collection slot. */
+    SYMBOL_SUPERSCRIPTS,
+    /** Subscripts collection slot. */
+    SYMBOL_SUBSCRIPTS,
+    /** Fractions collection slot. */
+    SYMBOL_FRACTIONS,
+    /** Whitespace collection slot. */
+    SYMBOL_WHITESPACE,
+    /** Quotation Marks collection slot. */
+    SYMBOL_QUOTATION,
+    /** Accessibility Symbols collection slot. */
+    SYMBOL_ACCESSIBILITY,
+    /** Letterlike Symbols collection slot. */
+    SYMBOL_LETTERLIKE,
+    /** Religious Symbols collection slot. */
+    SYMBOL_RELIGIOUS,
+    /** Variation Selectors collection slot. */
+    SYMBOL_VARIATION,
+    /** Block Elements collection slot. */
+    SYMBOL_BLOCK_ELEMENTS,
 };
 
 /** Stable English labels corresponding to the SymbolCollection slots. */
@@ -84,6 +104,37 @@ static const char *const symbol_names[] = {
     [SYMBOL_PHONETICS] = N_("Phonetics"),
     [SYMBOL_ENCLOSED] = N_("Enclosed"),
     [SYMBOL_SPECIAL] = N_("Special & Formatting"),
+    [SYMBOL_SUPERSCRIPTS] = N_("Superscripts"),
+    [SYMBOL_SUBSCRIPTS] = N_("Subscripts"),
+    [SYMBOL_FRACTIONS] = N_("Fractions"),
+    [SYMBOL_WHITESPACE] = N_("Whitespace"),
+    [SYMBOL_QUOTATION] = N_("Quotation Marks"),
+    [SYMBOL_ACCESSIBILITY] = N_("Accessibility Symbols"),
+    [SYMBOL_LETTERLIKE] = N_("Letterlike Symbols"),
+    [SYMBOL_RELIGIOUS] = N_("Religious Symbols"),
+    [SYMBOL_VARIATION] = N_("Variation Selectors"),
+    [SYMBOL_BLOCK_ELEMENTS] = N_("Block Elements"),
+};
+
+/** Unicode planes, indexed by the high sixteen bits of a scalar. */
+static const char *const plane_names[] = {
+    N_("0: Basic Multilingual Plane"),
+    N_("1: Supplementary Multilingual Plane"),
+    N_("2: Supplementary Ideographic Plane"),
+    N_("3: Tertiary Ideographic Plane"),
+    N_("4: Plane 4 (Reserved)"),
+    N_("5: Plane 5 (Reserved)"),
+    N_("6: Plane 6 (Reserved)"),
+    N_("7: Plane 7 (Reserved)"),
+    N_("8: Plane 8 (Reserved)"),
+    N_("9: Plane 9 (Reserved)"),
+    N_("10: Plane 10 (Reserved)"),
+    N_("11: Plane 11 (Reserved)"),
+    N_("12: Plane 12 (Reserved)"),
+    N_("13: Plane 13 (Reserved)"),
+    N_("14: Supplementary Special-purpose Plane"),
+    N_("15: Supplementary Private Use Area-A"),
+    N_("16: Supplementary Private Use Area-B"),
 };
 
 /** Broad Unicode general-category groups; also the index into category_names. */
@@ -421,12 +472,146 @@ static int category_for(uint32_t point) {
     }
 }
 
-/** Check an inclusive Unicode range. */
-static bool within(uint32_t point, uint32_t start, uint32_t end) {
-    return point >= start && point <= end;
+/** One inclusive range of scalars in a curated semantic collection. */
+struct SymbolRange {
+    /** First scalar in the range. */
+    uint32_t first;
+    /** Last scalar in the range. */
+    uint32_t last;
+};
+
+/** Maximum number of ranges in one collection, including the terminating empty slot. */
+#define SYMBOL_RANGE_SLOTS 12
+
+/** Curated semantic ranges indexed by stable collection slot; overlaps are intentional. */
+static const struct SymbolRange symbol_ranges[COUNT(symbol_names)][SYMBOL_RANGE_SLOTS] = {
+    [SYMBOL_ARROWS] = {
+        { 0x2190, 0x21FF },
+        { 0x27F0, 0x27FF },
+        { 0x2900, 0x297F },
+        { 0x2B00, 0x2B11 },
+        { 0x1F800, 0x1F8FF },
+    },
+    [SYMBOL_BULLETS] = {
+        { 0x2022, 0x2022 },
+        { 0x2023, 0x2023 },
+        { 0x2043, 0x2043 },
+        { 0x2219, 0x2219 },
+        { 0x25E6, 0x25E6 },
+        { 0x2605, 0x2606 },
+        { 0x2720, 0x274B },
+    },
+    [SYMBOL_PICTURES] = {
+        { 0x25A0, 0x27BF },
+        { 0x1F300, 0x1F5FF },
+        { 0x1F780, 0x1F7FF },
+    },
+    [SYMBOL_MATH] = {
+        { 0x2200, 0x22FF },
+        { 0x27C0, 0x27EF },
+        { 0x2980, 0x2AFF },
+        { 0x1D400, 0x1D7FF },
+    },
+    [SYMBOL_LETTERS] = {
+        { 0x0000, 0x024F },
+        { 0x1E00, 0x1EFF },
+        { 0x2100, 0x214F },
+    },
+    [SYMBOL_TECHNICAL] = {
+        { 0x2300, 0x23FF },
+        { 0x2400, 0x245F },
+        { 0x1FB00, 0x1FBFF },
+        { 0x2699, 0x2699 },
+        { 0x26A1, 0x26A1 },
+        { 0x1F50C, 0x1F50C },
+        { 0x1F4BB, 0x1F4BB },
+        { 0x1F5A5, 0x1F5A8 },
+    },
+    [SYMBOL_MUSIC] = {
+        { 0x2669, 0x266F },
+        { 0x1D000, 0x1D24F },
+    },
+    [SYMBOL_GAMES] = {
+        { 0x2654, 0x2667 },
+        { 0x2680, 0x2685 },
+        { 0x1F000, 0x1F0FF },
+        { 0x1FA00, 0x1FA6F },
+    },
+    [SYMBOL_BRAILLE] = {
+        { 0x2800, 0x28FF },
+    },
+    [SYMBOL_BOX_DRAWING] = {
+        { 0x2500, 0x259F },
+    },
+    [SYMBOL_PHONETICS] = {
+        { 0x0250, 0x02AF },
+        { 0x1D00, 0x1DBF },
+        { 0x10780, 0x107BF },
+    },
+    [SYMBOL_ENCLOSED] = {
+        { 0x2460, 0x24FF },
+        { 0x3200, 0x32FF },
+        { 0x1F100, 0x1F2FF },
+    },
+    [SYMBOL_ACCESSIBILITY] = {
+        { 0x267F, 0x267F },
+        { 0x1F9AF, 0x1F9AF },
+        { 0x1F9BB, 0x1F9BB },
+        { 0x1F9BC, 0x1F9BC },
+        { 0x1F9BD, 0x1F9BD },
+        { 0x1F9BE, 0x1F9BE },
+        { 0x1F9BF, 0x1F9BF },
+        { 0x1F9CF, 0x1F9CF },
+        { 0x2800, 0x28FF },
+    },
+    [SYMBOL_LETTERLIKE] = {
+        { 0x2100, 0x214F },
+    },
+    [SYMBOL_RELIGIOUS] = {
+        { 0x2626, 0x262A },
+        { 0x262C, 0x262F },
+        { 0x2638, 0x2638 },
+        { 0x271D, 0x2721 },
+        { 0x1F549, 0x1F54E },
+        { 0x1F6D0, 0x1F6D0 },
+    },
+    [SYMBOL_VARIATION] = {
+        { 0x180B, 0x180D },
+        { 0x180F, 0x180F },
+        { 0xFE00, 0xFE0F },
+        { 0xE0100, 0xE01EF },
+    },
+    [SYMBOL_BLOCK_ELEMENTS] = {
+        { 0x2580, 0x259F },
+        { 0x1FB00, 0x1FB3B },
+        { 0x1FB70, 0x1FB8B },
+    },
+    [SYMBOL_QUOTATION] = {
+        { 0x0022, 0x0022 },
+        { 0x0027, 0x0027 },
+        { 0x300C, 0x300F },
+        { 0x301D, 0x301F },
+    },
+};
+
+/** Match only ranges in one indexed collection without allocating or looking up properties. */
+static bool symbol_range_matches(uint32_t point, int filter) {
+    if ((size_t)filter >= COUNT(symbol_ranges)) {
+        return false;
+    }
+    for (size_t index = 0; index < SYMBOL_RANGE_SLOTS; index++) {
+        const struct SymbolRange *rule = &symbol_ranges[filter][index];
+        if (!rule->last) {
+            break;
+        }
+        if (point >= rule->first && point <= rule->last) {
+            return true;
+        }
+    }
+    return false;
 }
 
-/** Classify semantic symbol collections; collections intentionally overlap. */
+/** Classify semantic collections with Unicode properties and curated range data. */
 static bool symbol_matches(uint32_t point, int filter) {
     int category = category_for(point);
     int type = characters_scalar_category(point);
@@ -434,8 +619,16 @@ static bool symbol_matches(uint32_t point, int filter) {
         if (category >= CATEGORY_MARKS && category <= CATEGORY_CONTROLS) {
             return true;
         }
+        if (category != CATEGORY_LETTERS) {
+            return false;
+        }
+        int decomposition = characters_scalar_decomposition_type(point);
+        if (decomposition == U_DT_SUPER || decomposition == U_DT_SUB ||
+            decomposition == U_DT_FRACTION) {
+            return true;
+        }
         for (size_t index = 0; index < COUNT(symbol_names); index++) {
-            if (symbol_matches(point, (int)index)) {
+            if (symbol_range_matches(point, (int)index)) {
                 return true;
             }
         }
@@ -444,53 +637,43 @@ static bool symbol_matches(uint32_t point, int filter) {
     switch (filter) {
         case SYMBOL_PUNCTUATION:
             return category == CATEGORY_PUNCTUATION;
-        case SYMBOL_ARROWS:
-            return within(point, 0x2190, 0x21FF) || within(point, 0x27F0, 0x27FF) ||
-                       within(point, 0x2900, 0x297F) || within(point, 0x2B00, 0x2B11) ||
-                       within(point, 0x1F800, 0x1F8FF);
-        case SYMBOL_BULLETS:
-            return point == 0x2022 || point == 0x2023 || point == 0x2043 ||
-                       within(point, 0x2605, 0x2606) || within(point, 0x2720, 0x274B) ||
-                       point == 0x2219 || point == 0x25E6;
-        case SYMBOL_PICTURES:
-            return within(point, 0x25A0, 0x27BF) || within(point, 0x1F300, 0x1F5FF) ||
-                       within(point, 0x1F780, 0x1F7FF);
         case SYMBOL_CURRENCY:
             return type == U_CURRENCY_SYMBOL;
-        case SYMBOL_MATH:
-            return type == U_MATH_SYMBOL || within(point, 0x2200, 0x22FF) ||
-                       within(point, 0x27C0, 0x27EF) || within(point, 0x2980, 0x2AFF) ||
-                       within(point, 0x1D400, 0x1D7FF);
-        case SYMBOL_LETTERS:
-            return category == CATEGORY_LETTERS && (within(point, 0x0000, 0x024F) ||
-                       within(point, 0x1E00, 0x1EFF) || within(point, 0x2100, 0x214F));
         case SYMBOL_NUMBERS:
             return category == CATEGORY_NUMBERS;
-        case SYMBOL_TECHNICAL:
-            return within(point, 0x2300, 0x23FF) || within(point, 0x2400, 0x245F) ||
-                       within(point, 0x1FB00, 0x1FBFF);
-        case SYMBOL_MUSIC:
-            return within(point, 0x2669, 0x266F) || within(point, 0x1D000, 0x1D24F);
-        case SYMBOL_GAMES:
-            return within(point, 0x2654, 0x2667) || within(point, 0x2680, 0x2685) ||
-                        within(point, 0x1F000, 0x1F0FF) || within(point, 0x1FA00, 0x1FA6F);
-        case SYMBOL_BRAILLE:
-            return within(point, 0x2800, 0x28FF);
         case SYMBOL_MARKS:
             return category == CATEGORY_MARKS;
-        case SYMBOL_BOX_DRAWING:
-            return within(point, 0x2500, 0x259F);
-        case SYMBOL_PHONETICS:
-            return within(point, 0x0250, 0x02AF) || within(point, 0x1D00, 0x1DBF) ||
-                        within(point, 0x10780, 0x107BF);
-        case SYMBOL_ENCLOSED:
-            return within(point, 0x2460, 0x24FF) || within(point, 0x3200, 0x32FF) ||
-                        within(point, 0x1F100, 0x1F2FF);
         case SYMBOL_SPECIAL:
             return category == CATEGORY_SEPARATORS || category == CATEGORY_CONTROLS;
+        case SYMBOL_SUPERSCRIPTS:
+            return characters_scalar_decomposition_type(point) == U_DT_SUPER;
+        case SYMBOL_SUBSCRIPTS:
+            return characters_scalar_decomposition_type(point) == U_DT_SUB;
+        case SYMBOL_FRACTIONS:
+            return characters_scalar_decomposition_type(point) == U_DT_FRACTION ||
+                   point == 0x2044;
+        case SYMBOL_WHITESPACE:
+            // White_Space is stable for the Unicode 17 repertoire.
+            return u_hasBinaryProperty((UChar32)point, UCHAR_WHITE_SPACE);
+        case SYMBOL_QUOTATION:
+            if (type == U_INITIAL_PUNCTUATION || type == U_FINAL_PUNCTUATION) {
+                return true;
+            }
+            break;
+        case SYMBOL_MATH:
+            if (type == U_MATH_SYMBOL) {
+                return true;
+            }
+            break;
+        case SYMBOL_LETTERS:
+            if (category != CATEGORY_LETTERS) {
+                return false;
+            }
+            break;
         default:
-            return false;
+            break;
     }
+    return symbol_range_matches(point, filter);
 }
 
 /** Whether the scalar passes the collection, script extensions and category constraints. */
@@ -600,13 +783,18 @@ static bool scalar_query_matches(uint32_t point, const struct Query *query) {
     return matches;
 }
 
-/** Scan assigned scalars in numeric order, restricted to an optional block. */
+/** Scan the selected scalar repertoire in numeric order, bounded by block or plane. */
 static bool scan_scalars(CharactersSearch *search, const struct Query *query) {
     uint32_t start = 0;
     uint32_t end = SCALAR_LIMIT - 1;
     if (search->scope == CHARACTERS_SEARCH_BLOCK && search->filter >= 0) {
         start = characters_unicode_block_start((size_t)search->filter);
         end = characters_unicode_block_end((size_t)search->filter);
+    }
+    if ((search->scope == CHARACTERS_SEARCH_PLANE ||
+         search->scope == CHARACTERS_SEARCH_UNASSIGNED) && search->filter >= 0) {
+        start = (uint32_t)search->filter << 16;
+        end = start + 0xFFFFu;
     }
     if (query->exact) {
         if (query->point_count != 1 || query->points[0] < start || query->points[0] > end) {
@@ -618,7 +806,10 @@ static bool scan_scalars(CharactersSearch *search, const struct Query *query) {
         if ((point % CANCEL_INTERVAL == 0) && is_canceled(search)) {
             return true;
         }
-        if (characters_unicode_is_assigned(point) && scalar_matches(search, point) &&
+        bool assigned = characters_unicode_is_assigned(point);
+        bool included = search->scope == CHARACTERS_SEARCH_UNASSIGNED ?
+            characters_unicode_is_scalar(point) && !assigned : assigned;
+        if (included && scalar_matches(search, point) &&
             scalar_query_matches(point, query) && !append_id(search, point)) {
             return false;
         }
@@ -866,7 +1057,7 @@ CharactersSearchStatus characters_search_run(CharactersSearch *search) {
     }
     search->started = true;
     struct Query query = { 0 };
-    if (search->scope < CHARACTERS_SEARCH_ALL || search->scope > CHARACTERS_SEARCH_STROKES ||
+    if (search->scope < CHARACTERS_SEARCH_ALL || search->scope > CHARACTERS_SEARCH_UNASSIGNED ||
         search->filter < -1 || (search->filter >= 0 &&
         !characters_search_filter_name(search->scope, (size_t)search->filter)) ||
         search->category < -1 || search->category >= (int)COUNT(category_names) ||
@@ -943,6 +1134,9 @@ size_t characters_search_filter_count(CharactersSearchScope scope) {
             return characters_unihan_group_count(true);
         case CHARACTERS_SEARCH_STROKES:
             return characters_unihan_group_count(false);
+        case CHARACTERS_SEARCH_PLANE:
+        case CHARACTERS_SEARCH_UNASSIGNED:
+            return COUNT(plane_names);
         default:
             return 0;
     }
@@ -967,6 +1161,9 @@ const char *characters_search_filter_name(CharactersSearchScope scope, size_t in
             return characters_unihan_group_name(true, index);
         case CHARACTERS_SEARCH_STROKES:
             return characters_unihan_group_name(false, index);
+        case CHARACTERS_SEARCH_PLANE:
+        case CHARACTERS_SEARCH_UNASSIGNED:
+            return plane_names[index];
         default:
             return NULL;
     }
@@ -997,6 +1194,9 @@ char *characters_search_text(uint32_t id) {
 char *characters_search_display(uint32_t id) {
     if (id < SCALAR_LIMIT && characters_unicode_is_scalar(id)) {
         int category = category_for(id);
+        if (!characters_unicode_is_assigned(id)) {
+            return strdup("·");
+        }
         if (category == CATEGORY_SEPARATORS || category == CATEGORY_CONTROLS ||
             id == 0x034F || id == 0x115F || id == 0x1160 || id == 0x3164 || id == 0xFFA0) {
             return strdup("·");
@@ -1015,7 +1215,8 @@ char *characters_search_name(uint32_t id) {
             return NULL;
         }
         if (!characters_unicode_is_assigned(id)) {
-            return strdup("Unassigned Character");
+            return strdup(u_hasBinaryProperty((UChar32)id, UCHAR_NONCHARACTER_CODE_POINT) ?
+                          N_("Noncharacter") : N_("Unassigned Character"));
         }
         char *name = characters_unicode_name(id);
         if (name) {

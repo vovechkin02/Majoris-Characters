@@ -8,6 +8,10 @@ int main () {
     assert (snapshot.count () == 1 && snapshot.point (0) == 0xE9);
     assert (snapshot.format (Inspector.Format.UTF8) == "C3 A9");
     assert (snapshot.normalize ("NFD") == "U+0065 U+0301");
+    assert (Inspector.decomposition (0x01FA) == "U+00C5 U+0301");
+    assert (Inspector.decomposition (0xA7F1) == "U+0053");
+    assert (Inspector.decomposition (0x41) == null);
+    assert (Inspector.from_id (0x0378) != null);
     var related = snapshot.related ();
     assert (related != null);
     bool found = false;
