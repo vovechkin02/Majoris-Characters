@@ -18,7 +18,8 @@ Comment: The upstream README assigns BSD-3-clause to gtk-js-app-derived
  files and GPL-2+ to other files. Both original notices are included.
 
 Files: native/unicode/vendor/gnome/*.h native/unicode/generated/supplement.h
-       native/unicode/generated/properties.h
+       native/unicode/generated/properties.h native/unicode/generated/emoji-sequences.h
+       data/unicode/emoji/presentation-bases.txt data/unicode/emoji/cldr-48-en-additions.json
        data/unicode/supplement/*.txt
 Copyright: Unicode, Inc. and GNOME Characters contributors (where applicable)
 License: Unicode-3.0
@@ -31,6 +32,7 @@ Copyright: 2017-2019 Miles Johnson (Emojibase)
 License: Expat and Unicode-3.0
 Comment: Exported from Debian GTK 3.24.49-3 emoji chooser resources. The
  original upstream notices are preserved in data/unicode/emoji/GTK-DEBIAN-COPYRIGHT.
+ Eight CLDR 48 English base annotation records are included under Unicode-3.0.
 
 License: GPL-2+
  On Debian systems, the complete text of the GNU General Public License

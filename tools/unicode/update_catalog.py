@@ -1,12 +1,17 @@
 """Regenerate GNOME-derived catalogs from locally acquired Unicode source files."""
 
 import argparse
+import gzip
+import json
 from pathlib import Path
 import re
 import subprocess
 import sys
 import tempfile
 
+from generate_emoji_annotations import coverage
+from generate_emoji_sequences import generate as generate_emoji_sequences
+from generate_emoji_sequences import read_catalog, read_official, verify_emoji_test
 from generate_supplement import generate
 
 
@@ -52,10 +57,35 @@ def regenerate(root: Path, inputs: Path, version: str) -> None:
         )
         for source in (aliases, sequences):
             (staging / source.name).write_bytes(source.read_bytes())
+        # Alias indexes depend on the exact catalog order. Stage every dependent table
+        # and verify official qualification identities before replacing any catalog.
+        presentation = inputs / "emoji-variation-sequences.txt"
+        bases = read_official(presentation)
+        catalog = read_catalog(staging / "emoji.h")
+        verify_emoji_test(inputs / "emoji-test.txt", catalog)
+        generate_emoji_sequences(bases, catalog, staging / "emoji-sequences.h")
+        (staging / "presentation-bases.txt").write_text(
+            f"# Unicode {version} emoji-variation-sequences.txt: base scalars.\n"
+            "# Copyright Unicode, Inc. See ../supplement/LICENSE.unicode.\n"
+            f"# https://www.unicode.org/Public/{version}/ucd/emoji/"
+            "emoji-variation-sequences.txt\n" + "".join(f"{point:04X}\n" for point in bases),
+            encoding="utf-8",
+        )
+        emoji_data = root / "data/unicode/emoji"
+        with gzip.open(emoji_data / "annotations.json.gz", "rt", encoding="utf-8") as stream:
+            annotations = json.load(stream)
+        report = {"source": annotations["source"],
+                  "locales": coverage(annotations["locales"], catalog)}
+        (staging / "coverage.json").write_text(
+            json.dumps(report, indent=2) + "\n", encoding="utf-8",
+        )
         for name, _ in GENERATORS:
             (staging / f"{name}.h").replace(vendor / f"{name}.h")
         (staging / "catalog-version.h").replace(base / "generated/catalog-version.h")
         (staging / "supplement.h").replace(base / "generated/supplement.h")
+        (staging / "emoji-sequences.h").replace(base / "generated/emoji-sequences.h")
+        for name in ("presentation-bases.txt", "coverage.json"):
+            (staging / name).replace(emoji_data / name)
         for source in (aliases, sequences):
             (staging / source.name).replace(root / "data/unicode/supplement" / source.name)
 

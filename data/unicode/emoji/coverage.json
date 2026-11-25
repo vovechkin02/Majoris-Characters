@@ -1,0 +1,125 @@
+{
+  "source": "GTK 3.24.49-3 Debian 13 emoji resources (Emojibase annotations); CLDR 48 English Emoji 17 additions (8 base entries)",
+  "locales": {
+    "bn": {
+      "direct": 1906,
+      "tone_base": 1785,
+      "missing": 253
+    },
+    "da": {
+      "direct": 1906,
+      "tone_base": 1785,
+      "missing": 253
+    },
+    "de": {
+      "direct": 1906,
+      "tone_base": 1785,
+      "missing": 253
+    },
+    "en": {
+      "direct": 1914,
+      "tone_base": 1790,
+      "missing": 240
+    },
+    "es": {
+      "direct": 1906,
+      "tone_base": 1785,
+      "missing": 253
+    },
+    "et": {
+      "direct": 1906,
+      "tone_base": 1785,
+      "missing": 253
+    },
+    "fi": {
+      "direct": 1906,
+      "tone_base": 1785,
+      "missing": 253
+    },
+    "fr": {
+      "direct": 1906,
+      "tone_base": 1785,
+      "missing": 253
+    },
+    "hi": {
+      "direct": 1906,
+      "tone_base": 1785,
+      "missing": 253
+    },
+    "hu": {
+      "direct": 1906,
+      "tone_base": 1785,
+      "missing": 253
+    },
+    "it": {
+      "direct": 1906,
+      "tone_base": 1785,
+      "missing": 253
+    },
+    "ja": {
+      "direct": 1906,
+      "tone_base": 1785,
+      "missing": 253
+    },
+    "ko": {
+      "direct": 1906,
+      "tone_base": 1785,
+      "missing": 253
+    },
+    "lt": {
+      "direct": 1906,
+      "tone_base": 1785,
+      "missing": 253
+    },
+    "ms": {
+      "direct": 1906,
+      "tone_base": 1785,
+      "missing": 253
+    },
+    "nb": {
+      "direct": 1906,
+      "tone_base": 1785,
+      "missing": 253
+    },
+    "nl": {
+      "direct": 1906,
+      "tone_base": 1785,
+      "missing": 253
+    },
+    "pl": {
+      "direct": 1906,
+      "tone_base": 1785,
+      "missing": 253
+    },
+    "pt": {
+      "direct": 1906,
+      "tone_base": 1785,
+      "missing": 253
+    },
+    "ru": {
+      "direct": 1906,
+      "tone_base": 1785,
+      "missing": 253
+    },
+    "sv": {
+      "direct": 1906,
+      "tone_base": 1785,
+      "missing": 253
+    },
+    "th": {
+      "direct": 1906,
+      "tone_base": 1785,
+      "missing": 253
+    },
+    "uk": {
+      "direct": 1906,
+      "tone_base": 1785,
+      "missing": 253
+    },
+    "zh": {
+      "direct": 1906,
+      "tone_base": 1785,
+      "missing": 253
+    }
+  }
+}

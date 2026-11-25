@@ -48,3 +48,16 @@ Full original copyright notices, source hashes, and the LPPL license are
 retained in `data/unicode/han/`. The derived snapshot and generated tables
 retain the source data attribution and licensing. Official Unihan files are
 not bundled; any later imported official data retain the Unicode data license.
+
+## Priority 3 emoji sequence and annotation data
+
+The 371 presentation bases are transcribed from Unicode 17.0
+`emoji-variation-sequences.txt` (Copyright 2025 Unicode, Inc.), at
+https://www.unicode.org/Public/17.0.0/ucd/emoji/emoji-variation-sequences.txt.
+Selector omissions derive from the existing GNOME catalog. Eight English
+base annotations derive from CLDR 48 `common/annotations/en.xml`
+(Copyright 1991–2025 Unicode, Inc.), at
+https://github.com/unicode-org/cldr/blob/release-48/common/annotations/en.xml.
+These Unicode data are licensed under Unicode-3.0; see the included license
+under `data/unicode/supplement/`. The remaining annotation data retain the
+original GTK/Emojibase attribution and licensing.

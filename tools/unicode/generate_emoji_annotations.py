@@ -8,6 +8,8 @@ import re
 import unicodedata
 import xml.etree.ElementTree as ET
 
+from generate_emoji_sequences import CATALOG, read_catalog
+
 
 def key(points: list[int]) -> str:
     """Remove presentation selectors and GTK modifier placeholders from a lookup key."""
@@ -26,6 +28,8 @@ def quote(text: str) -> str:
 
 def read_cldr(root: Path) -> dict:
     """Import resolved or explicit CLDR annotation XML, merging derived entries by locale."""
+    if not (root / "annotations").is_dir():
+        raise ValueError("CLDR common/annotations is required")
     locales = {}
     for directory in ("annotations", "annotationsDerived"):
         for path in sorted((root / directory).glob("*.xml")):
@@ -37,28 +41,57 @@ def read_cldr(root: Path) -> dict:
                 value = (node.text or "").strip()
                 if not text or not value or value == "↑↑↑" or node.get("alt"):
                     continue
+                text = key(list(map(ord, text)))
+                if not text:
+                    continue
                 record = rows.setdefault(text, [list(map(ord, text)), "", []])
                 if node.get("type") == "tts":
                     record[1] = value
                 else:
                     record[2].extend(word.strip() for word in value.split("|") if word.strip())
-    return {lang: list(rows.values()) for lang, rows in locales.items()}
+    return {lang: list(rows.values()) for lang, rows in locales.items() if rows}
+
+
+def coverage(locales: dict, catalog: list[tuple[int, ...]]) -> dict:
+    """Count direct exact annotation keys and skin-tone-base fallback per locale."""
+    report = {}
+    for language, rows in sorted(locales.items()):
+        keys = {key(points) for points, name, words in rows if name or words}
+        direct = sum(key(list(points)) in keys for points in catalog)
+        inherited_tone = sum(
+            key(list(points)) not in keys and
+            key([p for p in points if not 0x1F3FB <= p <= 0x1F3FF]) in keys
+            for points in catalog
+        )
+        report[language] = {"direct": direct, "tone_base": inherited_tone,
+                            "missing": len(catalog) - direct - inherited_tone}
+    return report
 
 
 def generate(locales: dict, source: str, output: Path) -> None:
     """Emit sorted, deduplicated lookup records with immutable locale tables."""
     lines = ["/* Generated emoji annotation tables; do not edit. */",
              f"#define EMOJI_ANNOTATION_SOURCE {quote(source)}"]
+    if len({language.lower() for language in locales}) != len(locales):
+        raise ValueError("Duplicate case-insensitive locale tag")
     for language, rows in sorted(locales.items()):
         if not re.fullmatch(r"[a-zA-Z0-9_]+", language):
             raise ValueError(f"Invalid locale: {language}")
         records = {}
         for points, name, keywords in rows:
+            if any(not isinstance(point, int) or not 0 <= point <= 0x10FFFF or
+                   0xD800 <= point <= 0xDFFF for point in points):
+                raise ValueError("Invalid annotation scalar")
             sequence = key(points)
             if not sequence:
                 continue
-            record = records.setdefault(sequence, set())
-            record.update(fold(value) for value in [name, *keywords] if value)
+            words = {fold(value) for value in [name, *keywords] if value}
+            if any(any(ord(char) < 32 for char in word) for word in words):
+                raise ValueError("Control character in annotation text")
+            if words:
+                records.setdefault(sequence, set()).update(words)
+        if not records:
+            raise ValueError(f"Empty annotation locale: {language}")
         lines.append(f"static const struct Annotation annotations_{language}[] = {{")
         for sequence, words in sorted(records.items(), key=lambda pair: pair[0].encode()):
             lines.append(f"    {{ {quote(sequence)}, {quote(' | '.join(sorted(words)))} }},")
@@ -80,6 +113,8 @@ def main() -> int:
                         default=root / "data/unicode/emoji/annotations.json.gz")
     parser.add_argument("--output", type=Path,
                         default=root / "native/unicode/generated/emoji-annotations.h")
+    parser.add_argument("--coverage", type=Path)
+    parser.add_argument("--require-complete", action="append", default=[], metavar="LOCALE")
     args = parser.parse_args()
     if args.cldr_common:
         if not args.cldr_version or not re.fullmatch(r"[0-9]+(?:\.[0-9]+)*", args.cldr_version):
@@ -92,7 +127,15 @@ def main() -> int:
     locales = data["locales"]
     if not locales or "en" not in locales or not locales["en"]:
         raise ValueError("English annotation fallback is required")
+    report = coverage(locales, read_catalog(CATALOG))
+    for language in args.require_complete:
+        if language not in report or report[language]["missing"]:
+            raise ValueError(f"Incomplete direct or tone-base coverage: {language}")
     generate(locales, data["source"], args.output)
+    if args.coverage:
+        args.coverage.write_text(json.dumps({"source": data["source"],
+                                             "locales": report}, indent=2) + "\n",
+                                 encoding="utf-8")
     if args.cldr_common:
         encoded = json.dumps(data, ensure_ascii=False, separators=(",", ":")).encode()
         args.source.write_bytes(gzip.compress(encoded, mtime=0))

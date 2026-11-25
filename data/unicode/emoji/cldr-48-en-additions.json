@@ -1,0 +1,15 @@
+{
+  "source": "CLDR 48 common/annotations/en.xml (eight Emoji 17 additions only)",
+  "locales": {
+    "en": [
+      [[129736], "hairy creature", ["bigfoot", "cryptid", "forest", "giant", "hairy", "sasquatch", "woodwose", "yeti"]],
+      [[129741], "orca", ["marine", "ocean", "whale"]],
+      [[129770], "distorted face", ["anxiety", "bloated", "panic", "shocked", "surprised", "vulnerable"]],
+      [[129775], "fight cloud", ["argument", "brawl", "debate", "disagreement", "fight", "ruckus", "wrestle"]],
+      [[128728], "landslide", ["avalanche", "danger", "disaster", "earthquake", "mountain", "mudslide", "rocks"]],
+      [[129674], "trombone", ["brass", "instrument", "jazz", "music", "sad", "slide"]],
+      [[129678], "treasure chest", ["gem", "gold", "jewels", "loot", "money", "prize", "silver", "valuables", "wealth"]],
+      [[129489, 8205, 129648], "ballet dancer", ["ballet", "dancer"]]
+    ]
+  }
+}

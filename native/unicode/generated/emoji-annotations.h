@@ -1,5 +1,5 @@
 /* Generated emoji annotation tables; do not edit. */
-#define EMOJI_ANNOTATION_SOURCE "GTK 3.24.49-3 Debian 13 emoji resources (Emojibase annotations)"
+#define EMOJI_ANNOTATION_SOURCE "GTK 3.24.49-3 Debian 13 emoji resources (Emojibase annotations); CLDR 48 English Emoji 17 additions (8 base entries)"
 static const struct Annotation annotations_bn[] = {
     { "#⃣", "কিক্যাপ | কিক্যাপ: #" },
     { "*⃣", "কিক্যাপ | কিক্যাপ: *" },
@@ -7170,6 +7170,7 @@ static const struct Annotation annotations_en[] = {
     { "🛕", "hindu | hindu temple | temple" },
     { "🛖", "home | house | hut | roundhouse | shelter | yurt" },
     { "🛗", "accessibility | elevator | hoist | lift" },
+    { "🛘", "avalanche | danger | disaster | earthquake | landslide | mountain | mudslide | rocks" },
     { "🛜", "broadband | computer | connectivity | hotspot | internet | network | router | smartphone | wi-fi | wifi | wireless | wlan" },
     { "🛝", "amusement | park | play | playground | playground slide | playing | slide | sliding | theme" },
     { "🛞", "car | circle | tire | turn | vehicle | wheel" },
@@ -7465,6 +7466,7 @@ static const struct Annotation annotations_en[] = {
     { "🧑‍🧑‍🧒‍🧒", "adult | child | family | family: adult, adult, child, child" },
     { "🧑‍🧒", "adult | child | family | family: adult, child" },
     { "🧑‍🧒‍🧒", "adult | child | family | family: adult, child, child" },
+    { "🧑‍🩰", "ballet | ballet dancer | dancer" },
     { "🧒", "bright-eyed | child | grandchild | kid | young | younger" },
     { "🧓", "adult | elderly | grandparent | old | older person | person | wise" },
     { "🧔", "beard | bearded | person | person: beard | whiskers" },
@@ -7556,6 +7558,8 @@ static const struct Annotation annotations_en[] = {
     { "🪇", "cha | dance | instrument | maracas | music | party | percussion | rattle | shake | shaker" },
     { "🪈", "band | fife | flautist | flute | instrument | marching | music | orchestra | piccolo | pipe | recorder | woodwind" },
     { "🪉", "cupid | harp | instrument | love | music | orchestra" },
+    { "🪊", "brass | instrument | jazz | music | sad | slide | trombone" },
+    { "🪎", "gem | gold | jewels | loot | money | prize | silver | treasure chest | valuables | wealth" },
     { "🪏", "bury | dig | garden | hole | plant | scoop | shovel | snow | spade" },
     { "🪐", "planet | ringed | ringed planet | saturn | saturnine" },
     { "🪑", "chair | seat | sit" },
@@ -7612,6 +7616,8 @@ static const struct Annotation annotations_en[] = {
     { "🫄", "belly | bloated | full | overeat | person | pregnant | pregnant person | stuffed" },
     { "🫅", "crown | monarch | noble | person | person with crown | regal | royal | royalty" },
     { "🫆", "clue | crime | detective | fingerprint | forensics | identity | mystery | print | safety | trace" },
+    { "🫈", "bigfoot | cryptid | forest | giant | hairy | hairy creature | sasquatch | woodwose | yeti" },
+    { "🫍", "marine | ocean | orca | whale" },
     { "🫎", "alces | animal | antlers | elk | mammal | moose" },
     { "🫏", "animal | ass | burro | donkey | hinny | mammal | mule | stubborn" },
     { "🫐", "berries | berry | bilberry | blue | blueberries | blueberry | food | fruit" },
@@ -7638,6 +7644,8 @@ static const struct Annotation annotations_en[] = {
     { "🫧", "bubble | bubbles | burp | clean | floating | pearl | soap | underwater" },
     { "🫨", "crazy | daze | earthquake | face | omg | panic | shaking | shaking face | shock | surprise | vibrate | whoa | wow" },
     { "🫩", "bags | bored | exhausted | eyes | face | face with bags under eyes | fatigued | late | sleepy | tired | weary" },
+    { "🫪", "anxiety | bloated | distorted face | panic | shocked | surprised | vulnerable" },
+    { "🫯", "argument | brawl | debate | disagreement | fight | fight cloud | ruckus | wrestle" },
     { "🫰", "<3 | crossed | expensive | finger | hand | hand with index finger and thumb crossed | heart | index | love | money | snap | thumb" },
     { "🫱", "hand | handshake | hold | reach | right | rightward | rightwards | rightwards hand | shake" },
     { "🫲", "hand | handshake | hold | left | leftward | leftwards | leftwards hand | reach | shake" },

@@ -20,6 +20,7 @@
 #define COUNT(array) (sizeof(array) / sizeof((array)[0]))
 #define SCALAR_LIMIT 0x110000u
 #define EMOJI_BASE SCALAR_LIMIT
+#define EMOJI_ALIAS_BASE 0x180000u
 #define NAMED_BASE 0x200000u
 #define MAX_QUERY_BYTES 512
 #define MAX_SEQUENCE_POINTS CHARACTERS_UNICODE_MAX_SEQUENCE_LENGTH
@@ -313,6 +314,12 @@ static bool parse_query(const char *input, struct Query *query) {
         int category = characters_scalar_category(query->points[0]);
         query->literal_letter = query->points[0] > 0x7F &&
             category >= U_UPPERCASE_LETTER && category <= U_OTHER_LETTER;
+        query->exact = true;
+        return true;
+    }
+    if (query->point_count > 1 &&
+        (characters_unicode_emoji_index(query->points, query->point_count) != SIZE_MAX ||
+         characters_emoji_alias_index(query->text) != SIZE_MAX)) {
         query->exact = true;
         return true;
     }
@@ -701,6 +708,45 @@ static bool scan_emoji(CharactersSearch *search, const struct Query *query) {
     return true;
 }
 
+/** Add an exact noncatalog emoji identity without changing ordinary browse counts. */
+static bool scan_emoji_alias(CharactersSearch *search, const struct Query *query) {
+    if (is_canceled(search) || !query->exact || !query->point_count ||
+        (search->scope == CHARACTERS_SEARCH_ALL && query->point_count == 1)) {
+        return true;
+    }
+    char *text = characters_unicode_encode(query->points, query->point_count);
+    size_t alias = characters_emoji_alias_index(text);
+    free(text);
+    if (alias == SIZE_MAX || alias >= NAMED_BASE - EMOJI_ALIAS_BASE) {
+        return true;
+    }
+    if (search->category >= 0 && (query->point_count != 1 ||
+        category_for(query->points[0]) != search->category)) {
+        return true;
+    }
+    if (search->scope == CHARACTERS_SEARCH_EMOJI && search->filter >= 0) {
+        size_t canonical = characters_emoji_alias_canonical(alias);
+        size_t group = (size_t)search->filter;
+        bool found = false;
+        if (canonical == SIZE_MAX) {
+            /* Standalone keycap bases belong to Symbols, not Flags or People. */
+            const char *name = characters_unicode_emoji_group_name(group);
+            found = name && strcmp(name, "Symbols") == 0;
+        } else {
+            for (size_t index = 0; index < characters_unicode_emoji_group_size(group); index++) {
+                if (characters_unicode_emoji_group_index(group, index) == canonical) {
+                    found = true;
+                    break;
+                }
+            }
+        }
+        if (!found) {
+            return true;
+        }
+    }
+    return append_id(search, EMOJI_ALIAS_BASE + (uint32_t)alias);
+}
+
 /** Scan standardized named sequences, retaining their distinct catalog identity. */
 static bool scan_named(CharactersSearch *search, const struct Query *query) {
     if (search->category >= 0) {
@@ -836,7 +882,8 @@ CharactersSearchStatus characters_search_run(CharactersSearch *search) {
                                     search->scripts);
     }
     size_t emoji_count = characters_unicode_emoji_count();
-    if (emoji_count > NAMED_BASE - EMOJI_BASE ||
+    if (emoji_count > EMOJI_ALIAS_BASE - EMOJI_BASE ||
+        characters_emoji_alias_count() > NAMED_BASE - EMOJI_ALIAS_BASE ||
         characters_unicode_named_count() >= UINT32_MAX - NAMED_BASE) {
         search->status = CHARACTERS_SEARCH_FAILED;
         return search->status;
@@ -854,7 +901,7 @@ CharactersSearchStatus characters_search_run(CharactersSearch *search) {
     }
     if (!search->points && success && !query.han_field && !is_canceled(search) &&
         (search->scope == CHARACTERS_SEARCH_ALL || search->scope == CHARACTERS_SEARCH_EMOJI)) {
-        success = scan_emoji(search, &query);
+        success = scan_emoji(search, &query) && scan_emoji_alias(search, &query);
     }
     if (!search->points && success && !query.han_field && !is_canceled(search) &&
         (search->scope == CHARACTERS_SEARCH_ALL || search->scope == CHARACTERS_SEARCH_NAMED)) {
@@ -937,8 +984,12 @@ char *characters_search_text(uint32_t id) {
     if (id < SCALAR_LIMIT) {
         return characters_unicode_is_scalar(id) ? characters_unicode_encode(&id, 1) : NULL;
     }
-    if (id < NAMED_BASE) {
+    if (id < EMOJI_ALIAS_BASE) {
         return characters_unicode_emoji_text(id - EMOJI_BASE);
+    }
+    if (id < NAMED_BASE) {
+        const char *text = characters_emoji_alias_text(id - EMOJI_ALIAS_BASE);
+        return text ? strdup(text) : NULL;
     }
     return characters_unicode_named_text(id - NAMED_BASE);
 }
@@ -977,7 +1028,10 @@ char *characters_search_name(uint32_t id) {
         return strdup(category_for(id) == CATEGORY_PRIVATE_USE ?
                       "Private Use Character" : "Unnamed Character");
     }
-    const char *name = id < NAMED_BASE ? characters_unicode_emoji_label(id - EMOJI_BASE) :
+    if (id >= EMOJI_ALIAS_BASE && id < NAMED_BASE) {
+        return characters_emoji_alias_name(id - EMOJI_ALIAS_BASE);
+    }
+    const char *name = id < EMOJI_ALIAS_BASE ? characters_unicode_emoji_label(id - EMOJI_BASE) :
                        characters_unicode_named_name(id - NAMED_BASE);
     return name ? strdup(name) : NULL;
 }

@@ -90,3 +90,9 @@ Official references:
 - https://www.unicode.org/Public/17.0.0/ucd/NameAliases.txt
 - https://www.unicode.org/Public/17.0.0/ucd/NamedSequences.txt
 - https://www.unicode.org/Public/17.0.0/ucd/NormalizationTest.txt
+
+Priority 3 requires `emoji-variation-sequences.txt` in the catalog input directory
+alongside `emoji-test.txt`. Catalog replacement stages and validates the new
+presentation bases, selector-omission indexes, and annotation coverage report
+before replacing generated catalog files. Full CLDR annotations are updated
+separately through `generate_emoji_annotations.py`.

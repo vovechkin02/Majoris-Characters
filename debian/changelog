@@ -1,3 +1,13 @@
+majoris-characters (1.0.3-1) unstable; urgency=medium
+
+  * Include all Unicode 17 standardized emoji presentation bases.
+  * Preserve exact selector-omission sequences in search and variation selection.
+  * Use structural emoji family grouping and extend annotation locale fallback.
+  * Add CLDR 48 English annotations for new Emoji 17 bases and coverage reporting.
+  * Add deterministic data generation and import regression tests.
+
+ -- Vlad Ovechkin <45165533+vovechkin02@users.noreply.github.com>  Wed, 25 Nov 2026 19:14:00 +1100
+
 majoris-characters (1.0.2-1) unstable; urgency=medium
 
   * Add script-extension, language and configured keyboard browsing.

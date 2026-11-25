@@ -1,14 +1,14 @@
 # Majoris Characters
 
 Characters is a native GTK4/libadwaita character utility for the Majoris desktop.
-This Stage 10 qualification candidate brings together the nine implemented feature
-stages with desktop input hardening, accessibility, localization, and release checks.
+This qualification candidate includes the ten development stages and subsequent
+Unicode, international browsing, and emoji data improvements.
 
 | Project metadata | Value |
 | --- | --- |
-| Version | 1.0.2 |
+| Version | 1.0.3 |
 | Platform target | Majoris OS / Debian 13 (Trixie) |
-| Development status | Stage 10 — qualification candidate (not a verified stable release) |
+| Development status | Priority 3 — qualification candidate (not a verified stable release) |
 | Application ID | `com.majoris.characters` |
 | Debian package | `majoris-characters` |
 | License | GPL-3.0-or-later |
@@ -97,10 +97,13 @@ See [international browsing](docs/international-browsing.md) for CJK query synta
 source coverage and official Unihan import instructions. The bundled fallback is
 not the full official Unihan database.
 Emoji annotations from Debian GTK 3.24.49-3 (Emojibase-derived data) are
-bundled for 24 languages; they do not cover all Unicode 17 entries. Direct
-CLDR XML imports are supported by the offline generator. The picker exposes
-catalog-backed skin tone, gender, hair, direction, relationship, flag and
-keycap choices, and presentation pairs derived from the catalog. Color glyphs
+bundled for 24 languages, plus CLDR 48 English annotations for the eight new
+Emoji 17 bases. Full multilingual coverage remains outstanding. Direct CLDR
+XML imports and coverage reporting are supported by the offline generator. The
+picker exposes catalog-backed skin tone, gender, hair, direction, relationship,
+flag and keycap choices, all 742 standardized presentation sequences, and
+selector-omission forms. Exact search retains supplementary identities without
+adding duplicates to ordinary browsing. Color glyphs
 are rendered by Pango with installed emoji fonts. See [emoji functionality](docs/emoji-functionality.md)
 for coverage and rendering boundaries. Desktop integration is provided through the
 compact picker, SearchProvider2, an opt-in Shell shortcut, and an optional IBus input
@@ -156,7 +159,7 @@ For Debian binary packages (run from the repository root):
 
 ```sh
 dpkg-buildpackage -us -uc -b
-sudo apt install ../majoris-characters_1.0.2-1_$(dpkg --print-architecture).deb
+sudo apt install ../majoris-characters_1.0.3-1_$(dpkg --print-architecture).deb
 ```
 
 The source package uses `3.0 (quilt)` and requires the corresponding upstream
@@ -306,9 +309,9 @@ After installing the Debian package, the same runtime tests can target the real
 installed executable:
 
 ```sh
-python3 tests/integration/test_application.py /usr/bin/majoris-characters 1.0.2 cli
+python3 tests/integration/test_application.py /usr/bin/majoris-characters 1.0.3 cli
 xvfb-run -a dbus-run-session -- python3 \
-  tests/integration/test_application.py /usr/bin/majoris-characters 1.0.2 gui
+  tests/integration/test_application.py /usr/bin/majoris-characters 1.0.3 gui
 ```
 
 For a fresh, fail-closed automated build/test and optional Debian package gate:
@@ -318,7 +321,8 @@ python3 tools/qualification/qualify.py build-release --package
 ```
 
 See [ISO integration and desktop qualification](docs/release-integration.md) for
-installation and target runtime checks. See [Stage 10 qualification](docs/stage-10-qualification.md) for actual
+installation and target runtime checks. See [Priority 3 qualification](docs/priority-3-qualification.md) for current evidence and
+[Stage 10 qualification](docs/stage-10-qualification.md) for historical
 verification results and remaining build/package checks. Historical Stage 1–9
 reports are preserved under `docs/`. Source inspection is
 not equivalent to compilation or runtime validation.

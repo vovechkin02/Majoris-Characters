@@ -206,3 +206,9 @@ test('Unihan offline importer contracts', python,
   suite: 'unit',
   timeout: 10,
 )
+
+test('Emoji offline data and coverage contracts', python,
+  args: [files('unit/test_emoji_data.py')],
+  suite: 'unit',
+  timeout: 30,
+)

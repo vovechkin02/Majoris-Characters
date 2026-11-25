@@ -10,6 +10,7 @@
 #include <unicode/utf16.h>
 #include <unicode/utf8.h>
 
+#include "emoji-catalog.h"
 #include "normalization.h"
 #include "scalar-properties.h"
 #include "unihan.h"
@@ -499,7 +500,13 @@ char *characters_unicode_sequence_name(const uint32_t *points, size_t length) {
         }
     }
     const struct EmojiCharacter *emoji = find_emoji(points, length);
-    return emoji ? strdup(emoji->name) : NULL;
+    if (emoji) {
+        return strdup(emoji->name);
+    }
+    char *text = characters_unicode_encode(points, length);
+    size_t alias = characters_emoji_alias_index(text);
+    free(text);
+    return characters_emoji_alias_name(alias);
 }
 
 char *characters_unicode_normalize(const char *text, const char *form) {
@@ -608,10 +615,6 @@ char **characters_unicode_related(const uint32_t *points, size_t length) {
         }
     } else {
         uint32_t point = points[0];
-        uint32_t variant[] = { point, 0xFE0F };
-        if (find_emoji(variant, COUNT(variant))) {
-            append_related(&list, variant, COUNT(variant));
-        }
         if (has_properties(point)) {
             append_case_variants(&list, point);
             append_scalar(&list, (uint32_t)u_charMirror((UChar32)point));
@@ -620,9 +623,22 @@ char **characters_unicode_related(const uint32_t *points, size_t length) {
         }
         append_confusables(&list, point);
     }
+    if (characters_emoji_is_presentation_base(points[0]) &&
+        (length == 1 || (length == 2 && (points[1] == 0xFE0E || points[1] == 0xFE0F)))) {
+        uint32_t pair[] = { points[0], 0xFE0E };
+        append_related(&list, pair, COUNT(pair));
+        pair[1] = 0xFE0F;
+        append_related(&list, pair, COUNT(pair));
+    }
     char *original = characters_unicode_encode(points, length);
     if (!original) {
         list.failed = true;
+    } else {
+        size_t canonical = characters_emoji_alias_canonical(characters_emoji_alias_index(original));
+        if (canonical < COUNT(emoji_characters)) {
+            const struct EmojiCharacter *entry = &emoji_characters[canonical];
+            append_related(&list, entry->uc, (size_t)entry->length);
+        }
     }
     char **result = finish_related(&list, original);
     free(original);

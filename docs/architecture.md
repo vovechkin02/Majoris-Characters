@@ -287,3 +287,19 @@ The main window observes optional GSettings input-source changes and disconnects
 on closure; the existing request controller handles cancellation/supersession.
 This uses native Observer signals and a direct data lookup rather than speculative
 strategy hierarchies. Formal Han properties and fallbacks have separate contracts.
+
+
+## Priority 3: exact emoji sequence identities
+
+`generate_emoji_sequences.py` produces a sorted immutable table from the pinned
+presentation bases and catalog selector omissions. `emoji-catalog.c` owns
+binary search, canonical association and structural family selection; the
+Unicode engine uses the same lookup for related characters and inspector names.
+The search engine reserves a separate private ID interval for supplementary
+identities and emits them only for exact queries. Existing catalog and named
+sequence IDs remain unchanged. The supplementary IDs are not persisted. The
+application continues to use GSettings text identities for persistence and
+GDK text for clipboard operations. This is a direct table lookup and domain
+policy, not a new GoF pattern hierarchy. All native lookups are immutable and
+thread-safe; variant allocations belong to the picker. Tests verify all bases,
+exact query behavior, existing family contracts and deterministic generation.

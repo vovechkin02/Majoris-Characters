@@ -25,3 +25,8 @@ application and GJS are not runtime dependencies of the main application. The op
 - Priority 2: International browsing, script extensions, configured XKB scopes,
   Han search and metadata import implemented; full official Unihan acquisition
   and runtime GUI qualification remain outstanding. See international-browsing.md.
+
+- Priority 3: Standardized presentation and selector-omission lookup, exact
+  search, structural families, CLDR 48 English additions, and locale coverage
+  tooling implemented. Full multilingual CLDR import and official emoji-test
+  file comparison remain outstanding. Next functional priority: font inspection.
