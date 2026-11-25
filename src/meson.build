@@ -28,6 +28,8 @@ application_sources = files('app/application.vala') + integration_sources + font
   'views/composer-view.vala',
   'views/emoji-variations.vala',
   'views/font-browser.vala',
+  'views/font-face-dialog.vala',
+  'views/font-preview.vala',
   'views/library-dialog.vala',
   'views/main-window.vala',
   'views/preferences-dialog.vala',

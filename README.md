@@ -2,13 +2,13 @@
 
 Characters is a native GTK4/libadwaita character utility for the Majoris desktop.
 This qualification candidate includes the ten development stages and subsequent
-Unicode, international browsing, and emoji data improvements.
+Unicode, international browsing, emoji data, and exact font inspection improvements.
 
 | Project metadata | Value |
 | --- | --- |
-| Version | 1.0.3 |
+| Version | 1.0.4 |
 | Platform target | Majoris OS / Debian 13 (Trixie) |
-| Development status | Priority 3 — qualification candidate (not a verified stable release) |
+| Development status | Priority 4 — qualification candidate (not a verified stable release) |
 | Application ID | `com.majoris.characters` |
 | Debian package | `majoris-characters` |
 | License | GPL-3.0-or-later |
@@ -66,6 +66,8 @@ Unicode, international browsing, and emoji data improvements.
 
 - Installed font family and face browsing, mapped Unicode coverage including
   private-use scalars, font comparisons, and variable/color capability discovery.
+- Exact FreeType file/face previews with fallback disabled, variable-axis adjustment,
+  selected-instance reset, and separate Microsoft Symbol cmap inspection.
 - Explicit preview fallback control, adjustable point size, manual and periodic
   font inventory refresh, and nominal face-resolution checks.
 - Thirty-five ICU legacy character sets with exact byte lookup, alternate
@@ -116,7 +118,7 @@ in the delivery environment.
 Debian 13 is the intended build and runtime environment. The build requires Meson
 1.3 or newer, a Vala compiler, GCC or a compatible C compiler, Ninja, pkg-config,
 GTK 4.14+, libadwaita 1.7+, GIO/GLib 2.80+, ICU 76+, Fontconfig 2.13+,
-PangoFT2 1.50+, gettext, and Python 3. The integration
+FreeType 2.10+, PangoFT2 1.50+, gettext, and Python 3. The integration
 tests use Xvfb, xauth, a private D-Bus session and GLib command-line tools.
 The full Debian build dependency list is in [debian/control](debian/control).
 The application does not require unstable GNOME packages or GJS. The optional
@@ -130,7 +132,7 @@ Install the build tools on Debian 13:
 ```sh
 sudo apt-get install build-essential valac meson ninja-build pkgconf \
   libgtk-4-dev libadwaita-1-dev libglib2.0-dev libglib2.0-bin libicu-dev gettext \
-  libfontconfig-dev libpango1.0-dev fonts-dejavu-core fonts-noto-color-emoji \
+  libfontconfig-dev libfreetype-dev libpango1.0-dev fonts-dejavu-core fonts-noto-color-emoji \
   python3 xvfb xauth dbus-daemon debhelper
 ```
 
@@ -159,7 +161,7 @@ For Debian binary packages (run from the repository root):
 
 ```sh
 dpkg-buildpackage -us -uc -b
-sudo apt install ../majoris-characters_1.0.3-1_$(dpkg --print-architecture).deb
+sudo apt install ../majoris-characters_1.0.4-1_$(dpkg --print-architecture).deb
 ```
 
 The source package uses `3.0 (quilt)` and requires the corresponding upstream
@@ -206,7 +208,9 @@ for precise input, representation, and clipboard contracts.
 Choose **Fonts** or **Character Sets** from the sidebar or main menu. Select a
 family and face, filter the mapped repertoire, change preview size, or toggle
 font fallback. Use **Font Variations** in the inspector to compare the selected
-scalar across installed faces. For legacy character sets, enter `byte:80` or
+scalar across installed faces. Choose **Inspect Font Face and Symbol Map**
+for exact glyph previews, design-axis adjustments and raw symbol codes.
+For legacy character sets, enter `byte:80` or
 `byte:82 A0` to find an exact mapping in the selected encoding. See
 [font inspection](docs/font-inspection.md) for mapping and preview limitations.
 Select **Emoji**, search by a name or annotation keyword in the current locale,
@@ -244,7 +248,7 @@ SearchProvider2 interface. No public library ABI or plugin API is provided.
 
 - `native/unicode/`: private C engine, search, inspector and composition operations, vendored catalog
   and generated supplement.
-- `native/fonts/`: Fontconfig face inventory, coverage, and Pango resolution checks.
+- `native/fonts/`: Fontconfig inventory, FreeType exact glyphs and axes, and Pango fallback.
 - `src/fonts/`: asynchronous font and encoding source loading.
 - `vapi/`: internal Vala bindings.
 - `tools/unicode/`: offline catalog generation.
@@ -282,7 +286,8 @@ input and cancels search on focus loss. The input query is passed to a local sub
 command line. The explicit insertion history command still receives the selected
 character as an argument.
 The interface inherits system theme styling; no custom CSS or Majoris-specific runtime package is required. Font previews
-use explicit Pango attributes without changing the interface font. The app's original icon follows the
+use exact FreeType rasterization without fallback or explicit Pango attributes
+with fallback, without changing the interface font. The app's original icon follows the
 Majoris color palette. GNOME-derived data and algorithms are attributed in [third-party notices](THIRD_PARTY_NOTICES.md).
 
 ## Testing and release qualification
@@ -309,9 +314,9 @@ After installing the Debian package, the same runtime tests can target the real
 installed executable:
 
 ```sh
-python3 tests/integration/test_application.py /usr/bin/majoris-characters 1.0.3 cli
+python3 tests/integration/test_application.py /usr/bin/majoris-characters 1.0.4 cli
 xvfb-run -a dbus-run-session -- python3 \
-  tests/integration/test_application.py /usr/bin/majoris-characters 1.0.3 gui
+  tests/integration/test_application.py /usr/bin/majoris-characters 1.0.4 gui
 ```
 
 For a fresh, fail-closed automated build/test and optional Debian package gate:
@@ -321,7 +326,7 @@ python3 tools/qualification/qualify.py build-release --package
 ```
 
 See [ISO integration and desktop qualification](docs/release-integration.md) for
-installation and target runtime checks. See [Priority 3 qualification](docs/priority-3-qualification.md) for current evidence and
+installation and target runtime checks. See [Priority 4 qualification](docs/priority-4-qualification.md) for current evidence and
 [Stage 10 qualification](docs/stage-10-qualification.md) for historical
 verification results and remaining build/package checks. Historical Stage 1–9
 reports are preserved under `docs/`. Source inspection is

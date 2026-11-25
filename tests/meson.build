@@ -130,7 +130,11 @@ font_sources_test = executable(
   dependencies: [gio_dep, gtk_dep, font_dep, unicode_dep],
   c_args: ['-UNDEBUG'],
 )
+font_test_environment = environment()
+font_test_environment.set('CHARACTERS_FONT_FIXTURES',
+  meson.current_source_dir() / 'fixtures/fonts')
 test('Font and legacy source bindings and supersession', font_sources_test,
+  env: font_test_environment,
   suite: 'unit', timeout: 30)
 
 emoji_catalog_test = executable(
@@ -211,4 +215,16 @@ test('Emoji offline data and coverage contracts', python,
   args: [files('unit/test_emoji_data.py')],
   suite: 'unit',
   timeout: 30,
+)
+
+font_face_test = executable(
+  'test-font-face',
+  'unit/test-font-face.c',
+  dependencies: font_dep,
+  c_args: ['-UNDEBUG'],
+)
+test('Exact font face and variation contracts', font_face_test,
+  args: files('fixtures/fonts/faces.ttc', 'fixtures/fonts/variable.ttf',
+              'fixtures/fonts/symbol.ttf'),
+  suite: 'unit', timeout: 30,
 )

@@ -147,6 +147,16 @@ private void test_font_browser (MainWindow window) {
     wait_for_page (selection, 1, "65");
     selection.selected = 0;
     assert (detail.label.contains ("DejaVu Sans"));
+    var inspect_face = find_widget (dialog, "inspect_face") as Gtk.Button;
+    assert (inspect_face != null && inspect_face.sensitive);
+    inspect_face.clicked ();
+    var face_dialog = window.get_visible_dialog () as FontFaceDialog;
+    assert (face_dialog != null);
+    var picture = find_widget (face_dialog, "face_picture") as Gtk.Picture;
+    var glyph = find_widget (face_dialog, "glyph_identity") as Gtk.Label;
+    assert (picture != null && picture.paintable != null);
+    assert (glyph != null && glyph.label.contains ("U+0041"));
+    assert (face_dialog.close ());
     preview.value = 36;
     fallback.active = true;
     assert (selection.selected == 0 && detail.label.contains ("DejaVu Sans"));

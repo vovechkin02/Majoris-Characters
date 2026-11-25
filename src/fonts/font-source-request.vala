@@ -22,6 +22,8 @@ namespace Characters {
         private bool force_refresh;
         /** Owned scalar repertoire, transferred to the main-context consumer on completion. */
         private uint32[]? points;
+        /** Exact face opened on the worker; transferred to the main context after publication. */
+        private Fonts.Face? exact_face;
         /** Owned legacy mapping, transferred once alongside its repertoire. */
         private Legacy.Table? table;
 
@@ -63,7 +65,11 @@ namespace Characters {
                     if (inventory == null) {
                         return false;
                     }
-                    points = inventory.get_catalog ().points (index);
+                    exact_face = inventory.get_catalog ().open_face (index);
+                    if (exact_face == null) {
+                        return false;
+                    }
+                    points = exact_face.unicode_points ();
                     return points != null;
                 case FontSourceKind.ENCODING:
                     table = Legacy.load (index);
@@ -80,6 +86,11 @@ namespace Characters {
         /** Transfers the completed repertoire once; must be called on the main context. */
         public uint32[]? take_points () {
             return (owned) points;
+        }
+
+        /** Transfers the exact face once; no further worker operations access it. */
+        public Fonts.Face? take_face () {
+            return (owned) exact_face;
         }
 
         /** Transfers the completed encoding table once on the main context. */

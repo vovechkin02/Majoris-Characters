@@ -52,6 +52,9 @@ namespace Characters {
         /** Allows Pango fallback during preview, never during coverage inspection. */
         [GtkChild]
         private unowned Gtk.CheckButton font_fallback;
+        /** Opens exact face inspection, including symbol-only fonts with no Unicode selection. */
+        [GtkChild]
+        private unowned Gtk.Button inspect_face;
         /** Explains the source and the distinction between coverage and rendering. */
         [GtkChild]
         private unowned Gtk.Label source_note;
@@ -106,6 +109,8 @@ namespace Characters {
         private SearchController controller = new SearchController ();
         /** Last successfully discovered immutable installed-face inventory. */
         private FontInventory? inventory;
+        /** Thread-confined exact selected face, transferred from the source worker. */
+        private Fonts.Face? exact_face;
         /** Current scalar repertoire, never inferred from Pango fallback. */
         private uint32[]? repertoire;
         /** Current strict legacy byte mapping, independent of the Unicode search request. */
@@ -220,6 +225,7 @@ namespace Characters {
             font_previous.clicked.connect (previous_page);
             font_next.clicked.connect (next_page);
             font_inspect.clicked.connect (inspect_selected);
+            inspect_face.clicked.connect (inspect_current_face);
             font_copy.clicked.connect (copy_character);
             bytes_copy.clicked.connect (copy_bytes);
         }
@@ -241,6 +247,9 @@ namespace Characters {
             refresh_fonts.visible = mode != FontBrowserMode.ENCODINGS;
             font_category.visible = mode != FontBrowserMode.VARIATIONS;
             bytes_copy.visible = mode == FontBrowserMode.ENCODINGS;
+            inspect_face.visible = mode != FontBrowserMode.ENCODINGS;
+            inspect_face.sensitive = false;
+            exact_face = null;
             font_fallback.visible = mode != FontBrowserMode.ENCODINGS;
             font_category.selected = 0;
             font_query.text = "";
@@ -268,6 +277,8 @@ namespace Characters {
         private void load_inventory (bool force, bool show_loading) {
             if (show_loading) {
                 inventory_refreshing = true;
+                inspect_face.sensitive = false;
+                exact_face = null;
                 face_controls.sensitive = false;
                 comparison_count = 0;
                 controller.cancel ();
@@ -307,6 +318,8 @@ namespace Characters {
                 face_controls.sensitive = true;
             }
             if (!success) {
+                exact_face = null;
+                inspect_face.sensitive = false;
                 if (request.kind == FontSourceKind.INVENTORY) {
                     inventory = null;
                     current_face = Gtk.INVALID_LIST_POSITION;
@@ -333,8 +346,14 @@ namespace Characters {
                     break;
                 case FontSourceKind.FACE:
                     repertoire = request.take_points ();
+                    exact_face = request.take_face ();
+                    inspect_face.sensitive = exact_face != null;
                     update_face_note ();
-                    submit_search ();
+                    if (repertoire != null && repertoire.length == 0) {
+                        set_status (_("No Unicode Mappings in This Face"));
+                    } else {
+                        submit_search ();
+                    }
                     break;
                 case FontSourceKind.ENCODING:
                     repertoire = request.take_points ();
@@ -356,6 +375,8 @@ namespace Characters {
             controller.cancel ();
             clear_page ();
             repertoire = null;
+            exact_face = null;
+            inspect_face.sensitive = false;
             inventory = next;
             unowned Fonts.Catalog catalog = next.get_catalog ();
             catalog.apply_config (get_pango_context ().get_font_map ());
@@ -449,6 +470,8 @@ namespace Characters {
                 return;
             }
             current_face = index;
+            inspect_face.sensitive = false;
+            exact_face = null;
             controller.cancel ();
             repertoire = null;
             clear_page ();
@@ -482,7 +505,7 @@ namespace Characters {
                 rebuild_comparisons ();
                 return;
             }
-            if (repertoire == null) {
+            if (repertoire == null || repertoire.length == 0) {
                 return;
             }
             controller.cancel ();
@@ -654,7 +677,7 @@ namespace Characters {
                 if (mode == FontBrowserMode.VARIATIONS) {
                     caption = face_name (catalog, face);
                     detail = caption + "\n" + detail;
-                    if (!matches_preview (catalog, face, description)) {
+                    if (fallback && !matches_preview (catalog, face, description)) {
                         caption += _(" (Substituted)");
                         detail += "\n" + _("Renderer resolved another face.");
                     }
@@ -666,8 +689,18 @@ namespace Characters {
                     caption = bytes;
                 }
             }
-            tile.bind_preview (point, description, preview_size.get_value_as_int (), fallback,
-                caption, detail, mode == FontBrowserMode.VARIATIONS);
+            var size_pt = preview_size.get_value_as_int ();
+            if (!fallback && mode != FontBrowserMode.ENCODINGS && inventory != null) {
+                if (mode == FontBrowserMode.VARIATIONS) {
+                    var face = inventory.get_catalog ().open_face (id);
+                    tile.bind_exact (point, face, size_pt, caption, detail, true);
+                } else {
+                    tile.bind_exact (point, exact_face, size_pt, caption, detail);
+                }
+            } else {
+                tile.bind_preview (point, description, size_pt, fallback,
+                    caption, detail, mode == FontBrowserMode.VARIATIONS);
+            }
         }
 
         /** Releases stale accessibility and display data before a cell is recycled. */
@@ -717,12 +750,15 @@ namespace Characters {
                 return;
             }
             unowned Fonts.Catalog catalog = inventory.get_catalog ();
-            var matched = matches_preview (catalog, current_face,
+            var matched = !font_fallback.active || matches_preview (catalog, current_face,
                 catalog.description (current_face));
             source_note.label = _("%d mapped scalars. Coverage excludes fallback; " +
                 "preview uses %s. %s").printf (repertoire.length,
-                font_fallback.active ? _("font fallback") : _("the requested font without fallback"),
+                font_fallback.active ? _("font fallback") : _("the exact file and face"),
                 matched ? "" : _("The renderer resolved a different face or no face."));
+            if (exact_face != null && exact_face.symbol_count () > 0) {
+                source_note.label += "\n" + _("Raw symbol mappings are available in Font Face Inspector.");
+            }
         }
 
         /** Shows exact mapped identity, face metadata, and whether the nominal preview resolved. */
@@ -735,6 +771,9 @@ namespace Characters {
             font_selection.label = "%s — %s".printf (Search.name (point) ?? _("Unknown Character"),
                 Search.code (point) ?? "");
             font_inspect.sensitive = true;
+            if (mode == FontBrowserMode.VARIATIONS) {
+                inspect_face.sensitive = inventory != null;
+            }
             font_copy.sensitive = Search.text (point) != null;
             font_favorite.sensitive = font_copy.sensitive && library != null;
             font_add.sensitive = font_copy.sensitive && composer != null;
@@ -749,9 +788,11 @@ namespace Characters {
                 var flags = _("Variable: %s · Color glyphs: %s").printf (
                     catalog.is_variable (face) ? _("Yes") : _("No"),
                     catalog.is_color (face) ? _("Yes") : _("No"));
-                var matches = matches_preview (catalog, face, catalog.description (face));
+                var matches = !font_fallback.active ||
+                    matches_preview (catalog, face, catalog.description (face));
                 font_detail.label = "%s\n%s [%d]\n%s\n%s".printf (face_name (catalog, face),
                     Filename.display_name (catalog.file (face) ?? ""), catalog.face_index (face), flags,
+                    !font_fallback.active ? _("Exact file and face rendering; no fallback.") :
                     matches ? _("Nominal preview face matches the installed file.") :
                     _("Preview substitution: renderer resolved a different face or no face."));
             }
@@ -766,6 +807,34 @@ namespace Characters {
             font_favorite.sensitive = false;
             font_add.sensitive = false;
             bytes_copy.sensitive = false;
+            if (mode == FontBrowserMode.VARIATIONS) {
+                inspect_face.sensitive = false;
+            }
+        }
+
+        /** Opens an isolated face for adjustable axes and non-Unicode symbol inspection. */
+        private void inspect_current_face () {
+            if (inventory == null || mode == FontBrowserMode.ENCODINGS) {
+                return;
+            }
+            var index = mode == FontBrowserMode.VARIATIONS ? selected_id () : current_face;
+            unowned Fonts.Catalog catalog = inventory.get_catalog ();
+            var face = catalog.open_face (index);
+            if (face == null) {
+                font_toasts.add_toast (new Adw.Toast (_("Unable to Open Exact Font Face")));
+                return;
+            }
+            var point = selected_point ();
+            if (point == uint32.MAX && repertoire != null && repertoire.length > 0) {
+                point = repertoire[0];
+                // Prefer a familiar visible glyph over a leading space when no tile is selected.
+                if (face.glyph (0x41, false) != 0) {
+                    point = 0x41;
+                }
+            }
+            var identity = "%s\n%s [%d]".printf (face_name (catalog, index),
+                Filename.display_name (catalog.file (index) ?? ""), catalog.face_index (index));
+            new FontFaceDialog ((owned) face, identity, point).present (this);
         }
 
         /** Opens the existing inspector for the exact scalar, including unassigned font mappings. */

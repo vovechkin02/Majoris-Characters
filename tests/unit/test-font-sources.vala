@@ -57,10 +57,34 @@ private void test_latest_source () {
     loader.shutdown ();
 }
 
+/** Exercises ownership, exact raster bytes, axis output parameters and symbol-code separation. */
+private void test_exact_face_bindings () {
+    var directory = Environment.get_variable ("CHARACTERS_FONT_FIXTURES");
+    assert (directory != null);
+    var face = Fonts.open_file (Path.build_filename (directory, "variable.ttf"), 0x10000);
+    assert (face != null && face.axis_count () == 1 && face.axis_tag (0) == "wght");
+    double minimum, maximum, default_value, current;
+    assert (face.axis_range (0, out minimum, out maximum, out default_value, out current));
+    assert (minimum == 100 && maximum == 900 && current == 900);
+    var heavy = face.render (0x41, false, 48, 0, 0, 0);
+    assert (heavy != null && heavy.get_size () == 96 * 96 * 4);
+    assert (face.set_axis (0, 100));
+    var light = face.render (0x41, false, 48, 0, 0, 0);
+    assert (light != null && !heavy.equal (light));
+    assert (face.reset ());
+    assert (face.axis_range (0, out minimum, out maximum, out default_value, out current));
+    assert (current == 900);
+    var symbol = Fonts.open_file (Path.build_filename (directory, "symbol.ttf"), 0);
+    assert (symbol != null && symbol.symbol_count () == 2);
+    assert (symbol.symbol_code (0) == 0xF041);
+    assert (symbol.glyph (0xF041, true) == 1 && symbol.glyph (0xF041, false) == 0);
+}
+
 /** Registers focused bindings and source supersession tests without initializing GTK. */
 int main (string[] args) {
     Test.init (ref args);
     Test.add_func ("/characters/fonts/mapping-bindings", test_mapping_bindings);
     Test.add_func ("/characters/fonts/latest-source", test_latest_source);
+    Test.add_func ("/characters/fonts/exact-face-bindings", test_exact_face_bindings);
     return Test.run ();
 }

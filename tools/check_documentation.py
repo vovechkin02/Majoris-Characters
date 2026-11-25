@@ -124,7 +124,7 @@ def scan_c(path: Path) -> list[tuple[str, int, bool]]:
         )
         if path.suffix == ".c" and name.startswith(("characters_unicode_", "characters_search_",
                                                    "characters_inspector_", "characters_fonts_",
-                                                   "characters_legacy_")):
+                                                   "characters_legacy_", "characters_font_face_")):
             # Public functions are documented once in their owning header.
             header = path.with_suffix(".h")
             if header.exists():

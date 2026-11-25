@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface domain="majoris-characters">
+  <requires lib="gtk" version="4.14"/>
+  <template class="CharactersFontFaceDialog" parent="AdwDialog">
+    <property name="title" translatable="yes">Font Face Inspector</property>
+    <property name="content-width">440</property>
+    <property name="content-height">580</property>
+    <property name="child">
+      <object class="AdwToolbarView">
+        <child type="top">
+          <object class="AdwHeaderBar"/>
+        </child>
+        <property name="content">
+          <object class="GtkScrolledWindow">
+            <property name="hscrollbar-policy">never</property>
+            <child>
+              <object class="GtkBox">
+                <property name="orientation">vertical</property>
+                <property name="spacing">8</property>
+                <property name="margin-start">16</property>
+                <property name="margin-end">16</property>
+                <property name="margin-top">16</property>
+                <property name="margin-bottom">16</property>
+                <child>
+                  <object class="GtkLabel" id="face_identity">
+                    <property name="selectable">True</property>
+                    <property name="wrap">True</property>
+                    <property name="xalign">0</property>
+                    <style><class name="heading"/></style>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkPicture" id="face_picture">
+                    <property name="height-request">192</property>
+                    <property name="content-fit">contain</property>
+                    <property name="can-shrink">True</property>
+                    <accessibility><property name="label" translatable="yes">Exact Glyph Preview</property></accessibility>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkLabel" id="glyph_identity">
+                    <property name="selectable">True</property>
+                    <property name="wrap">True</property>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkLabel" id="face_status">
+                    <property name="wrap">True</property>
+                    <style><class name="dim-label"/></style>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkBox" id="axis_controls">
+                    <property name="orientation">vertical</property>
+                    <property name="spacing">8</property>
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="label" translatable="yes">Variation Axes</property>
+                        <property name="xalign">0</property>
+                        <style><class name="heading"/></style>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkDropDown" id="axis_selector">
+                        <accessibility><property name="label" translatable="yes">Variation Axis</property></accessibility>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkSpinButton" id="axis_value">
+                        <property name="numeric">True</property>
+                        <property name="digits">4</property>
+                        <property name="adjustment">
+                          <object class="GtkAdjustment">
+                            <property name="lower">0</property>
+                            <property name="upper">1</property>
+                            <property name="step-increment">0.01</property>
+                          </object>
+                        </property>
+                        <accessibility><property name="label" translatable="yes">Design Coordinate</property></accessibility>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="axis_range">
+                        <property name="wrap">True</property>
+                        <property name="xalign">0</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkButton" id="axis_reset">
+                        <property name="label" translatable="yes">Reset to Selected Face</property>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkBox" id="symbol_controls">
+                    <property name="orientation">vertical</property>
+                    <property name="spacing">8</property>
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="label" translatable="yes">Microsoft Symbol Character Map</property>
+                        <property name="xalign">0</property>
+                        <style><class name="heading"/></style>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkCheckButton" id="symbol_mode">
+                        <property name="label" translatable="yes">Inspect Raw Symbol Codes</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkDropDown" id="symbol_selector">
+                        <property name="enable-search">True</property>
+                        <accessibility><property name="label" translatable="yes">Raw Symbol Code</property></accessibility>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkButton" id="copy_symbol_code">
+                        <property name="label" translatable="yes">Copy Raw Code and Glyph Index</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="label" translatable="yes">Raw font codes are not Unicode characters. Copying, favorites and composition are not available for these mappings.</property>
+                        <property name="wrap">True</property>
+                        <property name="xalign">0</property>
+                        <style><class name="dim-label"/></style>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+              </object>
+            </child>
+          </object>
+        </property>
+      </object>
+    </property>
+  </template>
+</interface>

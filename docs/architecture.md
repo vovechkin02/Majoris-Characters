@@ -125,10 +125,22 @@ pattern hierarchy. No source operation waits for a worker on the GTK thread.
 
 `FontBrowser` owns its dialog state, preview controls, source loader, search
 controller, and periodic freshness check. Closing the dialog stops publication
-and the periodic check. Pango descriptions are used only for presentation;
-Fontconfig file/index identity remains the coverage authority. Nominal Pango
-resolution is checked and substitution is reported rather than presented as
-exact coverage. No application-wide typeface is overridden.
+and the periodic check. Pango descriptions are used for fallback-enabled presentation, and nominal Pango
+resolution is checked for substitution. The selected face uses actual FreeType
+Unicode cmap enumeration. No application-wide typeface is overridden.
+
+Priority 4 introduces `CharactersFontFace`, an adapter over FreeType's native
+file/index, cmap, variation and bitmap contracts. `FontSourceRequest` opens and
+owns the selected face on its worker; ownership transfers once after publication,
+and subsequent mutable operations are confined to the GTK main context.
+`FontFaceDialog` owns a separate face and coordinate vector; `FontPreview`
+converts owned RGBA bytes to GDK textures. The browser consumes the same adapter
+for fallback-disabled cells. A failed raster is not replaced by a Pango glyph.
+Raw symbol identifiers are never routed through Unicode actions. This is a
+focused native adapter and composition boundary, not a new Strategy hierarchy.
+Original TTC, variable and symbol fixtures exercise identity and lifecycle
+contracts. The direct rendering paths and Vala adapter require target build and
+runtime qualification.
 
 The legacy source builds an immutable scalar-to-byte mapping table with ICU's
 strict decoder. Alternate mappings remain available. The repertoire filter

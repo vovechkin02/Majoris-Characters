@@ -7,6 +7,8 @@
 
 #include <pango/pango.h>
 
+#include "font-face.h"
+
 /** Immutable installed-face inventory, with retained Fontconfig patterns and configuration. */
 typedef struct CharactersFontCatalog CharactersFontCatalog;
 
@@ -102,7 +104,8 @@ bool characters_fonts_is_color(const CharactersFontCatalog *catalog, size_t inde
  * @index: Face index within this snapshot.
  * @point: Unicode scalar.
  *
- * Returns: Whether this face advertises a Unicode cmap mapping; no fallback is used.
+ * Returns: Whether Fontconfig advertises a Unicode cmap mapping; symbol faces
+ * are checked directly with FreeType. No fallback is used.
  * This does not guarantee a visible glyph, variation-selector mapping, or sequence shaping.
  */
 bool characters_fonts_contains(const CharactersFontCatalog *catalog, size_t index,
@@ -115,7 +118,8 @@ bool characters_fonts_contains(const CharactersFontCatalog *catalog, size_t inde
  * @length: (out): Number of returned Unicode scalars, zero on failure.
  *
  * Returns: (transfer full) (array length=length) (nullable): Sorted scalar coverage,
- * including private-use and unassigned mappings. Free with g_free().
+ * including private-use and unassigned mappings. Uses the selected FreeType Unicode
+ * cmap; a symbol-only face yields an empty array. Free with g_free().
  */
 uint32_t *characters_fonts_points(const CharactersFontCatalog *catalog, size_t index,
                                  size_t *length);
@@ -149,5 +153,14 @@ bool characters_fonts_apply_config(const CharactersFontCatalog *catalog, PangoFo
  * Non-Fontconfig renderers and unresolved fonts return false.
  */
 bool characters_fonts_matches(const CharactersFontCatalog *catalog, size_t index, PangoFont *font);
+
+/**
+ * characters_fonts_open_face:
+ * @catalog: Borrowed inventory.
+ * @index: Face index within this snapshot.
+ *
+ * Returns: (transfer full) (nullable): Independent exact FreeType face.
+ */
+CharactersFontFace *characters_fonts_open_face(const CharactersFontCatalog *catalog, size_t index);
 
 #endif

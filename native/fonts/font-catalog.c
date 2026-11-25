@@ -89,7 +89,7 @@ CharactersFontCatalog *characters_fonts_load(void) {
     FcPattern *query = FcPatternCreate();
     FcObjectSet *objects = FcObjectSetBuild(FC_FAMILY, FC_STYLE, FC_FILE, FC_INDEX,
         FC_CHARSET, FC_WEIGHT, FC_WIDTH, FC_SLANT, FC_SIZE, FC_VARIABLE, FC_COLOR,
-        FC_FONT_VARIATIONS, FC_SCALABLE, (char *)NULL);
+        FC_FONT_VARIATIONS, FC_SCALABLE, FC_SYMBOL, (char *)NULL);
     FcFontSet *listed = query && objects ? FcFontList(catalog->config, query, objects) : NULL;
     if (query) {
         FcPatternDestroy(query);
@@ -111,7 +111,7 @@ CharactersFontCatalog *characters_fonts_load(void) {
         FcPattern *pattern = listed->fonts[index];
         const char *family = get_string(pattern, FC_FAMILY);
         if (!family || !g_utf8_validate(family, -1, NULL) || !get_string(pattern, FC_FILE) ||
-            get_face_index(pattern) < 0 || !get_charset(pattern)) {
+            get_face_index(pattern) < 0) {
             continue;
         }
         FcPatternReference(pattern);
@@ -192,7 +192,16 @@ bool characters_fonts_is_color(const CharactersFontCatalog *catalog, size_t inde
 
 bool characters_fonts_contains(const CharactersFontCatalog *catalog, size_t index, uint32_t point) {
     FcCharSet *charset = get_charset(get_face(catalog, index));
-    return charset && is_scalar(point) && FcCharSetHasChar(charset, point);
+    if (!charset || !is_scalar(point) || !FcCharSetHasChar(charset, point)) {
+        return false;
+    }
+    if (get_bool(get_face(catalog, index), FC_SYMBOL)) {
+        CharactersFontFace *face = characters_fonts_open_face(catalog, index);
+        bool mapped = characters_font_face_glyph(face, point, false) != 0;
+        characters_font_face_free(face);
+        return mapped;
+    }
+    return true;
 }
 
 uint32_t *characters_fonts_points(const CharactersFontCatalog *catalog, size_t index,
@@ -201,41 +210,9 @@ uint32_t *characters_fonts_points(const CharactersFontCatalog *catalog, size_t i
         return NULL;
     }
     *length = 0;
-    FcCharSet *charset = get_charset(get_face(catalog, index));
-    if (!charset) {
-        return NULL;
-    }
-    /* Allocate only the maximum valid Unicode space; malformed high pages are ignored. */
-    size_t capacity = FcCharSetCount(charset);
-    if (capacity > 0x110000u) {
-        capacity = 0x110000u;
-    }
-    uint32_t *points = g_try_new(uint32_t, capacity ? capacity : 1);
-    if (!points) {
-        return NULL;
-    }
-    FcChar32 map[FC_CHARSET_MAP_SIZE];
-    FcChar32 next;
-    for (FcChar32 page = FcCharSetFirstPage(charset, map, &next);
-         page != FC_CHARSET_DONE && page <= 0x10FFFFu;
-         page = FcCharSetNextPage(charset, map, &next)) {
-        for (unsigned word = 0; word < FC_CHARSET_MAP_SIZE; word++) {
-            uint32_t bits = map[word];
-            while (bits) {
-                unsigned bit = (unsigned)__builtin_ctz(bits);
-                uint32_t point = page + word * 32u + bit;
-                if (is_scalar(point)) {
-                    if (*length == capacity) {
-                        g_free(points);
-                        *length = 0;
-                        return NULL;
-                    }
-                    points[(*length)++] = point;
-                }
-                bits &= bits - 1u;
-            }
-        }
-    }
+    CharactersFontFace *face = characters_fonts_open_face(catalog, index);
+    uint32_t *points = characters_font_face_unicode_points(face, length);
+    characters_font_face_free(face);
     return points;
 }
 
@@ -260,4 +237,9 @@ bool characters_fonts_matches(const CharactersFontCatalog *catalog, size_t index
     const char *file = get_string(actual, FC_FILE);
     return file && strcmp(file, get_string(expected, FC_FILE)) == 0 &&
         get_face_index(actual) == get_face_index(expected);
+}
+
+CharactersFontFace *characters_fonts_open_face(const CharactersFontCatalog *catalog, size_t index) {
+    return characters_font_face_open(characters_fonts_file(catalog, index),
+                                      characters_fonts_face_index(catalog, index));
 }

@@ -46,6 +46,10 @@ namespace Characters.Fonts {
         [CCode (cname = "characters_fonts_points", array_length_type = "size_t")]
         public uint32[]? points (size_t index);
 
+        /** Opens an independent face from its exact installed file and index. */
+        [CCode (cname = "characters_fonts_open_face")]
+        public Face? open_face (size_t index);
+
         /** Tests font discovery freshness on a worker. */
         [CCode (cname = "characters_fonts_is_current")]
         public bool is_current ();
@@ -58,6 +62,58 @@ namespace Characters.Fonts {
         [CCode (cname = "characters_fonts_matches")]
         public bool matches (size_t index, Pango.Font? font);
     }
+
+    /** Thread-confined exact FreeType face; owns its library and variation state. */
+    [Compact]
+    [CCode (cname = "CharactersFontFace", free_function = "characters_font_face_free",
+        has_type_id = false)]
+    public class Face {
+        /** Number of adjustable axes. */
+        [CCode (cname = "characters_font_face_axis_count")]
+        public size_t axis_count ();
+
+        /** Owned OpenType design-axis tag. */
+        [CCode (cname = "characters_font_face_axis_tag")]
+        public string? axis_tag (size_t index);
+
+        /** Declared range, default and active coordinate of an axis. */
+        [CCode (cname = "characters_font_face_axis_range")]
+        public bool axis_range (size_t index, out double minimum, out double maximum,
+                                out double default_value, out double current);
+
+        /** Changes one coordinate while retaining all other axes. */
+        [CCode (cname = "characters_font_face_set_axis")]
+        public bool set_axis (size_t index, double value);
+
+        /** Restores the originally opened face or named instance. */
+        [CCode (cname = "characters_font_face_reset")]
+        public bool reset ();
+
+        /** Owned actual Unicode cmap coverage; empty for symbol-only faces. */
+        [CCode (cname = "characters_font_face_unicode_points", array_length_type = "size_t")]
+        public uint32[]? unicode_points ();
+
+        /** Raw Microsoft Symbol code count, independent of Unicode coverage. */
+        [CCode (cname = "characters_font_face_symbol_count")]
+        public size_t symbol_count ();
+
+        /** Raw mapped code by index; UINT32_MAX on invalid index. */
+        [CCode (cname = "characters_font_face_symbol_code")]
+        public uint32 symbol_code (size_t index);
+
+        /** Actual mapped glyph index, zero for an absent mapping. */
+        [CCode (cname = "characters_font_face_glyph")]
+        public uint32 glyph (uint32 code, bool symbol);
+
+        /** Owned straight RGBA square image, or null if exact rasterization fails. */
+        [CCode (cname = "characters_font_face_render")]
+        public GLib.Bytes? render (uint32 code, bool symbol, uint size_px,
+                                   uint8 red, uint8 green, uint8 blue);
+    }
+
+    /** Opens an exact face from a native path; callers must supply a trusted installed/test path. */
+    [CCode (cname = "characters_font_face_open")]
+    public static Face? open_file (string file, int index);
 
     /** Loads a fresh catalog on a worker, returning null if discovery fails. */
     [CCode (cname = "characters_fonts_load")]

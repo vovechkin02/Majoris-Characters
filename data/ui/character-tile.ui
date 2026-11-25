@@ -18,6 +18,14 @@
       </object>
     </child>
     <child>
+      <object class="GtkPicture" id="glyph_picture">
+        <property name="visible">False</property>
+        <property name="vexpand">True</property>
+        <property name="can-shrink">True</property>
+        <property name="content-fit">contain</property>
+      </object>
+    </child>
+    <child>
       <object class="GtkLabel" id="code_label">
         <property name="ellipsize">end</property>
         <property name="max-width-chars">10</property>

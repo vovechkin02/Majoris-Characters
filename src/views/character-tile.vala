@@ -5,6 +5,9 @@ namespace Characters {
         /** Rendered glyph or a visible placeholder for a nonprinting scalar. */
         [GtkChild]
         private unowned Gtk.Label glyph_label;
+        /** Exact selected-face texture, used only for fallback-disabled font browsing. */
+        [GtkChild]
+        private unowned Gtk.Picture glyph_picture;
         /** Code point caption, visually shortened for long sequences. */
         [GtkChild]
         private unowned Gtk.Label code_label;
@@ -40,6 +43,9 @@ namespace Characters {
         /** Renders a scalar using typed Pango attributes, never markup or injected font labels. */
         public void bind_preview (uint32 id, string? description, int size_pt, bool fallback,
                                   string caption, string detail, bool wide_caption = false) {
+            glyph_picture.paintable = null;
+            glyph_picture.visible = false;
+            glyph_label.visible = true;
             drag_text = Search.text (id);
             var attributes = new Pango.AttrList ();
             if (description != null) {
@@ -60,9 +66,31 @@ namespace Characters {
             update_property (Gtk.AccessibleProperty.LABEL, detail);
         }
 
+        /** Displays exact rasterization or an explicit unavailable state, never a substitute. */
+        public void bind_exact (uint32 id, Fonts.Face? face, int size_pt, string caption,
+                                string detail, bool wide_caption = false) {
+            bind_preview (id, null, size_pt, false, caption, detail, wide_caption);
+            var texture = face != null ? FontPreview.render (face, id, false, size_pt, this) : null;
+            if (texture == null) {
+                glyph_label.attributes = null;
+                glyph_label.label = _("Unavailable");
+                tooltip_text = detail + "\n" + _("Exact glyph rendering unavailable.");
+                update_property (Gtk.AccessibleProperty.LABEL, tooltip_text);
+                return;
+            }
+            glyph_label.visible = false;
+            glyph_picture.paintable = texture;
+            glyph_picture.visible = true;
+            // Keep the raster's allocated widget size comparable with ordinary character tiles.
+            glyph_picture.set_size_request (size_pt * 2, size_pt * 2);
+        }
+
         /** Clears recycled content so an unbound cell cannot expose a stale character. */
         public void clear () {
             drag_text = null;
+            glyph_picture.paintable = null;
+            glyph_picture.visible = false;
+            glyph_label.visible = true;
             glyph_label.set_text ("");
             glyph_label.attributes = null;
             code_label.label = "";

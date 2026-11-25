@@ -16,14 +16,40 @@ family/face filtering and bounded pages. Color and variable font flags identify
 Fontconfig-reported capabilities. Refresh explicitly or use the periodic
 30-second freshness check; inventory operations run off the GTK main thread.
 
-Coverage does not prove correct shaping of a composite sequence, color glyph
-presentation, or support for arbitrary variation axes. Pango renders a font
-description rather than a direct file/index request; where nominal resolution
-selects another face, the browser reports substitution. GTK's Pango backend
-may still produce missing glyphs or substitute fonts when fallback is enabled.
-There is no arbitrary axis editor, font installation/removal, unencoded glyph
-browser, or special handling of symbol-only non-Unicode charmaps. Color rendering
-is delegated to the system renderer and requires runtime qualification.
+## Exact faces, variation axes and symbol maps
+
+Disable fallback (the default) to render the mapped scalar directly from the
+selected file and exact collection/named-instance index using FreeType. The grid
+uses actual Unicode cmap enumeration for the selected face. Comparisons use
+Fontconfig coverage discovery and exact rendering when fallback is disabled.
+A mapped whitespace glyph can be transparent; an unsupported raster format or
+unavailable font is explicitly marked unavailable, never silently substituted.
+With fallback enabled, Pango renders as before and nominal face substitution is
+reported. Scalar coverage does not prove correct composite shaping.
+
+Select **Inspect Font Face and Symbol Map** to open a private exact-face preview.
+Choose an available OpenType design axis by its four-character tag and edit its
+coordinate within the font's declared range. The remaining axes retain their
+coordinates. Reset restores the selected face or named instance rather than
+forcing every axis to the base font's default. These edits are confined to this
+preview and never modify installed fonts or the browser's selected face.
+
+Microsoft Symbol charmaps (platform 3, encoding 0) are exposed as raw mapped
+codes and glyph indexes. A symbol-only face is accessible even when there are
+no Unicode mappings. The searchable raw code selector preserves the first
+Microsoft Symbol cmap's exact entries; no low-byte alias is synthesized. Raw
+symbol entries cannot enter the Unicode inspector, clipboard character actions,
+favorites, history or composer. Only the hexadecimal code and glyph index can
+be copied from this view. Other non-Unicode legacy font charmaps and unencoded
+glyph browsing are outside this scope.
+
+The exact preview rasterizer supports outline, monochrome, grayscale and
+FreeType BGRA color bitmaps, selecting a nearby fixed strike when required.
+It centers a single glyph rather than performing sequence shaping. Unsupported
+formats (including SVG or COLR paint graphs not rasterized by the installed
+FreeType build) produce an unavailable state. Pango remains available with
+fallback enabled. High-DPI scaling, color font appearance, and theme transitions
+require desktop qualification.
 
 ## Legacy character sets
 
@@ -58,6 +84,8 @@ Native font catalogs, coverage snapshots, and encoding tables are private
 application resources. The asynchronous source loader owns requests until
 completion and only the latest request is published. The existing search
 controller copies the selected scalar repertoire before searching it. Grid
-pages are bounded to 256 characters or 48 font comparisons. Font previews
-use Pango attributes rather than custom CSS. No font files are distributed
-with this project.
+pages are bounded to 256 characters or 48 font comparisons. The selected face
+is opened on a worker and transferred once; comparison cells and the face
+inspector open independent faces on demand. The main-context raster work is
+bounded per glyph but not benchmarked. No custom CSS is used. Three original
+miniature fonts are included as test fixtures only; they are never installed.

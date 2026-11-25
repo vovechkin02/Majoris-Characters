@@ -29,4 +29,8 @@ application and GJS are not runtime dependencies of the main application. The op
 - Priority 3: Standardized presentation and selector-omission lookup, exact
   search, structural families, CLDR 48 English additions, and locale coverage
   tooling implemented. Full multilingual CLDR import and official emoji-test
-  file comparison remain outstanding. Next functional priority: font inspection.
+  file comparison remain outstanding.
+- Priority 4: Exact selected-face rasterization, variable-axis controls and raw
+  Microsoft Symbol cmap inspection implemented at source level; native font and
+  GTK qualification remain outstanding. Next functional priority: legacy
+  encoding expansion.

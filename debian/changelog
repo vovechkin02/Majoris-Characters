@@ -1,3 +1,12 @@
+majoris-characters (1.0.4-1) unstable; urgency=medium
+
+  * Inspect exact FreeType file and face identities without Pango substitution.
+  * Expose variable font coordinates and restore selected named instances.
+  * Browse raw Microsoft Symbol cmap codes separately from Unicode identities.
+  * Add original font fixtures and focused native, binding and GTK tests.
+
+ -- Vlad Ovechkin <45165533+vovechkin02@users.noreply.github.com>  Wed, 25 Nov 2026 20:00:00 +1100
+
 majoris-characters (1.0.3-1) unstable; urgency=medium
 
   * Include all Unicode 17 standardized emoji presentation bases.
