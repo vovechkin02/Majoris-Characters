@@ -12,7 +12,7 @@ Surrogates, unassigned scalars and noncharacters are not treated as characters.
 
 The Emoji scope retains exact fully qualified sequences and their upstream
 names, including single-scalar emoji. The Symbols scope provides 17 overlapping
-semantic collections. The Scripts scope uses ICU's primary Script property;
+semantic collections. The Scripts scope uses the Unicode 17 primary Script property;
 Unicode Blocks uses the independently versioned GNOME block table. Named
 Sequences exposes the standardized supplement. The collection dropdown offers
 all nine emoji groups, encoded script slots, 346 Unicode blocks, or symbol
@@ -21,9 +21,9 @@ scalar results; it is hidden for the dedicated emoji and named-sequence scopes.
 When a general-category filter is selected in All Characters, multi-scalar
 sequences are excluded because they do not have one scalar category.
 
-Script filtering is not Script_Extensions matching. Characters with unavailable
-ICU properties remain browseable in All Characters or their known block, but
-are not assigned invented scripts or categories. Unicode block entries that
+Script filtering is not Script_Extensions matching; this is a separate
+international browsing improvement. The full assigned repertoire uses the
+bundled Unicode 17 property snapshot. Unicode block entries that
 contain only unassigned or surrogate points return an empty grid. Symbols use
 explicit Unicode ranges and general categories, not an exhaustive semantic
 ontology; the global scope covers the complete available catalog regardless of

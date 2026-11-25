@@ -8,11 +8,11 @@
 #include <strings.h>
 
 #include <unicode/uchar.h>
-#include <unicode/uscript.h>
 #include <unicode/utf8.h>
 
 #include "emoji-catalog.h"
 #include "unicode-engine.h"
+#include "scalar-properties.h"
 
 #define N_(message) (message)
 #define COUNT(array) (sizeof(array) / sizeof((array)[0]))
@@ -300,8 +300,9 @@ static bool parse_query(const char *input, struct Query *query) {
     }
     query->point_count = decode_text(query->text, query->points);
     if (query->point_count == 1) {
+        int category = characters_scalar_category(query->points[0]);
         query->literal_letter = query->points[0] > 0x7F &&
-            u_isalpha((UChar32)query->points[0]);
+            category >= U_UPPERCASE_LETTER && category <= U_OTHER_LETTER;
         query->exact = true;
         return true;
     }
@@ -370,7 +371,7 @@ static bool matches_points(const struct Query *query, const uint32_t *points, si
 
 /** Read the Unicode general-category group for a scalar; -1 denotes unknown metadata. */
 static int category_for(uint32_t point) {
-    int type = u_charType((UChar32)point);
+    int type = characters_scalar_category(point);
     switch (type) {
         case U_UPPERCASE_LETTER: case U_LOWERCASE_LETTER: case U_TITLECASE_LETTER:
         case U_MODIFIER_LETTER: case U_OTHER_LETTER:
@@ -404,7 +405,7 @@ static bool within(uint32_t point, uint32_t start, uint32_t end) {
 /** Classify semantic symbol collections; collections intentionally overlap. */
 static bool symbol_matches(uint32_t point, int filter) {
     int category = category_for(point);
-    int type = u_charType((UChar32)point);
+    int type = characters_scalar_category(point);
     if (filter < 0) {
         if (category >= CATEGORY_MARKS && category <= CATEGORY_CONTROLS) {
             return true;
@@ -477,8 +478,8 @@ static bool scalar_matches(const CharactersSearch *search, uint32_t point) {
         return symbol_matches(point, search->filter);
     }
     if (search->scope == CHARACTERS_SEARCH_SCRIPT && search->filter >= 0) {
-        return u_getIntPropertyValue((UChar32)point, UCHAR_SCRIPT) == search->filter &&
-               u_charType((UChar32)point) != U_UNASSIGNED;
+        return characters_scalar_script(point) == search->filter &&
+               characters_scalar_category(point) != U_UNASSIGNED;
     }
     return true;
 }
@@ -532,8 +533,8 @@ static bool scalar_query_matches(uint32_t point, const struct Query *query) {
     char *name = characters_search_name(point);
     char *aliases = characters_unicode_aliases(point);
     const char *block = characters_unicode_find_block(point);
-    const char *script = u_charType((UChar32)point) != U_UNASSIGNED ?
-        uscript_getName(u_getIntPropertyValue((UChar32)point, UCHAR_SCRIPT)) : NULL;
+    const char *script = characters_scalar_category(point) != U_UNASSIGNED ?
+        characters_scalar_script_name((size_t)characters_scalar_script(point)) : NULL;
     const char *category = characters_search_category_name((size_t)category_for(point));
     bool matches = matches_terms(query, name, aliases, block, script, category);
     free(name);
@@ -824,7 +825,7 @@ size_t characters_search_filter_count(CharactersSearchScope scope) {
         case CHARACTERS_SEARCH_SYMBOLS:
             return COUNT(symbol_names);
         case CHARACTERS_SEARCH_SCRIPT:
-            return USCRIPT_CODE_LIMIT;
+            return characters_scalar_script_count();
         case CHARACTERS_SEARCH_BLOCK:
             return characters_unicode_block_count();
         default:
@@ -842,8 +843,7 @@ const char *characters_search_filter_name(CharactersSearchScope scope, size_t in
         case CHARACTERS_SEARCH_SYMBOLS:
             return symbol_names[index];
         case CHARACTERS_SEARCH_SCRIPT:
-            return uscript_getUsage((UScriptCode)index) != USCRIPT_USAGE_NOT_ENCODED ?
-                   uscript_getName((UScriptCode)index) : NULL;
+            return characters_scalar_script_name(index);
         case CHARACTERS_SEARCH_BLOCK:
             return characters_unicode_block_name(index);
         default:

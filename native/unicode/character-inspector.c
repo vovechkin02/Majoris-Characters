@@ -5,12 +5,13 @@
 #include <string.h>
 
 #include <unicode/uchar.h>
-#include <unicode/unorm2.h>
 #include <unicode/utf8.h>
 #include <unicode/utf16.h>
 
 #include "character-search.h"
 #include "emoji-catalog.h"
+#include "normalization.h"
+#include "scalar-properties.h"
 #include "unicode-engine.h"
 
 /** Maximum number of scalars accepted by the bounded snapshot. */
@@ -116,26 +117,6 @@ char *characters_inspector_format_points(const uint32_t *points, size_t count,
     return output;
 }
 
-/** Return the ICU normalization instance for one of the four supported forms. */
-static const UNormalizer2 *get_normalizer(const char *form, UErrorCode *error) {
-    if (!form) {
-        return NULL;
-    }
-    if (strcmp(form, "NFC") == 0) {
-        return unorm2_getNFCInstance(error);
-    }
-    if (strcmp(form, "NFD") == 0) {
-        return unorm2_getNFDInstance(error);
-    }
-    if (strcmp(form, "NFKC") == 0) {
-        return unorm2_getNFKCInstance(error);
-    }
-    if (strcmp(form, "NFKD") == 0) {
-        return unorm2_getNFKDInstance(error);
-    }
-    return NULL;
-}
-
 CharactersInspector *characters_inspector_from_id(uint32_t id) {
     if (id <= 0x10FFFFu && !characters_unicode_is_assigned(id)) {
         return NULL;
@@ -209,18 +190,17 @@ char *characters_inspector_display(const CharactersInspector *snapshot) {
     free(emoji_text);
     uint8_t buffer[(MAX_POINTS + 1) * 4 + 1];
     int32_t offset = 0;
-    int8_t category = u_charType((UChar32)first);
+    int8_t category = characters_scalar_category(first);
     if (category == U_NON_SPACING_MARK || category == U_COMBINING_SPACING_MARK ||
         category == U_ENCLOSING_MARK) {
         U8_APPEND_UNSAFE(buffer, offset, 0x25CC);
     }
     for (size_t index = 0; index < snapshot->count; index++) {
         uint32_t point = snapshot->points[index];
-        category = u_charType((UChar32)point);
+        category = characters_scalar_category(point);
         if (category == U_CONTROL_CHAR || category == U_FORMAT_CHAR ||
             category == U_LINE_SEPARATOR || category == U_PARAGRAPH_SEPARATOR ||
-            category == U_SPACE_SEPARATOR || u_hasBinaryProperty((UChar32)point,
-                                                                 UCHAR_DEFAULT_IGNORABLE_CODE_POINT)) {
+            category == U_SPACE_SEPARATOR || characters_scalar_is_ignorable(point)) {
             point = 0x00B7;
         }
         U8_APPEND_UNSAFE(buffer, offset, point);
@@ -242,37 +222,27 @@ char *characters_inspector_normalize(const CharactersInspector *snapshot, const 
     int32_t length = 0;
     for (size_t index = 0; index < snapshot->count; index++) {
         uint32_t point = snapshot->points[index];
-        // Do not claim normalization for catalog characters beyond the loaded ICU repertoire.
-        if (u_charType((UChar32)point) == U_UNASSIGNED) {
+        if (!characters_unicode_is_assigned(point)) {
             return NULL;
         }
         U16_APPEND_UNSAFE(input, length, point);
     }
-    UErrorCode error = U_ZERO_ERROR;
-    const UNormalizer2 *normalizer = get_normalizer(form, &error);
-    if (!normalizer || U_FAILURE(error)) {
-        return NULL;
-    }
-    int32_t needed = unorm2_normalize(normalizer, input, length, NULL, 0, &error);
-    if (error != U_BUFFER_OVERFLOW_ERROR || needed <= 0) {
-        return NULL;
-    }
-    UChar *normalized = malloc((size_t)needed * sizeof(*normalized));
-    uint32_t *points = malloc((size_t)needed * sizeof(*points));
-    if (!normalized || !points) {
+    int32_t actual = 0;
+    UChar *normalized = characters_normalize_utf16(input, length, form, &actual);
+    if (!normalized || actual <= 0) {
         free(normalized);
-        free(points);
         return NULL;
     }
-    error = U_ZERO_ERROR;
-    int32_t actual = unorm2_normalize(normalizer, input, length, normalized, needed, &error);
+    uint32_t *points = malloc((size_t)actual * sizeof(*points));
+    if (!points) {
+        free(normalized);
+        return NULL;
+    }
     size_t count = 0;
-    if (U_SUCCESS(error) && actual == needed) {
-        for (int32_t offset = 0; offset < actual;) {
-            UChar32 point;
-            U16_NEXT(normalized, offset, actual, point);
-            points[count++] = (uint32_t)point;
-        }
+    for (int32_t offset = 0; offset < actual;) {
+        UChar32 point;
+        U16_NEXT(normalized, offset, actual, point);
+        points[count++] = (uint32_t)point;
     }
     char *result = characters_inspector_format_points(points, count, CHARACTERS_INSPECTOR_CODE);
     free(normalized);

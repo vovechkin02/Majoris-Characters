@@ -3,7 +3,7 @@
 | Stage | Scope | Status |
 | --- | --- | --- |
 | 1 | Vala app, XML UI, Meson, resources, GSettings, theme, Debian packaging | Source implemented; build/runtime qualification pending |
-| 2 | Unicode engine, GNOME C reuse and Vala bindings, database and metadata | Core implemented; native tests passed; full Unicode 17 properties and Vala qualification pending |
+| 2 | Unicode engine, GNOME C reuse and Vala bindings, database and metadata | Core implemented; native tests passed; Unicode 17 scalar snapshot and normalization delta implemented; official data conformance and Vala qualification pending |
 | 3 | Virtualized character browsing, scripts, blocks, search and filters | Source implemented; native search tests passed; Vala and GTK qualification pending |
 | 4 | Inspector, relationships, encodings, normalization, and identification | Source implemented; native tests passed; Vala and GTK qualification pending |
 | 5 | Installed fonts, coverage, variations, legacy encodings | Source implemented; ICU legacy tests passed; font backend and GTK qualification pending |

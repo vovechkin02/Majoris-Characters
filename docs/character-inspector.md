@@ -50,11 +50,10 @@ the exact original non-NUL text. For NUL-containing sequences, use code-point
 or encoding copy actions. The explicit report and value actions never silently
 replace source scalars with the preview.
 
-The catalog is Unicode 17.0.0, ICU property and normalization data are Unicode
-16.0, and the name alias/named-sequence supplement is Unicode 15.0.0. Values
-unavailable in the corresponding database are shown as unavailable. The
-normalization result is withheld if any scalar lacks assigned ICU properties;
-this avoids implying that older ICU data cover newer catalog characters.
+The catalog and scalar metadata target Unicode 17.0.0 independently of ICU's
+Unicode 16 database. Normalization uses the shared Unicode 17 delta layer.
+Unassigned scalars still have no normalization result in the inspector.
+See [Unicode engine](unicode-engine.md) for the supplement provenance and limits.
 
 ## Internal API and ownership
 

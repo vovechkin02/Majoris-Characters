@@ -146,6 +146,12 @@ static void test_normalization(void) {
     free(normalized);
     characters_inspector_free(snapshot);
 
+    snapshot = characters_inspector_from_code("U+0061 U+0301 U+1ADD U+0000 U+A7F1");
+    assert(snapshot);
+    expect_text(characters_inspector_normalize(snapshot, "NFKD"),
+                "U+0061 U+1ADD U+0301 U+0000 U+0053");
+    characters_inspector_free(snapshot);
+
     snapshot = characters_inspector_from_code("U+0378");
     assert(snapshot && !characters_inspector_name(snapshot));
     assert(!characters_inspector_normalize(snapshot, "NFC"));

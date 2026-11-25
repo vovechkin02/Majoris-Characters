@@ -1,3 +1,11 @@
+majoris-characters (1.0.1-1) unstable; urgency=medium
+
+  * Synchronize scalar assignment, properties, names and scripts to Unicode 17.
+  * Apply Unicode 17 normalization and alias deltas without replacing system ICU.
+  * Add exhaustive repertoire checks and offline property regeneration.
+
+ -- Vlad Ovechkin <45165533+vovechkin02@users.noreply.github.com>  Wed, 25 Nov 2026 21:00:00 +1100
+
 majoris-characters (1.0.0-1) unstable; urgency=medium
 
   * Harden desktop input and honor shared picker preview preferences.

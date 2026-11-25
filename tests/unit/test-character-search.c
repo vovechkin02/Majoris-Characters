@@ -63,7 +63,7 @@ static void test_complete_repertoire(void) {
         }
     }
     size_t scalar_count = index;
-    assert(scalar_count > 150000);
+    assert(scalar_count == 297334);
     assert(characters_search_count(job) > scalar_count);
     for (; index < characters_search_count(job); index++) {
         assert(characters_search_id(job, index) > 0x10FFFF);
@@ -88,6 +88,17 @@ static void test_filters(void) {
     assert(contains_id(job, 0x03B1));
     assert(!contains_id(job, 'A'));
     assert(!contains_id(job, 0x037E));
+    characters_search_free(job);
+
+    int beria = find_filter(CHARACTERS_SEARCH_SCRIPT, "Beria_Erfe");
+    job = search(CHARACTERS_SEARCH_SCRIPT, beria, 0, "");
+    assert(contains_id(job, 0x16EA0));
+    assert(contains_id(job, 0x16ED3));
+    assert(!contains_id(job, 'A'));
+    characters_search_free(job);
+
+    job = search(CHARACTERS_SEARCH_ALL, -1, -1, "U+323B0");
+    assert(characters_search_count(job) == 1 && characters_search_id(job, 0) == 0x323B0);
     characters_search_free(job);
 
     int currencies = find_filter(CHARACTERS_SEARCH_SYMBOLS, "Currencies");

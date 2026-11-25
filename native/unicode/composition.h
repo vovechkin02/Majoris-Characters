@@ -32,7 +32,7 @@ char *characters_composition_format(const char *text, CharactersInspectorFormat 
  * @text: NUL-terminated UTF-8 text within the analysis limit.
  * @form: NFC, NFD, NFKC or NFKD.
  *
- * Normalize across the entire sequence. Reject unavailable ICU properties and output
+ * Normalize across the entire sequence. Reject unassigned scalar properties and output
  * exceeding the analysis limit; never truncate or silently normalize in another form.
  *
  * Returns: (transfer full) (nullable): Allocated UTF-8, freed with free(), or NULL on failure.

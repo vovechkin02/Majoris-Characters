@@ -25,7 +25,7 @@ static bool validate_text(const char *text, uint32_t *points, size_t *count,
         UChar32 point;
         U8_NEXT((const uint8_t *)text, offset, length, point);
         if (point < 0 || *count == CHARACTERS_COMPOSITION_MAX_POINTS ||
-            (require_properties && u_charType(point) == U_UNASSIGNED)) {
+            (require_properties && !characters_unicode_is_assigned((uint32_t)point))) {
             return false;
         }
         if (points) {

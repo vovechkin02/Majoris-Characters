@@ -15,11 +15,16 @@ Consortium publications. The Unicode data license and attribution are in
 `data/unicode/supplement/LICENSE.unicode`. The supplemental alias records
 were exported from the Unicode 15.0.0 `Name_Alias` property through Perl's
 public `Unicode::UCD::prop_invmap` interface; `NamedSequences.txt` was supplied
-with the same Unicode database. The checked-in generated supplement is
+with the same Unicode database. The alias baseline includes eight documented Unicode 16 and 17 additions.
+The named-sequence baseline is retained after review, without a full official-file
+comparison. The checked-in generated supplement is
 reproducible from these two local files. No Perl source code is incorporated.
 
-ICU is a system dependency, not vendored or modified. Its Unicode property and
-normalization data version is reported at runtime. See
+The new scalar snapshot derives Unicode 17 property data from regex 2026.5.9
+and FontTools Unicode 17 script tables, with stable age values from ICU 76.
+No Python package implementation code is bundled. Unicode data attribution
+and license are retained as above. ICU is a system dependency, not vendored
+or modified; the application reports the effective snapshot version. See
 https://github.com/unicode-org/icu for its licensing and source.
 
 ## Emoji annotations

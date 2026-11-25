@@ -1,77 +1,91 @@
 # Unicode engine contracts and data maintenance
 
-Stage 2 builds a private static C library using ICU and the supplied GNOME
-Characters tables. The VAPI is internal, not an installed ABI. Calls are
-synchronous and safe to use from independent worker threads; catalog data is
-immutable and ICU normalization instances are read-only. The application
-only calls the version functions during local CLI handling. Interactive
-search, cancellation and UI scheduling belong to Stage 3.
+The private static C engine exposes an internal VAPI, not an installed ABI.
+Catalog and scalar property data are immutable and safe for independent
+worker threads. Search cancellation and GTK scheduling remain outside the
+engine.
 
 ## Data provenance and limits
 
 | Source | Version | Coverage |
 | --- | --- | --- |
-| GNOME Characters catalog | 17.0.0 | Explicit names, 346 blocks, 3,944 fully qualified emoji and single-scalar confusable classes |
-| ICU 76 (Debian 13) | 16.0 | Canonical names including algorithmic CJK/Hangul, scalar assignment, scripts, properties, age, normalization |
-| Unicode supplement | 15.0.0 | 473 name aliases and 461 named sequences |
+| GNOME Characters | 17.0.0 | Explicit names, 346 blocks, 3,944 fully qualified emoji, confusables |
+| Generated scalar snapshot | 17.0.0 | Assignment, general category, primary script, script extensions, age, combining class, bidi, decomposition type, East Asian width, supported binary flags |
+| ICU system library | Unicode 16.0 on Debian 13 | Stable names, normalization primitives, grapheme segmentation, legacy encodings, case folding |
+| Alias supplement | 15.0 baseline plus verified 16/17 deltas | 481 aliases |
+| Named-sequence supplement | 15.0 baseline reviewed through 17.0 | 461 records; full official-file comparison pending |
 
-The versions are independent and `--unicode-version` prints them. ICU is the
-canonical name and property authority for its repertoire. The newer GNOME
-catalog supplements explicitly named characters and fully qualified emoji.
-It is not a complete Unicode 17 assignment or property database: newly assigned
-algorithmic ideographs absent from the explicit name table cannot be reliably
-recognized by ICU 76, and new single-code-point emoji may have a label but no
-canonical name. The engine never guesses assignment from an entire block range.
-The older alias/named-sequence supplement can be refreshed from official files.
-CLDR localized annotations, Unihan readings, exhaustive emoji variants and
-full newer Unicode property coverage are not provided in this release.
+The snapshot is generated from regex 2026.5.9 Unicode 17 property tables,
+FontTools Unicode 17 `Scripts` and `ScriptExtensions` tables, and ICU 76 age
+values. Newly assigned scalars are given age 17.0. No package code is copied
+or needed at runtime. Assignment is determined by the snapshot, not by block
+membership or name availability. Surrogates and noncharacters are excluded
+from assigned scalar enumeration. The 297,334 assigned scalars include private
+use and controls. Canonical names use the GNOME table, stable ICU names,
+Unicode 17 algorithmic ideograph names, and seven new scalar emoji names from
+UnicodeData. The eight new alias records were verified against UCD 16/17.
+
+The supported scalar fields target Unicode 17, not every UCD property.
+The CLI reports effective property and catalog versions. The supplement version
+identifies its target release, not a byte-for-byte official-file verification.
+The raw UCD archive could not be acquired in the delivery environment. Full
+UCD source comparison and the official normalization conformance suite remain
+required for formal conformance. Unihan, full CLDR annotations, official emoji
+variation data, and script-extension-aware browsing are separate priorities.
 
 ## Query API
 
 See `native/unicode/unicode-engine.h` and `vapi/characters-unicode.vapi` for
-ownership, invalid inputs and index contracts. The scalar interface uses numeric
-code points; surrogate values are rejected except in block-range queries.
-U+0000 can be inspected but cannot be returned as a standalone NUL-terminated
-UTF-8 string. Exact sequences are bounded to 32 scalars; normalization accepts
-up to 1 MiB of NUL-terminated UTF-8. No implicit normalization is performed.
+ownership and index contracts. Scalar input is numeric. Surrogates are rejected
+except in block-range queries. U+0000 is inspectable but cannot be represented
+as standalone NUL-terminated UTF-8. Exact sequences are bounded to 32 scalars;
+no implicit normalization is performed.
 
-`get_property_value` accepts the standardized ICU property names
-`General_Category`, `Script`, `Bidi_Class`, `Bidi_Mirrored`, `Decomposition_Type`,
-`East_Asian_Width`, `Emoji`, `Emoji_Presentation`, `Emoji_Modifier`, and the
-explicit names `Age`, `Canonical_Combining_Class`, `Script_Extensions`, `Plane`.
-Enumerated properties return standard short aliases; script extensions are
-space-delimited ISO 15924 codes, age is a Unicode version, and combining class
-and plane are decimal strings. Unknown or unavailable properties return null.
-The plane is numeric and does not depend on the ICU assignment database.
+`get_property_value` accepts standard ICU property names for supported fields.
+Enumerated values use standardized short aliases; script extensions are
+space-delimited ISO 15924 codes. Age is a Unicode version; combining class and
+plane are decimal. Unknown properties return null. The primary script and
+general-category filters use the independent snapshot.
 
-Related-character queries adapt GNOME's case, mirroring, canonical variants,
-Hangul decomposition, emoji decomposition and confusable lookup. Results are
-sorted and unique and exclude the input. Confusable classes are advisory,
-not a spoof-detection or security guarantee. ICU's metadata version also bounds
-canonical relations. Full emoji variation selection belongs to Stage 6.
+`normalization.c` shares explicit-length UTF-16 normalization across the
+engine, inspector and composer. For the Debian 13 baseline, it uses stable ICU
+normalization data, Unicode 17 combining classes and the U+A7F1 compatibility
+mapping, and canonical composition with ICU pairs. New scalars without
+mappings remain unchanged; embedded NUL is preserved in length-aware calls.
+The older ICU path remains for unchanged text. New Unicode 17 simple case
+pairs also participate in related-character lookup. Grapheme segmentation and
+general case folding still use system ICU. Confusable relations are advisory,
+not a security guarantee.
 
-## Offline catalog updates
+## Offline regeneration
 
-Acquire matching official `Blocks.txt`, `UnicodeData.txt`, `emoji-test.txt`,
-and `confusables.txt` locally from https://www.unicode.org/Public/ and verify
-their release versions and checksums. Place these four files in one directory.
-The upstream generators are retained unchanged and are invoked by an offline
-wrapper. Do not edit generated tables manually.
+Acquire matching official files from https://www.unicode.org/Public/17.0.0/
+and emoji/confusables data for the same release. Verify source versions and
+checksums. The property generator is pinned to regex 2026.5.9, FontTools
+Unicode 17 script tables and ICU 76. It rejects incompatible inputs and
+unexpected assignment counts. Generated headers are checked in; no runtime
+network access or Python package dependency is introduced.
 
 ```sh
+python3 tools/unicode/generate_properties.py native/unicode/generated/properties.h
 python3 tools/unicode/update_catalog.py /path/to/ucd-inputs 17.0.0
-python3 tools/unicode/generate_supplement.py \
-  data/unicode/supplement/NameAliases.txt \
-  data/unicode/supplement/NamedSequences.txt 15.0.0 \
-  native/unicode/generated/supplement.h
 meson compile -C build
 meson test -C build --suite unit --print-errorlogs
 ```
 
-For a supplement update, replace the two checked-in source inputs with the
-same-version official UCD files and use that version in the generator command.
-Record upstream release/checksums and verify all catalog tests. For a newer ICU
-property database, use a supported ICU distribution; the engine reports the
-actual runtime version. These are developer operations, not runtime downloads.
-The full official 17.0.0 input files were not supplied and no network access
-was available; regeneration of the GNOME tables was not performed here.
+The catalog input directory must contain `Blocks.txt`, `UnicodeData.txt`,
+`emoji-test.txt`, `confusables.txt`, `NameAliases.txt`, and `NamedSequences.txt`.
+The wrapper stages the catalog and supplement before replacing outputs and
+rejects a target version that differs from the property snapshot. For any
+future Unicode release, explicitly update the generator version, expected
+counts, name and normalization deltas, and regression cases; changing only a
+version string is not sufficient.
+
+Official references:
+
+- https://www.unicode.org/versions/Unicode17.0.0/
+- https://www.unicode.org/reports/tr44/
+- https://www.unicode.org/Public/17.0.0/ucd/UnicodeData.txt
+- https://www.unicode.org/Public/17.0.0/ucd/NameAliases.txt
+- https://www.unicode.org/Public/17.0.0/ucd/NamedSequences.txt
+- https://www.unicode.org/Public/17.0.0/ucd/NormalizationTest.txt

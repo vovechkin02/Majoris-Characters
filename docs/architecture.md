@@ -20,7 +20,9 @@ Desktop/AppStream and Debian release metadata are maintained together per releas
 Stage 2 adds an internal native Unicode engine. The app links a private static
 library and consumes its VAPI, not ICU or generated table internals. The engine
 owns no mutable global state and has no UI dependency. Its catalog is immutable;
-ICU handles standard property and normalization semantics. See
+The immutable scalar snapshot supplies Unicode 17 properties; ICU supplies
+stable names and normalization primitives. The shared normalization module
+applies the Unicode 17 delta. See
 [Unicode engine](unicode-engine.md) for contracts and data versions.
 
 The native interface is an adapter-like boundary over ICU and GNOME data, not a

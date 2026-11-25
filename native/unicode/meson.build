@@ -6,6 +6,8 @@ unicode_engine = static_library(
   'composition.c',
   'emoji-catalog.c',
   'legacy-encoding.c',
+  'normalization.c',
+  'scalar-properties.c',
   'unicode-engine.c',
   include_directories: unicode_include,
   dependencies: [icu_dep, icu_i18n_dep],

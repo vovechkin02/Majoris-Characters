@@ -53,6 +53,10 @@ static void test_normalization(void) {
     expect_text(characters_composition_normalize("①ﬁ", "NFKC"), "1fi");
     expect_text(characters_composition_normalize("①é", "NFKD"), "1e\xCC\x81");
     expect_text(characters_composition_normalize("", "NFC"), "");
+    expect_text(characters_composition_normalize("\uA7F1\U000323B0", "NFKC"),
+                "S\U000323B0");
+    expect_text(characters_composition_normalize("a\u0301\u1ADD", "NFD"),
+                "a\u1ADD\u0301");
     assert(characters_composition_normalize("\xCD\xB8", "NFC") == NULL);
     assert(characters_composition_normalize("A", "invalid") == NULL);
 }

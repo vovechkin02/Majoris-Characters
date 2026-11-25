@@ -20,15 +20,15 @@ bool characters_unicode_is_scalar(uint32_t point);
  * characters_unicode_is_assigned:
  * @point: Numeric Unicode code point.
  *
- * Returns: Whether ICU assigns the scalar, or the catalog has an explicit name
- * or single-code-point emoji entry. Private-use scalars count as assigned.
+ * Returns: Whether the Unicode 17 property snapshot assigns the scalar.
+ * Private-use scalars count as assigned.
  */
 bool characters_unicode_is_assigned(uint32_t point);
 
 /**
  * characters_unicode_properties_version:
  *
- * Returns: (transfer full): The Unicode version supported by the loaded ICU data.
+ * Returns: (transfer full): The Unicode version of the bundled scalar property snapshot.
  */
 char *characters_unicode_properties_version(void);
 
@@ -70,7 +70,7 @@ char *characters_unicode_aliases(uint32_t point);
  * @property: Supported UCD property name (see the Unicode engine documentation).
  *
  * Returns: (transfer full) (nullable): Property value, or NULL for unsupported
- * queries, invalid scalars, or scalars not assigned in the ICU property data.
+ * queries, invalid scalars, or scalars not assigned in the scalar property snapshot.
  * Plane is available for all valid scalars.
  */
 char *characters_unicode_property(uint32_t point, const char *property);

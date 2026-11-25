@@ -7,6 +7,8 @@ import subprocess
 import sys
 import tempfile
 
+from generate_supplement import generate
+
 
 # Kept in dependency order: names consume both UCD and the emoji test input.
 GENERATORS = (
@@ -22,6 +24,9 @@ def regenerate(root: Path, inputs: Path, version: str) -> None:
     if not re.fullmatch(r"\d+\.\d+\.\d+", version):
         raise ValueError("Expected a three-part Unicode version")
     base = root / "native/unicode"
+    property_header = (base / "generated/properties.h").read_text(encoding="utf-8")
+    if f'#define PROPERTY_VERSION "{version}"' not in property_header:
+        raise ValueError("Generate the matching scalar property snapshot first")
     vendor = base / "vendor/gnome"
     with tempfile.TemporaryDirectory(dir=base) as directory:
         staging = Path(directory)
@@ -40,9 +45,19 @@ def regenerate(root: Path, inputs: Path, version: str) -> None:
             "/* Generated catalog identity; update with the upstream tables. */\n"
             f'#define CATALOG_VERSION "{version}"\n', encoding="utf-8",
         )
+        aliases = inputs / "NameAliases.txt"
+        sequences = inputs / "NamedSequences.txt"
+        (staging / "supplement.h").write_text(
+            generate(aliases, sequences, version), encoding="utf-8",
+        )
+        for source in (aliases, sequences):
+            (staging / source.name).write_bytes(source.read_bytes())
         for name, _ in GENERATORS:
             (staging / f"{name}.h").replace(vendor / f"{name}.h")
         (staging / "catalog-version.h").replace(base / "generated/catalog-version.h")
+        (staging / "supplement.h").replace(base / "generated/supplement.h")
+        for source in (aliases, sequences):
+            (staging / source.name).replace(root / "data/unicode/supplement" / source.name)
 
 
 def main() -> int:

@@ -1,5 +1,5 @@
 /* Generated Unicode data; do not edit. */
-#define SUPPLEMENT_VERSION "15.0.0"
+#define SUPPLEMENT_VERSION "17.0.0"
 static const struct AliasEntry aliases[] = {
     { 0x0, "NUL", "abbreviation" },
     { 0x0, "NULL", "control" },
@@ -228,12 +228,20 @@ static const struct AliasEntry aliases[] = {
     { 0xFEFF, "ZWNBSP", "abbreviation" },
     { 0x122D4, "CUNEIFORM SIGN NU11 TENU", "correction" },
     { 0x122D5, "CUNEIFORM SIGN NU11 OVER NU11 BUR OVER BUR", "correction" },
+    { 0x12327, "CUNEIFORM SIGN KALAM", "correction" },
+    { 0x1680B, "BAMUM LETTER PHASE-A MAEMGBIEE", "correction" },
+    { 0x16881, "BAMUM LETTER PHASE-B PUNGGAAM", "correction" },
+    { 0x1688E, "BAMUM LETTER PHASE-B NGGOM", "correction" },
+    { 0x168DC, "BAMUM LETTER PHASE-C SHETFON", "correction" },
+    { 0x1697D, "BAMUM LETTER PHASE-E NGGOP", "correction" },
     { 0x16E56, "MEDEFAIDRIN CAPITAL LETTER H", "correction" },
     { 0x16E57, "MEDEFAIDRIN CAPITAL LETTER NG", "correction" },
     { 0x16E76, "MEDEFAIDRIN SMALL LETTER H", "correction" },
     { 0x16E77, "MEDEFAIDRIN SMALL LETTER NG", "correction" },
     { 0x1B001, "HENTAIGANA LETTER E-1", "correction" },
     { 0x1D0C5, "BYZANTINE MUSICAL SYMBOL FTHORA SKLIRON CHROMA VASIS", "correction" },
+    { 0x1E899, "MENDE KIKAKUI SYLLABLE M172 MBO", "correction" },
+    { 0x1E89A, "MENDE KIKAKUI SYLLABLE M174 MBOO", "correction" },
     { 0xE0100, "VS17", "abbreviation" },
     { 0xE0101, "VS18", "abbreviation" },
     { 0xE0102, "VS19", "abbreviation" },

@@ -6,13 +6,13 @@ namespace Characters.Unicode {
     public static bool is_scalar (uint32 point);
 
     /**
-     * Whether ICU assigns the scalar, or the catalog has an explicit name or single-code-point
-     * emoji entry. Private-use scalars count as assigned.
+     * Whether the Unicode 17 property snapshot assigns the scalar.
+     * Private-use scalars count as assigned.
      */
     [CCode (cname = "characters_unicode_is_assigned")]
     public static bool is_assigned (uint32 point);
 
-    /** The Unicode version supported by the loaded ICU data. */
+    /** The Unicode version of the bundled scalar property snapshot. */
     [CCode (cname = "characters_unicode_properties_version")]
     public static string? properties_version ();
 
@@ -40,7 +40,7 @@ namespace Characters.Unicode {
 
     /**
      * Property value, or NULL for unsupported queries, invalid scalars, or scalars not assigned in
-     * the ICU property data. Plane is available for all valid scalars.
+     * the scalar property snapshot. Plane is available for all valid scalars.
      */
     [CCode (cname = "characters_unicode_property")]
     public static string? get_property_value (uint32 point, string property);

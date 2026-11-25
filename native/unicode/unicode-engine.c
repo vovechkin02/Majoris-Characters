@@ -6,10 +6,12 @@
 
 #include <unicode/uchar.h>
 #include <unicode/unorm2.h>
-#include <unicode/uscript.h>
 #include <unicode/ustring.h>
 #include <unicode/utf16.h>
 #include <unicode/utf8.h>
+
+#include "normalization.h"
+#include "scalar-properties.h"
 
 /* GNOME generated headers use GLib's unsigned 32-bit scalar spelling. */
 typedef uint32_t gunichar;
@@ -131,9 +133,9 @@ static const struct EmojiCharacter *find_emoji(const uint32_t *points, size_t le
                    sizeof(emoji_characters[0]), compare_emoji);
 }
 
-/** Return whether ICU itself recognizes the scalar's general category. */
+/** Return whether the bundled snapshot assigns the scalar. */
 static bool has_properties(uint32_t point) {
-    return characters_unicode_is_scalar(point) && u_charType((UChar32)point) != U_UNASSIGNED;
+    return characters_scalar_category(point) != U_UNASSIGNED;
 }
 
 /** Convert a valid bounded UTF-16 buffer to newly allocated NUL-terminated UTF-8. */
@@ -155,26 +157,6 @@ static char *from_utf16(const UChar *text, int32_t length) {
         return NULL;
     }
     return result;
-}
-
-/** Resolve a normalization form without accepting arbitrary ICU identifiers. */
-static const UNormalizer2 *normalizer(const char *form, UErrorCode *error) {
-    if (!form) {
-        return NULL;
-    }
-    if (strcmp(form, "NFC") == 0) {
-        return unorm2_getNFCInstance(error);
-    }
-    if (strcmp(form, "NFD") == 0) {
-        return unorm2_getNFDInstance(error);
-    }
-    if (strcmp(form, "NFKC") == 0) {
-        return unorm2_getNFKCInstance(error);
-    }
-    if (strcmp(form, "NFKD") == 0) {
-        return unorm2_getNFKDInstance(error);
-    }
-    return NULL;
 }
 
 /** Return the first canonical decomposition scalar, or the original scalar. */
@@ -253,11 +235,26 @@ static void append_confusables(struct RelatedList *list, uint32_t point) {
     }
 }
 
+/** Add the new simple case pairs defined by Unicode 17 before consulting ICU 16. */
+static void append_case_variants(struct RelatedList *list, uint32_t point) {
+    if (point >= 0x16EA0 && point <= 0x16EB8) {
+        append_scalar(list, point + 0x1B);
+    } else if (point >= 0x16EBB && point <= 0x16ED3) {
+        append_scalar(list, point - 0x1B);
+    } else if ((point >= 0xA7CE && point <= 0xA7CF) ||
+               (point >= 0xA7D2 && point <= 0xA7D5)) {
+        append_scalar(list, point ^ 1u);
+    } else {
+        append_scalar(list, (uint32_t)u_toupper((UChar32)point));
+        append_scalar(list, (uint32_t)u_tolower((UChar32)point));
+        append_scalar(list, (uint32_t)u_totitle((UChar32)point));
+    }
+}
+
 /** Find reverse canonical variants in the same families used by GNOME Characters. */
 static void append_accent_variants(struct RelatedList *list, uint32_t point) {
-    UErrorCode error = U_ZERO_ERROR;
-    UScriptCode script = uscript_getScript((UChar32)point, &error);
-    if (U_FAILURE(error)) {
+    const char *script = characters_scalar_script_name((size_t)characters_scalar_script(point));
+    if (!script) {
         return;
     }
     static const uint32_t latin[] = { 0x0000, 0x0080, 0x0100, 0x0180, 0x1E00 };
@@ -265,13 +262,13 @@ static void append_accent_variants(struct RelatedList *list, uint32_t point) {
     static const uint32_t katakana[] = { 0x30A0, 0x31F0 };
     const uint32_t *starts = NULL;
     size_t count = 0;
-    if (script == USCRIPT_LATIN) {
+    if (strcmp(script, "Latin") == 0) {
         starts = latin;
         count = COUNT(latin);
-    } else if (script == USCRIPT_HIRAGANA) {
+    } else if (strcmp(script, "Hiragana") == 0) {
         starts = hiragana;
         count = COUNT(hiragana);
-    } else if (script == USCRIPT_KATAKANA) {
+    } else if (strcmp(script, "Katakana") == 0) {
         starts = katakana;
         count = COUNT(katakana);
     }
@@ -347,16 +344,11 @@ bool characters_unicode_is_scalar(uint32_t point) {
 }
 
 bool characters_unicode_is_assigned(uint32_t point) {
-    return characters_unicode_is_scalar(point) &&
-           (has_properties(point) || find_name(point) || find_emoji(&point, 1));
+    return has_properties(point);
 }
 
 char *characters_unicode_properties_version(void) {
-    UVersionInfo version;
-    char text[U_MAX_VERSION_STRING_LENGTH];
-    u_getUnicodeVersion(version);
-    u_versionToString(version, text);
-    return strdup(text);
+    return strdup(characters_scalar_version());
 }
 
 const char *characters_unicode_catalog_version(void) {
@@ -368,7 +360,7 @@ const char *characters_unicode_supplement_version(void) {
 }
 
 char *characters_unicode_name(uint32_t point) {
-    if (!characters_unicode_is_scalar(point)) {
+    if (!characters_unicode_is_assigned(point)) {
         return NULL;
     }
     char name[256];
@@ -378,7 +370,20 @@ char *characters_unicode_name(uint32_t point) {
         return strdup(name);
     }
     const struct CharacterName *entry = find_name(point);
-    return entry ? strdup(entry->name) : NULL;
+    if (entry) {
+        return strdup(entry->name);
+    }
+    /* Canonical names of Unicode 17 single-scalar emoji omitted by GNOME's name generator. */
+    switch (point) {
+        case 0x1F6D8: return strdup("LANDSLIDE");
+        case 0x1FA8A: return strdup("TROMBONE");
+        case 0x1FA8E: return strdup("TREASURE CHEST");
+        case 0x1FAC8: return strdup("HAIRY CREATURE");
+        case 0x1FACD: return strdup("ORCA");
+        case 0x1FAEA: return strdup("DISTORTED FACE");
+        case 0x1FAEF: return strdup("FIGHT CLOUD");
+        default: return characters_scalar_algorithmic_name(point);
+    }
 }
 
 char *characters_unicode_aliases(uint32_t point) {
@@ -433,51 +438,7 @@ char *characters_unicode_property(uint32_t point, const char *property) {
         snprintf(text, sizeof(text), "%u", (unsigned)(point >> 16));
         return strdup(text);
     }
-    if (!has_properties(point)) {
-        return NULL;
-    }
-    UChar32 value = (UChar32)point;
-    if (strcmp(property, "Age") == 0) {
-        UVersionInfo version;
-        char text[U_MAX_VERSION_STRING_LENGTH];
-        u_charAge(value, version);
-        u_versionToString(version, text);
-        return strdup(text);
-    }
-    if (strcmp(property, "Script_Extensions") == 0) {
-        UScriptCode scripts[USCRIPT_CODE_LIMIT];
-        UErrorCode error = U_ZERO_ERROR;
-        int32_t count = uscript_getScriptExtensions(value, scripts, COUNT(scripts), &error);
-        if (U_FAILURE(error) || count <= 0) {
-            return NULL;
-        }
-        char *result = calloc((size_t)count * 5, 1);
-        if (!result) {
-            return NULL;
-        }
-        for (int32_t index = 0; index < count; index++) {
-            if (index) {
-                strcat(result, " ");
-            }
-            strcat(result, uscript_getShortName(scripts[index]));
-        }
-        return result;
-    }
-    if (strcmp(property, "Canonical_Combining_Class") == 0) {
-        char text[4];
-        snprintf(text, sizeof(text), "%u", (unsigned)u_getCombiningClass(value));
-        return strdup(text);
-    }
-    UProperty key = u_getPropertyEnum(property);
-    if (key != UCHAR_GENERAL_CATEGORY && key != UCHAR_SCRIPT && key != UCHAR_BIDI_CLASS &&
-        key != UCHAR_BIDI_MIRRORED && key != UCHAR_DECOMPOSITION_TYPE &&
-        key != UCHAR_EAST_ASIAN_WIDTH && key != UCHAR_EMOJI &&
-        key != UCHAR_EMOJI_PRESENTATION && key != UCHAR_EMOJI_MODIFIER) {
-        return NULL;
-    }
-    const char *name = u_getPropertyValueName(key, u_getIntPropertyValue(value, key),
-                                               U_SHORT_PROPERTY_NAME);
-    return name ? strdup(name) : NULL;
+    return characters_scalar_property(point, property);
 }
 
 size_t characters_unicode_block_count(void) {
@@ -540,10 +501,6 @@ char *characters_unicode_normalize(const char *text, const char *form) {
         return NULL;
     }
     UErrorCode error = U_ZERO_ERROR;
-    const UNormalizer2 *instance = normalizer(form, &error);
-    if (!instance || U_FAILURE(error)) {
-        return NULL;
-    }
     int32_t length = 0;
     u_strFromUTF8(NULL, 0, &length, text, -1, &error);
     if (error != U_BUFFER_OVERFLOW_ERROR && U_FAILURE(error)) {
@@ -559,20 +516,10 @@ char *characters_unicode_normalize(const char *text, const char *form) {
         free(input);
         return NULL;
     }
-    int32_t needed = unorm2_normalize(instance, input, length, NULL, 0, &error);
-    if (error != U_BUFFER_OVERFLOW_ERROR && U_FAILURE(error)) {
-        free(input);
-        return NULL;
-    }
-    UChar *output = malloc(((size_t)needed + 1) * sizeof(*output));
-    if (!output) {
-        free(input);
-        return NULL;
-    }
-    error = U_ZERO_ERROR;
-    unorm2_normalize(instance, input, length, output, needed + 1, &error);
+    int32_t needed = 0;
+    UChar *output = characters_normalize_utf16(input, length, form, &needed);
     free(input);
-    char *result = U_SUCCESS(error) ? from_utf16(output, needed) : NULL;
+    char *result = output ? from_utf16(output, needed) : NULL;
     free(output);
     return result;
 }
@@ -660,9 +607,7 @@ char **characters_unicode_related(const uint32_t *points, size_t length) {
             append_related(&list, variant, COUNT(variant));
         }
         if (has_properties(point)) {
-            append_scalar(&list, (uint32_t)u_toupper((UChar32)point));
-            append_scalar(&list, (uint32_t)u_tolower((UChar32)point));
-            append_scalar(&list, (uint32_t)u_totitle((UChar32)point));
+            append_case_variants(&list, point);
             append_scalar(&list, (uint32_t)u_charMirror((UChar32)point));
             append_decomposition(&list, point);
             append_accent_variants(&list, point);

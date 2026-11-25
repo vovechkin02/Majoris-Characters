@@ -6,7 +6,7 @@ stages with desktop input hardening, accessibility, localization, and release ch
 
 | Project metadata | Value |
 | --- | --- |
-| Version | 1.0.0 |
+| Version | 1.0.1 |
 | Platform target | Majoris OS / Debian 13 (Trixie) |
 | Development status | Stage 10 — qualification candidate (not a verified stable release) |
 | Application ID | `com.majoris.characters` |
@@ -82,10 +82,13 @@ stages with desktop input hardening, accessibility, localization, and release ch
 - GNOME Shell SearchProvider2, desktop action, and single-instance CLI activation.
 - Configurable opt-in GNOME Shell 48 shortcut and native IBus candidate insertion.
 
-The bundled catalog is Unicode 17.0.0; ICU 76 provides Unicode 16.0 properties,
-and the alias/named-sequence supplement is Unicode 15.0.0. Newer metadata not
-available in those sources is explicitly unavailable rather than fabricated.
-Script and general-category filters use ICU's assigned-property data.
+The bundled catalog and independent scalar property snapshot target Unicode
+17.0.0. The snapshot covers 297,334 assigned scalars, including private use.
+Names combine the GNOME catalog, stable ICU names, and Unicode 17 additions.
+The alias supplement includes the eight documented additions since Unicode 15;
+the 461 named-sequence records are retained pending full official-file comparison.
+Normalization uses ICU 76 with the Unicode 17 combining-class and compatibility
+delta. See [Unicode engine](docs/unicode-engine.md) for provenance and limits.
 Emoji annotations from Debian GTK 3.24.49-3 (Emojibase-derived data) are
 bundled for 24 languages; they do not cover all Unicode 17 entries. Direct
 CLDR XML imports are supported by the offline generator. The picker exposes
@@ -146,7 +149,7 @@ For Debian binary packages (run from the repository root):
 
 ```sh
 dpkg-buildpackage -us -uc -b
-sudo apt install ../majoris-characters_1.0.0-1_$(dpkg --print-architecture).deb
+sudo apt install ../majoris-characters_1.0.1-1_$(dpkg --print-architecture).deb
 ```
 
 The source package uses `3.0 (quilt)` and requires the corresponding upstream
@@ -296,9 +299,9 @@ After installing the Debian package, the same runtime tests can target the real
 installed executable:
 
 ```sh
-python3 tests/integration/test_application.py /usr/bin/majoris-characters 1.0.0 cli
+python3 tests/integration/test_application.py /usr/bin/majoris-characters 1.0.1 cli
 xvfb-run -a dbus-run-session -- python3 \
-  tests/integration/test_application.py /usr/bin/majoris-characters 1.0.0 gui
+  tests/integration/test_application.py /usr/bin/majoris-characters 1.0.1 gui
 ```
 
 For a fresh, fail-closed automated build/test and optional Debian package gate:

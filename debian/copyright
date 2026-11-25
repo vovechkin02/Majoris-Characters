@@ -18,6 +18,7 @@ Comment: The upstream README assigns BSD-3-clause to gtk-js-app-derived
  files and GPL-2+ to other files. Both original notices are included.
 
 Files: native/unicode/vendor/gnome/*.h native/unicode/generated/supplement.h
+       native/unicode/generated/properties.h
        data/unicode/supplement/*.txt
 Copyright: Unicode, Inc. and GNOME Characters contributors (where applicable)
 License: Unicode-3.0

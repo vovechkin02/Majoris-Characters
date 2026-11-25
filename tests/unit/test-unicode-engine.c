@@ -1,10 +1,12 @@
 #include "unicode-engine.h"
+#include "scalar-properties.h"
 
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
+#include <unicode/uchar.h>
 #include <unicode/utf8.h>
 
 /** Compare a newly allocated value and release it after the assertion. */
@@ -49,6 +51,41 @@ static void test_scalar_metadata(void) {
     printf("Property data: %s; catalog: %s; supplement: %s\n", version,
            characters_unicode_catalog_version(), characters_unicode_supplement_version());
     free(version);
+}
+
+/** Verify Unicode 17 coverage independently of the installed ICU repertoire. */
+static void test_unicode_17(void) {
+    expect_text(characters_unicode_properties_version(), "17.0.0");
+    assert(strcmp(characters_unicode_catalog_version(), "17.0.0") == 0);
+    assert(strcmp(characters_unicode_supplement_version(), "17.0.0") == 0);
+    expect_text(characters_unicode_name(0x323B0), "CJK UNIFIED IDEOGRAPH-323B0");
+    expect_text(characters_unicode_name(0x187F8), "TANGUT IDEOGRAPH-187F8");
+    expect_text(characters_unicode_name(0x1FAEA), "DISTORTED FACE");
+    expect_text(characters_unicode_property(0x16EA0, "Script"), "Berf");
+    expect_text(characters_unicode_property(0x16EA0, "General_Category"), "Lu");
+    expect_text(characters_unicode_property(0x16EA0, "Age"), "17.0");
+    expect_text(characters_unicode_property(0x0295, "General_Category"), "Lo");
+    expect_text(characters_unicode_property(0x1ADD, "Canonical_Combining_Class"), "220");
+    expect_text(characters_unicode_property(0x1FAEA, "Emoji"), "Y");
+    expect_text(characters_unicode_aliases(0x16881), "BAMUM LETTER PHASE-B PUNGGAAM");
+    expect_text(characters_unicode_aliases(0x12327), "CUNEIFORM SIGN KALAM");
+    char *scripts = characters_unicode_property(0x0306, "Script_Extensions");
+    assert(scripts && strstr(scripts, "Tfng"));
+    free(scripts);
+    size_t assigned = 0;
+    for (uint32_t point = 0; point <= 0x10FFFF; point++) {
+        if (!characters_unicode_is_assigned(point)) {
+            continue;
+        }
+        assigned++;
+        int category = characters_scalar_category(point);
+        if (category != U_CONTROL_CHAR && category != U_PRIVATE_USE_CHAR) {
+            char *name = characters_unicode_name(point);
+            assert(name && *name);
+            free(name);
+        }
+    }
+    assert(assigned == 297334);
 }
 
 /** Check ordered, nonoverlapping blocks and both inclusive endpoints. */
@@ -144,6 +181,16 @@ static void test_encoding(void) {
     expect_text(characters_unicode_normalize("ﬀ", "NFKC"), "ff");
     expect_text(characters_unicode_normalize("ﬀ", "NFKD"), "ff");
     expect_text(characters_unicode_normalize("", "NFC"), "");
+    expect_text(characters_unicode_normalize("\uA7F1", "NFKD"), "S");
+    expect_text(characters_unicode_normalize("\uA7F1", "NFC"), "\uA7F1");
+    expect_text(characters_unicode_normalize("a\u0301\u1ADD", "NFD"),
+                "a\u1ADD\u0301");
+    expect_text(characters_unicode_normalize("a\u0301\u1ADD", "NFC"),
+                "\u00E1\u1ADD");
+    expect_text(characters_unicode_normalize("a\u1ACF\u0301", "NFC"),
+                "a\u1ACF\u0301");
+    expect_text(characters_unicode_normalize("\U000323B0", "NFKC"), "\U000323B0");
+    expect_text(characters_unicode_normalize("\u0378", "NFC"), "\u0378");
     assert(!characters_unicode_normalize("\xFF", "NFC"));
     assert(!characters_unicode_normalize("abc", "invalid"));
     assert(!characters_unicode_encode(points, 33));
@@ -186,6 +233,8 @@ static void test_relationships(void) {
     expect_related(0xAC00, "ᄀ");
     expect_related('A', "Α");
     expect_related(0xA9, "©️");
+    expect_related(0xA7D3, "\uA7D2");
+    expect_related(0x16EA0, "\U00016EBB");
     uint32_t invalid = 0x110000;
     assert(!characters_unicode_related(&invalid, 1));
 }
@@ -193,10 +242,11 @@ static void test_relationships(void) {
 /** Run the headless native contract suite and report the catalog sizes. */
 int main(void) {
     test_scalar_metadata();
+    test_unicode_17();
     test_blocks();
     test_catalogs();
     test_encoding();
     test_relationships();
-    puts("Five native Unicode test groups passed.");
+    puts("Six native Unicode test groups passed.");
     return 0;
 }
