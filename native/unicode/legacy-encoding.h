@@ -52,23 +52,33 @@ void characters_legacy_free(CharactersLegacy *table);
 uint32_t *characters_legacy_points(const CharactersLegacy *table, size_t *length);
 
 /**
- * characters_legacy_decode:
- * @table: Borrowed table.
- * @hex: Hexadecimal byte pairs, optionally separated by one ASCII space.
+ * characters_legacy_encoding_index:
+ * @table: Borrowed immutable table.
  *
- * Returns: Decoded Unicode scalar, including NUL; UINT32_MAX for invalid or unmapped input.
+ * Returns: Stable converter index or SIZE_MAX for NULL.
  */
-uint32_t characters_legacy_decode(const CharactersLegacy *table, const char *hex);
+size_t characters_legacy_encoding_index(const CharactersLegacy *table);
 
 /**
- * characters_legacy_bytes:
- * @table: Borrowed table.
- * @point: Unicode scalar.
+ * characters_legacy_contains:
+ * @table: Borrowed immutable table.
+ * @point: Unicode scalar, including NUL.
  *
- * Returns: (transfer full) (nullable): Independent byte alternatives or canonical contextual bytes (hexadecimal),
- * or NULL if unmapped or allocation fails. The caller frees the string.
+ * Returns: True if the scalar is present in the repertoire.
  */
-char *characters_legacy_bytes(const CharactersLegacy *table, uint32_t point);
+bool characters_legacy_contains(const CharactersLegacy *table, uint32_t point);
+
+/**
+ * characters_legacy_keys:
+ * @table: Borrowed immutable table.
+ * @point: Unicode scalar.
+ * @length: (out): Number of exact independent byte alternatives.
+ *
+ * Returns: (transfer full) (array length=length) (nullable): Sorted packed keys,
+ * with byte length in the high 32 bits and big-endian bytes in the low 32 bits.
+ * NULL for unmapped/contextual scalars or allocation failure. Free with free().
+ */
+uint64_t *characters_legacy_keys(const CharactersLegacy *table, uint32_t point, size_t *length);
 
 /**
  * characters_legacy_is_contextual:
@@ -79,27 +89,31 @@ char *characters_legacy_bytes(const CharactersLegacy *table, uint32_t point);
 bool characters_legacy_is_contextual(size_t index);
 
 /**
- * characters_legacy_decode_sequence:
+ * characters_legacy_decode_raw:
  * @encoding: Encoding choice index.
- * @hex: 1–128 bytes in hexadecimal, starting in the converter's initial state.
+ * @bytes: (array length=count): Exact byte stream, including zero bytes.
+ * @count: Number of bytes, 1–128.
  * @length: (out): Number of decoded scalars, zero on failure.
  *
- * Returns: (transfer full) (array length=length) (nullable): Exact 1–32 scalars, including
- * NUL and contextual multi-scalar mappings; NULL for invalid, empty or oversized output.
- * Free with free(). No replacement or normalization is performed.
+ * Returns: (transfer full) (array length=length) (nullable): Exact 1–32 scalars
+ * from the converter's initial state; NULL for invalid, empty or oversized output.
+ * No replacement or normalization is performed. Free with free().
  */
-uint32_t *characters_legacy_decode_sequence(size_t encoding, const char *hex, size_t *length);
+uint32_t *characters_legacy_decode_raw(size_t encoding, const uint8_t *bytes, size_t count,
+                                       size_t *length);
 
 /**
- * characters_legacy_encode_sequence:
+ * characters_legacy_encode_raw:
  * @encoding: Encoding choice index.
  * @points: (array length=length): Exact Unicode scalars, including NUL.
  * @length: Number of scalars, 1–32.
+ * @count: (out): Number of encoded bytes, zero on failure.
  *
- * Returns: (transfer full) (nullable): Canonical hexadecimal bytes (at most 128), including
- * any state shifts or resets. NULL unless strict decoding reproduces every input scalar.
- * Free with free(). The canonical encoding need not reproduce an original byte alias.
+ * Returns: (transfer full) (array length=count) (nullable): Strict ICU output
+ * of at most 128 bytes, including state resets. The caller must check exact
+ * round-trip equality before publishing conversion results. Free with free().
  */
-char *characters_legacy_encode_sequence(size_t encoding, const uint32_t *points, size_t length);
+uint8_t *characters_legacy_encode_raw(size_t encoding, const uint32_t *points, size_t length,
+                                     size_t *count);
 
 #endif

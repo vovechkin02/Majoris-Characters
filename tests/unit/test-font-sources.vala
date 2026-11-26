@@ -19,8 +19,8 @@ private size_t encoding_index (string name) {
 private void test_mapping_bindings () {
     var table = Legacy.load (encoding_index ("Windows-1252"));
     assert (table != null);
-    assert (table.decode ("80") == 0x20AC);
-    assert (table.bytes (0x20AC) == "80");
+    assert (Legacy.decode (table, "80") == 0x20AC);
+    assert (Legacy.bytes (table, 0x20AC) == "80");
     var points = table.points ();
     assert (points != null && points.length >= 128);
     var job = QueryParser.create_points (points, -1, "U+20AC");
@@ -74,7 +74,7 @@ private void test_latest_source () {
     var table = received.take_table ();
     var points = received.take_points ();
     assert (table != null && points != null && points.length >= 128);
-    assert (table.decode ("80") == 0x20AC);
+    assert (Legacy.decode (table, "80") == 0x20AC);
     assert (received.take_table () == null && received.take_points () == null);
     loader.shutdown ();
 }

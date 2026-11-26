@@ -151,7 +151,9 @@ computed on demand; the table never claims to enumerate arbitrary stateful
 streams. The source worker owns construction and publishes only the latest
 request; large GB18030 repertoires reuse the existing bounded grid and search.
 `LegacySequenceDialog` captures the encoding index and delegates bounded,
-length-aware conversion to fresh strict ICU converters. It keeps original bytes
+length-aware conversion to the Vala `Legacy` workflow and fresh strict ICU
+converters. Vala parses and formats byte notation, compares round-trip scalars,
+and formats the ordered native packed mapping keys. It keeps original bytes
 on decode and only accepts encoding when a reverse conversion reproduces the
 input exactly. The existing character inspector owns sequence metadata and
 Unicode actions. The native ICU integration is an adapter with a fixed bounded
@@ -418,7 +420,9 @@ interpreting query prefixes or hardcoding semantic collection ranges. `Relations
 sorts exact text alternatives from native scalar candidates and emoji catalog
 lookups. Native scalar enumeration avoids per-candidate GObjects. The property
 tables, ICU normalization, FreeType rasterizer, Fontconfig inventory and legacy
-converters remain in C. No new pattern hierarchy or public ABI is introduced.
-See [pass 3 qualification](vala-migration-pass-3.md),
+conversion and repertoire enumeration remain in C; byte parsing, presentation
+and explicit conversion policy belong to Vala. No new pattern hierarchy or
+public ABI is introduced. See [pass 4 qualification](vala-migration-pass-4.md),
+[pass 3 qualification](vala-migration-pass-3.md),
 [pass 2 qualification](vala-migration-pass-2.md), and the earlier
 [pass 1 qualification](vala-migration.md).

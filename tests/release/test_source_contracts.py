@@ -221,6 +221,25 @@ class SourceContractsTest(unittest.TestCase):
         self.assertNotIn('"mandarin:"', han)
         self.assertIn("characters_unihan_match_fields", han)
 
+    def test_fourth_vala_migration_wiring(self) -> None:
+        """Keep legacy notation and round-trip policy on the Vala side."""
+        sources = (ROOT / "src/meson.build").read_text()
+        tests = (ROOT / "tests/meson.build").read_text()
+        workflow = (ROOT / "src/encodings/legacy-workflow.vala").read_text()
+        native = (ROOT / "native/unicode/legacy-encoding.c").read_text()
+        binding = (ROOT / "vapi/characters-legacy.vapi").read_text()
+        self.assertIn("encodings/legacy-workflow.vala", sources)
+        self.assertIn("legacy_sources", tests)
+        self.assertIn("unit/test-legacy-adapter.c", tests)
+        self.assertIn("decode_raw (encoding, encoded)", workflow)
+        self.assertIn("points[index] != decoded[index]", workflow)
+        self.assertIn("table.keys (point)", workflow)
+        for obsolete in ("parse_hex(", "format_bytes(", "characters_legacy_decode_sequence(",
+                         "characters_legacy_encode_sequence("):
+            self.assertNotIn(obsolete, native)
+        self.assertIn("characters_legacy_decode_raw", binding)
+        self.assertIn("characters_legacy_encode_raw", binding)
+
     def test_release_gate(self) -> None:
         """Prove missing and skipped test records cannot pass the release log gate."""
         names = sorted(expected_tests())

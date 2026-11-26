@@ -27,6 +27,7 @@ search_sources = files(
   'search/search-controller.vala',
   'search/search-request.vala',
 )
+legacy_sources = files('encodings/legacy-workflow.vala')
 font_sources = files(
   'fonts/font-inventory.vala',
   'fonts/font-source-loader.vala',
@@ -40,7 +41,7 @@ integration_sources = files(
   'integration/desktop-search.vala',
   'integration/search-provider.vala',
 )
-application_sources = files('app/application.vala', 'library/library-query.vala') + integration_sources + font_sources + library_sources + search_sources + unicode_sources + files(
+application_sources = files('app/application.vala', 'library/library-query.vala') + integration_sources + font_sources + legacy_sources + library_sources + search_sources + unicode_sources + files(
   'views/character-inspector.vala',
   'views/character-tile.vala',
   'views/compact-picker.vala',

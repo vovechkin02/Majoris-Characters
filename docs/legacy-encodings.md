@@ -52,6 +52,16 @@ U+0041 U+0000 U+1F600. The NUL is preserved in numeric representations;
 GTK's text clipboard cannot carry it, so the existing inspector disables
 original-text actions for that sequence.
 
+## Implementation boundary
+
+`src/encodings/legacy-workflow.vala` owns hexadecimal parsing, byte and
+alias formatting, scalar membership checks, and exact round-trip validation.
+The private native adapter accepts and returns explicit-length arrays of bytes
+or scalars, and returns ordered packed mapping keys for independent encodings.
+Contextual repertoire enumeration still checks each scalar in C to avoid
+allocating per-candidate arrays or crossing the language boundary for each
+mapping. The existing table ownership and worker lifecycle are unchanged.
+
 ## Bounds and semantics
 
 - 1–128 bytes per conversion, written as contiguous hex pairs or with one ASCII
@@ -78,5 +88,6 @@ platform's HKSCS mappings). ISO-8859-16 is not present in the tested ICU build;
 not every historical encoding is exposed. These choices do not imply that
 non-Unicode font charmaps are equivalent to legacy text encodings.
 
-See [Priority 5 qualification](priority-5-qualification.md) for executed checks
+See [Vala migration pass 4](vala-migration-pass-4.md) for current evidence and
+[Priority 5 qualification](priority-5-qualification.md) for executed checks
 and remaining target-system validation.

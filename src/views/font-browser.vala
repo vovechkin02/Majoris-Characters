@@ -521,7 +521,7 @@ namespace Characters {
             var query = font_query.text;
             var byte_query = query.strip ();
             if (mode == FontBrowserMode.ENCODINGS && byte_query.down ().has_prefix ("byte:")) {
-                var point = mapping != null ? mapping.decode (byte_query.substring (5).strip ()) :
+                var point = mapping != null ? Legacy.decode (mapping, byte_query.substring (5).strip ()) :
                     uint32.MAX;
                 if (point == uint32.MAX) {
                     var decoded = Legacy.decode_sequence (encoding_filter.selected,
@@ -695,7 +695,7 @@ namespace Characters {
                     }
                 }
             } else if (mapping != null) {
-                var bytes = mapping.bytes (point);
+                var bytes = Legacy.bytes (mapping, point);
                 if (bytes != null) {
                     detail += "\n" + bytes;
                     caption = bytes;
@@ -794,7 +794,7 @@ namespace Characters {
             font_add.sensitive = font_copy.sensitive && composer != null;
             bytes_copy.sensitive = false;
             if (mode == FontBrowserMode.ENCODINGS && mapping != null) {
-                var bytes = mapping.bytes (point);
+                var bytes = Legacy.bytes (mapping, point);
                 var format = Legacy.is_contextual (encoding_filter.selected) ?
                     _("Canonical bytes: %s") : _("Encoded bytes: %s");
                 font_detail.label = format.printf (bytes ?? _("Unavailable"));
@@ -893,7 +893,7 @@ namespace Characters {
             if (query.down ().has_prefix ("byte:")) {
                 initial = query.substring (5).strip ();
             } else if (mapping != null) {
-                var bytes = mapping.bytes (selected_point ());
+                var bytes = Legacy.bytes (mapping, selected_point ());
                 if (bytes != null) {
                     initial = bytes.split (",", 2)[0];
                 }
@@ -905,7 +905,7 @@ namespace Characters {
         /** Copies exact byte notation, not a lossy conversion into the system clipboard format. */
         private void copy_bytes () {
             if (mapping != null && mode == FontBrowserMode.ENCODINGS) {
-                var bytes = mapping.bytes (selected_point ());
+                var bytes = Legacy.bytes (mapping, selected_point ());
                 if (bytes != null) {
                     copy_text (bytes);
                 }

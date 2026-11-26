@@ -1,7 +1,6 @@
 #include "legacy-encoding.h"
 
 #include <stdbool.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -168,47 +167,6 @@ static UConverter *open_converter(size_t index) {
     return converter;
 }
 
-/** Convert ASCII hexadecimal digits without locale-dependent parsing. */
-static int hex_digit(char digit) {
-    if (digit >= '0' && digit <= '9') {
-        return digit - '0';
-    }
-    if (digit >= 'A' && digit <= 'F') {
-        return digit - 'A' + 10;
-    }
-    if (digit >= 'a' && digit <= 'f') {
-        return digit - 'a' + 10;
-    }
-    return -1;
-}
-
-/** Accept contiguous pairs or one ASCII space between pairs, within the byte limit. */
-static size_t parse_hex(const char *hex, char bytes[MAX_BYTES]) {
-    if (!hex || strnlen(hex, MAX_BYTES * 3) == MAX_BYTES * 3) {
-        return 0;
-    }
-    size_t count = 0;
-    while (*hex) {
-        if (count == MAX_BYTES || !hex[1]) {
-            return 0;
-        }
-        int high = hex_digit(hex[0]);
-        int low = hex_digit(hex[1]);
-        if (high < 0 || low < 0) {
-            return 0;
-        }
-        bytes[count++] = (char)(high * 16 + low);
-        hex += 2;
-        if (*hex == ' ') {
-            hex++;
-            if (!*hex) {
-                return 0;
-            }
-        }
-    }
-    return count;
-}
-
 /** Decode a complete independent input from initial state, preserving exact scalar order. */
 static size_t decode_points(UConverter *converter, const char *bytes, size_t length,
                             uint32_t points[MAX_POINTS]) {
@@ -232,7 +190,7 @@ static size_t decode_points(UConverter *converter, const char *bytes, size_t len
     return used;
 }
 
-/** Encode and strictly decode again; reject lossy mappings and incomplete sequences. */
+/** Encode explicit scalars with strict callbacks, without imposing round-trip policy. */
 static size_t encode_points(UConverter *converter, const uint32_t *points, size_t length,
                             char bytes[MAX_BYTES]) {
     if (!points || !length || length > MAX_POINTS) {
@@ -251,25 +209,15 @@ static size_t encode_points(UConverter *converter, const uint32_t *points, size_
     if (U_FAILURE(error) || count <= 0) {
         return 0;
     }
-    uint32_t decoded[MAX_POINTS];
-    if (decode_points(converter, bytes, (size_t)count, decoded) != length ||
-        memcmp(decoded, points, length * sizeof(*points)) != 0) {
-        return 0;
-    }
     return (size_t)count;
 }
 
-/** Format an exact byte vector as uppercase, space-separated hexadecimal pairs. */
-static char *format_bytes(const char *bytes, size_t length) {
-    char *text = malloc(length * 3 + 1);
-    if (!text) {
-        return NULL;
-    }
-    for (size_t index = 0; index < length; index++) {
-        snprintf(text + index * 3, 4, "%02X%s", (unsigned)(unsigned char)bytes[index],
-                 index + 1 == length ? "" : " ");
-    }
-    return text;
+/** Verify standalone contextual repertoire membership without allocating intermediate arrays. */
+static bool round_trip_scalar(UConverter *converter, uint32_t point) {
+    char bytes[MAX_BYTES];
+    size_t count = encode_points(converter, &point, 1, bytes);
+    uint32_t decoded[MAX_POINTS];
+    return count && decode_points(converter, bytes, count, decoded) == 1 && decoded[0] == point;
 }
 
 /** Keep alternatives contiguous, ordered by encoded length then unsigned byte value. */
@@ -402,8 +350,7 @@ static bool enumerate_contextual(CharactersLegacy *table, UConverter *converter)
         }
         for (UChar32 value = start; value <= end; value++) {
             uint32_t point = (uint32_t)value;
-            char bytes[MAX_BYTES];
-            if (encode_points(converter, &point, 1, bytes) && !append_mapping(table, point, 0)) {
+            if (round_trip_scalar(converter, point) && !append_mapping(table, point, 0)) {
                 success = false;
                 break;
             }
@@ -475,14 +422,13 @@ uint32_t *characters_legacy_points(const CharactersLegacy *table, size_t *length
     return points;
 }
 
-uint32_t *characters_legacy_decode_sequence(size_t encoding, const char *hex, size_t *length) {
+uint32_t *characters_legacy_decode_raw(size_t encoding, const uint8_t *bytes, size_t count,
+                                       size_t *length) {
     if (!length) {
         return NULL;
     }
     *length = 0;
-    char bytes[MAX_BYTES];
-    size_t count = parse_hex(hex, bytes);
-    if (!count) {
+    if (!bytes || !count || count > MAX_BYTES) {
         return NULL;
     }
     UConverter *converter = open_converter(encoding);
@@ -490,7 +436,7 @@ uint32_t *characters_legacy_decode_sequence(size_t encoding, const char *hex, si
         return NULL;
     }
     uint32_t decoded[MAX_POINTS];
-    size_t used = decode_points(converter, bytes, count, decoded);
+    size_t used = decode_points(converter, (const char *)bytes, count, decoded);
     ucnv_close(converter);
     if (!used) {
         return NULL;
@@ -503,34 +449,49 @@ uint32_t *characters_legacy_decode_sequence(size_t encoding, const char *hex, si
     return points;
 }
 
-char *characters_legacy_encode_sequence(size_t encoding, const uint32_t *points, size_t length) {
+uint8_t *characters_legacy_encode_raw(size_t encoding, const uint32_t *points, size_t length,
+                                     size_t *count) {
+    if (!count) {
+        return NULL;
+    }
+    *count = 0;
     UConverter *converter = open_converter(encoding);
     if (!converter) {
         return NULL;
     }
     char bytes[MAX_BYTES];
-    size_t count = encode_points(converter, points, length, bytes);
+    size_t used = encode_points(converter, points, length, bytes);
     ucnv_close(converter);
-    return count ? format_bytes(bytes, count) : NULL;
+    if (!used) {
+        return NULL;
+    }
+    uint8_t *output = malloc(used);
+    if (output) {
+        memcpy(output, bytes, used);
+        *count = used;
+    }
+    return output;
 }
 
-uint32_t characters_legacy_decode(const CharactersLegacy *table, const char *hex) {
-    if (!table) {
-        return UINT32_MAX;
-    }
-    size_t length = 0;
-    uint32_t *points = characters_legacy_decode_sequence(table->encoding, hex, &length);
-    uint32_t point = points && length == 1 ? points[0] : UINT32_MAX;
-    free(points);
-    if (point == UINT32_MAX) {
-        return point;
+size_t characters_legacy_encoding_index(const CharactersLegacy *table) {
+    return table ? table->encoding : SIZE_MAX;
+}
+
+bool characters_legacy_contains(const CharactersLegacy *table, uint32_t point) {
+    if (!table || !characters_unicode_is_scalar(point)) {
+        return false;
     }
     size_t index = lower_bound(table, point);
-    return index < table->count && table->entries[index].point == point ? point : UINT32_MAX;
+    return index < table->count && table->entries[index].point == point;
 }
 
-char *characters_legacy_bytes(const CharactersLegacy *table, uint32_t point) {
-    if (!table || !characters_unicode_is_scalar(point)) {
+uint64_t *characters_legacy_keys(const CharactersLegacy *table, uint32_t point, size_t *length) {
+    if (!length) {
+        return NULL;
+    }
+    *length = 0;
+    if (!table || !characters_unicode_is_scalar(point) ||
+        characters_legacy_is_contextual(table->encoding)) {
         return NULL;
     }
     size_t first = lower_bound(table, point);
@@ -538,26 +499,12 @@ char *characters_legacy_bytes(const CharactersLegacy *table, uint32_t point) {
     if (first == end) {
         return NULL;
     }
-    if (characters_legacy_is_contextual(table->encoding)) {
-        return characters_legacy_encode_sequence(table->encoding, &point, 1);
-    }
-    size_t capacity = (end - first) * 14 + 1;
-    char *text = malloc(capacity);
-    if (!text) {
-        return NULL;
-    }
-    size_t offset = 0;
-    for (size_t index = first; index < end; index++) {
-        uint64_t key = table->entries[index].key;
-        unsigned length = (unsigned)(key >> 32);
-        if (index != first) {
-            offset += (size_t)snprintf(text + offset, capacity - offset, ", ");
+    uint64_t *keys = malloc((end - first) * sizeof(*keys));
+    if (keys) {
+        for (size_t index = first; index < end; index++) {
+            keys[index - first] = table->entries[index].key;
         }
-        for (unsigned byte = 0; byte < length; byte++) {
-            unsigned value = (unsigned)(key >> (8 * (length - byte - 1))) & 255;
-            offset += (size_t)snprintf(text + offset, capacity - offset, "%02X%s", value,
-                                      byte + 1 == length ? "" : " ");
-        }
+        *length = end - first;
     }
-    return text;
+    return keys;
 }

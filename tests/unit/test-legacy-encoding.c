@@ -1,5 +1,5 @@
 #include "search-contract-tests.h"
-#include "legacy-encoding.h"
+#include "legacy-workflow-contracts.h"
 #include "unicode-engine.h"
 
 #include <assert.h>
@@ -78,6 +78,13 @@ static void test_mappings(void) {
     expect_mapping("GB18030-2022", "90 30 81 30", 0x10000);
     expect_mapping("EUC-JP", "8F A2 AF", 0x02D8);
     expect_mapping("EUC-TW", "8E A2 A1 A1", 0x4E42);
+    CharactersLegacy *aliases = load("Shift JIS (Windows-932)");
+    assert(aliases);
+    char *bytes = characters_legacy_bytes(aliases, 0x2160);
+    assert(bytes && strcmp(bytes, "87 54, FA 4A") == 0);
+    free(bytes);
+    assert(characters_legacy_decode(aliases, "fa4a") == 0x2160);
+    characters_legacy_free(aliases);
 }
 
 /** Rejects malformed bytes, unmapped inputs, lead bytes and multiple decoded scalars. */
@@ -104,9 +111,9 @@ static void test_invalid(void) {
 /** Validates a byte stream including any initial-state shifts against exact scalar output. */
 static void expect_sequence(size_t encoding, const char *hex, const uint32_t *expected,
                             size_t count) {
-    size_t length = 0;
+    int length = 0;
     uint32_t *points = characters_legacy_decode_sequence(encoding, hex, &length);
-    assert(points && length == count && memcmp(points, expected, count * sizeof(*points)) == 0);
+    assert(points && (size_t)length == count && memcmp(points, expected, count * sizeof(*points)) == 0);
     free(points);
 }
 
@@ -142,7 +149,7 @@ static void test_contextual(void) {
     expect_sequence(japanese, encoded, hiragana, 1);
     free(encoded);
     characters_legacy_free(table);
-    size_t length = 99;
+    int length = 99;
     assert(!characters_legacy_decode_sequence(japanese, "1B 24", &length) && !length);
     assert(!characters_legacy_decode_sequence(japanese, "1B 24 42 24", &length) && !length);
     assert(!characters_legacy_decode_sequence(japanese, "1B 24 42", &length) && !length);
@@ -160,6 +167,8 @@ static void test_sequence_limits(void) {
     assert(encoded && strcmp(encoded, "41 00 94 39 FC 36") == 0);
     free(encoded);
     assert(!characters_legacy_encode_sequence(ascii, mixed, 3));
+    uint32_t lossy[] = { 'A', 0x200D };
+    assert(!characters_legacy_encode_sequence(ascii, lossy, 2));
     uint32_t invalid[] = { 0xD800, 0x110000 };
     assert(!characters_legacy_encode_sequence(gb, invalid, 2));
     uint32_t points[33];
@@ -171,7 +180,7 @@ static void test_sequence_limits(void) {
     char hex[259];
     memset(hex, '4', sizeof(hex) - 1);
     hex[sizeof(hex) - 1] = '\0';
-    size_t length = 10;
+    int length = 10;
     assert(!characters_legacy_decode_sequence(ascii, hex, &length) && !length);
     hex[66] = '\0';
     assert(!characters_legacy_decode_sequence(ascii, hex, &length) && !length);
@@ -184,7 +193,6 @@ static void test_sequence_limits(void) {
     assert(!characters_legacy_decode_sequence(ascii, "41 ", &length) && !length);
     assert(!characters_legacy_decode_sequence(SIZE_MAX, "41", &length) && !length);
     assert(!characters_legacy_encode_sequence(SIZE_MAX, points, 1));
-    assert(!characters_legacy_decode_sequence(ascii, "41", NULL));
     uint32_t supplementary[32];
     for (size_t index = 0; index < 32; index++) {
         supplementary[index] = 0x1F600;

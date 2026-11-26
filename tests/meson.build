@@ -133,9 +133,19 @@ inspector_binding_test = executable(
 )
 test('Inspector Vala bindings', inspector_binding_test, suite: 'unit', timeout: 30)
 
+legacy_adapter_test = executable(
+  'test-legacy-adapter',
+  'unit/test-legacy-adapter.c',
+  dependencies: unicode_dep,
+  c_args: ['-UNDEBUG'],
+)
+test('Native legacy adapter contracts', legacy_adapter_test, suite: 'unit', timeout: 30)
+
 legacy_encoding_test = executable(
   'test-legacy-encoding',
   'unit/test-legacy-encoding.c',
+  legacy_sources,
+  legacy_vapi,
   search_contract_driver,
   search_domain_sources,
   search_domain_vapis,
@@ -157,6 +167,7 @@ test('Installed font catalog contracts', font_catalog_test, suite: 'unit', timeo
 font_sources_test = executable(
   'test-font-sources',
   'unit/test-font-sources.vala',
+  legacy_sources,
   font_sources,
   search_domain_sources,
   search_domain_vapis,
