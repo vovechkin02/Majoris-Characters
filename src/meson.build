@@ -4,6 +4,16 @@ app_config = configure_file(
   configuration: configuration,
 )
 
+unicode_sources = files(
+  'emoji/variation-family.vala',
+  'emoji/variants.vala',
+  'unicode/composition.vala',
+  'unicode/inspection-snapshot.vala',
+  'unicode/scalar-sequence.vala',
+  'unicode/sequence-format.vala',
+)
+unicode_domain_vapis = unicode_vapi + search_vapi + icu_vapi + emoji_vapi
+
 search_sources = files(
   'search/search-controller.vala',
   'search/search-request.vala',
@@ -21,7 +31,7 @@ integration_sources = files(
   'integration/desktop-search.vala',
   'integration/search-provider.vala',
 )
-application_sources = files('app/application.vala', 'library/library-query.vala') + integration_sources + font_sources + library_sources + search_sources + files(
+application_sources = files('app/application.vala', 'library/library-query.vala') + integration_sources + font_sources + library_sources + search_sources + unicode_sources + files(
   'views/character-inspector.vala',
   'views/character-tile.vala',
   'views/compact-picker.vala',
@@ -52,7 +62,7 @@ characters_executable = executable(
   app_config,
   unicode_vapi,
   search_vapi,
-  inspector_vapi,
+  icu_vapi,
   font_vapi,
   legacy_vapi,
   emoji_vapi,

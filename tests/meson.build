@@ -68,7 +68,7 @@ character_browser_test = executable(
   app_config,
   unicode_vapi,
   search_vapi,
-  inspector_vapi,
+  icu_vapi,
   font_vapi,
   legacy_vapi,
   emoji_vapi,
@@ -86,10 +86,20 @@ test('Character browser interaction', find_program('xvfb-run'),
   timeout: 90,
 )
 
+icu_adapter_test = executable(
+  'test-icu-adapter',
+  'unit/test-icu-adapter.c',
+  dependencies: unicode_dep,
+  c_args: ['-UNDEBUG'],
+)
+test('ICU adapter contracts', icu_adapter_test, suite: 'unit', timeout: 30)
+
 character_inspector_test = executable(
   'test-character-inspector',
-  'unit/test-character-inspector.c',
-  dependencies: unicode_dep,
+  'unit/test-character-inspector.vala',
+  unicode_sources,
+  unicode_domain_vapis,
+  dependencies: [gio_dep, unicode_dep],
   c_args: ['-UNDEBUG'],
 )
 test('Character inspector contracts', character_inspector_test, suite: 'unit', timeout: 30)
@@ -97,7 +107,8 @@ test('Character inspector contracts', character_inspector_test, suite: 'unit', t
 inspector_binding_test = executable(
   'test-inspector-bindings',
   'unit/test-inspector-bindings.vala',
-  inspector_vapi,
+  unicode_sources,
+  unicode_domain_vapis,
   dependencies: [gio_dep, unicode_dep],
   c_args: ['-UNDEBUG'],
 )
@@ -149,7 +160,8 @@ test('Emoji variations and localized annotation search', emoji_catalog_test,
 emoji_binding_test = executable(
   'test-emoji-bindings',
   'unit/test-emoji-bindings.vala',
-  emoji_vapi,
+  unicode_sources,
+  unicode_domain_vapis,
   dependencies: [gio_dep, unicode_dep],
   c_args: ['-UNDEBUG'],
 )
@@ -157,8 +169,10 @@ test('Emoji Vala bindings', emoji_binding_test, suite: 'unit', timeout: 30)
 
 composition_test = executable(
   'test-composition',
-  'unit/test-composition.c',
-  dependencies: unicode_dep,
+  'unit/test-composition.vala',
+  unicode_sources,
+  unicode_domain_vapis,
+  dependencies: [gio_dep, unicode_dep],
   c_args: ['-UNDEBUG'],
 )
 test('Composition graphemes, representations and normalization', composition_test,

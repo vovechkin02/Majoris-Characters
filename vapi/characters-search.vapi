@@ -110,4 +110,8 @@ namespace Characters.Search {
     /** Complete code point notation for an identity, including composite sequences. */
     [CCode (cname = "characters_search_code")]
     public static string? code (uint32 id);
+    /** Decode explicit notation into a caller-owned 32-element scalar buffer. */
+    [CCode (cname = "characters_search_decode_code")]
+    public static size_t decode_code (string code,
+        [CCode (array_length = false)] uint32[] points);
 }

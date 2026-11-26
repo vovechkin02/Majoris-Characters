@@ -45,7 +45,7 @@ namespace Characters {
         [GtkChild]
         private unowned Gtk.Button emoji_favorite;
 
-        /** Immutable native collection owned by the dialog for its lifetime. */
+        /** Immutable variation collection owned by the dialog for its lifetime. */
         private Emoji.Variants? variants;
 
         /** Builds a searchable selection list; preserves the incoming identity if available. */
@@ -88,7 +88,7 @@ namespace Characters {
             update_preview ();
         }
 
-        /** Returns an owned exact sequence independently of the native collection's lifetime. */
+        /** Returns an owned exact sequence independently of the variation collection's lifetime. */
         private string? selected_text () {
             if (variants == null || variant_filter.selected == Gtk.INVALID_LIST_POSITION) {
                 return null;

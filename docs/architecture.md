@@ -54,8 +54,9 @@ contracts.
 
 ## Stage 4 boundaries
 
-`character-inspector.c` owns immutable scalar snapshots, explicit numeric
-representations, safe previews, and length-aware ICU normalization. It reuses
+`src/unicode/inspection-snapshot.vala` owns immutable scalar snapshots and safe
+previews. `sequence-format.vala` provides explicit numeric representations; the
+small native `icu-adapter.c` preserves length-aware ICU normalization. It reuses
 the search parser for explicit code points and the Unicode engine for names,
 relationships, and catalog data. The snapshot is independent of the search
 request and remains valid after the grid model changes or the worker is freed.
@@ -64,9 +65,9 @@ A NUL is stored as a scalar, not a C string terminator. All input snapshots have
 without truncation. ICU normalization for unassigned data is withheld.
 
 `CharacterInspector` is an XML-backed adaptive `Adw.Dialog`, owned by the
-window's dialog presentation lifecycle. It owns one native snapshot, a bounded
+window's dialog presentation lifecycle. It owns one Vala snapshot, a bounded
 history of 32 previous numeric identities, and a plain-text report. All access
-and GTK updates occur on the main context; no new worker is created. The native
+and GTK updates occur on the main context; no new worker is created. The domain
 operations inspect at most 32 scalars, fixed catalog tables, and bounded related
 classes. A component selector limits displayed property rows to one scalar,
 while reports contain all components. Generated row actions carry exact values
@@ -170,10 +171,12 @@ See [font inspection](font-inspection.md) for operational boundaries and
 
 ## Stage 6: emoji variation and annotation catalog
 
-`emoji-catalog.c` owns variant grouping and immutable annotation tables. The
+`src/emoji/variation-family.vala` owns structural grouping and `variants.vala`
+constructs exact alternatives. `emoji-catalog.c` owns immutable annotation and
+sequence lookup tables. The
 variant key exists only for comparison; all copyable identities are exact
 catalog entries, except explicitly supported scalar presentation choices.
-`CharactersEmojiVariants` owns its strings and exposes borrowed immutable values
+`Characters.Emoji.Variants` owns its strings and exposes borrowed immutable values
 until release. The dialog copies a value before handing it to another inspector
 or clipboard. Catalog-sized bounded work is performed only when opening a picker;
 no global mutable variant cache or new framework is introduced. This is a direct
@@ -205,9 +208,9 @@ preview text. Recycled CharacterTile instances clear their drag text on unbind;
 GDK owns a copied string value after drag preparation. Drag sources offer COPY
 only, while the text view retains native editing behavior.
 
-`composition.c` is a private bounded ICU bridge for extended grapheme counting
-and conversion. It reuses the inspector's shared scalar formatter and Unicode
-normalizer. Technical operations run synchronously on explicit input of at
+`src/unicode/composition.vala` owns bounded input validation and conversion
+policy. It reuses the shared scalar formatter and Unicode normalizer;
+`icu-adapter.c` supplies ICU extended grapheme counting. Technical operations run synchronously on explicit input of at
 most 16,384 scalars (and normalization output is checked against the same
 bound). The count update checks GTK's scalar count before extracting text.
 The existing 32-scalar inspector contract is unchanged. ICU's grapheme result
@@ -318,7 +321,7 @@ strategy hierarchies. Formal Han properties and fallbacks have separate contract
 
 `generate_emoji_sequences.py` produces a sorted immutable table from the pinned
 presentation bases and catalog selector omissions. `emoji-catalog.c` owns
-binary search, canonical association and structural family selection; the
+binary search and canonical association; Vala owns structural family selection. The
 Unicode engine uses the same lookup for related characters and inspector names.
 The search engine reserves a separate private ID interval for supplementary
 identities and emits them only for exact queries. Existing catalog and named
@@ -396,3 +399,16 @@ existing GTK keyboard navigation, selection state and toast infrastructure are
 retained. No custom Observer, Adapter or event bus is needed for these ordinary
 presentation responsibilities. The full GTK integration suite and manual
 screen-reader checks remain required to validate the runtime behavior.
+
+## Vala migration boundary
+
+The Vala inspection and composition services share scalar validation and a single
+formatter. Vala owns the exact snapshot and variation collection lifetimes.
+Native `Icu` bindings adapt explicit-length scalar arrays to ICU UTF-16 operations;
+`Scalar` and the catalog bindings borrow immutable metadata. Returned buffers
+are owned by Vala and have explicit lengths, so NUL remains a scalar. This is a
+focused library Adapter and direct composition of domain services, not a new
+pattern hierarchy. The native search worker, property tables, ICU normalization,
+FreeType rasterizer, Fontconfig inventory and legacy converters remain in C.
+The remaining migration requires a compiled Vala baseline and performance
+comparison. See [migration qualification](vala-migration.md).

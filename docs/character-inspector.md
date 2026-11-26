@@ -1,6 +1,6 @@
 # Character inspector
 
-Stage 4 adds a native inspection snapshot and an XML-backed, adaptive libadwaita
+Stage 4 adds a inspection snapshot and an XML-backed, adaptive libadwaita
 inspector. It does not change catalog identities, search filters, the geometry
 schema, or the existing package and desktop identity.
 
@@ -73,15 +73,14 @@ See [Unicode engine](unicode-engine.md) for the supplement provenance and limits
 
 ## Internal API and ownership
 
-`native/unicode/character-inspector.h` defines an internal opaque snapshot and
-format enumeration; `vapi/characters-inspector.vapi` binds both. The snapshot
-owns an exact bounded scalar array, contains no references to the browser,
-and transfers full ownership to the caller. Returned strings and related
-vectors are owned; native callers free them with `free`, and Vala releases them
-using GLib allocation-compatible functions. The shared explicit code parser
-preserves the Stage 3 query syntax without requiring membership in a catalog.
-ICU normalization uses length-aware UTF-16, including embedded NUL, and formats
-the entire normalized result without imposing the input length limit on output.
+`src/unicode/inspection-snapshot.vala` defines the internal snapshot and
+`sequence-format.vala` defines the format enumeration and shared formatter. The
+snapshot owns an exact bounded scalar array, contains no references to the
+browser, and uses normal Vala reference-counted ownership. Returned strings and
+related vectors are owned. The shared explicit code parser preserves the Stage 3
+query syntax without requiring catalog membership. The native ICU adapter
+returns explicitly sized scalar arrays; normalization preserves embedded NUL
+and formats the entire result without imposing the input length limit on output.
 
 The dialog remains on the GTK main context and uses standard action groups,
 GDK clipboard and toast feedback. No network, service integration, external

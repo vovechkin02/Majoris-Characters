@@ -50,3 +50,9 @@ application and GJS are not runtime dependencies of the main application. The op
   German, and Spanish catalogs implemented. Translation and assistive-technology
   review and target GTK qualification remain outstanding. Next priorities:
   external Desktop Shell/ISO integration, then full release qualification.
+
+- Vala migration pass 1 (1.0.9): inspection, scalar formatting, composition
+  validation, and emoji variation-family policy moved to Vala. Remaining native
+  application policy migration is deferred until full compilation and parity
+  benchmarks are available. Generated and vendored data are classified for
+  GitHub Linguist without altering their contents.

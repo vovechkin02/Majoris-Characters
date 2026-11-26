@@ -6,79 +6,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "character-inspector.h"
 #include "character-search.h"
 #include "unicode-engine.h"
-
-/** Check for an exact string in a variant collection, never a preview substitution. */
-static bool has_variant(const CharactersEmojiVariants *variants, const char *expected) {
-    for (size_t index = 0; index < characters_emoji_variants_count(variants); index++) {
-        if (strcmp(characters_emoji_variants_text(variants, index), expected) == 0) {
-            return true;
-        }
-    }
-    return false;
-}
-
-/** Require an exact alternative, and ensure all returned strings are unique and labeled. */
-static void expect_family(const char *input, const char *expected, size_t minimum) {
-    CharactersEmojiVariants *variants = characters_emoji_variants_new(input);
-    assert(variants);
-    size_t count = characters_emoji_variants_count(variants);
-    assert(count >= minimum);
-    assert(has_variant(variants, input));
-    assert(has_variant(variants, expected));
-    for (size_t index = 0; index < count; index++) {
-        const char *text = characters_emoji_variants_text(variants, index);
-        assert(text && *text && characters_emoji_is_candidate(text));
-        assert(characters_emoji_variants_label(variants, index));
-        for (size_t previous = 0; previous < index; previous++) {
-            assert(strcmp(text, characters_emoji_variants_text(variants, previous)) != 0);
-        }
-    }
-    assert(!characters_emoji_variants_text(variants, count));
-    assert(!characters_emoji_variants_label(variants, count));
-    characters_emoji_variants_free(variants);
-}
-
-/** Check all five skin tones and mixed-tone handshake alternatives. */
-static void test_modifiers(void) {
-    expect_family("👍", "👍🏿", 6);
-    expect_family("👍🏽", "👍🏻", 6);
-    expect_family("🤝", "🫱🏻‍🫲🏿", 26);
-    expect_family("🫱🏻‍🫲🏿", "🤝🏾", 26);
-}
-
-/** Check catalog-supported professions, gender, hair and direction variants. */
-static void test_people(void) {
-    expect_family("👩‍💻", "🧑🏽‍💻", 18);
-    expect_family("👨", "👩‍🦰", 12);
-    expect_family("🚶", "🚶🏽‍♀️‍➡️", 18);
-    expect_family("👪", "🧑‍🧑‍🧒", 20);
-    expect_family("💑", "👩🏻‍❤️‍👩🏿", 26);
-    expect_family("💏", "👨🏿‍❤️‍💋‍👨🏻", 26);
-    expect_family("👫", "🧑🏻‍🤝‍🧑🏿", 26);
-}
-
-/** Check flags, keycaps and standardized text/emoji presentation pairs. */
-static void test_presentation(void) {
-    expect_family("🇦🇺", "🇯🇵", 200);
-    expect_family("1️⃣", "#️⃣", 12);
-    expect_family("©️", "©︎", 3);
-    expect_family("©︎", "©️", 3);
-    expect_family("©", "©️", 3);
-    CharactersInspector *snapshot = characters_inspector_from_text("©︎");
-    assert(snapshot);
-    char *display = characters_inspector_display(snapshot);
-    assert(display && strcmp(display, "©︎") == 0);
-    free(display);
-    characters_inspector_free(snapshot);
-    assert(!characters_emoji_is_candidate("A"));
-    assert(!characters_emoji_variants_new("A️"));
-    assert(!characters_emoji_variants_new("👍‍😀"));
-    assert(!characters_emoji_variants_new("\xFF"));
-    assert(!characters_emoji_variants_new(NULL));
-}
 
 /** Check every generated identity and both standardized selectors for all 371 bases. */
 static void test_all_presentation_pairs(void) {
@@ -96,18 +25,6 @@ static void test_all_presentation_pairs(void) {
         size_t length = strlen(text);
         if (length >= 3 && strcmp(text + length - 3, "\xEF\xB8\x8E") == 0) {
             base_count++;
-            char *base = strndup(text, length - 3);
-            char *emoji = strdup(text);
-            assert(base && emoji);
-            emoji[length - 1] = (char)0x8F;
-            CharactersEmojiVariants *variants = characters_emoji_variants_new(text);
-            assert(variants && strcmp(characters_emoji_variants_text(variants, 0), text) == 0);
-            assert(has_variant(variants, base));
-            assert(has_variant(variants, emoji));
-            assert(has_variant(variants, text));
-            characters_emoji_variants_free(variants);
-            free(base);
-            free(emoji);
         }
     }
     assert(base_count == 371);
@@ -120,20 +37,6 @@ static void test_all_presentation_pairs(void) {
 
 /** Test exact minimally qualified forms without silently substituting selectors. */
 static void test_qualification(void) {
-    expect_family("👁‍🗨", "👁️‍🗨️", 4);
-    expect_family("🚶‍♀‍➡", "🚶‍♀️‍➡️", 18);
-    expect_family("1⃣", "1️⃣", 12);
-    expect_family("⌚︎", "⌚️", 3);
-    expect_family("#︎", "#️", 3);
-    CharactersEmojiVariants *variants = characters_emoji_variants_new("🚶‍♀‍➡");
-    assert(variants && strcmp(characters_emoji_variants_text(variants, 0), "🚶‍♀‍➡") == 0);
-    characters_emoji_variants_free(variants);
-    CharactersInspector *snapshot = characters_inspector_from_text("⌚︎");
-    assert(snapshot);
-    char *name = characters_inspector_name(snapshot);
-    assert(name && strstr(name, "WATCH") && strstr(name, "Text presentation"));
-    free(name);
-    characters_inspector_free(snapshot);
     uint32_t watch[] = { 0x231A };
     char **related = characters_unicode_related(watch, 1);
     assert(related);
@@ -219,13 +122,10 @@ static void test_exact_alias_search(void) {
 
 /** Run the focused Stage 6 contracts without a graphical session. */
 int main(void) {
-    test_modifiers();
-    test_people();
-    test_presentation();
     test_annotations();
     test_all_presentation_pairs();
     test_qualification();
     test_exact_alias_search();
-    puts("7 emoji variation and annotation contract groups passed");
+    puts("4 native emoji data and annotation contract groups passed");
     return 0;
 }

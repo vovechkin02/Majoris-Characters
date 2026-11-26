@@ -43,7 +43,8 @@ available in the existing inspector. Copy and Add are disabled for identities
 without representable text. The application never substitutes a preview glyph
 or silently strips combining marks or presentation selectors.
 
-The native contracts are exercised by `test-composition`; the real GTK browser
+The Vala contracts are exercised by `test-composition`, with native ICU boundary
+checks in `test-icu-adapter`; the real GTK browser
 integration test additionally covers append, exact clipboard data, grouped
 undo/redo, normalization, format copying, and inspector navigation. Manual
 Wayland and X11 checks are still required for actual drag-and-drop, clipboard

@@ -6,9 +6,9 @@ Unicode, international browsing, emoji data, and exact font inspection improveme
 
 | Project metadata | Value |
 | --- | --- |
-| Version | 1.0.8 |
+| Version | 1.0.9 |
 | Platform target | Majoris OS / Debian 13 (Trixie) |
-| Development status | Priority 8 — qualification candidate (not a verified stable release) |
+| Development status | Vala migration pass 1 — qualification candidate (not a verified stable release) |
 | Application ID | `com.majoris.characters` |
 | Debian package | `majoris-characters` |
 | License | GPL-3.0-or-later |
@@ -172,7 +172,7 @@ For Debian binary packages (run from the repository root):
 
 ```sh
 dpkg-buildpackage -us -uc -b
-sudo apt install ../majoris-characters_1.0.8-1_$(dpkg --print-architecture).deb
+sudo apt install ../majoris-characters_1.0.9-1_$(dpkg --print-architecture).deb
 ```
 
 The source package uses `3.0 (quilt)` and requires the corresponding upstream
@@ -260,8 +260,10 @@ SearchProvider2 interface. No public library ABI or plugin API is provided.
 
 ## Architecture and source layout
 
-- `native/unicode/`: private C engine, search, inspector and composition operations, vendored catalog
-  and generated supplement.
+- `native/unicode/`: private C catalog and property lookups, search, ICU operations, and generated
+  and vendored databases.
+- `src/unicode/`: Vala scalar inspection, representation formatting, and composition policy.
+- `src/emoji/`: Vala exact variation collections and structural family keys.
 - `native/fonts/`: Fontconfig inventory, FreeType exact glyphs and axes, and Pango fallback.
 - `src/fonts/`: asynchronous font and encoding source loading.
 - `vapi/`: internal Vala bindings.
@@ -313,7 +315,8 @@ meson test -C build --print-errorlogs
 meson test -C build --suite integration --print-errorlogs
 ```
 
-The default suite checks native Unicode, search, inspector, legacy encoding and font contracts, Vala bindings and
+The default suite checks native Unicode, search, ICU adapter, legacy encoding and font contracts, Vala inspector,
+composition and emoji variation contracts, bindings and
 request supersession, declaration documentation, CLI version/help/error handling,
 XML window startup, repeat activation, actions, clean close, settings persistence,
 and actual GTK browser paging, search, filtering, selection, inspector navigation,
@@ -321,16 +324,16 @@ exact emoji variation copying, composer editing, normalization and clipboard cop
 saved-collection interactions, compact picker copying and desktop search in a private D-Bus
 session and Xvfb display. Headless library tests and a separate-process keyfile
 persistence test cover the new settings repository. The test runner isolates the home and configuration
-directories and treats GTK warnings as fatal. Native search and inspector contracts and the Python input response protocol are
+directories and treats GTK warnings as fatal. Native search and Vala inspector contracts and the Python input response protocol are
 tested without a graphical display. Native timings are not a substitute for GTK responsiveness or platform performance qualification.
 
 After installing the Debian package, the same runtime tests can target the real
 installed executable:
 
 ```sh
-python3 tests/integration/test_application.py /usr/bin/majoris-characters 1.0.8 cli
+python3 tests/integration/test_application.py /usr/bin/majoris-characters 1.0.9 cli
 xvfb-run -a dbus-run-session -- python3 \
-  tests/integration/test_application.py /usr/bin/majoris-characters 1.0.8 gui
+  tests/integration/test_application.py /usr/bin/majoris-characters 1.0.9 gui
 ```
 
 For a fresh, fail-closed automated build/test and optional Debian package gate:
@@ -342,7 +345,8 @@ python3 tools/qualification/qualify.py build-release --package
 See [ISO integration and desktop qualification](docs/release-integration.md) for
 installation and target runtime checks. See [Accessibility and localization](docs/accessibility-and-localization.md) for
 keyboard guidance, translation coverage, and manual accessibility qualification.
-See [Priority 8 qualification](docs/priority-8-qualification.md) for current evidence and
+See [Vala migration qualification](docs/vala-migration.md) for current evidence,
+[Priority 8 qualification](docs/priority-8-qualification.md) for earlier evidence, and
 [Stage 10 qualification](docs/stage-10-qualification.md) for historical
 verification results and remaining build/package checks. Historical Stage 1–9
 reports are preserved under `docs/`. Source inspection is

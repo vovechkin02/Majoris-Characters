@@ -1,6 +1,6 @@
 using Characters;
 
-/** Verifies compact snapshot ownership, exact formats, NUL and related-vector bindings. */
+/** Verifies Vala snapshot ownership and the native metadata and normalization boundaries. */
 int main () {
     var snapshot = Inspector.from_text ("é");
     assert (snapshot != null);

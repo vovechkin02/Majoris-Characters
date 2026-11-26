@@ -149,6 +149,28 @@ class SourceContractsTest(unittest.TestCase):
                 self.assertIn(f'msgid "{message}"', catalog)
             self.assertIn(f'"Language: {locale}\\n"', catalog)
 
+    def test_vala_migration_wiring(self) -> None:
+        """Require migrated production modules and tests without duplicate native policies."""
+        native = (ROOT / "native/unicode/meson.build").read_text()
+        sources = (ROOT / "src/meson.build").read_text()
+        tests = (ROOT / "tests/meson.build").read_text()
+        for name in ("character-inspector", "composition"):
+            self.assertNotIn(f"'{name}.c'", native)
+            self.assertFalse((ROOT / f"native/unicode/{name}.c").exists())
+            self.assertIn(f"unit/test-{name}.vala", tests)
+        for name in ("unicode/composition", "unicode/inspection-snapshot",
+                     "unicode/scalar-sequence", "unicode/sequence-format",
+                     "emoji/variation-family", "emoji/variants"):
+            self.assertIn(f"'{name}.vala'", sources)
+            self.assertTrue((ROOT / f"src/{name}.vala").is_file())
+        self.assertIn("'icu-adapter.c'", native)
+        self.assertIn("unit/test-icu-adapter.c", tests)
+        self.assertNotIn("characters_emoji_variants_new",
+                         (ROOT / "native/unicode/emoji-catalog.c").read_text())
+        attributes = (ROOT / ".gitattributes").read_text()
+        self.assertIn("native/unicode/generated/** linguist-generated=true", attributes)
+        self.assertIn("native/unicode/vendor/** linguist-vendored=true", attributes)
+
     def test_release_gate(self) -> None:
         """Prove missing and skipped test records cannot pass the release log gate."""
         names = sorted(expected_tests())

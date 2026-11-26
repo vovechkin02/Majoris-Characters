@@ -89,3 +89,10 @@ native localized coverage. Use the full CLDR `common/annotations` and
 `common/annotationsDerived` directories for broader coverage. Full locale
 inheritance/alias resolution requires resolved input; the runtime supports
 common parent tags but is not a complete LDML resolver.
+
+## Implementation boundary
+
+The Vala `Variants` collection owns exact text and labels. `variation-family.vala`
+constructs structural keys from scalar arrays; no generated data is duplicated.
+The native catalog retains immutable alias and annotation lookups used by both
+the search worker and Vala. See [migration qualification](vala-migration.md).

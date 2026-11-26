@@ -1,0 +1,3 @@
+# Preserve honest language statistics without hiding handwritten implementation.
+native/unicode/generated/** linguist-generated=true
+native/unicode/vendor/** linguist-vendored=true
