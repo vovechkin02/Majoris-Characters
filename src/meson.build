@@ -5,13 +5,16 @@ app_config = configure_file(
 )
 
 search_domain_sources = files(
+  'search/collection-catalog.vala',
   'search/han-query.vala',
   'search/language-selection.vala',
   'search/query-parser.vala',
   'search/semantic-filters.vala',
   'unicode/scalar-sequence.vala',
+  'unicode/character-presentation.vala',
+  'unicode/sequence-format.vala',
 )
-search_domain_vapis = unicode_vapi + search_vapi + emoji_vapi + language_vapi + han_vapi
+search_domain_vapis = unicode_vapi + search_vapi + emoji_vapi + language_vapi + han_vapi + icu_vapi
 
 unicode_sources = search_domain_sources + files(
   'emoji/variation-family.vala',
@@ -19,9 +22,8 @@ unicode_sources = search_domain_sources + files(
   'unicode/composition.vala',
   'unicode/inspection-snapshot.vala',
   'unicode/relationships.vala',
-  'unicode/sequence-format.vala',
 )
-unicode_domain_vapis = search_domain_vapis + icu_vapi
+unicode_domain_vapis = search_domain_vapis
 
 search_sources = files(
   'search/search-controller.vala',

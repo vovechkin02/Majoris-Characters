@@ -10,6 +10,35 @@
 #include "scalar-properties.h"
 #include "unihan.h"
 
+/** Supply stable fixture operands independently of the production Vala catalog. */
+static void configure_fixture_metadata(CharactersSearch *job)
+{
+    guint32 masks[] = { 0x3E, 0x1C0, 0xE00, 0x30F80000,
+                        0x0F000000, 0x7000, 0x18000, 0x20000 };
+    gchar *labels[] = { "Letters", "Marks", "Numbers", "Punctuation", "Symbols",
+                        "Separators", "Controls & Formatting", "Private Use" };
+    gchar *fallbacks[] = { "Noncharacter", "Unassigned Character", "Private Use Character",
+                           "Unnamed Character" };
+    assert(job && characters_search_set_metadata(job, masks, G_N_ELEMENTS(masks),
+        labels, G_N_ELEMENTS(labels), fallbacks, G_N_ELEMENTS(fallbacks)));
+}
+
+/** Allocate and prepare fixture metadata for a catalog request. */
+static CharactersSearch *fixture_job(CharactersSearchScope scope, gint filter, gint category)
+{
+    CharactersSearch *job = characters_search_allocate(scope, filter, category);
+    configure_fixture_metadata(job);
+    return job;
+}
+
+/** Allocate and prepare fixture metadata for an explicit scalar repertoire. */
+static CharactersSearch *fixture_points(const gunichar *points, gsize length, gint category)
+{
+    CharactersSearch *job = characters_search_allocate_points(points, length, category);
+    configure_fixture_metadata(job);
+    return job;
+}
+
 /** Return true if a completed vector contains an identity. */
 static gboolean contains(const CharactersSearch *job, gunichar point) {
     for (gsize index = 0; index < characters_search_count(job); index++) {
@@ -23,7 +52,7 @@ static gboolean contains(const CharactersSearch *job, gunichar point) {
 /** Prepared terms and explicit repertoires remain independent of caller-owned storage. */
 static void test_copied_input(void) {
     gunichar points[] = { 0x20AC, 0x41, 0x20AC };
-    CharactersSearch *job = characters_search_allocate_points(points, 3, -1);
+    CharactersSearch *job = fixture_points(points, 3, -1);
     assert(job);
     gchar term[] = "euro";
     gchar *terms[] = { term };
@@ -46,14 +75,14 @@ static void test_copied_input(void) {
 
 /** Preserve exact scalars, including NUL, and independently folded Han metadata terms. */
 static void test_exact_and_han(void) {
-    CharactersSearch *job = characters_search_allocate(CHARACTERS_SEARCH_ALL, -1, -1);
+    CharactersSearch *job = fixture_job(CHARACTERS_SEARCH_ALL, -1, -1);
     gunichar point[] = { 0 };
     assert(job && characters_search_prepare(job, "U+0000", point, 1, NULL, 0, NULL, 0, NULL, 0, TRUE, FALSE));
     point[0] = 0x41;
     assert(characters_search_run(job) == CHARACTERS_SEARCH_OK);
     assert(characters_search_count(job) == 1 && characters_search_id(job, 0) == 0);
     characters_search_free(job);
-    job = characters_search_allocate(CHARACTERS_SEARCH_ALL, -1, -1);
+    job = fixture_job(CHARACTERS_SEARCH_ALL, -1, -1);
     gchar *terms[] = { "mandarin:ZHŌNG", "radical:2" };
     gchar folded[] = "zhong";
     gchar *han[] = { folded, "2" };
@@ -77,7 +106,7 @@ static void test_language_mask(void) {
     characters_language_add_locale("ja", scripts, sizeof(scripts));
     assert(scripts[characters_scalar_script_index("Hira")]);
     assert(scripts[characters_scalar_script_index("Kana")]);
-    CharactersSearch *job = characters_search_allocate(CHARACTERS_SEARCH_LANGUAGE, 0, -1);
+    CharactersSearch *job = fixture_job(CHARACTERS_SEARCH_LANGUAGE, 0, -1);
     assert(job && characters_search_prepare(job, "", NULL, 0, NULL, 0, NULL, 0, NULL, 0, FALSE, FALSE));
     characters_search_set_scripts(job, scripts, sizeof(scripts));
     memset(scripts, 0, sizeof(scripts));
@@ -88,7 +117,7 @@ static void test_language_mask(void) {
 
 /** Invalid input cannot publish results; cancellation works before preparation. */
 static void test_invalid_and_canceled(void) {
-    CharactersSearch *job = characters_search_allocate(CHARACTERS_SEARCH_ALL, -1, -1);
+    CharactersSearch *job = fixture_job(CHARACTERS_SEARCH_ALL, -1, -1);
     guint32 surrogate[] = { 0xD800 };
     assert(job && !characters_search_prepare(job, "U+D800", surrogate, 1, NULL, 0, NULL, 0, NULL, 0, TRUE, FALSE));
     assert(!characters_search_prepare(job, "", NULL, 0, NULL, 0, NULL, 0, NULL, 0, TRUE, FALSE));
@@ -99,7 +128,7 @@ static void test_invalid_and_canceled(void) {
     assert(characters_search_run(job) == CHARACTERS_SEARCH_INVALID);
     assert(characters_search_count(job) == 0);
     characters_search_free(job);
-    job = characters_search_allocate(CHARACTERS_SEARCH_ALL, -1, -1);
+    job = fixture_job(CHARACTERS_SEARCH_ALL, -1, -1);
     assert(job);
     characters_search_cancel(job);
     assert(characters_search_prepare(job, "", NULL, 0, NULL, 0, NULL, 0, NULL, 0, FALSE, FALSE));
@@ -110,7 +139,7 @@ static void test_invalid_and_canceled(void) {
 
 /** Verify bounded clause validation, copying, union semantics and category intersection. */
 static void test_semantic_rules(void) {
-    CharactersSearch *job = characters_search_allocate(CHARACTERS_SEARCH_SYMBOLS, -1, 4);
+    CharactersSearch *job = fixture_job(CHARACTERS_SEARCH_SYMBOLS, -1, 4);
     guint32 rules[] = { 1u << 25, 0, 0, 0x10FFFF, 0x3FFFFFFF, 0, 0x2190, 0x2190 };
     assert(job);
     assert(!characters_search_set_rules(job, rules, 7));
@@ -126,7 +155,7 @@ static void test_semantic_rules(void) {
     assert(contains(job, 0x20AC) && contains(job, 0x2190) && !contains(job, 'A'));
     characters_search_free(job);
 
-    job = characters_search_allocate(CHARACTERS_SEARCH_SYMBOLS, -1, -1);
+    job = fixture_job(CHARACTERS_SEARCH_SYMBOLS, -1, -1);
     assert(job && characters_search_prepare(job, "", NULL, 0, NULL, 0, NULL, 0, NULL, 0,
                                              FALSE, FALSE));
     assert(characters_search_run(job) == CHARACTERS_SEARCH_INVALID);
@@ -135,7 +164,7 @@ static void test_semantic_rules(void) {
 
 /** Reject malformed descriptors without publishing a partial query. */
 static void test_han_descriptor_validation(void) {
-    CharactersSearch *job = characters_search_allocate(CHARACTERS_SEARCH_ALL, -1, -1);
+    CharactersSearch *job = fixture_job(CHARACTERS_SEARCH_ALL, -1, -1);
     gchar *terms[] = { "radical:215" };
     gchar *han[] = { "215" };
     guint32 rules[] = { CHARACTERS_HAN_RADICAL, 0, 215 };
@@ -152,6 +181,67 @@ static void test_han_descriptor_validation(void) {
     characters_search_free(job);
 }
 
+/** Validate copied vocabulary, category masks and missing metadata rejection. */
+static void test_metadata(void)
+{
+    gunichar points[] = { 0x41, 0x0301, 0xE000 };
+    CharactersSearch *job = characters_search_allocate_points(points, 3, -1);
+    assert(job);
+    guint32 masks[] = { 0x3E, 0x1C0, 0xE00, 0x30F80000,
+                        0x0F000000, 0x7000, 0x18000, 0x20000 };
+    gchar first[] = "letters-test";
+    gchar private_use[] = "private-test";
+    gchar *labels[] = { first, "Marks", "Numbers", "Punctuation", "Symbols",
+                        "Separators", "Controls & Formatting", "Private Use" };
+    gchar *fallbacks[] = { "Noncharacter", "Unassigned Character", private_use,
+                           "Unnamed Character" };
+    assert(!characters_search_set_metadata(job, masks, 7, labels, 8, fallbacks, 4));
+    masks[1] = masks[0];
+    assert(!characters_search_set_metadata(job, masks, 8, labels, 8, fallbacks, 4));
+    masks[1] = 0x1C0;
+    assert(!characters_search_set_metadata(job, masks, 8, labels, 8, fallbacks, 3));
+    assert(characters_search_set_metadata(job, masks, 8, labels, 8, fallbacks, 4));
+    assert(!characters_search_set_metadata(job, masks, 8, labels, 8, fallbacks, 4));
+    memset(first, 'z', sizeof(first) - 1);
+    memset(private_use, 'z', sizeof(private_use) - 1);
+    masks[0] = 0;
+    gchar *terms[] = { "letters-test" };
+    gchar *han[] = { "" };
+    guint32 operands[] = { CHARACTERS_HAN_ORDINARY, CHARACTERS_HAN_TEXT_FIELDS, 0 };
+    assert(characters_search_prepare(job, terms[0], NULL, 0, terms, 1, han, 1,
+        operands, 3, FALSE, FALSE));
+    assert(characters_search_run(job) == CHARACTERS_SEARCH_OK);
+    assert(characters_search_count(job) == 1 && contains(job, 0x41));
+    characters_search_free(job);
+
+    job = characters_search_allocate_points(points, 3, 7);
+    masks[0] = 0x3E;
+    strcpy(first, "letters-test");
+    strcpy(private_use, "private-test");
+    assert(job && characters_search_set_metadata(job, masks, 8, labels, 8, fallbacks, 4));
+    memset(private_use, 'z', sizeof(private_use) - 1);
+    gchar *copied_terms[] = { "private-test" };
+    assert(characters_search_prepare(job, copied_terms[0], NULL, 0, copied_terms, 1,
+        han, 1, operands, 3, FALSE, FALSE));
+    assert(characters_search_run(job) == CHARACTERS_SEARCH_OK);
+    assert(characters_search_count(job) == 1 && contains(job, 0xE000));
+    characters_search_free(job);
+
+    job = fixture_points(points, 3, 7);
+    gchar *private_terms[] = { "Private Use Character" };
+    assert(characters_search_prepare(job, private_terms[0], NULL, 0, private_terms, 1,
+        han, 1, operands, 3, FALSE, FALSE));
+    assert(characters_search_run(job) == CHARACTERS_SEARCH_OK);
+    assert(characters_search_count(job) == 1 && contains(job, 0xE000));
+    characters_search_free(job);
+
+    job = characters_search_allocate(CHARACTERS_SEARCH_ALL, -1, -1);
+    assert(job && characters_search_prepare(job, "", NULL, 0, NULL, 0, NULL, 0, NULL, 0,
+        FALSE, FALSE));
+    assert(characters_search_run(job) == CHARACTERS_SEARCH_INVALID);
+    characters_search_free(job);
+}
+
 /** Run the native prepared-request contracts without requiring a Vala compiler. */
 int main(void) {
     test_copied_input();
@@ -160,6 +250,7 @@ int main(void) {
     test_invalid_and_canceled();
     test_semantic_rules();
     test_han_descriptor_validation();
-    puts("6 prepared search contract groups passed");
+    test_metadata();
+    puts("7 prepared search contract groups passed");
     return 0;
 }

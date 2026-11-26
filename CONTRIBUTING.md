@@ -46,3 +46,10 @@ bounded algorithms solely to use a GLib container. Use GLib cleanup helpers
 where they simplify ownership without changing failure or lifetime semantics.
 Keep VAPI length, type, and transfer annotations synchronized with native
 headers and mixed-language tests.
+
+
+Collection labels, group policies, and scalar presentation belong in the Vala
+domain layer. Native search may consume copied, untranslated metadata vocabulary
+and validated numeric predicates; do not reintroduce native UI formatters or
+locale-dependent matching. Keep the exact text and visible glyph representation
+separate, and preserve explicit scalar arrays for embedded NUL values.

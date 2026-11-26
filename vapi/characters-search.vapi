@@ -67,6 +67,12 @@ namespace Characters.Search {
         [CCode (cname = "characters_search_set_rules")]
         public bool set_rules ([CCode (array_length_type = "gsize")] uint32[] rules);
 
+        /** Copy category masks and English search vocabulary before worker execution. */
+        [CCode (cname = "characters_search_set_metadata")]
+        public bool set_metadata ([CCode (array_length_type = "gsize")] uint32[] masks,
+            [CCode (array_length_type = "gsize")] string[] labels,
+            [CCode (array_length_type = "gsize")] string[] fallbacks);
+
         /** Request cancellation without waiting for its worker. */
         [CCode (cname = "characters_search_cancel")]
         public void cancel ();
@@ -92,35 +98,11 @@ namespace Characters.Search {
     [CCode (cname = "characters_search_allocate_points", array_length_type = "gsize")]
     public static Job? allocate_points (uint32[]? points, int category);
 
-    /** Number of collection-specific filter slots, including unavailable slots. */
-    [CCode (cname = "characters_search_filter_count")]
-    public static size_t filter_count (Scope scope);
-
-    /** Borrowed English label, or null for an unavailable slot. */
-    [CCode (cname = "characters_search_filter_name")]
-    public static unowned string? filter_name (Scope scope, size_t index);
-
-    /** Number of general-category groups. */
-    [CCode (cname = "characters_search_category_count")]
-    public static size_t category_count ();
-
-    /** Borrowed English category label, or null for invalid slots. */
-    [CCode (cname = "characters_search_category_name")]
-    public static unowned string? category_name (size_t index);
-
     /** Exact UTF-8 sequence, or null for NUL or invalid identities. */
     [CCode (cname = "characters_search_text")]
     public static string? text (uint32 id);
 
-    /** Safe visible tile representation, distinct from the original sequence. */
-    [CCode (cname = "characters_search_display")]
-    public static string? display (uint32 id);
-
-    /** Catalog or fallback name for a valid identity. */
-    [CCode (cname = "characters_search_name")]
-    public static string? name (uint32 id);
-
-    /** Complete code point notation for an identity, including composite sequences. */
-    [CCode (cname = "characters_search_code")]
-    public static string? code (uint32 id);
+    /** Owned raw sequence label, or null for scalar or invalid identities. */
+    [CCode (cname = "characters_search_sequence_label")]
+    public static string? sequence_label (uint32 id);
 }

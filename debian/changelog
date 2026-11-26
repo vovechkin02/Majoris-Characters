@@ -1,3 +1,11 @@
+majoris-characters (1.0.16-1) unstable; urgency=medium
+
+  * Move collection labels and category metadata policies into Vala.
+  * Share the Vala scalar formatter and resolve exact inspector identities directly.
+  * Prepare bounded English search vocabulary for the native scanner.
+
+ -- Majoris Contributors <45165533+vovechkin02@users.noreply.github.com>  Thu, 26 Nov 2026 16:00:00 +1100
+
 majoris-characters (1.0.15-1) unstable; urgency=medium
 
   * Standardize project-owned native APIs and allocations on GLib.

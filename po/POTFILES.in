@@ -11,11 +11,11 @@ data/ui/library-dialog.ui
 data/ui/main-window.ui
 data/ui/preferences-dialog.ui
 data/ui/shortcuts-dialog.ui
-native/unicode/character-search.c
 native/unicode/generated/properties.h
 native/unicode/language-collections.c
 native/unicode/unicode-engine.c
 src/app/application.vala
+src/search/collection-catalog.vala
 src/views/character-inspector.vala
 src/views/character-tile.vala
 src/views/compact-picker.vala

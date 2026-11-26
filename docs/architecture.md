@@ -447,3 +447,22 @@ library contracts retain their required types. Recoverable allocations use
 checked `g_try_*` helpers. Compact vectors, immutable generated arrays and
 C11 cancellation atomics are retained. See
 [GLib standardization and verification](glib-native-standardization.md).
+
+## Character presentation and collections (1.0.16)
+
+`src/search/collection-catalog.vala` owns the indexed collection labels,
+category group masks, and scalar fallback vocabulary. Its raw registry access
+uses the Unicode, Scalar, LanguageData, and Han VAPI contracts. English labels
+remain stable; views translate them at presentation time. The query parser
+copies group masks and English vocabulary into each native request. The scanner
+validates and compiles the masks into a 32-entry category-to-group map before
+traversal. It retains private filter-bound checks, raw metadata lookup, compact
+vectors, and cancellation. There is no per-scalar Vala callback.
+
+`src/unicode/character-presentation.vala` owns glyph placeholders, dotted-circle
+previews, scalar name fallback selection, exact identity decoding, and code
+notation. It uses the shared `Inspector.format_points()` and native raw text and
+sequence-label access. `Inspector.from_id()` receives exact scalar arrays
+without formatting and parsing numeric strings. NUL remains a valid inspected
+scalar but has no NUL-terminated clipboard text. No external API or serialized
+identity format is added. See [migration evidence](character-presentation-migration.md).

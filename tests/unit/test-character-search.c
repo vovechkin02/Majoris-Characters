@@ -20,11 +20,13 @@ static CharactersSearch *search(CharactersSearchScope scope, gint filter, gint c
     return job;
 }
 
-/** Find the collection slot by its immutable native label. */
+/** Find the collection slot by its stable Vala catalog label. */
 static gint find_filter(CharactersSearchScope scope, const gchar *name) {
     for (gsize index = 0; index < characters_search_filter_count(scope); index++) {
-        const gchar *label = characters_search_filter_name(scope, index);
-        if (label && strcmp(label, name) == 0) {
+        gchar *label = characters_search_filter_name(scope, index);
+        gboolean match = label && strcmp(label, name) == 0;
+        g_free(label);
+        if (match) {
             return (gint)index;
         }
     }

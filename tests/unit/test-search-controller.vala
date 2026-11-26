@@ -20,6 +20,29 @@ private void test_bindings () {
     assert (Search.filter_count (Search.Scope.BLOCK) == Unicode.block_count ());
 }
 
+/** Exercise the Vala collection catalog and exact presentation boundary. */
+private void test_presentation () {
+    assert (Search.filter_count (Search.Scope.SYMBOLS) == 27);
+    assert (Search.filter_name (Search.Scope.SYMBOLS, 26) == "Block Elements");
+    assert (Search.filter_name (Search.Scope.SYMBOLS, 27) == null);
+    assert (Search.filter_count (Search.Scope.PLANE) == 17);
+    assert (Search.filter_name (Search.Scope.PLANE, 16) == "16: Supplementary Private Use Area-B");
+    assert (Search.category_count () == 8);
+    assert (Search.category_name (8) == null);
+    var nul = Search.points (0);
+    assert (nul != null && nul.length == 1 && nul[0] == 0);
+    assert (Search.code (0) == "U+0000" && Search.display (0) == "·");
+    assert (Search.points (0xD800) == null && Search.points (uint32.MAX) == null);
+    assert (Search.name (0x0378) == "Unassigned Character");
+    assert (Search.name (0x10FFFF) == "Noncharacter");
+    assert (Search.name (0xE000) == "Private Use Character");
+    assert (Search.display (0x3164) == "·" && Search.display (0x0301) == "◌́");
+    var job = QueryParser.create (Search.Scope.EMOJI, -1, -1, "U+2764 U+FE0E");
+    assert (job != null && job.run () == Search.Status.OK && job.count () == 1);
+    assert (Search.code (job.id (0)) == "U+2764 U+FE0E");
+    assert (Search.display (job.id (0)) == "❤︎");
+}
+
 /** Exercise shared numeric syntax and invalid input directly through the Vala parser. */
 private void test_query_parser () {
     var points = QueryParser.decode_code (" \tU+0000 0x20ac dec:128512\r\n");
@@ -71,6 +94,7 @@ private void test_latest_request () {
 int main (string[] args) {
     Test.init (ref args);
     Test.add_func ("/characters/search/bindings", test_bindings);
+    Test.add_func ("/characters/search/presentation", test_presentation);
     Test.add_func ("/characters/search/query-parser", test_query_parser);
     Test.add_func ("/characters/search/latest-request", test_latest_request);
     return Test.run ();

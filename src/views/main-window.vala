@@ -515,7 +515,7 @@ namespace Characters {
             model.append (_("All Collections"));
             filter_slots = { -1 };
             for (size_t index = 0; index < Search.filter_count (scope); index++) {
-                unowned string? label = Search.filter_name (scope, index);
+                var label = Search.filter_name (scope, index);
                 if (label != null) {
                     model.append (scope == Search.Scope.SCRIPT ?
                         PropertyLabels.script_label (label) : _(label));

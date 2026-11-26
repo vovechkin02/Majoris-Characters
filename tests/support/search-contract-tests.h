@@ -3,6 +3,21 @@
 
 #include "character-search.h"
 
+/** Vala collection count, indexed by the native scope. */
+gsize characters_search_filter_count(CharactersSearchScope scope);
+
+/** Owned English collection label, or NULL outside the registry. */
+gchar *characters_search_filter_name(CharactersSearchScope scope, gsize index);
+
+/** Owned safe glyph representation, never used for copy. */
+gchar *characters_search_display(guint32 id);
+
+/** Owned catalog or fallback name, or NULL for an invalid identity. */
+gchar *characters_search_name(guint32 id);
+
+/** Owned exact code-point notation for an identity. */
+gchar *characters_search_code(guint32 id);
+
 /** Vala query factory used by the C scanner and catalog contract fixtures. */
 CharactersSearch *characters_query_parser_create(CharactersSearchScope scope, gint filter,
                                                  gint category, const gchar *input);

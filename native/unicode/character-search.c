@@ -18,7 +18,6 @@
 #include "unicode-engine.h"
 #include "unihan.h"
 
-#define N_(message) (message)
 #define SCALAR_LIMIT 0x110000u
 #define EMOJI_BASE SCALAR_LIMIT
 #define EMOJI_ALIAS_BASE 0x180000u
@@ -32,147 +31,11 @@
 #define HAN_WORDS 3u
 #define MAX_HAN_TERM_BYTES (MAX_QUERY_BYTES * 3 + 1)
 
-/** Semantic symbol collections; also the index into symbol_names. */
-enum SymbolCollection {
-    /** Punctuation collection slot. */
-    SYMBOL_PUNCTUATION,
-    /** Arrows collection slot. */
-    SYMBOL_ARROWS,
-    /** Bullets & Stars collection slot. */
-    SYMBOL_BULLETS,
-    /** Pictures & Shapes collection slot. */
-    SYMBOL_PICTURES,
-    /** Currencies collection slot. */
-    SYMBOL_CURRENCY,
-    /** Mathematics collection slot. */
-    SYMBOL_MATH,
-    /** Letters collection slot. */
-    SYMBOL_LETTERS,
-    /** Numbers & Fractions collection slot. */
-    SYMBOL_NUMBERS,
-    /** Technical collection slot. */
-    SYMBOL_TECHNICAL,
-    /** Music collection slot. */
-    SYMBOL_MUSIC,
-    /** Games collection slot. */
-    SYMBOL_GAMES,
-    /** Braille collection slot. */
-    SYMBOL_BRAILLE,
-    /** Combining Marks collection slot. */
-    SYMBOL_MARKS,
-    /** Box Drawing collection slot. */
-    SYMBOL_BOX_DRAWING,
-    /** Phonetics collection slot. */
-    SYMBOL_PHONETICS,
-    /** Enclosed collection slot. */
-    SYMBOL_ENCLOSED,
-    /** Special & Formatting collection slot. */
-    SYMBOL_SPECIAL,
-    /** Superscripts collection slot. */
-    SYMBOL_SUPERSCRIPTS,
-    /** Subscripts collection slot. */
-    SYMBOL_SUBSCRIPTS,
-    /** Fractions collection slot. */
-    SYMBOL_FRACTIONS,
-    /** Whitespace collection slot. */
-    SYMBOL_WHITESPACE,
-    /** Quotation Marks collection slot. */
-    SYMBOL_QUOTATION,
-    /** Accessibility Symbols collection slot. */
-    SYMBOL_ACCESSIBILITY,
-    /** Letterlike Symbols collection slot. */
-    SYMBOL_LETTERLIKE,
-    /** Religious Symbols collection slot. */
-    SYMBOL_RELIGIOUS,
-    /** Variation Selectors collection slot. */
-    SYMBOL_VARIATION,
-    /** Block Elements collection slot. */
-    SYMBOL_BLOCK_ELEMENTS,
-};
-
-/** Stable English labels corresponding to the SymbolCollection slots. */
-static const gchar *const symbol_names[] = {
-    [SYMBOL_PUNCTUATION] = N_("Punctuation"),
-    [SYMBOL_ARROWS] = N_("Arrows"),
-    [SYMBOL_BULLETS] = N_("Bullets & Stars"),
-    [SYMBOL_PICTURES] = N_("Pictures & Shapes"),
-    [SYMBOL_CURRENCY] = N_("Currencies"),
-    [SYMBOL_MATH] = N_("Mathematics"),
-    [SYMBOL_LETTERS] = N_("Letters"),
-    [SYMBOL_NUMBERS] = N_("Numbers & Fractions"),
-    [SYMBOL_TECHNICAL] = N_("Technical"),
-    [SYMBOL_MUSIC] = N_("Music"),
-    [SYMBOL_GAMES] = N_("Games"),
-    [SYMBOL_BRAILLE] = N_("Braille"),
-    [SYMBOL_MARKS] = N_("Combining Marks"),
-    [SYMBOL_BOX_DRAWING] = N_("Box Drawing"),
-    [SYMBOL_PHONETICS] = N_("Phonetics"),
-    [SYMBOL_ENCLOSED] = N_("Enclosed"),
-    [SYMBOL_SPECIAL] = N_("Special & Formatting"),
-    [SYMBOL_SUPERSCRIPTS] = N_("Superscripts"),
-    [SYMBOL_SUBSCRIPTS] = N_("Subscripts"),
-    [SYMBOL_FRACTIONS] = N_("Fractions"),
-    [SYMBOL_WHITESPACE] = N_("Whitespace"),
-    [SYMBOL_QUOTATION] = N_("Quotation Marks"),
-    [SYMBOL_ACCESSIBILITY] = N_("Accessibility Symbols"),
-    [SYMBOL_LETTERLIKE] = N_("Letterlike Symbols"),
-    [SYMBOL_RELIGIOUS] = N_("Religious Symbols"),
-    [SYMBOL_VARIATION] = N_("Variation Selectors"),
-    [SYMBOL_BLOCK_ELEMENTS] = N_("Block Elements"),
-};
-
-/** Unicode planes, indexed by the high sixteen bits of a scalar. */
-static const gchar *const plane_names[] = {
-    N_("0: Basic Multilingual Plane"),
-    N_("1: Supplementary Multilingual Plane"),
-    N_("2: Supplementary Ideographic Plane"),
-    N_("3: Tertiary Ideographic Plane"),
-    N_("4: Plane 4 (Reserved)"),
-    N_("5: Plane 5 (Reserved)"),
-    N_("6: Plane 6 (Reserved)"),
-    N_("7: Plane 7 (Reserved)"),
-    N_("8: Plane 8 (Reserved)"),
-    N_("9: Plane 9 (Reserved)"),
-    N_("10: Plane 10 (Reserved)"),
-    N_("11: Plane 11 (Reserved)"),
-    N_("12: Plane 12 (Reserved)"),
-    N_("13: Plane 13 (Reserved)"),
-    N_("14: Supplementary Special-purpose Plane"),
-    N_("15: Supplementary Private Use Area-A"),
-    N_("16: Supplementary Private Use Area-B"),
-};
-
-/** Broad Unicode general-category groups; also the index into category_names. */
-enum CategoryGroup {
-    /** Letters collection slot. */
-    CATEGORY_LETTERS,
-    /** Marks collection slot. */
-    CATEGORY_MARKS,
-    /** Numbers collection slot. */
-    CATEGORY_NUMBERS,
-    /** Punctuation collection slot. */
-    CATEGORY_PUNCTUATION,
-    /** Symbols collection slot. */
-    CATEGORY_SYMBOLS,
-    /** Separators collection slot. */
-    CATEGORY_SEPARATORS,
-    /** Controls & Formatting collection slot. */
-    CATEGORY_CONTROLS,
-    /** Private Use collection slot. */
-    CATEGORY_PRIVATE_USE,
-};
-
-/** Stable English labels corresponding to the CategoryGroup slots. */
-static const gchar *const category_names[] = {
-    [CATEGORY_LETTERS] = N_("Letters"),
-    [CATEGORY_MARKS] = N_("Marks"),
-    [CATEGORY_NUMBERS] = N_("Numbers"),
-    [CATEGORY_PUNCTUATION] = N_("Punctuation"),
-    [CATEGORY_SYMBOLS] = N_("Symbols"),
-    [CATEGORY_SEPARATORS] = N_("Separators"),
-    [CATEGORY_CONTROLS] = N_("Controls & Formatting"),
-    [CATEGORY_PRIVATE_USE] = N_("Private Use"),
-};
+#define CATEGORY_COUNT 8u
+#define FALLBACK_COUNT 4u
+#define METADATA_LABEL_BYTES 64u
+#define SYMBOL_COUNT 27u
+#define PLANE_COUNT 17u
 
 /** The worker owns mutable result storage; only the cancellation flag is shared during run. */
 struct CharactersSearch {
@@ -182,6 +45,14 @@ struct CharactersSearch {
     gint filter;
     /** General-category group slot, or -1. */
     gint category;
+    /** Prepared category group index for each ICU category; -1 means no group. */
+    gint category_groups[32];
+    /** Copied English search vocabulary for category groups. */
+    gchar category_labels[CATEGORY_COUNT][METADATA_LABEL_BYTES];
+    /** Copied English fallback scalar search vocabulary. */
+    gchar fallback_labels[FALLBACK_COUNT][METADATA_LABEL_BYTES];
+    /** Whether the Vala metadata policy has been validated and copied. */
+    gboolean metadata_ready;
     /** Owned prepared query; NULL until the Vala domain parser accepts input. */
     struct Query *query;
     /** Locale captured before worker execution; defaults to English. */
@@ -289,33 +160,29 @@ static gboolean matches_points(const struct Query *query, const gunichar *points
            memcmp(query->points, points, count * sizeof(*points)) == 0;
 }
 
-/** Read the Unicode general-category group for a scalar; -1 denotes unknown metadata. */
-static gint category_for(gunichar point)
+/** Read the prepared category-group mapping for a scalar without allocating. */
+static gint category_for(const CharactersSearch *search, gunichar point)
 {
     gint type = characters_scalar_category(point);
-    switch (type) {
-        case U_UPPERCASE_LETTER: case U_LOWERCASE_LETTER: case U_TITLECASE_LETTER:
-        case U_MODIFIER_LETTER: case U_OTHER_LETTER:
-            return CATEGORY_LETTERS;
-        case U_NON_SPACING_MARK: case U_ENCLOSING_MARK: case U_COMBINING_SPACING_MARK:
-            return CATEGORY_MARKS;
-        case U_DECIMAL_DIGIT_NUMBER: case U_LETTER_NUMBER: case U_OTHER_NUMBER:
-            return CATEGORY_NUMBERS;
-        case U_DASH_PUNCTUATION: case U_START_PUNCTUATION: case U_END_PUNCTUATION:
-        case U_CONNECTOR_PUNCTUATION: case U_OTHER_PUNCTUATION:
-        case U_INITIAL_PUNCTUATION: case U_FINAL_PUNCTUATION:
-            return CATEGORY_PUNCTUATION;
-        case U_MATH_SYMBOL: case U_CURRENCY_SYMBOL: case U_MODIFIER_SYMBOL: case U_OTHER_SYMBOL:
-            return CATEGORY_SYMBOLS;
-        case U_SPACE_SEPARATOR: case U_LINE_SEPARATOR: case U_PARAGRAPH_SEPARATOR:
-            return CATEGORY_SEPARATORS;
-        case U_CONTROL_CHAR: case U_FORMAT_CHAR:
-            return CATEGORY_CONTROLS;
-        case U_PRIVATE_USE_CHAR:
-            return CATEGORY_PRIVATE_USE;
-        default:
-            return -1;
+    return type >= 0 && type < 32 ? search->category_groups[type] : -1;
+}
+
+/** Resolve English metadata for search, not a tile or localized presentation label. */
+static gchar *scalar_search_name(const CharactersSearch *search, gunichar point)
+{
+    if (!characters_unicode_is_assigned(point)) {
+        return characters_try_strdup(search->fallback_labels[
+            u_hasBinaryProperty((UChar32)point, UCHAR_NONCHARACTER_CODE_POINT) ? 0 : 1]);
     }
+    gchar *name = characters_unicode_name(point);
+    if (!name) {
+        name = characters_unicode_aliases(point);
+    }
+    if (!name) {
+        name = characters_try_strdup(search->fallback_labels[
+            characters_scalar_category(point) == U_PRIVATE_USE_CHAR ? 2 : 3]);
+    }
+    return name;
 }
 
 /** Evaluate the prepared union of property/range clauses without allocating. */
@@ -349,7 +216,7 @@ static gboolean rules_match(const CharactersSearch *search, gunichar point)
 /** Whether the scalar passes the collection, script extensions and category constraints. */
 static gboolean scalar_matches(const CharactersSearch *search, gunichar point)
 {
-    if (search->category >= 0 && category_for(point) != search->category) {
+    if (search->category >= 0 && category_for(search, point) != search->category) {
         return FALSE;
     }
     if (search->scope == CHARACTERS_SEARCH_SYMBOLS) {
@@ -425,7 +292,8 @@ static gboolean han_matches(gunichar point, const struct Query *query, gsize ind
 }
 
 /** Resolve scalar metadata on demand; empty and numeric queries avoid name allocations. */
-static gboolean scalar_query_matches(gunichar point, const struct Query *query)
+static gboolean scalar_query_matches(const CharactersSearch *search, gunichar point,
+                                      const struct Query *query)
 {
     if (matches_points(query, &point, 1)) {
         return TRUE;
@@ -450,12 +318,13 @@ static gboolean scalar_query_matches(gunichar point, const struct Query *query)
     if (!needs_metadata) {
         return TRUE;
     }
-    gchar *name = characters_search_name(point);
+    gchar *name = scalar_search_name(search, point);
     gchar *aliases = characters_unicode_aliases(point);
     const gchar *block = characters_unicode_find_block(point);
     const gchar *script = characters_scalar_category(point) != U_UNASSIGNED ?
         characters_scalar_script_name((gsize)characters_scalar_script(point)) : NULL;
-    const gchar *category = characters_search_category_name((gsize)category_for(point));
+    gint group = category_for(search, point);
+    const gchar *category = group >= 0 ? search->category_labels[group] : NULL;
     gboolean matches = TRUE;
     for (gsize index = 0; index < query->term_count; index++) {
         const gchar *term = query->terms[index];
@@ -502,7 +371,7 @@ static gboolean scan_scalars(CharactersSearch *search, const struct Query *query
         gboolean included = search->scope == CHARACTERS_SEARCH_UNASSIGNED ?
             characters_unicode_is_scalar(point) && !assigned : assigned;
         if (included && scalar_matches(search, point) &&
-            scalar_query_matches(point, query) && !append_id(search, point)) {
+            scalar_query_matches(search, point, query) && !append_id(search, point)) {
             return FALSE;
         }
     }
@@ -517,7 +386,7 @@ static gboolean scan_points(CharactersSearch *search, const struct Query *query)
             return TRUE;
         }
         gunichar point = search->points[index];
-        if (scalar_matches(search, point) && scalar_query_matches(point, query) &&
+        if (scalar_matches(search, point) && scalar_query_matches(search, point, query) &&
             !append_id(search, point)) {
             return FALSE;
         }
@@ -583,7 +452,7 @@ static gboolean scan_emoji(CharactersSearch *search, const struct Query *query)
                 return FALSE;
             }
             if (match && search->category >= 0 &&
-                (count != 1 || category_for(points[0]) != search->category)) {
+                (count != 1 || category_for(search, points[0]) != search->category)) {
                 continue;
             }
             if (match && !append_id(search, search->scope == CHARACTERS_SEARCH_ALL && count == 1 ?
@@ -609,7 +478,7 @@ static gboolean scan_emoji_alias(CharactersSearch *search, const struct Query *q
         return TRUE;
     }
     if (search->category >= 0 && (query->point_count != 1 ||
-        category_for(query->points[0]) != search->category)) {
+        category_for(search, query->points[0]) != search->category)) {
         return TRUE;
     }
     if (search->scope == CHARACTERS_SEARCH_EMOJI && search->filter >= 0) {
@@ -856,6 +725,76 @@ void characters_search_cancel(CharactersSearch *search)
     }
 }
 
+/** Validate one filter slot against native registry bounds; labels are presentation policy. */
+static gboolean valid_filter(CharactersSearchScope scope, gsize index)
+{
+    switch (scope) {
+        case CHARACTERS_SEARCH_EMOJI:
+            return characters_unicode_emoji_group_name(index) != NULL;
+        case CHARACTERS_SEARCH_SYMBOLS:
+            return index < SYMBOL_COUNT;
+        case CHARACTERS_SEARCH_SCRIPT:
+            return characters_scalar_script_name(index) != NULL;
+        case CHARACTERS_SEARCH_BLOCK:
+            return characters_unicode_block_name(index) != NULL;
+        case CHARACTERS_SEARCH_LANGUAGE:
+            return characters_language_name(index) != NULL;
+        case CHARACTERS_SEARCH_RADICAL:
+            return characters_unihan_group_name(TRUE, index) != NULL;
+        case CHARACTERS_SEARCH_STROKES:
+            return characters_unihan_group_name(FALSE, index) != NULL;
+        case CHARACTERS_SEARCH_PLANE:
+        case CHARACTERS_SEARCH_UNASSIGNED:
+            return index < PLANE_COUNT;
+        default:
+            return FALSE;
+    }
+}
+
+gboolean characters_search_set_metadata(CharactersSearch *search, const guint32 *masks,
+                                          gsize mask_count, gchar *const *labels,
+                                          gsize label_count, gchar *const *fallbacks,
+                                          gsize fallback_count)
+{
+    if (!search || search->started || search->metadata_ready || !masks || !labels ||
+        !fallbacks || mask_count != CATEGORY_COUNT || label_count != CATEGORY_COUNT ||
+        fallback_count != FALLBACK_COUNT) {
+        return FALSE;
+    }
+    guint32 used = 0;
+    for (gsize index = 0; index < mask_count; index++) {
+        if (!masks[index] || (masks[index] & ~UINT32_C(0x3FFFFFFF)) ||
+            (used & masks[index]) || !labels[index] || !labels[index][0] ||
+            strnlen(labels[index], METADATA_LABEL_BYTES) >= METADATA_LABEL_BYTES) {
+            return FALSE;
+        }
+        used |= masks[index];
+    }
+    for (gsize index = 0; index < fallback_count; index++) {
+        if (!fallbacks[index] || !fallbacks[index][0] ||
+            strnlen(fallbacks[index], METADATA_LABEL_BYTES) >= METADATA_LABEL_BYTES) {
+            return FALSE;
+        }
+    }
+    for (gsize type = 0; type < G_N_ELEMENTS(search->category_groups); type++) {
+        search->category_groups[type] = -1;
+        for (gsize index = 0; index < mask_count; index++) {
+            if (masks[index] & (UINT32_C(1) << type)) {
+                search->category_groups[type] = (gint)index;
+                break;
+            }
+        }
+    }
+    for (gsize index = 0; index < label_count; index++) {
+        strcpy(search->category_labels[index], labels[index]);
+    }
+    for (gsize index = 0; index < fallback_count; index++) {
+        strcpy(search->fallback_labels[index], fallbacks[index]);
+    }
+    search->metadata_ready = TRUE;
+    return TRUE;
+}
+
 CharactersSearchStatus characters_search_run(CharactersSearch *search)
 {
     if (!search || search->started) {
@@ -865,9 +804,10 @@ CharactersSearchStatus characters_search_run(CharactersSearch *search)
     const struct Query *query = search->query;
     if (search->scope < CHARACTERS_SEARCH_ALL || search->scope > CHARACTERS_SEARCH_UNASSIGNED ||
         search->filter < -1 || (search->filter >= 0 &&
-        !characters_search_filter_name(search->scope, (gsize)search->filter)) ||
-        search->category < -1 || search->category >= (gint)G_N_ELEMENTS(category_names) ||
-        (search->scope == CHARACTERS_SEARCH_SYMBOLS && !search->rule_count) || !query) {
+        !valid_filter(search->scope, (gsize)search->filter)) ||
+        search->category < -1 || search->category >= (gint)CATEGORY_COUNT ||
+        (search->scope == CHARACTERS_SEARCH_SYMBOLS && !search->rule_count) || !query ||
+        !search->metadata_ready) {
         return search->status;
     }
     if (is_canceled(search)) {
@@ -924,69 +864,6 @@ guint32 characters_search_id(const CharactersSearch *search, gsize index)
     return index < characters_search_count(search) ? search->ids[index] : G_MAXUINT32;
 }
 
-gsize characters_search_filter_count(CharactersSearchScope scope)
-{
-    switch (scope) {
-        case CHARACTERS_SEARCH_EMOJI:
-            return characters_unicode_emoji_group_count();
-        case CHARACTERS_SEARCH_SYMBOLS:
-            return G_N_ELEMENTS(symbol_names);
-        case CHARACTERS_SEARCH_SCRIPT:
-            return characters_scalar_script_count();
-        case CHARACTERS_SEARCH_BLOCK:
-            return characters_unicode_block_count();
-        case CHARACTERS_SEARCH_LANGUAGE:
-            return characters_language_count();
-        case CHARACTERS_SEARCH_RADICAL:
-            return characters_unihan_group_count(TRUE);
-        case CHARACTERS_SEARCH_STROKES:
-            return characters_unihan_group_count(FALSE);
-        case CHARACTERS_SEARCH_PLANE:
-        case CHARACTERS_SEARCH_UNASSIGNED:
-            return G_N_ELEMENTS(plane_names);
-        default:
-            return 0;
-    }
-}
-
-const gchar *characters_search_filter_name(CharactersSearchScope scope, gsize index)
-{
-    if (index >= characters_search_filter_count(scope)) {
-        return NULL;
-    }
-    switch (scope) {
-        case CHARACTERS_SEARCH_EMOJI:
-            return characters_unicode_emoji_group_name(index);
-        case CHARACTERS_SEARCH_SYMBOLS:
-            return symbol_names[index];
-        case CHARACTERS_SEARCH_SCRIPT:
-            return characters_scalar_script_name(index);
-        case CHARACTERS_SEARCH_BLOCK:
-            return characters_unicode_block_name(index);
-        case CHARACTERS_SEARCH_LANGUAGE:
-            return characters_language_name(index);
-        case CHARACTERS_SEARCH_RADICAL:
-            return characters_unihan_group_name(TRUE, index);
-        case CHARACTERS_SEARCH_STROKES:
-            return characters_unihan_group_name(FALSE, index);
-        case CHARACTERS_SEARCH_PLANE:
-        case CHARACTERS_SEARCH_UNASSIGNED:
-            return plane_names[index];
-        default:
-            return NULL;
-    }
-}
-
-gsize characters_search_category_count(void)
-{
-    return G_N_ELEMENTS(category_names);
-}
-
-const gchar *characters_search_category_name(gsize index)
-{
-    return index < G_N_ELEMENTS(category_names) ? category_names[index] : NULL;
-}
-
 gchar *characters_search_text(guint32 id)
 {
     if (id < SCALAR_LIMIT) {
@@ -1002,45 +879,10 @@ gchar *characters_search_text(guint32 id)
     return characters_unicode_named_text(id - NAMED_BASE);
 }
 
-gchar *characters_search_display(guint32 id)
+gchar *characters_search_sequence_label(guint32 id)
 {
-    if (id < SCALAR_LIMIT && characters_unicode_is_scalar(id)) {
-        gint category = category_for(id);
-        if (!characters_unicode_is_assigned(id)) {
-            return characters_try_strdup("·");
-        }
-        if (category == CATEGORY_SEPARATORS || category == CATEGORY_CONTROLS ||
-            id == 0x034F || id == 0x115F || id == 0x1160 || id == 0x3164 || id == 0xFFA0) {
-            return characters_try_strdup("·");
-        }
-        if (category == CATEGORY_MARKS) {
-            gunichar points[] = { 0x25CC, id };
-            return characters_unicode_encode(points, G_N_ELEMENTS(points));
-        }
-    }
-    return characters_search_text(id);
-}
-
-gchar *characters_search_name(guint32 id)
-{
-    if (id < SCALAR_LIMIT) {
-        if (!characters_unicode_is_scalar(id)) {
-            return NULL;
-        }
-        if (!characters_unicode_is_assigned(id)) {
-            return characters_try_strdup(u_hasBinaryProperty((UChar32)id, UCHAR_NONCHARACTER_CODE_POINT) ?
-                          N_("Noncharacter") : N_("Unassigned Character"));
-        }
-        gchar *name = characters_unicode_name(id);
-        if (name) {
-            return name;
-        }
-        name = characters_unicode_aliases(id);
-        if (name) {
-            return name;
-        }
-        return characters_try_strdup(category_for(id) == CATEGORY_PRIVATE_USE ?
-                      "Private Use Character" : "Unnamed Character");
+    if (id < EMOJI_BASE) {
+        return NULL;
     }
     if (id >= EMOJI_ALIAS_BASE && id < NAMED_BASE) {
         return characters_emoji_alias_name(id - EMOJI_ALIAS_BASE);
@@ -1049,28 +891,3 @@ gchar *characters_search_name(guint32 id)
                        characters_unicode_named_name(id - NAMED_BASE);
     return name ? characters_try_strdup(name) : NULL;
 }
-
-gchar *characters_search_code(guint32 id)
-{
-    gunichar points[MAX_SEQUENCE_POINTS];
-    gsize count;
-    if (id < SCALAR_LIMIT && characters_unicode_is_scalar(id)) {
-        points[0] = id;
-        count = 1;
-    } else {
-        gchar *text = characters_search_text(id);
-        count = characters_icu_decode_utf8(text, points, MAX_SEQUENCE_POINTS);
-        g_free(text);
-    }
-    if (!count) {
-        return NULL;
-    }
-    gchar code[MAX_SEQUENCE_POINTS * 9 + 1];
-    gsize offset = 0;
-    for (gsize index = 0; index < count; index++) {
-        offset += (gsize)g_snprintf(code + offset, sizeof(code) - offset, "%sU+%04X",
-                                  index ? " " : "", (guint)points[index]);
-    }
-    return characters_try_strdup(code);
-}
-

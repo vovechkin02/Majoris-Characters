@@ -39,7 +39,9 @@ namespace Characters.Scalar {
         /** Paragraph separator. */
         PARAGRAPH_SEPARATOR,
         /** Space separator. */
-        SPACE_SEPARATOR
+        SPACE_SEPARATOR,
+        /** Private-use scalar. */
+        PRIVATE_USE_CHAR
     }
 
     /** Return the Unicode 17 category rather than the system GLib category. */
@@ -53,4 +55,12 @@ namespace Characters.Scalar {
     /** Return the Unicode 17 decomposition type, with zero denoting no mapping. */
     [CCode (cname = "characters_scalar_decomposition_type")]
     public static int decomposition_type (uint32 point);
+
+    /** Number of snapshot script slots. */
+    [CCode (cname = "characters_scalar_script_count")]
+    public static size_t script_count ();
+
+    /** Borrow the long script name from the bundled snapshot. */
+    [CCode (cname = "characters_scalar_script_name")]
+    public static unowned string? script_name (size_t index);
 }

@@ -20,7 +20,7 @@ namespace Characters.SemanticFilters {
     /** Compatibility superscript mapping. */
     private const uint32 SUPERSCRIPT = 1u << 15;
     /** Stable number of indexed semantic collections. */
-    private const int COLLECTION_COUNT = 27;
+    internal const int COLLECTION_COUNT = 27;
     /** Upper bound shared with the native scanner, four words per clause. */
     private const int RULE_CAPACITY = 128 * 4;
 

@@ -108,6 +108,9 @@ namespace Characters.QueryParser {
 
     /** Prepare one native scan without transferring ownership of any Vala strings or arrays. */
     internal static bool prepare (Search.Job job, string? input) {
+        if (!Search.configure_metadata (job)) {
+            return false;
+        }
         if (input == null || input.length > MAX_BYTES || !input.validate ()) {
             return false;
         }

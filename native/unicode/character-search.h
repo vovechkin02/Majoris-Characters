@@ -145,37 +145,16 @@ gsize characters_search_count(const CharactersSearch *search);
 guint32 characters_search_id(const CharactersSearch *search, gsize index);
 
 /**
- * characters_search_filter_count:
- * @scope: Primary collection.
+ * characters_search_set_metadata:
  *
- * Returns: Number of possible filter slots, some of which may have no name.
+ * Copy the Vala category masks, English group labels and scalar fallback vocabulary.
+ * Reject overlapping masks, invalid lengths and repeated configuration. No borrowed
+ * arrays survive this call. Required before run; call only before worker execution.
  */
-gsize characters_search_filter_count(CharactersSearchScope scope);
-
-/**
- * characters_search_filter_name:
- * @scope: Primary collection.
- * @index: Filter slot.
- *
- * Returns: (transfer none) (nullable): Immutable English label or NULL for an
- * unavailable slot. Script slots refer to the bundled Unicode snapshot.
- */
-const gchar *characters_search_filter_name(CharactersSearchScope scope, gsize index);
-
-/**
- * characters_search_category_count:
- *
- * Returns: Number of available general-category groups.
- */
-gsize characters_search_category_count(void);
-
-/**
- * characters_search_category_name:
- * @index: Category group slot.
- *
- * Returns: (transfer none) (nullable): Immutable English label or NULL.
- */
-const gchar *characters_search_category_name(gsize index);
+gboolean characters_search_set_metadata(CharactersSearch *search, const guint32 *masks,
+                                          gsize mask_count, gchar *const *labels,
+                                          gsize label_count, gchar *const *fallbacks,
+                                          gsize fallback_count);
 
 /**
  * characters_search_text:
@@ -187,29 +166,12 @@ const gchar *characters_search_category_name(gsize index);
 gchar *characters_search_text(guint32 id);
 
 /**
- * characters_search_display:
- * @id: Result identity.
+ * characters_search_sequence_label:
+ * @id: Opaque non-scalar catalog identity.
  *
- * Returns: (transfer full) (nullable): Safe tile representation, including
- * visible placeholders for invisible scalars and dotted circle for marks.
+ * Returns: (transfer full) (nullable): Raw catalog sequence label, or NULL for
+ * scalar or invalid identities. Presentation and scalar fallback policy live in Vala.
  */
-gchar *characters_search_display(guint32 id);
-
-/**
- * characters_search_name:
- * @id: Result identity.
- *
- * Returns: (transfer full) (nullable): Catalog name, alias, or descriptive
- * fallback for an assigned scalar; NULL for invalid identity.
- */
-gchar *characters_search_name(guint32 id);
-
-/**
- * characters_search_code:
- * @id: Result identity.
- *
- * Returns: (transfer full) (nullable): All scalar values in U+ notation.
- */
-gchar *characters_search_code(guint32 id);
+gchar *characters_search_sequence_label(guint32 id);
 
 #endif

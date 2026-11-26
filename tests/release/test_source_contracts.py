@@ -307,6 +307,28 @@ class SourceContractsTest(unittest.TestCase):
         for path in (ROOT / "vapi").glob("*.vapi"):
             self.assertNotIn('array_length_type = "size_t"', path.read_text())
 
+    def test_character_presentation_migration(self) -> None:
+        """Keep UI formatting and collection policy out of the native scanner."""
+        scanner = (ROOT / "native/unicode/character-search.c").read_text()
+        header = (ROOT / "native/unicode/character-search.h").read_text()
+        source = (ROOT / "src/meson.build").read_text()
+        presentation = (ROOT / "src/unicode/character-presentation.vala").read_text()
+        collections = (ROOT / "src/search/collection-catalog.vala").read_text()
+        parser = (ROOT / "src/search/query-parser.vala").read_text()
+        for obsolete in ("characters_search_display", "characters_search_code",
+                         "characters_search_name", "characters_search_filter_name",
+                         "characters_search_category_name", "symbol_names[]", "plane_names[]"):
+            self.assertNotIn(obsolete, scanner + header)
+        self.assertIn("characters_search_set_metadata", scanner)
+        self.assertIn("search->category_groups[type]", scanner)
+        self.assertIn("Search.configure_metadata (job)", parser)
+        self.assertIn("job.set_metadata (masks, labels, fallbacks)", collections)
+        self.assertIn("Inspector.format_points (values, Inspector.Format.CODE)", presentation)
+        self.assertIn("Search.points (id)", (ROOT / "src/unicode/inspection-snapshot.vala").read_text())
+        self.assertIn("search/collection-catalog.vala", source)
+        self.assertIn("unicode/character-presentation.vala", source)
+        self.assertIn("src/search/collection-catalog.vala", (ROOT / "po/POTFILES.in").read_text())
+
     def test_release_gate(self) -> None:
         """Prove missing and skipped test records cannot pass the release log gate."""
         names = sorted(expected_tests())

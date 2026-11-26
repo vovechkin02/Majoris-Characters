@@ -87,7 +87,11 @@ namespace Characters.Inspector {
 
     /** Resolve an opaque search identity to an independent snapshot. */
     public static Snapshot? from_id (uint32 id) {
-        return from_code (Search.code (id));
+        var points = Search.points (id);
+        if (points == null || points.length == 0 || points.length > MAX_POINTS) {
+            return null;
+        }
+        return new Snapshot ((owned) points);
     }
 
     /** Decode one to 32 UTF-8 scalars; empty or malformed text is rejected. */

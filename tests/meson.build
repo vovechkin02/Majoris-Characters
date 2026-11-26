@@ -38,7 +38,7 @@ unicode_binding_test = executable(
   unicode_sources,
   unicode_domain_vapis,
   dependencies: [gio_dep, unicode_dep],
-  c_args: ['-UNDEBUG'],
+  c_args: app_c_args + ['-UNDEBUG'],
 )
 test('Unicode Vala bindings', unicode_binding_test, suite: 'unit', timeout: 30)
 
@@ -62,7 +62,7 @@ character_search_test = executable(
   search_domain_vapis,
   include_directories: search_contract_include,
   dependencies: [gio_dep, unicode_dep, dependency('threads')],
-  c_args: ['-UNDEBUG'],
+  c_args: app_c_args + ['-UNDEBUG'],
 )
 test('Character search contracts', character_search_test, suite: 'unit', timeout: 30)
 
@@ -73,7 +73,7 @@ search_controller_test = executable(
   search_domain_sources,
   search_domain_vapis,
   dependencies: [gio_dep, unicode_dep],
-  c_args: ['-UNDEBUG'],
+  c_args: app_c_args + ['-UNDEBUG'],
 )
 test('Search bindings and request supersession', search_controller_test,
   suite: 'unit', timeout: 30)
@@ -119,7 +119,7 @@ character_inspector_test = executable(
   unicode_sources,
   unicode_domain_vapis,
   dependencies: [gio_dep, unicode_dep],
-  c_args: ['-UNDEBUG'],
+  c_args: app_c_args + ['-UNDEBUG'],
 )
 test('Character inspector contracts', character_inspector_test, suite: 'unit', timeout: 30)
 
@@ -129,7 +129,7 @@ inspector_binding_test = executable(
   unicode_sources,
   unicode_domain_vapis,
   dependencies: [gio_dep, unicode_dep],
-  c_args: ['-UNDEBUG'],
+  c_args: app_c_args + ['-UNDEBUG'],
 )
 test('Inspector Vala bindings', inspector_binding_test, suite: 'unit', timeout: 30)
 
@@ -151,7 +151,7 @@ legacy_encoding_test = executable(
   search_domain_vapis,
   include_directories: search_contract_include,
   dependencies: [gio_dep, unicode_dep],
-  c_args: ['-UNDEBUG'],
+  c_args: app_c_args + ['-UNDEBUG'],
 )
 test('Legacy encoding and repertoire contracts', legacy_encoding_test,
   suite: 'unit', timeout: 30)
@@ -174,7 +174,7 @@ font_sources_test = executable(
   font_vapi,
   legacy_vapi,
   dependencies: [gio_dep, gtk_dep, font_dep, unicode_dep],
-  c_args: ['-UNDEBUG'],
+  c_args: app_c_args + ['-UNDEBUG'],
 )
 font_test_environment = environment()
 font_test_environment.set('CHARACTERS_FONT_FIXTURES',
@@ -191,7 +191,7 @@ emoji_catalog_test = executable(
   unicode_domain_vapis,
   include_directories: search_contract_include,
   dependencies: [gio_dep, unicode_dep],
-  c_args: ['-UNDEBUG'],
+  c_args: app_c_args + ['-UNDEBUG'],
 )
 test('Emoji variations and localized annotation search', emoji_catalog_test,
   suite: 'unit', timeout: 30)
@@ -202,7 +202,7 @@ emoji_binding_test = executable(
   unicode_sources,
   unicode_domain_vapis,
   dependencies: [gio_dep, unicode_dep],
-  c_args: ['-UNDEBUG'],
+  c_args: app_c_args + ['-UNDEBUG'],
 )
 test('Emoji Vala bindings', emoji_binding_test, suite: 'unit', timeout: 30)
 
@@ -212,7 +212,7 @@ composition_test = executable(
   unicode_sources,
   unicode_domain_vapis,
   dependencies: [gio_dep, unicode_dep],
-  c_args: ['-UNDEBUG'],
+  c_args: app_c_args + ['-UNDEBUG'],
 )
 test('Composition graphemes, representations and normalization', composition_test,
   suite: 'unit', timeout: 30)

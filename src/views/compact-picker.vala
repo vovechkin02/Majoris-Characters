@@ -154,7 +154,7 @@ namespace Characters {
             if (!is_saved ()) {
                 var scope = (Search.Scope) picker_scope.selected;
                 for (size_t index = 0; index < Search.filter_count (scope); index++) {
-                    unowned string? name = Search.filter_name (scope, index);
+                    var name = Search.filter_name (scope, index);
                     if (name != null) {
                         model.append (_(name));
                         category_slots += (int) index;

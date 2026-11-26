@@ -20,7 +20,7 @@ namespace Characters {
                 return string.joinv (", ", descriptions);
             }
             if (property == "Plane") {
-                unowned string? name = Search.filter_name (Search.Scope.PLANE,
+                var name = Search.filter_name (Search.Scope.PLANE,
                     (size_t) uint.parse (value));
                 return name != null ? _(name) : value;
             }

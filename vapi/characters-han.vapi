@@ -19,4 +19,12 @@ namespace Characters.Han {
     /** Return owned folded reading text, or null if the bounded ICU operation fails. */
     [CCode (cname = "characters_unihan_fold_text")]
     public static string? fold_text (string term);
+
+    /** Number of radical or stroke groups. */
+    [CCode (cname = "characters_unihan_group_count")]
+    public static size_t group_count (bool radical);
+
+    /** Borrow the raw group label at an index. */
+    [CCode (cname = "characters_unihan_group_name")]
+    public static unowned string? group_name (bool radical, size_t index);
 }
