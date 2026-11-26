@@ -6,16 +6,15 @@
 
 #include <glib.h>
 
-#include <unicode/ubrk.h>
 #include <unicode/uchar.h>
 #include <unicode/unorm2.h>
-#include <unicode/utext.h>
 #include <unicode/ustring.h>
 
 #include "../allocation.h"
 #include "icu-scalar-conversion.h"
 #include "normalization.h"
 #include "scalar-properties.h"
+#include "unicode-algorithms.h"
 #include "unicode-engine.h"
 
 /** Maximum input length for inspector scalar operations. */
@@ -26,29 +25,7 @@
 /** Count extended grapheme boundaries in a validated UTF-8 input. */
 gint characters_icu_graphemes(const gchar *text)
 {
-    if (!text || strnlen(text, 16384 * 4 + 1) > 16384 * 4) {
-        return -1;
-    }
-    UErrorCode error = U_ZERO_ERROR;
-    UText source = UTEXT_INITIALIZER;
-    utext_openUTF8(&source, text, -1, &error);
-    UBreakIterator *iterator = ubrk_open(UBRK_CHARACTER, "root", NULL, 0, &error);
-    if (U_SUCCESS(error)) {
-        ubrk_setUText(iterator, &source, &error);
-    }
-    gint result = -1;
-    if (U_SUCCESS(error)) {
-        result = 0;
-        ubrk_first(iterator);
-        while (ubrk_next(iterator) != UBRK_DONE) {
-            result++;
-        }
-    }
-    if (iterator) {
-        ubrk_close(iterator);
-    }
-    utext_close(&source);
-    return result;
+    return characters_unicode_graphemes(text);
 }
 
 /** Extract the immediate ICU decomposition into caller-owned scalar storage. */
@@ -77,22 +54,22 @@ gsize characters_icu_decomposition(gunichar point, gunichar *points)
     return characters_icu_decode_utf16(units, length, points, MAX_POINTS);
 }
 
-/** Return ICU's simple uppercase mapping for a valid scalar. */
+/** Return the Unicode 17 simple uppercase mapping for a valid scalar. */
 gunichar characters_icu_uppercase(gunichar point)
 {
-    return characters_scalar_is_valid(point) ? (gunichar)u_toupper((UChar32)point) : point;
+    return characters_unicode_simple_case(point, CHARACTERS_CASE_UPPER);
 }
 
-/** Return ICU's simple lowercase mapping for a valid scalar. */
+/** Return the Unicode 17 simple lowercase mapping for a valid scalar. */
 gunichar characters_icu_lowercase(gunichar point)
 {
-    return characters_scalar_is_valid(point) ? (gunichar)u_tolower((UChar32)point) : point;
+    return characters_unicode_simple_case(point, CHARACTERS_CASE_LOWER);
 }
 
-/** Return ICU's simple titlecase mapping for a valid scalar. */
+/** Return the Unicode 17 simple titlecase mapping for a valid scalar. */
 gunichar characters_icu_titlecase(gunichar point)
 {
-    return characters_scalar_is_valid(point) ? (gunichar)u_totitle((UChar32)point) : point;
+    return characters_unicode_simple_case(point, CHARACTERS_CASE_TITLE);
 }
 
 /** Return the ICU bidirectional mirror, or the input when no mapping exists. */

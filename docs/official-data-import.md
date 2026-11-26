@@ -161,3 +161,9 @@ python3 tools/qualification/qualify.py build-release --package
 The import remains annotation-specific rather than a complete LDML processor.
 Unicode 17 grapheme and case-folding consistency, official UCD conformance,
 interface translation coverage, and desktop integration remain separate tasks.
+
+As of 1.0.23, both derived search headers are regenerated with the pinned
+Unicode 17 folding rules rather than the host Python Unicode version. The
+original Unihan archive, CLDR snapshot and coverage report are unchanged; the
+manifest records the updated generated-header digests. The historical
+qualification above describes 1.0.22.

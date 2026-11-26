@@ -9,7 +9,7 @@ guint32 characters_emoji_locale_index(const gchar *language);
 /** Return the number of immutable annotation locale tables. */
 gsize characters_emoji_locale_count(void);
 
-/** Allocate an ICU NFKC-casefolded term, or NULL for invalid or empty input. */
+/** Allocate a Unicode 17 NFKC-casefolded term, or NULL for invalid or empty input. */
 gchar *characters_emoji_fold_term(const gchar *term);
 
 /** Match a prepared folded term using caller-selected locale indexes and exact scalars. */

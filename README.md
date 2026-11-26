@@ -6,7 +6,7 @@ Unicode, international browsing, emoji data, and exact font inspection improveme
 
 | Project metadata | Value |
 | --- | --- |
-| Version | 1.0.22 |
+| Version | 1.0.23 |
 | Platform target | Majoris OS / Debian 13 (Trixie) |
 | Development status | GLib native standardization — qualification candidate (not a verified stable release) |
 | Application ID | `com.majoris.characters` |
@@ -87,7 +87,7 @@ Unicode, international browsing, emoji data, and exact font inspection improveme
 - Collapsible character composer shared across browser, inspector, font and emoji dialogs.
 - Native text editing, selection, cut/copy/paste, undo/redo, and copy-only character tile drags.
 - Direct raw text copying, nine encoding representations, explicit four-form normalization,
-  scalar and UTF-8 byte counts, and ICU extended grapheme counts.
+  scalar and UTF-8 byte counts, and Unicode 17 extended grapheme counts.
 - Inspect selected composed text (up to 32 scalars) without modifying the editor.
 - Persistent, manually ordered favorites for exact character and sequence identities.
 - Recently and frequently used collections, per-entry removal, and history clearing.
@@ -105,7 +105,8 @@ Names combine the GNOME catalog, stable ICU names, and Unicode 17 additions.
 The alias supplement includes the eight documented additions since Unicode 15;
 the 461 named-sequence records are retained pending full official-file comparison.
 Normalization uses ICU 76 with the Unicode 17 combining-class and compatibility
-delta. See [Unicode engine](docs/unicode-engine.md) for provenance and limits.
+delta. Unicode 17 grapheme segmentation and default/full compatibility case folding
+use pinned generated mappings shared with the offline search indexes. See [Unicode engine](docs/unicode-engine.md) for provenance and limits.
 See [international browsing](docs/international-browsing.md) for CJK query syntax,
 source coverage and regeneration. The verified Unicode 17 Unihan release supplies
 102,998 official records across the ten supported formal metadata fields, with
@@ -173,7 +174,7 @@ For Debian binary packages (run from the repository root):
 
 ```sh
 dpkg-buildpackage -us -uc -b
-sudo apt install ../majoris-characters_1.0.22-1_$(dpkg --print-architecture).deb
+sudo apt install ../majoris-characters_1.0.23-1_$(dpkg --print-architecture).deb
 ```
 
 The source package uses `3.0 (quilt)` and requires the corresponding upstream
@@ -334,9 +335,9 @@ After installing the Debian package, the same runtime tests can target the real
 installed executable:
 
 ```sh
-python3 tests/integration/test_application.py /usr/bin/majoris-characters 1.0.22 cli
+python3 tests/integration/test_application.py /usr/bin/majoris-characters 1.0.23 cli
 xvfb-run -a dbus-run-session -- python3 \
-  tests/integration/test_application.py /usr/bin/majoris-characters 1.0.22 gui
+  tests/integration/test_application.py /usr/bin/majoris-characters 1.0.23 gui
 ```
 
 For a fresh, fail-closed automated build/test and optional Debian package gate:
@@ -391,3 +392,6 @@ and optional headless benchmark are documented in
 
 The 1.0.22 official dataset import, pinned source digests, coverage, and
 qualification results are documented in [official data import](docs/official-data-import.md).
+
+The 1.0.23 Unicode 17 algorithm changes and conformance workflow are described in
+[Unicode 17 algorithm consistency](docs/unicode-algorithm-consistency.md).

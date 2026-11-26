@@ -272,6 +272,11 @@ test('French translation formats', find_program('msgfmt'),
   timeout: 10,
 )
 
+test('Unicode 17 algorithm snapshot contracts', python,
+  args: [files('unit/test_algorithm_data.py')],
+  suite: 'unit', timeout: 30,
+)
+
 test('Unihan offline importer contracts', python,
   args: [files('unit/test_unihan_import.py')],
   suite: 'unit',
@@ -308,6 +313,14 @@ executable(
   search_domain_vapis,
   dependencies: [gio_dep, unicode_dep],
   c_args: app_c_args,
+  build_by_default: false,
+  install: false,
+)
+
+executable(
+  'unicode-conformance-probe',
+  'extended/unicode-conformance-probe.c',
+  dependencies: unicode_dep,
   build_by_default: false,
   install: false,
 )

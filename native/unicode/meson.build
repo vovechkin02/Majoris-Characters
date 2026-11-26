@@ -9,6 +9,7 @@ unicode_engine = static_library(
   'normalization.c',
   'scalar-properties.c',
   'unihan.c',
+  'unicode-algorithms.c',
   'unicode-engine.c',
   include_directories: unicode_include,
   dependencies: [glib_dep, icu_dep, icu_i18n_dep],

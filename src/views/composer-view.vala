@@ -149,7 +149,7 @@ namespace Characters {
                 var text = buffer.get_text (start, end, true);
                 var clusters = Composition.graphemes (text);
                 composer_counts.label = clusters >= 0 ?
-                    _("%d code points · %d UTF-8 bytes · %d graphemes (ICU)").printf (
+                    _("%d code points · %d UTF-8 bytes · %d graphemes (Unicode 17)").printf (
                         count, text.length, clusters) :
                     _("%d code points · %d UTF-8 bytes").printf (count, text.length);
             }

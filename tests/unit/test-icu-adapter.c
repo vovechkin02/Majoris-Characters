@@ -9,6 +9,7 @@
 
 #include "icu-scalar-conversion.h"
 #include "scalar-properties.h"
+#include "unicode-algorithms.h"
 #include "unicode-engine.h"
 
 /** Verify the ICU boundary preserves the exact scalar sequence, including NUL. */
@@ -102,6 +103,52 @@ static void test_graphemes(void) {
     assert(characters_icu_graphemes(NULL) == -1);
 }
 
+/** Check Unicode 17 grapheme rules, explicit NUL, and malformed input. */
+static void test_unicode17_graphemes(void)
+{
+    const gunichar indic[] = { 0x0915, 0x094D, 0x200D, 0x0915 };
+    const gunichar flags[] = { 0x1F1E6, 0x1F1E7, 0x1F1E8, 0x1F1E9, 0x1F1EA };
+    const gunichar new_mark[] = { 0x61, 0x1ADD };
+    const gunichar controls[] = { 0x61, 0, 0x0301, 0x0D, 0x0A };
+    const gunichar hangul[] = { 0x1100, 0x1161, 0x11A8 };
+    const gunichar invalid[] = { 0xD800 };
+    assert(characters_unicode_graphemes_points(indic, G_N_ELEMENTS(indic)) == 1);
+    assert(characters_unicode_graphemes_points(flags, G_N_ELEMENTS(flags)) == 3);
+    assert(characters_unicode_graphemes_points(new_mark, G_N_ELEMENTS(new_mark)) == 1);
+    assert(characters_unicode_graphemes_points(controls, G_N_ELEMENTS(controls)) == 4);
+    assert(characters_unicode_graphemes_points(hangul, G_N_ELEMENTS(hangul)) == 1);
+    assert(characters_unicode_graphemes_points(invalid, 1) == -1);
+    assert(characters_unicode_graphemes_points(NULL, 0) == 0);
+    assert(characters_icu_graphemes("\xED\xA0\x80") == -1);
+    assert(characters_icu_graphemes("\xF0\x9F") == -1);
+}
+
+/** Verify full folding, Unicode 17 mappings, compatibility, and ignorable removal. */
+static void test_unicode17_folding(void)
+{
+    assert(characters_icu_lowercase(0x16EA0) == 0x16EBB);
+    assert(characters_icu_uppercase(0x16EBB) == 0x16EA0);
+    assert(characters_icu_titlecase(0xA7CF) == 0xA7CE);
+    assert(characters_icu_lowercase(0xA7D4) == 0xA7D5);
+    gchar *text = characters_unicode_casefold("Straße I İ ı");
+    assert(text && !strcmp(text, "strasse i i\xCC\x87 ı"));
+    g_free(text);
+    text = characters_unicode_casefold("\U00016EA0\uA7CE\uA7D2");
+    assert(text && !strcmp(text, "\U00016EBB\uA7CF\uA7D3"));
+    g_free(text);
+    text = characters_unicode_nfkc_casefold("ＦＵＬＬ\uA7F1\u200D\uFE0F");
+    assert(text && !strcmp(text, "fulls"));
+    g_free(text);
+    text = characters_unicode_nfkc_casefold("E\u0301");
+    assert(text && !strcmp(text, "é"));
+    g_free(text);
+    text = characters_unicode_nfkc_casefold("\u200D");
+    assert(text && !*text);
+    g_free(text);
+    assert(!characters_unicode_casefold("\xFF"));
+    assert(!characters_unicode_nfkc_casefold("\xC0\x80"));
+}
+
 /** Exercise the shared bounded decoder and encoder without a Vala runtime. */
 static void test_scalar_conversion(void) {
     gunichar points[32];
@@ -148,6 +195,8 @@ int main(void) {
     test_relationship_primitives();
     test_graphemes();
     test_scalar_conversion();
-    puts("5 ICU adapter contract groups passed");
+    test_unicode17_graphemes();
+    test_unicode17_folding();
+    puts("7 ICU adapter contract groups passed");
     return 0;
 }

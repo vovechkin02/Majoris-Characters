@@ -7,12 +7,12 @@
 #include <glib.h>
 
 #include <unicode/uchar.h>
-#include <unicode/unorm2.h>
-#include <unicode/uscript.h>
-#include <unicode/ustring.h>
-#include <unicode/utf16.h>
+#include <unicode/utf8.h>
 
 #include "../allocation.h"
+#include "scalar-properties.h"
+#include "unicode-algorithms.h"
+#include "unicode-engine.h"
 
 #define MAX_TERM_UNITS 2048
 
@@ -68,47 +68,41 @@ const gchar *characters_unihan_version(void)
 /** Normalize bounded reading search text without changing original metadata. */
 static gboolean fold(const gchar *term, gchar *output, gsize capacity)
 {
-    if (!term || !output || !capacity || capacity > INT32_MAX) {
+    if (!term || !output || !capacity || capacity > INT32_MAX ||
+        strnlen(term, MAX_TERM_UNITS * 4 + 1) > MAX_TERM_UNITS * 4) {
         return FALSE;
     }
-    UErrorCode status = U_ZERO_ERROR;
-    UChar input[MAX_TERM_UNITS];
-    UChar folded[MAX_TERM_UNITS];
-    UChar decomposed[MAX_TERM_UNITS];
-    int32_t length;
-    u_strFromUTF8(input, G_N_ELEMENTS(input), &length, term, -1, &status);
-    if (U_FAILURE(status)) {
+    gchar *folded = characters_unicode_casefold(term);
+    gchar *decomposed = folded ? characters_unicode_normalize(folded, "NFD") : NULL;
+    g_free(folded);
+    if (!decomposed) {
         return FALSE;
     }
-    length = u_strFoldCase(folded, G_N_ELEMENTS(folded), input, length, U_FOLD_CASE_DEFAULT, &status);
-    const UNormalizer2 *normalizer = unorm2_getNFDInstance(&status);
-    if (U_FAILURE(status)) {
-        return FALSE;
-    }
-    length = unorm2_normalize(normalizer, folded, length, decomposed, G_N_ELEMENTS(decomposed), &status);
-    if (U_FAILURE(status)) {
-        return FALSE;
-    }
-    int32_t used = 0;
+    gint length = (gint)strlen(decomposed);
+    gint used = 0;
     gboolean latin = FALSE;
-    for (int32_t index = 0; index < length;) {
+    gint latin_script = characters_scalar_script_index("Latn");
+    for (gint index = 0; index < length;) {
         UChar32 point;
-        U16_NEXT(decomposed, index, length, point);
-        gint type = u_charType(point);
+        U8_NEXT((const guint8 *)decomposed, index, length, point);
+        gint type = characters_scalar_category((gunichar)point);
         if (type != U_NON_SPACING_MARK && type != U_COMBINING_SPACING_MARK &&
             type != U_ENCLOSING_MARK) {
-            UErrorCode script_status = U_ZERO_ERROR;
-            latin = uscript_getScript(point, &script_status) == USCRIPT_LATIN &&
-                    U_SUCCESS(script_status);
+            latin = characters_scalar_script((gunichar)point) == latin_script;
         }
         if (latin && (point == 0x0300 || point == 0x0301 ||
                       point == 0x0304 || point == 0x030C)) {
             continue;
         }
-        U16_APPEND_UNSAFE(folded, used, point);
+        if ((gsize)used + U8_LENGTH(point) >= capacity) {
+            g_free(decomposed);
+            return FALSE;
+        }
+        U8_APPEND_UNSAFE((guint8 *)output, used, point);
     }
-    u_strToUTF8(output, (int32_t)capacity, &length, folded, used, &status);
-    return U_SUCCESS(status) && length > 0 && (gsize)length < capacity;
+    output[used] = 0;
+    g_free(decomposed);
+    return used > 0;
 }
 
 /** Match one numeric group in the formal whitespace-separated property values. */
@@ -141,7 +135,7 @@ static gboolean group_matches(const struct HanRecord *row, gboolean radical, gui
     return fallback && (!group || fallback == group);
 }
 
-/** Fold one query term using the same bounded ICU operation as the previous scanner. */
+/** Fold one query term using the shared Unicode 17 folding and tone policy. */
 gchar *characters_unihan_fold_text(const gchar *term)
 {
     gchar output[512 * 3 + 1];

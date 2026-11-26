@@ -9,6 +9,8 @@ import re
 import unicodedata
 from zipfile import ZipFile
 
+from algorithm_data import han_fold
+
 
 FIELDS = ('kMandarin', 'kCantonese', 'kJapaneseOn', 'kJapaneseKun', 'kJapanese',
           'kKorean', 'kHangul', 'kDefinition', 'kRSUnicode', 'kTotalStrokes',
@@ -20,15 +22,7 @@ OFFICIAL_SHA256 = 'f7a48b2b545acfaa77b2d607ae28747404ce02baefee16396c5d2d7a8ef34
 
 def fold(value: str) -> str:
     """Make reading searches case- and tone-mark-insensitive without altering display."""
-    result = []
-    latin = False
-    for character in unicodedata.normalize('NFD', value.casefold()):
-        if not unicodedata.category(character).startswith('M'):
-            latin = unicodedata.name(character, '').startswith('LATIN ')
-        if latin and character in '\u0300\u0301\u0304\u030c':
-            continue
-        result.append(character)
-    return ''.join(result)
+    return han_fold(value)
 
 
 def c_string(value: str) -> str:

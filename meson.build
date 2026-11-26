@@ -1,7 +1,7 @@
 project(
   'majoris-characters',
   ['c', 'vala'],
-  version: '1.0.22',
+  version: '1.0.23',
   meson_version: '>=1.3.0',
   default_options: ['c_std=gnu11', 'warning_level=2'],
   license: 'GPL-3.0-or-later',

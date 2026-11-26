@@ -1,3 +1,11 @@
+majoris-characters (1.0.23-1) unstable; urgency=medium
+
+  * Pin Unicode 17 extended grapheme segmentation and simple/full case mappings.
+  * Share Unicode 17 folding rules across search queries and generated indexes.
+  * Add native and offline differential and optional official UCD qualification.
+
+ -- Majoris Contributors <45165533+vovechkin02@users.noreply.github.com>  Fri, 27 Nov 2026 08:00:00 +1100
+
 majoris-characters (1.0.22-1) unstable; urgency=medium
 
   * Import the verified Unicode 17.0.0 Unihan and CLDR 48 release archives.

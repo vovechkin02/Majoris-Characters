@@ -394,6 +394,22 @@ class SourceContractsTest(unittest.TestCase):
         self.assertIn('public static unowned string? value',
                       (ROOT / "vapi/characters-han.vapi").read_text())
 
+    def test_unicode_algorithm_consistency(self) -> None:
+        """Require the shared pinned folding policy at runtime and during indexing."""
+        native = ROOT / 'native/unicode'
+        adapter = (native / 'icu-adapter.c').read_text()
+        self.assertIn('characters_unicode_graphemes(text)', adapter)
+        self.assertNotIn('ubrk_open(', adapter)
+        self.assertIn('characters_unicode_nfkc_casefold(term)',
+                      (native / 'emoji-catalog.c').read_text())
+        self.assertIn('characters_unicode_casefold(term)',
+                      (native / 'unihan.c').read_text())
+        self.assertIn('from algorithm_data import nfkc_casefold',
+                      (ROOT / 'tools/unicode/generate_emoji_annotations.py').read_text())
+        self.assertIn('from algorithm_data import han_fold',
+                      (ROOT / 'tools/unicode/generate_unihan.py').read_text())
+        self.assertIn('unicode-algorithms.c', (native / 'meson.build').read_text())
+
     def test_release_gate(self) -> None:
         """Prove missing and skipped test records cannot pass the release log gate."""
         names = sorted(expected_tests())

@@ -187,7 +187,7 @@ no global mutable variant cache or new framework is introduced. This is a direct
 catalog lookup and composition, not a speculative Strategy or Factory hierarchy.
 
 Search jobs capture their locale before worker execution. Annotation lookups use
-immutable locale records and ICU case folding, so they introduce no shared
+immutable locale records and pinned Unicode 17 case folding, so they introduce no shared
 mutable state or new cancellation protocol. The existing worker and selection
 contracts remain unchanged. New window action `win.emoji-variations` and inspector
 action `inspect.emoji-variations` open the XML-backed `EmojiVariations` dialog.
@@ -214,18 +214,18 @@ only, while the text view retains native editing behavior.
 
 `src/unicode/composition.vala` owns bounded input validation and conversion
 policy. It reuses the shared scalar formatter and Unicode normalizer;
-`icu-adapter.c` supplies ICU extended grapheme counting. Technical operations run synchronously on explicit input of at
+`icu-adapter.c` delegates extended grapheme counting to the pinned Unicode 17
+algorithm adapter. Technical operations run synchronously on explicit input of at
 most 16,384 scalars (and normalization output is checked against the same
 bound). The count update checks GTK's scalar count before extracting text.
-The existing 32-scalar inspector contract is unchanged. ICU's grapheme result
-is version-dependent. No new mutable native service or pattern hierarchy is
+The existing 32-scalar inspector contract is unchanged. Grapheme boundaries
+are pinned to Unicode 17. No new mutable native service or pattern hierarchy is
 introduced. See [composition](composition.md) for limits and interaction rules.
 
 New window actions are `win.open-composer`, `win.add-character`, and
 `win.copy-character`. The new resource is `ui/composer-view.ui`; installed IDs,
 GSettings keys, native inspection snapshot semantics, and previous actions
-remain unchanged. ICU i18n is linked for grapheme segmentation via the existing
-Debian `libicu-dev` build dependency.
+remain unchanged. ICU remains a dependency for other existing Unicode operations.
 
 ## Stage 8: saved collections and preferences
 
@@ -516,3 +516,14 @@ Property-span traversal skips irrelevant assignment ranges without changing
 numeric ordering; catalog scans borrow exact scalar arrays instead of
 encoding and decoding transient UTF-8 strings. See
 [native search scanner evaluation](native-search-scanner-evaluation.md).
+
+## Unicode 17 algorithm consistency (1.0.23)
+
+The existing native Adapter now delegates grapheme boundaries and simple case
+lookups to `unicode-algorithms.c`. The immutable generated mapping pool serves
+full and compatibility case folding; `algorithm_data.py` consumes its source
+snapshot during offline generation. The Vala relationship collector owns
+relationship selection, but no longer duplicates Unicode 17 case exceptions.
+The composer, saved collections, font-label comparisons, Han search and emoji
+search use the pinned rules. Native traversal and existing GTK lifecycles remain
+unchanged. See [algorithm consistency](unicode-algorithm-consistency.md).

@@ -81,3 +81,10 @@ Their source URLs and pinned digests are documented in
 lookup tables. The archive workflow has populated the official datasets in this release.
 The Unihan archive and resolved CLDR snapshot are retained; fallback Han data
 and historical source notices remain unchanged.
+
+The Unicode 17 algorithm snapshot in `data/unicode/supplement/algorithms.json`
+and `native/unicode/generated/algorithms.h` derives Unicode property and case
+folding data from the pinned regex 2026.5.9 tables and stable ICU 76 data,
+with the documented Unicode 17 mapping additions. The Unicode data license is
+retained in `data/unicode/supplement/LICENSE.unicode`. No regex package code
+is shipped or linked at runtime. See `docs/unicode-algorithm-consistency.md`.

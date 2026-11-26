@@ -20,6 +20,7 @@
   <launchable type="desktop-id">com.majoris.characters.desktop</launchable>
   <url type="homepage">https://github.com/vovechkin02/Majoris-Characters</url>
   <releases>
+    <release version="1.0.23" date="2026-11-27" type="development"/>
     <release version="1.0.22" date="2026-11-27" type="development"/>
     <release version="1.0.21" date="2026-11-27" type="development"/>
     <release version="1.0.20" date="2026-11-26" type="development"/>

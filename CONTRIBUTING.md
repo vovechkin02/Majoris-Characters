@@ -81,3 +81,10 @@ collation metadata distinct. Verify the source archive digests, stage generated
 outputs before replacement, preserve Unicode notices, and report actual locale
 coverage without treating English search fallback as a translation. Do not
 mark a dataset as imported until its original release inputs were processed.
+
+Keep grapheme classes, Indic conjunct properties and case mappings in the
+pinned Unicode algorithm snapshot. Both offline search-index generation and
+runtime queries must use the same folding semantics. Keep exact text and
+metadata unchanged; only derived search operands may be folded. Official
+Unicode test corpus acquisition and the optional conformance driver are
+documented in `docs/unicode-algorithm-consistency.md`.

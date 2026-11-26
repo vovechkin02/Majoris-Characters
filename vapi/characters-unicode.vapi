@@ -2,6 +2,10 @@
 /** Internal native Unicode engine bindings; no installed ABI is promised. */
 [CCode (cheader_filename = "unicode-engine.h", cprefix = "characters_unicode_")]
 namespace Characters.Unicode {
+    /** Return a Unicode 17 default full casefold, or null on invalid input or failure. */
+    [CCode (cname = "characters_unicode_casefold", cheader_filename = "unicode-algorithms.h")]
+    public static string? casefold (string text);
+
     /** Whether @point is within Unicode and not a surrogate. */
     [CCode (cname = "characters_unicode_is_scalar")]
     public static bool is_scalar (uint32 point);

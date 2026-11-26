@@ -26,19 +26,9 @@ namespace Characters.Relationships {
         return append (result, original, Unicode.encode (single));
     }
 
-    /** Apply Unicode 17 simple-case additions before the older ICU mapping primitives. */
+    /** Assemble simple case alternatives from the pinned Unicode mapping adapter. */
     private static bool append_case_variants (GenericArray<string> result, string original,
         uint32 point) {
-        if (point >= 0x16EA0 && point <= 0x16EB8) {
-            return append_scalar (result, original, point + 0x1B);
-        }
-        if (point >= 0x16EBB && point <= 0x16ED3) {
-            return append_scalar (result, original, point - 0x1B);
-        }
-        if ((point >= 0xA7CE && point <= 0xA7CF) ||
-            (point >= 0xA7D2 && point <= 0xA7D5)) {
-            return append_scalar (result, original, point ^ 1u);
-        }
         return append_scalar (result, original, Icu.uppercase (point)) &&
             append_scalar (result, original, Icu.lowercase (point)) &&
             append_scalar (result, original, Icu.titlecase (point));

@@ -10,15 +10,15 @@ namespace Characters.Icu {
     public static size_t decomposition (uint32 point,
         [CCode (array_length = false)] uint32[] points);
 
-    /** ICU simple uppercase mapping; application-level Unicode version deltas are separate. */
+    /** Pinned Unicode 17 simple uppercase mapping. */
     [CCode (cname = "characters_icu_uppercase")]
     public static uint32 uppercase (uint32 point);
 
-    /** ICU simple lowercase mapping. */
+    /** Pinned Unicode 17 simple lowercase mapping. */
     [CCode (cname = "characters_icu_lowercase")]
     public static uint32 lowercase (uint32 point);
 
-    /** ICU simple titlecase mapping. */
+    /** Pinned Unicode 17 simple titlecase mapping. */
     [CCode (cname = "characters_icu_titlecase")]
     public static uint32 titlecase (uint32 point);
 

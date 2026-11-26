@@ -220,7 +220,7 @@ namespace Characters {
                     values += entry.text;
                 }
             }
-            var folded = picker_query.text.casefold ();
+            var folded = Unicode.casefold (picker_query.text);
             saved_results = {};
             foreach (var text in values) {
                 if (LibraryQuery.matches (text, folded)) {

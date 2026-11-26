@@ -2,7 +2,7 @@ namespace Characters.Composition {
     /** Maximum scalar count for technical operations, not an editor limit. */
     public const int MAX_POINTS = 16384;
 
-    /** Count extended graphemes using ICU after validating input bounds. */
+    /** Count extended graphemes using Unicode 17 rules after validating input bounds. */
     public static int graphemes (string? text) {
         if (text == null || ScalarSequence.bounded_count (text, MAX_POINTS) < 0) {
             return -1;

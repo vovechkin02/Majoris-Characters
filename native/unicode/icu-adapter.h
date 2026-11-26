@@ -3,19 +3,19 @@
 
 #include <glib.h>
 
-/** Count ICU extended grapheme clusters in validated, bounded UTF-8. */
+/** Count Unicode 17 extended grapheme clusters in validated, bounded UTF-8. */
 gint characters_icu_graphemes(const gchar *text);
 
 /** Write direct decomposition scalars to a caller-owned 32-element array; zero if absent. */
 gsize characters_icu_decomposition(gunichar point, gunichar *points);
 
-/** Return the ICU simple uppercase mapping, or the input if invalid or unmapped. */
+/** Return the pinned Unicode 17 simple uppercase mapping, or the input if invalid or unmapped. */
 gunichar characters_icu_uppercase(gunichar point);
 
-/** Return the ICU simple lowercase mapping, or the input if invalid or unmapped. */
+/** Return the pinned Unicode 17 simple lowercase mapping, or the input if invalid or unmapped. */
 gunichar characters_icu_lowercase(gunichar point);
 
-/** Return the ICU simple titlecase mapping, or the input if invalid or unmapped. */
+/** Return the pinned Unicode 17 simple titlecase mapping, or the input if invalid or unmapped. */
 gunichar characters_icu_titlecase(gunichar point);
 
 /** Return the ICU bidirectional mirror, or the input if invalid or unmapped. */

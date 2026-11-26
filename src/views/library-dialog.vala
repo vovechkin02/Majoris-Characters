@@ -172,7 +172,7 @@ namespace Characters {
                     counts.insert (entry.text, entry.count);
                 }
             }
-            var query = library_query.text.casefold ();
+            var query = Unicode.casefold (library_query.text);
             string[] visible = {};
             uint selected = Gtk.INVALID_LIST_POSITION;
             foreach (var text in values) {

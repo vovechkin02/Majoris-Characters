@@ -32,9 +32,8 @@ properties or oversized normalized output produce a message and leave the
 original unchanged.
 
 The status line reports Unicode scalar count, UTF-8 byte count, and extended
-grapheme clusters according to the installed ICU segmentation data. Grapheme
-clusters are not the same as rendered glyphs, and Unicode version differences
-may change segmentation of newer sequences. Counts and technical operations
+grapheme clusters according to the pinned Unicode 17 default UAX #29 rules.
+Grapheme clusters are not the same as rendered glyphs. Counts and technical operations
 are limited to 16,384 scalars; larger text can still be edited and copied using
 GTK, and a smaller selection can be converted. The inspector accepts up to 32
 scalars: select a smaller range to inspect longer compositions. Embedded NUL

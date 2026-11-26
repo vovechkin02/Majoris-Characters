@@ -11,7 +11,7 @@
     "data/unicode/emoji/annotations.json.gz": "821815fde34743b1ed70770503d4855bb7117618098b801d47a6c9e29797ae42",
     "data/unicode/emoji/coverage.json": "6daaca7948ad3925df8b6dba8b1656eb68f9b32e76c0c5735219e1375af505d5",
     "data/unicode/han/official-unihan.zip": "f7a48b2b545acfaa77b2d607ae28747404ce02baefee16396c5d2d7a8ef34b5e",
-    "native/unicode/generated/emoji-annotations.h": "f614d06707fff05465dd5186988a2cdcc8c899ca8604756742b51aceb98a4404",
+    "native/unicode/generated/emoji-annotations.h": "a3ce275e039ecee15372bb2bfa89524a103d6efdcacfd1cf06a74133cc57b230",
     "native/unicode/generated/unihan.h": "10c21436b4ffe0995718404dca6afb37de4934cac5280a2d256450399e06cb4e"
   },
   "status": "imported",

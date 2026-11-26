@@ -5,9 +5,9 @@ import gzip
 import json
 from pathlib import Path
 import re
-import unicodedata
 import xml.etree.ElementTree as ET
 
+from algorithm_data import nfkc_casefold
 from generate_emoji_sequences import CATALOG, read_catalog
 
 
@@ -18,7 +18,7 @@ def key(points: list[int]) -> str:
 
 def fold(text: str) -> str:
     """Normalize annotation text for case-insensitive multilingual search."""
-    return unicodedata.normalize("NFKC", text).casefold()
+    return nfkc_casefold(text)
 
 
 def quote(text: str) -> str:

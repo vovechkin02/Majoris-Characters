@@ -8,11 +8,10 @@
 
 #include <glib.h>
 
-#include <unicode/unorm2.h>
-#include <unicode/ustring.h>
 
 #include "../allocation.h"
 #include "icu-scalar-conversion.h"
+#include "unicode-algorithms.h"
 #include "unicode-engine.h"
 
 #define COUNT(array) G_N_ELEMENTS(array)
@@ -112,34 +111,18 @@ static const gchar *lookup_words(const struct AnnotationLocale *locale, const gc
     return NULL;
 }
 
-/** Fold a bounded query using ICU NFKC case folding; false on invalid or oversized output. */
-static gboolean fold_term(const gchar *term, gchar *output, int32_t capacity)
-{
-    if (!term || !*term || strnlen(term, MAX_TERM_BYTES + 1) > MAX_TERM_BYTES) {
-        return FALSE;
-    }
-    UChar input[MAX_TERM_BYTES + 1];
-    UChar folded[MAX_TERM_BYTES * 4 + 1];
-    int32_t length;
-    UErrorCode status = U_ZERO_ERROR;
-    u_strFromUTF8(input, G_N_ELEMENTS(input), &length, term, -1, &status);
-    const UNormalizer2 *normalizer = unorm2_getNFKCCasefoldInstance(&status);
-    if (U_FAILURE(status)) {
-        return FALSE;
-    }
-    length = unorm2_normalize(normalizer, input, length, folded, G_N_ELEMENTS(folded), &status);
-    if (U_FAILURE(status)) {
-        return FALSE;
-    }
-    u_strToUTF8(output, capacity, &length, folded, length, &status);
-    return U_SUCCESS(status) && length > 0 && length < capacity;
-}
-
-/** Allocate a folded operand once for a prepared query; NULL on invalid or empty input. */
+/** Fold a bounded query with the same Unicode 17 mapping as the generated index. */
 gchar *characters_emoji_fold_term(const gchar *term)
 {
-    gchar folded[MAX_TERM_BYTES * 12 + 1];
-    return fold_term(term, folded, sizeof(folded)) ? characters_try_strdup(folded) : NULL;
+    if (!term || !*term || strnlen(term, MAX_TERM_BYTES + 1) > MAX_TERM_BYTES) {
+        return NULL;
+    }
+    gchar *folded = characters_unicode_nfkc_casefold(term);
+    if (folded && (!*folded || strlen(folded) > MAX_TERM_BYTES * 12)) {
+        g_free(folded);
+        return NULL;
+    }
+    return folded;
 }
 
 /** Encode one bounded annotation key into caller-owned stack storage. */

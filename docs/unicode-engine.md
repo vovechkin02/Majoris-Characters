@@ -11,7 +11,8 @@ engine.
 | --- | --- | --- |
 | GNOME Characters | 17.0.0 | Explicit names, 346 blocks, 3,944 fully qualified emoji, confusables |
 | Generated scalar snapshot | 17.0.0 | Assignment, general category, primary script, script extensions, age, combining class, bidi, decomposition type, East Asian width, supported binary flags |
-| ICU system library | Unicode 16.0 on Debian 13 | Stable names, normalization primitives, grapheme segmentation, legacy encodings, case folding |
+| ICU system library | Unicode 16.0 on Debian 13 | Stable names, normalization primitives, legacy encodings, bidirectional mirror mapping |
+| Generated algorithm snapshot | 17.0.0 | Default extended grapheme boundaries, simple and full case mappings, NFKC_Casefold |
 | Alias supplement | 15.0 baseline plus verified 16/17 deltas | 481 aliases |
 | Official Unihan | 17.0.0 | 102,998 records; ten formal fields |
 | CLDR emoji annotations | 48 | 171 locale tables; complete English catalog coverage |
@@ -60,9 +61,10 @@ engine, inspector and composer. For the Debian 13 baseline, it uses stable ICU
 normalization data, Unicode 17 combining classes and the U+A7F1 compatibility
 mapping, and canonical composition with ICU pairs. New scalars without
 mappings remain unchanged; embedded NUL is preserved in length-aware calls.
-The older ICU path remains for unchanged text. New Unicode 17 simple case
-pairs also participate in related-character lookup. Grapheme segmentation and
-general case folding still use system ICU. Confusable relations are advisory,
+The older ICU path remains for unchanged text. Since 1.0.23, pinned Unicode 17
+case mappings and grapheme segmentation no longer depend on system ICU case or
+break data. Emoji and Han indexes and their query folding use shared Unicode 17
+mappings. Confusable relations are advisory,
 not a security guarantee.
 
 ## Offline regeneration
@@ -110,3 +112,6 @@ The ICU adapter supplies raw simple case and mirror mappings and recursive
 canonical decomposition (not compatibility mappings). The native catalog only
 copies the immutable confusable class. See the
 [relationship migration report](unicode-relationship-migration.md).
+
+See [Unicode algorithm consistency](unicode-algorithm-consistency.md) for
+regeneration and optional official conformance tests.

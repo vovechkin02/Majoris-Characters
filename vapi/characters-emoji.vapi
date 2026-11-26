@@ -25,7 +25,7 @@ namespace Characters.Emoji {
     [CCode (cname = "characters_emoji_locale_index")]
     public static uint32 locale_index (string language);
 
-    /** Return an owned ICU NFKC-casefolded operand, or null if unavailable. */
+    /** Return an owned Unicode 17 NFKC-casefolded operand, or null if unavailable. */
     [CCode (cname = "characters_emoji_fold_term")]
     public static string? fold_term (string term);
 

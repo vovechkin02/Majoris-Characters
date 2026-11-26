@@ -61,7 +61,7 @@ typedef enum {
 /** Bit positions of textual fields in the immutable HanRecord field order. */
 #define CHARACTERS_HAN_TEXT_FIELDS UINT32_C(0xCFF)
 
-/** Return owned ICU-folded reading text or NULL on invalid input or overflow. */
+/** Return owned Unicode 17-folded reading text or NULL on invalid input or overflow. */
 gchar *characters_unihan_fold_text(const gchar *term);
 
 /** Match a nonempty folded term against the selected immutable textual fields. */

@@ -3,7 +3,7 @@
 | Stage | Scope | Status |
 | --- | --- | --- |
 | 1 | Vala app, XML UI, Meson, resources, GSettings, theme, Debian packaging | Source implemented; build/runtime qualification pending |
-| 2 | Unicode engine, GNOME C reuse and Vala bindings, database and metadata | Core implemented; native tests passed; Unicode 17 scalar snapshot and normalization delta implemented; official data conformance and Vala qualification pending |
+| 2 | Unicode engine, GNOME C reuse and Vala bindings, database and metadata | Core implemented; native tests passed; Unicode 17 scalar snapshot, normalization delta, grapheme and case folding implemented; official data conformance and Vala qualification pending |
 | 3 | Virtualized character browsing, scripts, blocks, search and filters | Source implemented; native search tests passed; Vala and GTK qualification pending |
 | 4 | Inspector, relationships, encodings, normalization, and identification | Source implemented; native tests passed; Vala and GTK qualification pending |
 | 5 | Installed fonts, coverage, variations, legacy encodings | Source implemented; ICU legacy tests passed; font backend and GTK qualification pending |
@@ -78,3 +78,11 @@ application and GJS are not runtime dependencies of the main application. The op
   symbol storage. Native search traversal, immutable database access and font
   rasterization remain native. See [pass 6 qualification](vala-migration-pass-6.md).
   Establish a full build and benchmark baseline before additional migration.
+
+## Final functional completion priorities (1.0.23)
+
+The official Unihan and CLDR data import (revised Priority 2) is complete.
+Revised Priority 3 implements pinned Unicode 17 grapheme and case mapping
+consistency and regenerates both search indexes. Official UCD corpus conformance
+and full target compilation remain unqualified. The next functional priority is
+IBus-aware international browsing.

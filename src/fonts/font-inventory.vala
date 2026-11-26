@@ -71,14 +71,17 @@ namespace Characters {
 
         /** Returns sorted application identities with exact coverage and a matching label. */
         public uint[] comparisons (uint32 point, string query, string regular) {
-            var term = query.strip ().casefold ();
+            var term = Unicode.casefold (query.strip ());
+            if (term == null) {
+                return new uint[0];
+            }
             var result = new uint[faces.length];
             int matched = 0;
             for (uint index = 0; index < count (); index++) {
                 if (!catalog.contains (faces[index].native_index, point)) {
                     continue;
                 }
-                if (term != "" && !faces[index].display_name (regular).casefold ().contains (term)) {
+                if (term != "" && !(Unicode.casefold (faces[index].display_name (regular)) ?? "").contains (term)) {
                     continue;
                 }
                 result[matched++] = index;
