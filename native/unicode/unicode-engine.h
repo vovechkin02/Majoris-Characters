@@ -179,6 +179,16 @@ gsize characters_unicode_emoji_index(const gunichar *points, gsize length);
 gsize characters_unicode_emoji_count(void);
 
 /**
+ * characters_unicode_emoji_points:
+ * @index: Zero-based emoji catalog index.
+ * @count: (out): Sequence length, zero on invalid input.
+ *
+ * Returns: (transfer none) (array length=count) (nullable): Valid immutable scalars.
+ * The returned storage is static and must not be modified or freed.
+ */
+const gunichar *characters_unicode_emoji_points(gsize index, gsize *count);
+
+/**
  * characters_unicode_emoji_text:
  * @index: Zero-based catalog index.
  *
@@ -208,6 +218,15 @@ gsize characters_unicode_named_count(void);
  * Returns: (transfer none) (nullable): Standardized name or NULL.
  */
 const gchar *characters_unicode_named_name(gsize index);
+
+/**
+ * characters_unicode_named_points:
+ * @index: Zero-based named-sequence index.
+ * @count: (out): Sequence length, zero on invalid input.
+ *
+ * Returns: (transfer none) (array length=count) (nullable): Valid immutable scalars.
+ */
+const gunichar *characters_unicode_named_points(gsize index, gsize *count);
 
 /**
  * characters_unicode_named_text:

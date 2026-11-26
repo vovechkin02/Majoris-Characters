@@ -10,6 +10,7 @@
 #include "language-collections.h"
 #include "scalar-properties.h"
 #include "unihan.h"
+#include "unicode-engine.h"
 
 /** Supply stable fixture operands independently of the production Vala catalog. */
 static void configure_fixture_metadata(CharactersSearch *job)
@@ -29,6 +30,26 @@ static CharactersSearch *fixture_job(CharactersSearchScope scope, gint filter, g
 {
     CharactersSearch *job = characters_search_allocate(scope, filter, category);
     configure_fixture_metadata(job);
+    guint phases = CHARACTERS_SEARCH_PHASE_SCALARS;
+    guint32 first = 0;
+    guint32 last = 0x10FFFF;
+    if (scope == CHARACTERS_SEARCH_ALL) {
+        phases |= CHARACTERS_SEARCH_PHASE_EMOJI | CHARACTERS_SEARCH_PHASE_NAMED;
+    } else if (scope == CHARACTERS_SEARCH_EMOJI) {
+        phases = CHARACTERS_SEARCH_PHASE_EMOJI;
+        last = 0;
+    } else if (scope == CHARACTERS_SEARCH_NAMED) {
+        phases = CHARACTERS_SEARCH_PHASE_NAMED;
+        last = 0;
+    } else if (scope == CHARACTERS_SEARCH_BLOCK && filter >= 0) {
+        first = characters_unicode_block_start((gsize)filter);
+        last = characters_unicode_block_end((gsize)filter);
+    } else if ((scope == CHARACTERS_SEARCH_PLANE || scope == CHARACTERS_SEARCH_UNASSIGNED) &&
+               filter >= 0) {
+        first = (guint32)filter << 16;
+        last = first + 0xFFFFu;
+    }
+    assert(characters_search_set_plan(job, phases, first, last));
     return job;
 }
 
@@ -37,6 +58,7 @@ static CharactersSearch *fixture_points(const gunichar *points, gsize length, gi
 {
     CharactersSearch *job = characters_search_allocate_points(points, length, category);
     configure_fixture_metadata(job);
+    assert(characters_search_set_plan(job, CHARACTERS_SEARCH_PHASE_POINTS, 0, 0));
     return job;
 }
 
@@ -109,7 +131,8 @@ static void test_language_mask(void) {
     assert(scripts[characters_scalar_script_index("Kana")]);
     CharactersSearch *job = fixture_job(CHARACTERS_SEARCH_LANGUAGE, 0, -1);
     assert(job && characters_search_prepare(job, "", NULL, 0, NULL, 0, NULL, 0, NULL, 0, FALSE, FALSE));
-    characters_search_set_scripts(job, scripts, sizeof(scripts));
+    assert(!characters_search_set_scripts(job, scripts, sizeof(scripts) - 1));
+    assert(characters_search_set_scripts(job, scripts, sizeof(scripts)));
     memset(scripts, 0, sizeof(scripts));
     assert(characters_search_run(job) == CHARACTERS_SEARCH_OK);
     assert(contains(job, 0x3042) && contains(job, 0x30FC) && !contains(job, 0x41));
@@ -187,7 +210,7 @@ static void test_metadata(void)
 {
     gunichar points[] = { 0x41, 0x0301, 0xE000 };
     CharactersSearch *job = characters_search_allocate_points(points, 3, -1);
-    assert(job);
+    assert(job && characters_search_set_plan(job, CHARACTERS_SEARCH_PHASE_POINTS, 0, 0));
     guint32 masks[] = { 0x3E, 0x1C0, 0xE00, 0x30F80000,
                         0x0F000000, 0x7000, 0x18000, 0x20000 };
     gchar first[] = "letters-test";
@@ -216,6 +239,7 @@ static void test_metadata(void)
     characters_search_free(job);
 
     job = characters_search_allocate_points(points, 3, 7);
+    assert(job && characters_search_set_plan(job, CHARACTERS_SEARCH_PHASE_POINTS, 0, 0));
     masks[0] = 0x3E;
     strcpy(first, "letters-test");
     strcpy(private_use, "private-test");
@@ -295,6 +319,62 @@ static void test_annotation_operands(void)
     characters_search_free(job);
 }
 
+/** Verify plan bounds, phase compatibility, single commitment, and fail-closed execution. */
+static void test_scan_plan(void)
+{
+    CharactersSearch *job = characters_search_allocate(CHARACTERS_SEARCH_ALL, -1, -1);
+    configure_fixture_metadata(job);
+    assert(characters_search_prepare(job, "", NULL, 0, NULL, 0, NULL, 0, NULL, 0,
+                                     FALSE, FALSE));
+    assert(!characters_search_set_plan(job, 0, 0, 0));
+    assert(!characters_search_set_plan(job, 16, 0, 0));
+    assert(!characters_search_set_plan(job, CHARACTERS_SEARCH_PHASE_POINTS, 0, 0));
+    assert(!characters_search_set_plan(job, CHARACTERS_SEARCH_PHASE_EMOJI, 0, 1));
+    assert(!characters_search_set_plan(job, CHARACTERS_SEARCH_PHASE_SCALARS, 10, 9));
+    assert(!characters_search_set_plan(job, CHARACTERS_SEARCH_PHASE_SCALARS, 0, 0x110000));
+    assert(characters_search_run(job) == CHARACTERS_SEARCH_INVALID);
+    assert(!characters_search_count(job));
+    assert(!characters_search_set_plan(job, CHARACTERS_SEARCH_PHASE_SCALARS, 0, 0x10FFFF));
+    characters_search_free(job);
+
+    job = fixture_job(CHARACTERS_SEARCH_PLANE, 15, -1);
+    assert(!characters_search_set_plan(job, CHARACTERS_SEARCH_PHASE_SCALARS, 0, 0x10FFFF));
+    assert(characters_search_prepare(job, "", NULL, 0, NULL, 0, NULL, 0, NULL, 0,
+                                     FALSE, FALSE));
+    assert(characters_search_run(job) == CHARACTERS_SEARCH_OK);
+    assert(characters_search_count(job) == 65534);
+    assert(characters_search_id(job, 0) == 0xF0000);
+    assert(characters_search_id(job, 65533) == 0xFFFFD);
+    characters_search_free(job);
+
+    job = fixture_job(CHARACTERS_SEARCH_BLOCK, 0, -1);
+    gunichar outside[] = { 0x20AC };
+    assert(characters_search_prepare(job, "U+20AC", outside, 1, NULL, 0, NULL, 0, NULL, 0,
+                                     TRUE, FALSE));
+    assert(characters_search_run(job) == CHARACTERS_SEARCH_OK);
+    assert(!characters_search_count(job));
+    characters_search_free(job);
+
+    job = characters_search_allocate_points(NULL, 0, -1);
+    configure_fixture_metadata(job);
+    assert(!characters_search_set_plan(job, CHARACTERS_SEARCH_PHASE_SCALARS, 0, 0x10FFFF));
+    assert(!characters_search_set_plan(job, CHARACTERS_SEARCH_PHASE_POINTS |
+                                       CHARACTERS_SEARCH_PHASE_EMOJI, 0, 0));
+    assert(characters_search_set_plan(job, CHARACTERS_SEARCH_PHASE_POINTS, 0, 0));
+    assert(characters_search_prepare(job, "", NULL, 0, NULL, 0, NULL, 0, NULL, 0,
+                                     FALSE, FALSE));
+    assert(characters_search_run(job) == CHARACTERS_SEARCH_OK);
+    assert(!characters_search_count(job));
+    characters_search_free(job);
+
+    job = fixture_job(CHARACTERS_SEARCH_LANGUAGE, 0, -1);
+    assert(characters_search_prepare(job, "", NULL, 0, NULL, 0, NULL, 0, NULL, 0,
+                                     FALSE, FALSE));
+    assert(characters_search_run(job) == CHARACTERS_SEARCH_INVALID);
+    assert(!characters_search_count(job));
+    characters_search_free(job);
+}
+
 /** Run the native prepared-request contracts without requiring a Vala compiler. */
 int main(void) {
     test_copied_input();
@@ -305,6 +385,7 @@ int main(void) {
     test_han_descriptor_validation();
     test_metadata();
     test_annotation_operands();
-    puts("8 prepared search contract groups passed");
+    test_scan_plan();
+    puts("9 prepared search contract groups passed");
     return 0;
 }

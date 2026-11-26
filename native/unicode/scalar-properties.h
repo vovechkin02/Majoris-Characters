@@ -6,6 +6,16 @@
 /** Return the Unicode 17 general category in ICU UCharCategory numeric order. */
 gint characters_scalar_category(gunichar point);
 
+/**
+ * characters_scalar_category_span:
+ * @point: Start of a numeric traversal interval.
+ * @last: (out): Inclusive end of the immutable property range, or @point if absent.
+ *
+ * Returns: General category in ICU numeric order. Invalid points return U_UNASSIGNED.
+ * Callers traversing scalars must exclude surrogates, as for the single-point API.
+ */
+gint characters_scalar_category_span(gunichar point, gunichar *last);
+
 /** Return the Unicode 17 decomposition type in ICU UDecompositionType order. */
 gint characters_scalar_decomposition_type(gunichar point);
 

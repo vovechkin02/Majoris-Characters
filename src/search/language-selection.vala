@@ -12,7 +12,7 @@ namespace Characters.LanguageSelection {
     }
 
     /** Resolve named, current-locale and configured XKB collections before scanning. */
-    public static void configure (Search.Job job, int filter, string locale, string sources) {
+    public static bool configure (Search.Job job, int filter, string locale, string sources) {
         var scripts = new uint8[SCRIPT_LIMIT];
         if (filter == 0) {
             LanguageData.add_locale (normalize_locale (locale), scripts);
@@ -34,6 +34,6 @@ namespace Characters.LanguageSelection {
                 LanguageData.add_locale (normalize_locale (tag), scripts);
             }
         }
-        job.set_scripts (scripts);
+        return job.set_scripts (scripts);
     }
 }

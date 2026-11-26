@@ -41,11 +41,30 @@ namespace Characters.Search {
         FAILED
     }
 
+    /** Traversal phases selected by the Vala search plan. */
+    [Flags]
+    [CCode (cname = "CharactersSearchPhase", cprefix = "CHARACTERS_SEARCH_PHASE_",
+        has_type_id = false)]
+    public enum Phase {
+        /** Contiguous scalar range. */
+        SCALARS,
+        /** Emoji catalog and exact aliases. */
+        EMOJI,
+        /** Named sequence catalog. */
+        NAMED,
+        /** Copied explicit repertoire. */
+        POINTS
+    }
+
     /** Owned native request; only cancel may run concurrently with run. */
     [Compact]
     [CCode (cname = "CharactersSearch", free_function = "characters_search_free",
         has_type_id = false)]
     public class Job {
+        /** Commit the prepared traversal plan once before execution. */
+        [CCode (cname = "characters_search_set_plan")]
+        public bool set_plan (uint phases, uint32 first, uint32 last);
+
         /** Copy ordered resolved annotation locale indexes. */
         [CCode (cname = "characters_search_set_annotation_locales")]
         public bool set_annotation_locales ([CCode (array_length_type = "gsize")] uint32[] locales);
@@ -56,7 +75,7 @@ namespace Characters.Search {
 
         /** Copy a query-local script membership mask before the worker starts scanning. */
         [CCode (cname = "characters_search_set_scripts")]
-        public void set_scripts ([CCode (array_length_type = "gsize")] uint8[] scripts);
+        public bool set_scripts ([CCode (array_length_type = "gsize")] uint8[] scripts);
 
         /** Copy parser output and prepared Han operands; no borrowed data survives. */
         [CCode (cname = "characters_search_prepare")]

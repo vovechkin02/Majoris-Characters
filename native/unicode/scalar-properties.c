@@ -61,6 +61,16 @@ gint characters_scalar_category(gunichar point)
     return row ? row->category : U_UNASSIGNED;
 }
 
+/** Return the current immutable category span for a bounded scalar scan. */
+gint characters_scalar_category_span(gunichar point, gunichar *last)
+{
+    const struct PropertyRange *row = lookup(point);
+    if (last) {
+        *last = row ? row->end : point;
+    }
+    return row ? row->category : U_UNASSIGNED;
+}
+
 /** Return the canonical combining class; zero for invalid code points. */
 guint characters_scalar_combining_class(gunichar point)
 {

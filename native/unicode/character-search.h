@@ -41,6 +41,18 @@ typedef enum {
     CHARACTERS_SEARCH_FAILED
 } CharactersSearchStatus;
 
+/** Independent traversal phases selected by the Vala domain policy. */
+typedef enum {
+    /** Scan a contiguous scalar range. */
+    CHARACTERS_SEARCH_PHASE_SCALARS = 1u,
+    /** Scan fully qualified emoji and exact supplementary aliases. */
+    CHARACTERS_SEARCH_PHASE_EMOJI = 2u,
+    /** Scan standardized named sequences. */
+    CHARACTERS_SEARCH_PHASE_NAMED = 4u,
+    /** Scan an explicitly copied repertoire, preserving its order. */
+    CHARACTERS_SEARCH_PHASE_POINTS = 8u
+} CharactersSearchPhase;
+
 /** An owned, single-run request with thread-safe cancellation. */
 typedef struct CharactersSearch CharactersSearch;
 
@@ -59,6 +71,19 @@ CharactersSearch *characters_search_allocate(CharactersSearchScope scope, gint f
  */
 CharactersSearch *characters_search_allocate_points(const gunichar *points, gsize length,
                                                     gint category);
+
+/**
+ * characters_search_set_plan:
+ * @search: Unstarted request.
+ * @phases: Bitwise union of traversal phases in canonical scalar/emoji/named order.
+ * @first: Inclusive numeric lower bound; zero when no scalar phase is selected.
+ * @last: Inclusive numeric upper bound; zero when no scalar phase is selected.
+ *
+ * Returns: Whether the plan was accepted. Required exactly once before run.
+ * Explicit repertoires accept only the points phase. The caller owns scope policy.
+ */
+gboolean characters_search_set_plan(CharactersSearch *search, guint phases,
+                                    guint32 first, guint32 last);
 
 /**
  * characters_search_prepare:
@@ -110,8 +135,9 @@ gboolean characters_search_set_annotation_terms(CharactersSearch *search,
  * characters_search_set_scripts:
  *
  * Copy the exact snapshot script mask produced by Vala language selection.
+ * Returns: Whether a correctly sized mask was copied before execution.
  */
-void characters_search_set_scripts(CharactersSearch *search, const guint8 *scripts,
+gboolean characters_search_set_scripts(CharactersSearch *search, const guint8 *scripts,
                                    gsize length);
 
 /**

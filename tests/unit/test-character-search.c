@@ -290,14 +290,14 @@ static void test_language_collections(void) {
 
     job = characters_query_parser_create(CHARACTERS_SEARCH_LANGUAGE, 0, -1, "");
     assert(job);
-    characters_language_selection_configure(job, 0, "ko_KR.UTF-8", "");
+    assert(characters_language_selection_configure(job, 0, "ko_KR.UTF-8", ""));
     assert(characters_search_run(job) == CHARACTERS_SEARCH_OK);
     assert(contains_id(job, 0xAC00) && contains_id(job, 0x4E2D));
     characters_search_free(job);
 
     job = characters_query_parser_create(CHARACTERS_SEARCH_LANGUAGE, 1, -1, "");
     assert(job);
-    characters_language_selection_configure(job, 1, "en", "us,ru,unknown-layout");
+    assert(characters_language_selection_configure(job, 1, "en", "us,ru,unknown-layout"));
     assert(characters_search_run(job) == CHARACTERS_SEARCH_OK);
     assert(contains_id(job, 'A') && contains_id(job, 0x0410));
     assert(!contains_id(job, 0x3042));

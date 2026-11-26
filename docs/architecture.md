@@ -34,10 +34,12 @@ transfer ownership to the caller. Stage 2 itself creates no worker or callback.
 
 ## Stage 3 boundaries
 
-`src/search/query-parser.vala` owns bounded query parsing. The native scanner owns
-collection traversal, compact result identities and sequence-aware display
-representations. It reuses the immutable engine APIs and ICU, and has no GTK
-or GLib dependency. `SearchRequest` owns a native request across worker and
+`src/search/query-parser.vala` owns bounded query parsing and
+`src/search/search-plan.vala` prepares traversal phases and scalar bounds.
+The native GLib scanner executes the prepared plan, owns compact result identities,
+and borrows immutable catalog sequences and property spans. Vala owns display
+representations. The native scanner reuses the immutable engine APIs and ICU
+without a GTK dependency. `SearchRequest` owns a native request across worker and
 main-context references. `SearchController` serializes the latest pending
 request and suppresses obsolete completion. Native cancellation is atomic;
 results are only read after main-context publication. The GTK main context owns
@@ -500,3 +502,17 @@ remains a library boundary. No generated data, search predicates, Unicode
 assignment or official/fallback provenance changes. Canonical name lookup
 (including algorithmic names) remains native because the scanner uses it.
 See [property metadata migration](property-metadata-migration.md).
+
+## Search plan and native scanner evaluation (1.0.20)
+
+The asynchronous request and synchronous query factories share `SearchPlan`.
+Query, collection and language preparation must succeed before Vala commits
+one numeric plan. The native adapter validates the plan shape and required
+operands, then executes scalar or explicit-repertoire traversal followed by
+emoji and named sequences as applicable. Exact aliases, scope-specific
+matching, compact vectors, duplicate suppression and cancellation remain
+native. This is the existing Adapter boundary, not a new pluggable backend.
+Property-span traversal skips irrelevant assignment ranges without changing
+numeric ordering; catalog scans borrow exact scalar arrays instead of
+encoding and decoding transient UTF-8 strings. See
+[native search scanner evaluation](native-search-scanner-evaluation.md).

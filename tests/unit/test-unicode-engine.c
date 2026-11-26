@@ -171,6 +171,10 @@ static void test_catalogs(void) {
         assert(text && label && *label);
         gunichar points[32];
         gsize length = decode(text, points);
+        gsize borrowed_count;
+        const gunichar *borrowed = characters_unicode_emoji_points(index, &borrowed_count);
+        assert(borrowed && borrowed_count == length &&
+               memcmp(points, borrowed, length * sizeof(*points)) == 0);
         expect_text(characters_unicode_encode(points, length), text);
         if (length > 1) {
             gchar *name = characters_unicode_catalog_sequence_name(points, length);
@@ -190,10 +194,20 @@ static void test_catalogs(void) {
         assert(text && name);
         gunichar points[32];
         gsize length = decode(text, points);
+        gsize borrowed_count;
+        const gunichar *borrowed = characters_unicode_named_points(index, &borrowed_count);
+        assert(borrowed && borrowed_count == length &&
+               memcmp(points, borrowed, length * sizeof(*points)) == 0);
         expect_text(characters_unicode_catalog_sequence_name(points, length), name);
         g_free(text);
     }
     assert(!characters_unicode_named_name(named_count));
+    gsize invalid_count = 1;
+    assert(!characters_unicode_emoji_points(count, &invalid_count) && !invalid_count);
+    invalid_count = 1;
+    assert(!characters_unicode_named_points(named_count, &invalid_count) && !invalid_count);
+    assert(!characters_unicode_emoji_points(0, NULL));
+    assert(!characters_unicode_named_points(0, NULL));
     printf("Emoji: %zu; named sequences: %zu\n", count, named_count);
 }
 
@@ -256,6 +270,35 @@ static void test_confusables(void)
     assert(!characters_unicode_confusables('A', NULL));
 }
 
+/** Verify the range cursor agrees with every scalar's independent category lookup. */
+static void test_category_spans(void)
+{
+    gsize assigned = 0;
+    gsize unassigned = 0;
+    for (gunichar first = 0; first <= 0x10FFFFu;) {
+        if (first == 0xD800u) {
+            first = 0xE000u;
+        }
+        gunichar last;
+        gint category = characters_scalar_category_span(first, &last);
+        assert(last >= first && last <= 0x10FFFFu);
+        for (gunichar point = first; point <= last; point++) {
+            assert(characters_unicode_is_scalar(point));
+            assert(characters_scalar_category(point) == category);
+        }
+        if (category == U_UNASSIGNED) {
+            unassigned += last - first + 1;
+        } else {
+            assigned += last - first + 1;
+        }
+        first = last + 1;
+    }
+    assert(assigned == 297334 && unassigned == 814730);
+    gunichar last;
+    assert(characters_scalar_category_span(0xD800u, &last) == U_UNASSIGNED && last == 0xD800u);
+    assert(characters_scalar_category_span(0x110000u, &last) == U_UNASSIGNED && last == 0x110000u);
+}
+
 /** Run the headless native contract suite and report the catalog sizes. */
 int main(void) {
     test_scalar_metadata();
@@ -264,6 +307,7 @@ int main(void) {
     test_catalogs();
     test_encoding();
     test_confusables();
-    puts("Six native Unicode test groups passed.");
+    test_category_spans();
+    puts("Seven native Unicode test groups passed.");
     return 0;
 }

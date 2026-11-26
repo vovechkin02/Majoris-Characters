@@ -65,6 +65,25 @@ private void test_query_parser () {
     assert (job != null && job.run () == Search.Status.INVALID);
 }
 
+/** Exercise the production Vala traversal plan and its empty/rejected request behavior. */
+private void test_search_plan () {
+    var job = QueryParser.create (Search.Scope.ALL, -1, -1, "");
+    assert (job != null && job.run () == Search.Status.OK && job.count () == 300543);
+    job = QueryParser.create (Search.Scope.PLANE, 15, -1, "");
+    assert (job != null && job.run () == Search.Status.OK && job.count () == 65534);
+    assert (job.id (0) == 0xF0000 && job.id (65533) == 0xFFFFD);
+    job = QueryParser.create (Search.Scope.BLOCK, 0, -1, "U+20AC");
+    assert (job != null && job.run () == Search.Status.OK && job.count () == 0);
+    job = QueryParser.create (Search.Scope.NAMED, -1, -1, "");
+    assert (job != null && job.run () == Search.Status.OK && job.count () == Unicode.named_count ());
+    job = QueryParser.create (Search.Scope.EMOJI, -1, -1, "");
+    assert (job != null && job.run () == Search.Status.OK && job.count () == Unicode.emoji_count ());
+    job = QueryParser.create_points (new uint32[0], -1, "");
+    assert (job != null && job.run () == Search.Status.OK && job.count () == 0);
+    job = QueryParser.create (Search.Scope.PLANE, 17, -1, "");
+    assert (job != null && job.run () == Search.Status.INVALID && job.count () == 0);
+}
+
 /** A newer request must replace pending work and suppress completion of the older request. */
 private void test_latest_request () {
     var controller = new SearchController ();
@@ -96,6 +115,7 @@ int main (string[] args) {
     Test.add_func ("/characters/search/bindings", test_bindings);
     Test.add_func ("/characters/search/presentation", test_presentation);
     Test.add_func ("/characters/search/query-parser", test_query_parser);
+    Test.add_func ("/characters/search/scan-plan", test_search_plan);
     Test.add_func ("/characters/search/latest-request", test_latest_request);
     return Test.run ();
 }

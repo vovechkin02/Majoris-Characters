@@ -343,6 +343,38 @@ gsize characters_unicode_emoji_count(void)
     return G_N_ELEMENTS(emoji_characters);
 }
 
+/** Validate an immutable textual sequence without allocating a UTF-8 round trip. */
+static const gunichar *borrow_sequence(const gunichar *points, gsize length, gsize capacity,
+                                       gsize *count)
+{
+    if (!count) {
+        return NULL;
+    }
+    *count = 0;
+    if (length > capacity || !valid_sequence(points, length)) {
+        return NULL;
+    }
+    for (gsize index = 0; index < length; index++) {
+        if (!points[index]) {
+            return NULL;
+        }
+    }
+    *count = length;
+    return points;
+}
+
+const gunichar *characters_unicode_emoji_points(gsize index, gsize *count)
+{
+    if (index >= G_N_ELEMENTS(emoji_characters)) {
+        if (count) {
+            *count = 0;
+        }
+        return NULL;
+    }
+    const struct EmojiCharacter *entry = &emoji_characters[index];
+    return borrow_sequence(entry->uc, (gsize)entry->length, G_N_ELEMENTS(entry->uc), count);
+}
+
 gchar *characters_unicode_emoji_text(gsize index)
 {
     if (index >= G_N_ELEMENTS(emoji_characters)) {
@@ -365,6 +397,18 @@ gsize characters_unicode_named_count(void)
 const gchar *characters_unicode_named_name(gsize index)
 {
     return index < G_N_ELEMENTS(named_sequences) ? named_sequences[index].name : NULL;
+}
+
+const gunichar *characters_unicode_named_points(gsize index, gsize *count)
+{
+    if (index >= G_N_ELEMENTS(named_sequences)) {
+        if (count) {
+            *count = 0;
+        }
+        return NULL;
+    }
+    const struct NamedEntry *entry = &named_sequences[index];
+    return borrow_sequence(entry->points, entry->length, G_N_ELEMENTS(entry->points), count);
 }
 
 gchar *characters_unicode_named_text(gsize index)

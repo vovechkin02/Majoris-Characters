@@ -169,11 +169,7 @@ namespace Characters.QueryParser {
                                                 string? input, string locale) {
         var job = Search.allocate (scope, filter, category);
         if (job != null) {
-            prepare (job, input, locale);
-            SemanticFilters.configure (job, scope, filter);
-            if (scope == Search.Scope.LANGUAGE) {
-                LanguageSelection.configure (job, filter, locale, "");
-            }
+            SearchPlan.prepare (job, scope, filter, input, locale, "");
         }
         return (owned) job;
     }
@@ -182,7 +178,7 @@ namespace Characters.QueryParser {
     public static Search.Job? create_points (uint32[]? points, int category, string? input) {
         var job = Search.allocate_points (points, category);
         if (job != null) {
-            prepare (job, input);
+            SearchPlan.prepare (job, Search.Scope.ALL, -1, input, "en", "", true);
         }
         return (owned) job;
     }

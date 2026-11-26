@@ -65,3 +65,11 @@ query operands once before scanning using the bounded ICU adapter. Native
 lookup accepts resolved indexes and copied folded terms; do not reintroduce
 per-candidate locale resolution or term folding. Exact presentation aliases
 and their labels remain distinct from the immutable annotation keys.
+
+Prepare search traversal phases and bounds in Vala, committing the plan only
+after successful query and collection preparation. Native traversal must retain
+compact typed identities, ordered results, explicit repertoire ownership,
+recoverable allocation, and bounded cancellation. Prefer immutable property
+spans and borrowed catalog scalars over per-candidate conversion. Any further
+migration of the hot scan loops requires a compiled behavioral and performance
+baseline; language statistics alone are not a justification.

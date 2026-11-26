@@ -133,3 +133,14 @@ or disposing the window disconnects its completion receiver and requests
 cancellation without waiting on the GTK thread. The worker retains its request
 and controller until idle delivery; there are no persistent threads, network
 operations, timers, or cross-application dependencies.
+
+### Prepared traversal and performance (1.0.20)
+
+All production requests prepare a single Vala traversal plan after successful
+query and collection preparation. A missing or invalid plan cannot publish
+results. Explicit repertoires retain caller ordering, including empty input,
+and never expand into the global catalog. The native scanner uses immutable
+property spans and borrowed sequence scalars, with atomic cancellation checks
+before spans and at bounded intervals within included spans. See
+[scanner evaluation](native-search-scanner-evaluation.md) for measured local
+native compatibility and the optional production-path benchmark.

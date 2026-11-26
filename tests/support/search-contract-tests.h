@@ -37,7 +37,7 @@ CharactersSearch *characters_query_parser_create_points(gunichar *points, gint p
                                                         gint category, const gchar *input);
 
 /** Vala language-policy entry point used by the language selection contracts. */
-void characters_language_selection_configure(CharactersSearch *job, gint filter,
+gboolean characters_language_selection_configure(CharactersSearch *job, gint filter,
                                              const gchar *locale, const gchar *sources);
 
 /** Vala relationship policy returns an owned explicit-length string vector. */

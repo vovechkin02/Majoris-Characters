@@ -11,6 +11,7 @@ search_domain_sources = files(
   'search/han-query.vala',
   'search/language-selection.vala',
   'search/query-parser.vala',
+  'search/search-plan.vala',
   'search/semantic-filters.vala',
   'unicode/scalar-sequence.vala',
   'unicode/character-presentation.vala',

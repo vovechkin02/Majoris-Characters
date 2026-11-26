@@ -295,3 +295,14 @@ test('Exact font face and variation contracts', font_face_test,
               'fixtures/fonts/symbol.ttf'),
   suite: 'unit', timeout: 30,
 )
+
+executable(
+  'benchmark-search',
+  'benchmarks/benchmark-search.vala',
+  search_domain_sources,
+  search_domain_vapis,
+  dependencies: [gio_dep, unicode_dep],
+  c_args: app_c_args,
+  build_by_default: false,
+  install: false,
+)

@@ -12,7 +12,6 @@
 
 #include "../allocation.h"
 #include "emoji-catalog.h"
-#include "icu-scalar-conversion.h"
 #include "language-collections.h"
 #include "scalar-properties.h"
 #include "unicode-engine.h"
@@ -47,6 +46,16 @@ struct CharactersSearch {
     gint filter;
     /** General-category group slot, or -1. */
     gint category;
+    /** Validated phase mask; zero until traversal policy is prepared. */
+    guint phases;
+    /** Inclusive bounds selected by the Vala scalar traversal policy. */
+    guint32 first;
+    /** Inclusive upper bound for scalar traversal. */
+    guint32 last;
+    /** Whether the required language mask has been copied. */
+    gboolean scripts_ready;
+    /** Exclusive upper bound of identities tracked by the deduplication bitset. */
+    guint32 seen_limit;
     /** Prepared category group index for each ICU category; -1 means no group. */
     gint category_groups[32];
     /** Copied English search vocabulary for category groups. */
@@ -251,7 +260,7 @@ static gboolean is_canceled(const CharactersSearch *search)
 /** Test whether a valid scalar or emoji identity is already in the result vector. */
 static gboolean has_id(const CharactersSearch *search, guint32 id)
 {
-    return id < EMOJI_BASE + characters_unicode_emoji_count() &&
+    return id < search->seen_limit &&
            (search->seen[id / 8] & (1u << (id % 8)));
 }
 
@@ -274,7 +283,7 @@ static gboolean append_id(CharactersSearch *search, guint32 id)
         search->capacity = capacity;
     }
     search->ids[search->count++] = id;
-    if (id < EMOJI_BASE + characters_unicode_emoji_count()) {
+    if (id < search->seen_limit) {
         search->seen[id / 8] |= (guint8)(1u << (id % 8));
     }
     return TRUE;
@@ -352,34 +361,44 @@ static gboolean scalar_query_matches(const CharactersSearch *search, gunichar po
 /** Scan the selected scalar repertoire in numeric order, bounded by block or plane. */
 static gboolean scan_scalars(CharactersSearch *search, const struct Query *query)
 {
-    guint32 start = 0;
-    guint32 end = SCALAR_LIMIT - 1;
-    if (search->scope == CHARACTERS_SEARCH_BLOCK && search->filter >= 0) {
-        start = characters_unicode_block_start((gsize)search->filter);
-        end = characters_unicode_block_end((gsize)search->filter);
-    }
-    if ((search->scope == CHARACTERS_SEARCH_PLANE ||
-         search->scope == CHARACTERS_SEARCH_UNASSIGNED) && search->filter >= 0) {
-        start = (guint32)search->filter << 16;
-        end = start + 0xFFFFu;
-    }
+    guint32 start = search->first;
+    guint32 end = search->last;
     if (query->exact) {
         if (query->point_count != 1 || query->points[0] < start || query->points[0] > end) {
             return TRUE;
         }
         start = end = query->points[0];
     }
-    for (gunichar point = start; point <= end; point++) {
-        if ((point % CANCEL_INTERVAL == 0) && is_canceled(search)) {
+    for (gunichar first = start; first <= end;) {
+        if (is_canceled(search)) {
             return TRUE;
         }
-        gboolean assigned = characters_unicode_is_assigned(point);
-        gboolean included = search->scope == CHARACTERS_SEARCH_UNASSIGNED ?
-            characters_unicode_is_scalar(point) && !assigned : assigned;
-        if (included && scalar_matches(search, point) &&
-            scalar_query_matches(search, point, query) && !append_id(search, point)) {
-            return FALSE;
+        if (first >= 0xD800u && first <= 0xDFFFu) {
+            first = 0xE000u;
+            continue;
         }
+        gunichar last;
+        gint type = characters_scalar_category_span(first, &last);
+        if (last > end) {
+            last = end;
+        }
+        if (first < 0xD800u && last >= 0xD800u) {
+            last = 0xD7FFu;
+        }
+        gboolean assigned = type != U_UNASSIGNED;
+        gboolean included = search->scope == CHARACTERS_SEARCH_UNASSIGNED ? !assigned : assigned;
+        if (included) {
+            for (gunichar point = first; point <= last; point++) {
+                if ((point % CANCEL_INTERVAL == 0) && is_canceled(search)) {
+                    return TRUE;
+                }
+                if (scalar_matches(search, point) && scalar_query_matches(search, point, query) &&
+                    !append_id(search, point)) {
+                    return FALSE;
+                }
+            }
+        }
+        first = last + 1;
     }
     return TRUE;
 }
@@ -401,12 +420,11 @@ static gboolean scan_points(CharactersSearch *search, const struct Query *query)
 }
 
 /** Search a catalog sequence with exact sequence matching or English metadata terms. */
-static gboolean sequence_matches(const struct Query *query, const gchar *text, const gchar *name,
-                             const gchar *group, gunichar *points, gsize *count)
+static gboolean sequence_matches(const struct Query *query, const gunichar *points, gsize count,
+                                  const gchar *name, const gchar *group)
 {
-    *count = characters_icu_decode_utf8(text, points, MAX_SEQUENCE_POINTS);
-    return *count && (matches_points(query, points, *count) ||
-           matches_terms(query, name, NULL, NULL, NULL, group));
+    return matches_points(query, points, count) ||
+           matches_terms(query, name, NULL, NULL, NULL, group);
 }
 
 /** Match localized terms alongside the catalog name and category without changing exact queries. */
@@ -444,22 +462,14 @@ static gboolean scan_emoji(CharactersSearch *search, const struct Query *query)
                 return TRUE;
             }
             gsize entry = characters_unicode_emoji_group_index(group, index);
-            gchar *text = characters_unicode_emoji_text(entry);
-            if (!text) {
-                return FALSE;
-            }
-            gunichar points[MAX_SEQUENCE_POINTS];
             gsize count;
-            gboolean match = sequence_matches(query, text, characters_unicode_emoji_label(entry),
-                                          group_name, points, &count);
-            if (!match && count) {
-                match = emoji_query_matches(search, query, points, count,
-                    characters_unicode_emoji_label(entry), group_name);
-            }
-            g_free(text);
-            if (!count) {
+            const gunichar *points = characters_unicode_emoji_points(entry, &count);
+            if (!points) {
                 return FALSE;
             }
+            const gchar *name = characters_unicode_emoji_label(entry);
+            gboolean match = sequence_matches(query, points, count, name, group_name) ||
+                emoji_query_matches(search, query, points, count, name, group_name);
             if (match && search->category >= 0 &&
                 (count != 1 || category_for(search, points[0]) != search->category)) {
                 continue;
@@ -523,18 +533,13 @@ static gboolean scan_named(CharactersSearch *search, const struct Query *query)
         if (is_canceled(search)) {
             return TRUE;
         }
-        gchar *text = characters_unicode_named_text(index);
-        if (!text) {
-            return FALSE;
-        }
-        gunichar points[MAX_SEQUENCE_POINTS];
         gsize count;
-        gboolean match = sequence_matches(query, text, characters_unicode_named_name(index),
-                                      NULL, points, &count);
-        g_free(text);
-        if (!count) {
+        const gunichar *points = characters_unicode_named_points(index, &count);
+        if (!points) {
             return FALSE;
         }
+        gboolean match = sequence_matches(query, points, count,
+                                           characters_unicode_named_name(index), NULL);
         if (match && search->scope == CHARACTERS_SEARCH_ALL) {
             gsize emoji_index = characters_unicode_emoji_index(points, count);
             if (emoji_index != G_MAXSIZE && has_id(search, EMOJI_BASE + (guint32)emoji_index)) {
@@ -592,6 +597,29 @@ CharactersSearch *characters_search_allocate_points(const gunichar *points, gsiz
     }
     search->point_count = length;
     return search;
+}
+
+gboolean characters_search_set_plan(CharactersSearch *search, guint phases,
+                                    guint32 first, guint32 last)
+{
+    const guint catalog_phases = CHARACTERS_SEARCH_PHASE_SCALARS |
+        CHARACTERS_SEARCH_PHASE_EMOJI | CHARACTERS_SEARCH_PHASE_NAMED;
+    if (!search || search->started || search->phases || !phases ||
+        (search->points ? phases != CHARACTERS_SEARCH_PHASE_POINTS :
+                         (phases & ~catalog_phases) != 0)) {
+        return FALSE;
+    }
+    if (phases & CHARACTERS_SEARCH_PHASE_SCALARS) {
+        if (first > last || last >= SCALAR_LIMIT) {
+            return FALSE;
+        }
+    } else if (first || last) {
+        return FALSE;
+    }
+    search->phases = phases;
+    search->first = first;
+    search->last = last;
+    return TRUE;
 }
 
 /**
@@ -665,15 +693,18 @@ static void free_query(struct Query *query)
 }
 
 /** Copy the prepared language mask before worker scanning. */
-void characters_search_set_scripts(CharactersSearch *search, const guint8 *scripts,
-                                   gsize length)
+gboolean characters_search_set_scripts(CharactersSearch *search, const guint8 *scripts,
+                                       gsize length)
 {
-    if (!search || search->started || !scripts || length != G_N_ELEMENTS(search->scripts)) {
-        return;
+    if (!search || search->started || !scripts ||
+        length != G_N_ELEMENTS(search->scripts)) {
+        return FALSE;
     }
     for (gsize index = 0; index < length; index++) {
         search->scripts[index] = scripts[index] != 0;
     }
+    search->scripts_ready = TRUE;
+    return TRUE;
 }
 
 /** Copy a validated union of semantic rules before worker traversal. */
@@ -877,9 +908,10 @@ CharactersSearchStatus characters_search_run(CharactersSearch *search)
         !valid_filter(search->scope, (gsize)search->filter)) ||
         search->category < -1 || search->category >= (gint)CATEGORY_COUNT ||
         (search->scope == CHARACTERS_SEARCH_SYMBOLS && !search->rule_count) || !query ||
-        !search->metadata_ready ||
-        (!search->points && !query->han_field &&
-        (search->scope == CHARACTERS_SEARCH_ALL || search->scope == CHARACTERS_SEARCH_EMOJI) &&
+        !search->metadata_ready || !search->phases ||
+        (search->scope == CHARACTERS_SEARCH_LANGUAGE && search->filter >= 0 &&
+         !search->scripts_ready) ||
+        (!query->han_field && (search->phases & CHARACTERS_SEARCH_PHASE_EMOJI) &&
         (query->literal_letter || query->term_count) &&
         (!query->emoji_ready || !search->emoji_locale_count))) {
         return search->status;
@@ -895,23 +927,24 @@ CharactersSearchStatus characters_search_run(CharactersSearch *search)
         search->status = CHARACTERS_SEARCH_FAILED;
         return search->status;
     }
-    search->seen = g_try_malloc0_n((EMOJI_BASE + emoji_count + 7) / 8, 1);
+    search->seen_limit = EMOJI_BASE + (guint32)emoji_count;
+    search->seen = g_try_malloc0_n((search->seen_limit + 7) / 8, 1);
     if (!search->seen) {
         search->status = CHARACTERS_SEARCH_FAILED;
         return search->status;
     }
     gboolean success = TRUE;
-    if (search->points) {
+    if (search->phases & CHARACTERS_SEARCH_PHASE_POINTS) {
         success = scan_points(search, query);
-    } else if (search->scope != CHARACTERS_SEARCH_EMOJI && search->scope != CHARACTERS_SEARCH_NAMED) {
+    } else if (search->phases & CHARACTERS_SEARCH_PHASE_SCALARS) {
         success = scan_scalars(search, query);
     }
-    if (!search->points && success && !query->han_field && !is_canceled(search) &&
-        (search->scope == CHARACTERS_SEARCH_ALL || search->scope == CHARACTERS_SEARCH_EMOJI)) {
+    if (success && !query->han_field && !is_canceled(search) &&
+        (search->phases & CHARACTERS_SEARCH_PHASE_EMOJI)) {
         success = scan_emoji(search, query) && scan_emoji_alias(search, query);
     }
-    if (!search->points && success && !query->han_field && !is_canceled(search) &&
-        (search->scope == CHARACTERS_SEARCH_ALL || search->scope == CHARACTERS_SEARCH_NAMED)) {
+    if (success && !query->han_field && !is_canceled(search) &&
+        (search->phases & CHARACTERS_SEARCH_PHASE_NAMED)) {
         success = scan_named(search, query);
     }
     g_free(search->seen);

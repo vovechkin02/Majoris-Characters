@@ -17,6 +17,8 @@ namespace Characters {
         private Search.Scope scope = Search.Scope.ALL;
         /** Immutable collection filter. */
         private int filter = -1;
+        /** Whether the request traverses an explicit copied scalar repertoire. */
+        private bool explicit_points = false;
 
         /** Creates an unprepared request; parsing and language selection run on the worker. */
         public SearchRequest (Search.Scope scope, int filter, int category, string query,
@@ -32,6 +34,7 @@ namespace Characters {
         /** Copies a font or encoding repertoire into an independently owned native job. */
         public SearchRequest.for_points (uint32[] points, int category, string query) {
             this.query = query.length <= QueryParser.MAX_BYTES ? query : null;
+            explicit_points = true;
             job = Search.allocate_points (points, category);
         }
 
@@ -40,11 +43,8 @@ namespace Characters {
             if (job == null) {
                 return Search.Status.FAILED;
             }
-            QueryParser.prepare (job, query, locale);
-            SemanticFilters.configure (job, scope, filter);
-            if (scope == Search.Scope.LANGUAGE) {
-                LanguageSelection.configure (job, filter, locale, input_sources);
-            }
+            SearchPlan.prepare (job, scope, filter, query, locale, input_sources,
+                                explicit_points);
             return job.run ();
         }
 
