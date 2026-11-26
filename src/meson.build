@@ -5,6 +5,8 @@ app_config = configure_file(
 )
 
 search_domain_sources = files(
+  'emoji/annotation-policy.vala',
+  'emoji/presentation.vala',
   'search/collection-catalog.vala',
   'search/han-query.vala',
   'search/language-selection.vala',

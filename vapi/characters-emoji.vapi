@@ -21,9 +21,13 @@ namespace Characters.Emoji {
     [CCode (cname = "characters_emoji_alias_canonical")]
     public static size_t alias_canonical (size_t index);
 
-    /** Borrow the associated catalog or presentation label. */
-    [CCode (cname = "characters_emoji_alias_label")]
-    public static unowned string? alias_label (size_t index);
+    /** Resolve an exact locale tag, or UINT32_MAX when absent. */
+    [CCode (cname = "characters_emoji_locale_index")]
+    public static uint32 locale_index (string language);
+
+    /** Return an owned ICU NFKC-casefolded operand, or null if unavailable. */
+    [CCode (cname = "characters_emoji_fold_term")]
+    public static string? fold_term (string term);
 
     /** Borrow the annotation database provenance, independent of Unicode properties. */
     [CCode (cname = "characters_emoji_annotation_source")]

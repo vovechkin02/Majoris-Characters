@@ -46,9 +46,13 @@ namespace Characters.Search {
     [CCode (cname = "CharactersSearch", free_function = "characters_search_free",
         has_type_id = false)]
     public class Job {
-        /** Capture the annotation locale before handing the request to its worker. */
-        [CCode (cname = "characters_search_set_locale")]
-        public void set_locale (string locale);
+        /** Copy ordered resolved annotation locale indexes. */
+        [CCode (cname = "characters_search_set_annotation_locales")]
+        public bool set_annotation_locales ([CCode (array_length_type = "gsize")] uint32[] locales);
+
+        /** Copy folded annotation operands parallel to metadata terms or one literal letter. */
+        [CCode (cname = "characters_search_set_annotation_terms")]
+        public bool set_annotation_terms ([CCode (array_length_type = "gsize")] string[] terms);
 
         /** Copy a query-local script membership mask before the worker starts scanning. */
         [CCode (cname = "characters_search_set_scripts")]
@@ -102,7 +106,7 @@ namespace Characters.Search {
     [CCode (cname = "characters_search_text")]
     public static string? text (uint32 id);
 
-    /** Owned raw sequence label, or null for scalar or invalid identities. */
+    /** Owned raw catalog label; null for scalar, supplementary alias or invalid identities. */
     [CCode (cname = "characters_search_sequence_label")]
-    public static string? sequence_label (uint32 id);
+    public static string? catalog_sequence_label (uint32 id);
 }

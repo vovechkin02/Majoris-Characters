@@ -156,7 +156,7 @@ static void test_catalogs(void) {
         gsize length = decode(text, points);
         expect_text(characters_unicode_encode(points, length), text);
         if (length > 1) {
-            gchar *name = characters_unicode_sequence_name(points, length);
+            gchar *name = characters_unicode_catalog_sequence_name(points, length);
             assert(name && *name);
             g_free(name);
         }
@@ -173,7 +173,7 @@ static void test_catalogs(void) {
         assert(text && name);
         gunichar points[32];
         gsize length = decode(text, points);
-        expect_text(characters_unicode_sequence_name(points, length), name);
+        expect_text(characters_unicode_catalog_sequence_name(points, length), name);
         g_free(text);
     }
     assert(!characters_unicode_named_name(named_count));
@@ -184,7 +184,7 @@ static void test_catalogs(void) {
 static void test_encoding(void) {
     gunichar points[] = { 0x1F469, 0x200D, 0x1F4BB };
     expect_text(characters_unicode_encode(points, 3), "👩‍💻");
-    expect_text(characters_unicode_sequence_name(points, 3), "WOMAN TECHNOLOGIST");
+    expect_text(characters_unicode_catalog_sequence_name(points, 3), "WOMAN TECHNOLOGIST");
     expect_text(characters_unicode_normalize("e\xCC\x81", "NFC"), "é");
     expect_text(characters_unicode_normalize("é", "NFD"), "e\xCC\x81");
     expect_text(characters_unicode_normalize("ﬀ", "NFKC"), "ff");

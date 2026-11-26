@@ -479,3 +479,13 @@ decomposition; the generated confusable table exposes an owned class copy.
 Direct decomposition for the inspector is unchanged. The original filtering,
 exact identity deduplication and binary UTF-8 ordering remain in one collector.
 See [Unicode relationship migration](unicode-relationship-migration.md).
+
+## Emoji annotation policy (1.0.18)
+
+The Vala emoji domain prepares ordered, deduplicated annotation locale indexes
+and folded query operands before native scanning. The native search worker owns
+copies of those operands and reuses the decoded candidate sequence. The native
+catalog retains exact annotation key lookup and tone-base lookup with bounded
+stack storage. Supplementary presentation labels and names are assembled in
+Vala; canonical scalar, named-sequence and fully qualified catalog precedence
+is preserved. See [emoji annotation migration](emoji-annotation-migration.md).

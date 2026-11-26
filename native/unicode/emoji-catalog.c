@@ -70,15 +70,23 @@ static gsize annotation_key(const gunichar *points, gsize count, guint32 *key,
     return length;
 }
 
-/** Find one exact locale tag, ignoring ASCII case and normalizing separators at the caller. */
-static const struct AnnotationLocale *find_locale(const gchar *language)
+/** Return an exact annotation locale index, or G_MAXUINT32 when absent. */
+guint32 characters_emoji_locale_index(const gchar *language)
 {
-    for (gsize index = 0; index < G_N_ELEMENTS(annotation_locales); index++) {
-        if (g_ascii_strcasecmp(language, annotation_locales[index].language) == 0) {
-            return &annotation_locales[index];
+    if (language) {
+        for (gsize index = 0; index < G_N_ELEMENTS(annotation_locales); index++) {
+            if (g_ascii_strcasecmp(language, annotation_locales[index].language) == 0) {
+                return (guint32)index;
+            }
         }
     }
-    return NULL;
+    return G_MAXUINT32;
+}
+
+/** Return the number of immutable locale tables for prepared-index validation. */
+gsize characters_emoji_locale_count(void)
+{
+    return G_N_ELEMENTS(annotation_locales);
 }
 
 /** Binary-search one locale's sorted UTF-8 identity keys. */
@@ -127,84 +135,62 @@ static gboolean fold_term(const gchar *term, gchar *output, int32_t capacity)
     return U_SUCCESS(status) && length > 0 && length < capacity;
 }
 
-/** Check exact annotation keys before falling back to the unmodified skin-tone base. */
-static gboolean locale_matches(const struct AnnotationLocale *locale, const gunichar *points,
-                           gsize count, const gchar *term)
-{
-    if (!locale) {
-        return FALSE;
-    }
-    for (guint attempt = 0; attempt < 2; attempt++) {
-        guint32 key[MAX_POINTS];
-        gsize length = annotation_key(points, count, key, attempt != 0);
-        gchar *text = characters_unicode_encode(key, length);
-        const gchar *words = lookup_words(locale, text);
-        gboolean match = words && strstr(words, term);
-        g_free(text);
-        if (match) {
-            return TRUE;
-        }
-    }
-    return FALSE;
-}
-
-/** Search the locale and its parents, with a Chinese script fallback for regional tags. */
-static gboolean matches_locale_chain(const gchar *locale, const gunichar *points, gsize count,
-                                 const gchar *term)
-{
-    gchar language[64] = { 0 };
-    if (!locale) {
-        return FALSE;
-    }
-    gsize length = strcspn(locale, ".@:");
-    if (length >= sizeof(language)) {
-        return FALSE;
-    }
-    memcpy(language, locale, length);
-    for (gsize index = 0; index < length; index++) {
-        if (language[index] == '-') {
-            language[index] = '_';
-        }
-    }
-    if (locale_matches(find_locale(language), points, count, term)) {
-        return TRUE;
-    }
-    if (g_ascii_strcasecmp(language, "zh_TW") == 0 || g_ascii_strcasecmp(language, "zh_HK") == 0 ||
-        g_ascii_strcasecmp(language, "zh_MO") == 0) {
-        if (locale_matches(find_locale("zh_Hant"), points, count, term)) {
-            return TRUE;
-        }
-    } else if (g_ascii_strcasecmp(language, "zh_CN") == 0 || g_ascii_strcasecmp(language, "zh_SG") == 0) {
-        if (locale_matches(find_locale("zh_Hans"), points, count, term)) {
-            return TRUE;
-        }
-    }
-    gchar *separator;
-    while ((separator = strrchr(language, '_')) != NULL) {
-        *separator = '\0';
-        if (locale_matches(find_locale(language), points, count, term)) {
-            return TRUE;
-        }
-    }
-    return FALSE;
-}
-
-/** Match an annotation term without mutating either immutable source table. */
-gboolean characters_emoji_keyword_matches(gsize index, const gchar *locale, const gchar *term)
+/** Allocate a folded operand once for a prepared query; NULL on invalid or empty input. */
+gchar *characters_emoji_fold_term(const gchar *term)
 {
     gchar folded[MAX_TERM_BYTES * 12 + 1];
-    if (!fold_term(term, folded, sizeof(folded))) {
+    return fold_term(term, folded, sizeof(folded)) ? characters_try_strdup(folded) : NULL;
+}
+
+/** Encode one bounded annotation key into caller-owned stack storage. */
+static gboolean encode_key(const gunichar *points, gsize count, gboolean remove_tones,
+                           gchar *text)
+{
+    gunichar key[MAX_POINTS];
+    gsize length = annotation_key(points, count, key, remove_tones);
+    gsize offset = 0;
+    for (gsize index = 0; index < length; index++) {
+        if (!characters_unicode_is_scalar(key[index]) || !key[index]) {
+            return FALSE;
+        }
+        offset += (gsize)g_unichar_to_utf8(key[index], text + offset);
+    }
+    text[offset] = '\0';
+    return offset != 0;
+}
+
+/** Match one folded term using only the caller's resolved locale indexes. */
+gboolean characters_emoji_keyword_matches(const gunichar *points, gsize count,
+                                          const guint32 *locales, gsize locale_count,
+                                          const gchar *term)
+{
+    if (!points || !count || count > MAX_POINTS || !locales || !locale_count ||
+        locale_count > G_N_ELEMENTS(annotation_locales) || !term || !*term) {
         return FALSE;
     }
-    gunichar points[MAX_POINTS];
-    gchar *text = characters_unicode_emoji_text(index);
-    gsize count = characters_icu_decode_utf8(text, points, MAX_POINTS);
-    g_free(text);
-    if (!count) {
+    gchar exact[MAX_TEXT_BYTES + 1];
+    gchar base[MAX_TEXT_BYTES + 1];
+    if (!encode_key(points, count, FALSE, exact)) {
         return FALSE;
     }
-    return matches_locale_chain(locale, points, count, folded) ||
-           locale_matches(find_locale("en"), points, count, folded);
+    gboolean has_base = encode_key(points, count, TRUE, base) && strcmp(exact, base) != 0;
+    for (gsize index = 0; index < locale_count; index++) {
+        if (locales[index] >= G_N_ELEMENTS(annotation_locales)) {
+            continue;
+        }
+        const struct AnnotationLocale *locale = &annotation_locales[locales[index]];
+        const gchar *words = lookup_words(locale, exact);
+        if (words && strstr(words, term)) {
+            return TRUE;
+        }
+        if (has_base) {
+            words = lookup_words(locale, base);
+            if (words && strstr(words, term)) {
+                return TRUE;
+            }
+        }
+    }
+    return FALSE;
 }
 
 /** Return whether a scalar has both standardized presentation selectors. */
@@ -265,55 +251,6 @@ const gchar *characters_emoji_alias_text(gsize index)
 gsize characters_emoji_alias_canonical(gsize index)
 {
     return index < G_N_ELEMENTS(sequence_aliases) ? sequence_aliases[index].canonical : G_MAXSIZE;
-}
-
-/** Return a stable label for a noncatalog sequence. */
-const gchar *characters_emoji_alias_label(gsize index)
-{
-    const gchar *text = characters_emoji_alias_text(index);
-    gunichar points[MAX_POINTS];
-    gsize count = characters_icu_decode_utf8(text, points, MAX_POINTS);
-    if (!count) {
-        return NULL;
-    }
-    if (characters_emoji_is_presentation_base(points[0])) {
-        if (count == 1) {
-            return "Default presentation";
-        }
-        if (count == 2 && points[1] == 0xFE0E) {
-            return "Text presentation";
-        }
-        if (count == 2 && points[1] == 0xFE0F) {
-            return "Emoji presentation";
-        }
-    }
-    return characters_unicode_emoji_label(characters_emoji_alias_canonical(index));
-}
-
-/** Allocate an informative name including the base identity for explicit presentation pairs. */
-gchar *characters_emoji_alias_name(gsize index)
-{
-    const gchar *label = characters_emoji_alias_label(index);
-    const gchar *text = characters_emoji_alias_text(index);
-    gunichar points[MAX_POINTS];
-    gsize count = characters_icu_decode_utf8(text, points, MAX_POINTS);
-    if (!label || !count) {
-        return NULL;
-    }
-    if (count > 2 || (count == 2 && points[1] != 0xFE0E && points[1] != 0xFE0F)) {
-        return characters_try_strdup(label);
-    }
-    gchar *name = characters_unicode_name(points[0]);
-    if (!name) {
-        return characters_try_strdup(label);
-    }
-    gsize capacity = strlen(name) + strlen(label) + 4;
-    gchar *result = g_try_malloc(capacity);
-    if (result) {
-        g_snprintf(result, capacity, "%s (%s)", name, label);
-    }
-    g_free(name);
-    return result;
 }
 
 /** Expose annotation provenance independently of the Unicode character repertoire. */

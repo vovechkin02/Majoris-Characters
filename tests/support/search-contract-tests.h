@@ -22,6 +22,16 @@ gchar *characters_search_code(guint32 id);
 CharactersSearch *characters_query_parser_create(CharactersSearchScope scope, gint filter,
                                                  gint category, const gchar *input);
 
+/** Vala query factory with explicit locale fallback policy. */
+CharactersSearch *characters_query_parser_create_localized(CharactersSearchScope scope,
+    gint filter, gint category, const gchar *input, const gchar *locale);
+
+/** Owned Vala presentation label for an exact supplementary emoji identity. */
+gchar *characters_emoji_alias_label(gsize index);
+
+/** Owned Vala presentation name for an exact supplementary emoji identity. */
+gchar *characters_emoji_alias_name(gsize index);
+
 /** Vala query factory for copied repertoires; Vala array length uses gint. */
 CharactersSearch *characters_query_parser_create_points(gunichar *points, gint points_length,
                                                         gint category, const gchar *input);

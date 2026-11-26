@@ -6,6 +6,7 @@
 
 #include <glib.h>
 
+#include "emoji-catalog.h"
 #include "language-collections.h"
 #include "scalar-properties.h"
 #include "unihan.h"
@@ -242,6 +243,58 @@ static void test_metadata(void)
     characters_search_free(job);
 }
 
+/** Exercise copied locale indexes, folded terms, selector keys and rejection paths. */
+static void test_annotation_operands(void)
+{
+    guint32 locales[] = { characters_emoji_locale_index("FR"),
+                          characters_emoji_locale_index("en") };
+    assert(locales[0] != G_MAXUINT32 && locales[1] != G_MAXUINT32);
+    assert(characters_emoji_locale_index("unknown") == G_MAXUINT32);
+    gchar *folded = characters_emoji_fold_term("ÉMOTICÔNE");
+    assert(folded && strcmp(folded, "émoticône") == 0);
+    assert(!characters_emoji_fold_term("") && !characters_emoji_fold_term("\xFF"));
+    gunichar smile[] = { 0x1F600 };
+    assert(characters_emoji_keyword_matches(smile, 1, locales, 2, folded));
+    assert(!characters_emoji_keyword_matches(smile, 1, locales + 1, 1, folded));
+    gunichar dancer[] = { 0x1F9D1, 0x1F3FD, 0x200D, 0x1FA70 };
+    assert(characters_emoji_keyword_matches(dancer, 4, locales, 2, "ballet"));
+    assert(!characters_emoji_keyword_matches(dancer, 4, locales, 2, ""));
+    CharactersSearch *job = fixture_job(CHARACTERS_SEARCH_EMOJI, -1, -1);
+    gchar *terms[] = { "ÉMOTICÔNE" };
+    gchar *han[] = { "" };
+    guint32 operands[] = { CHARACTERS_HAN_ORDINARY, CHARACTERS_HAN_TEXT_FIELDS, 0 };
+    guint32 invalid[] = { G_MAXUINT32 };
+    guint32 duplicate[] = { locales[0], locales[0] };
+    assert(!characters_search_set_annotation_locales(job, invalid, 1));
+    assert(!characters_search_set_annotation_locales(job, duplicate, 2));
+    assert(characters_search_set_annotation_locales(job, locales, 2));
+    assert(!characters_search_set_annotation_locales(job, locales, 2));
+    assert(!characters_search_set_annotation_terms(job, terms, 1));
+    assert(characters_search_prepare(job, terms[0], NULL, 0, terms, 1, han, 1,
+                                     operands, 3, FALSE, FALSE));
+    gchar *prepared[] = { folded };
+    assert(!characters_search_set_annotation_terms(job, prepared, 0));
+    assert(characters_search_set_annotation_terms(job, prepared, 1));
+    assert(!characters_search_set_annotation_terms(job, prepared, 1));
+    memset(folded, 'z', strlen(folded));
+    g_free(folded);
+    locales[0] = G_MAXUINT32;
+    assert(characters_search_run(job) == CHARACTERS_SEARCH_OK);
+    gboolean found = FALSE;
+    for (gsize index = 0; index < characters_search_count(job); index++) {
+        gchar *text = characters_search_text(characters_search_id(job, index));
+        found |= text && strcmp(text, "😀") == 0;
+        g_free(text);
+    }
+    assert(found);
+    characters_search_free(job);
+    job = fixture_job(CHARACTERS_SEARCH_EMOJI, -1, -1);
+    assert(characters_search_prepare(job, terms[0], NULL, 0, terms, 1, han, 1,
+                                     operands, 3, FALSE, FALSE));
+    assert(characters_search_run(job) == CHARACTERS_SEARCH_INVALID);
+    characters_search_free(job);
+}
+
 /** Run the native prepared-request contracts without requiring a Vala compiler. */
 int main(void) {
     test_copied_input();
@@ -251,6 +304,7 @@ int main(void) {
     test_semantic_rules();
     test_han_descriptor_validation();
     test_metadata();
-    puts("7 prepared search contract groups passed");
+    test_annotation_operands();
+    puts("8 prepared search contract groups passed");
     return 0;
 }

@@ -36,7 +36,10 @@ namespace Characters.Search {
     /** Resolve the canonical name, aliases or descriptive fallback without altering identity. */
     public static string? name (uint32 id) {
         if (id >= SCALAR_LIMIT) {
-            return sequence_label (id);
+            if (id >= 0x180000u && id < 0x200000u) {
+                return Emoji.alias_name (id - 0x180000u);
+            }
+            return catalog_sequence_label (id);
         }
         if (!Unicode.is_scalar (id)) {
             return null;

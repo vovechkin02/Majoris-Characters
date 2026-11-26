@@ -3,15 +3,19 @@
 
 #include <glib.h>
 
-/**
- * characters_emoji_keyword_matches:
- * @index: Fully qualified catalog entry.
- * @locale: Locale identifier; English is always searched as a fallback.
- * @term: One UTF-8 metadata search term, at most 512 bytes.
- *
- * Returns: Whether localized or English annotations contain the folded term.
- */
-gboolean characters_emoji_keyword_matches(gsize index, const gchar *locale, const gchar *term);
+/** Resolve an exact locale tag to an immutable index, or G_MAXUINT32. */
+guint32 characters_emoji_locale_index(const gchar *language);
+
+/** Return the number of immutable annotation locale tables. */
+gsize characters_emoji_locale_count(void);
+
+/** Allocate an ICU NFKC-casefolded term, or NULL for invalid or empty input. */
+gchar *characters_emoji_fold_term(const gchar *term);
+
+/** Match a prepared folded term using caller-selected locale indexes and exact scalars. */
+gboolean characters_emoji_keyword_matches(const gunichar *points, gsize count,
+                                          const guint32 *locales, gsize locale_count,
+                                          const gchar *term);
 
 /** Return the immutable provenance string for the bundled annotation data. */
 const gchar *characters_emoji_annotation_source(void);
@@ -34,10 +38,5 @@ const gchar *characters_emoji_alias_text(gsize index);
 /** Return the corresponding catalog index, or G_MAXSIZE for standalone pairs. */
 gsize characters_emoji_alias_canonical(gsize index);
 
-/** Borrow a label for an exact presentation or selector-omission sequence. */
-const gchar *characters_emoji_alias_label(gsize index);
-
-/** Allocate an informative name for an exact alias; free the returned string. */
-gchar *characters_emoji_alias_name(gsize index);
 
 #endif

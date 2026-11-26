@@ -30,6 +30,8 @@
 #define MAX_RULE_WORDS (RULE_WORDS * 128u)
 #define HAN_WORDS 3u
 #define MAX_HAN_TERM_BYTES (MAX_QUERY_BYTES * 3 + 1)
+#define MAX_EMOJI_TERM_BYTES (MAX_QUERY_BYTES * 12 + 1)
+#define MAX_EMOJI_LOCALES 64u
 
 #define CATEGORY_COUNT 8u
 #define FALLBACK_COUNT 4u
@@ -55,8 +57,10 @@ struct CharactersSearch {
     gboolean metadata_ready;
     /** Owned prepared query; NULL until the Vala domain parser accepts input. */
     struct Query *query;
-    /** Locale captured before worker execution; defaults to English. */
-    gchar locale[64];
+    /** Resolved annotation locale indexes in caller-defined fallback order. */
+    guint32 emoji_locales[MAX_EMOJI_LOCALES];
+    /** Number of initialized annotation indexes. */
+    gsize emoji_locale_count;
     /** Script membership mask resolved once before scanning a language collection. */
     gboolean scripts[CHARACTERS_LANGUAGE_SCRIPT_LIMIT];
     /** Copied union of Vala semantic clauses, each containing four unsigned words. */
@@ -85,8 +89,6 @@ struct CharactersSearch {
 
 /** Parsed input in one owned allocation; term pointers refer to its internal buffer. */
 struct Query {
-    /** Exact literal text, used for single-letter emoji keyword searches. */
-    gchar text[MAX_QUERY_BYTES + 1];
     /** Packed, owned metadata term strings. */
     gchar term_text[MAX_QUERY_BYTES + 1];
     /** Borrowed pointers into term_text, valid for the prepared query lifetime. */
@@ -95,6 +97,10 @@ struct Query {
     gsize term_count;
     /** Independently folded Han search terms; empty if folding was unavailable. */
     gchar han_terms[MAX_TERMS][MAX_HAN_TERM_BYTES];
+    /** Owned folded annotation terms, parallel to metadata terms or one literal letter. */
+    gchar *emoji_terms[MAX_TERMS];
+    /** Whether annotation operands were validated and copied. */
+    gboolean emoji_ready;
     /** Prepared Han term descriptors: kind, field mask, numeric group. */
     guint32 han_rules[MAX_TERMS][HAN_WORDS];
     /** An explicit Han field disables non-Han sequence matching. */
@@ -405,16 +411,19 @@ static gboolean sequence_matches(const struct Query *query, const gchar *text, c
 
 /** Match localized terms alongside the catalog name and category without changing exact queries. */
 static gboolean emoji_query_matches(const CharactersSearch *search, const struct Query *query,
-                                gsize entry, const gchar *name, const gchar *group)
+                                const gunichar *points, gsize count, const gchar *name,
+                                const gchar *group)
 {
     if (query->exact) {
         return query->literal_letter && search->scope == CHARACTERS_SEARCH_EMOJI &&
-               characters_emoji_keyword_matches(entry, search->locale, query->text);
+               characters_emoji_keyword_matches(points, count, search->emoji_locales,
+                    search->emoji_locale_count, query->emoji_terms[0]);
     }
     for (gsize index = 0; index < query->term_count; index++) {
         const gchar *term = query->terms[index];
         if (!contains_term(name, term) && !contains_term(group, term) &&
-            !characters_emoji_keyword_matches(entry, search->locale, term)) {
+            !characters_emoji_keyword_matches(points, count, search->emoji_locales,
+                search->emoji_locale_count, query->emoji_terms[index])) {
             return FALSE;
         }
     }
@@ -444,7 +453,7 @@ static gboolean scan_emoji(CharactersSearch *search, const struct Query *query)
             gboolean match = sequence_matches(query, text, characters_unicode_emoji_label(entry),
                                           group_name, points, &count);
             if (!match && count) {
-                match = emoji_query_matches(search, query, entry,
+                match = emoji_query_matches(search, query, points, count,
                     characters_unicode_emoji_label(entry), group_name);
             }
             g_free(text);
@@ -585,11 +594,73 @@ CharactersSearch *characters_search_allocate_points(const gunichar *points, gsiz
     return search;
 }
 
-void characters_search_set_locale(CharactersSearch *search, const gchar *locale)
+/**
+ * characters_search_set_annotation_locales:
+ * Copy the resolved locale chain; invalid or repeated configuration is rejected.
+ */
+gboolean characters_search_set_annotation_locales(CharactersSearch *search,
+                                                  const guint32 *locales, gsize count)
 {
-    if (search && !search->started && locale &&
-        strnlen(locale, sizeof(search->locale)) < sizeof(search->locale)) {
-        strcpy(search->locale, locale);
+    if (!search || search->started || search->emoji_locale_count || !locales || !count ||
+        count > MAX_EMOJI_LOCALES || count > characters_emoji_locale_count()) {
+        return FALSE;
+    }
+    for (gsize index = 0; index < count; index++) {
+        if (locales[index] >= characters_emoji_locale_count()) {
+            return FALSE;
+        }
+        for (gsize previous = 0; previous < index; previous++) {
+            if (locales[previous] == locales[index]) {
+                return FALSE;
+            }
+        }
+    }
+    memcpy(search->emoji_locales, locales, count * sizeof(*locales));
+    search->emoji_locale_count = count;
+    return TRUE;
+}
+
+/**
+ * characters_search_set_annotation_terms:
+ * Copy folded annotation operands after the general query has been prepared.
+ */
+gboolean characters_search_set_annotation_terms(CharactersSearch *search,
+                                                gchar *const *terms, gsize count)
+{
+    if (!search || search->started || !search->query || search->query->emoji_ready ||
+        count != (search->query->literal_letter ? 1 : search->query->term_count) ||
+        (count && !terms)) {
+        return FALSE;
+    }
+    struct Query *query = search->query;
+    for (gsize index = 0; index < count; index++) {
+        if (!terms[index] || strnlen(terms[index], MAX_EMOJI_TERM_BYTES) >= MAX_EMOJI_TERM_BYTES) {
+            return FALSE;
+        }
+    }
+    for (gsize index = 0; index < count; index++) {
+        query->emoji_terms[index] = characters_try_strdup(terms[index]);
+        if (!query->emoji_terms[index]) {
+            for (gsize previous = 0; previous < index; previous++) {
+                g_free(query->emoji_terms[previous]);
+                query->emoji_terms[previous] = NULL;
+            }
+            search->status = CHARACTERS_SEARCH_FAILED;
+            return FALSE;
+        }
+    }
+    query->emoji_ready = TRUE;
+    return TRUE;
+}
+
+/** Release owned folded operands along with the bounded query allocation. */
+static void free_query(struct Query *query)
+{
+    if (query) {
+        for (gsize index = 0; index < MAX_TERMS; index++) {
+            g_free(query->emoji_terms[index]);
+        }
+        g_free(query);
     }
 }
 
@@ -684,7 +755,6 @@ gboolean characters_search_prepare(CharactersSearch *search, const gchar *text,
         search->status = CHARACTERS_SEARCH_FAILED;
         return FALSE;
     }
-    strcpy(query->text, text);
     if (point_count) {
         memcpy(query->points, points, point_count * sizeof(*points));
     }
@@ -710,7 +780,7 @@ gboolean characters_search_prepare(CharactersSearch *search, const gchar *text,
 void characters_search_free(CharactersSearch *search)
 {
     if (search) {
-        g_free(search->query);
+        free_query(search->query);
         g_free(search->points);
         g_free(search->ids);
         g_free(search->seen);
@@ -807,7 +877,11 @@ CharactersSearchStatus characters_search_run(CharactersSearch *search)
         !valid_filter(search->scope, (gsize)search->filter)) ||
         search->category < -1 || search->category >= (gint)CATEGORY_COUNT ||
         (search->scope == CHARACTERS_SEARCH_SYMBOLS && !search->rule_count) || !query ||
-        !search->metadata_ready) {
+        !search->metadata_ready ||
+        (!search->points && !query->han_field &&
+        (search->scope == CHARACTERS_SEARCH_ALL || search->scope == CHARACTERS_SEARCH_EMOJI) &&
+        (query->literal_letter || query->term_count) &&
+        (!query->emoji_ready || !search->emoji_locale_count))) {
         return search->status;
     }
     if (is_canceled(search)) {
@@ -842,7 +916,7 @@ CharactersSearchStatus characters_search_run(CharactersSearch *search)
     }
     g_free(search->seen);
     search->seen = NULL;
-    g_free(search->query);
+    free_query(search->query);
     search->query = NULL;
     search->status = !success ? CHARACTERS_SEARCH_FAILED :
                      is_canceled(search) ? CHARACTERS_SEARCH_CANCELED : CHARACTERS_SEARCH_OK;
@@ -885,7 +959,7 @@ gchar *characters_search_sequence_label(guint32 id)
         return NULL;
     }
     if (id >= EMOJI_ALIAS_BASE && id < NAMED_BASE) {
-        return characters_emoji_alias_name(id - EMOJI_ALIAS_BASE);
+        return NULL;
     }
     const gchar *name = id < EMOJI_ALIAS_BASE ? characters_unicode_emoji_label(id - EMOJI_BASE) :
                        characters_unicode_named_name(id - NAMED_BASE);

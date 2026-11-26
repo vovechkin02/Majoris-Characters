@@ -1,3 +1,11 @@
+majoris-characters (1.0.18-1) unstable; urgency=medium
+
+  * Prepare emoji annotation locales and folded terms in Vala before scanning.
+  * Move supplementary emoji presentation labels and names to Vala.
+  * Preserve exact sequence matching and immutable annotation tables.
+
+ -- Majoris Contributors <45165533+vovechkin02@users.noreply.github.com>  Thu, 26 Nov 2026 18:00:00 +1100
+
 majoris-characters (1.0.17-1) unstable; urgency=medium
 
   * Move scalar relationship assembly and Unicode 17 case policy into Vala.

@@ -83,10 +83,37 @@ private void test_invalid () {
     assert (Emoji.create_variants (null) == null);
 }
 
+/** Verify locale normalization, parent selection and English fallback order. */
+private void test_annotation_policy () {
+    var english = Emoji.locale_index ("en");
+    var french = Emoji.locale_index ("fr");
+    var chinese = Emoji.locale_index ("zh");
+    var locales = Emoji.annotation_locales ("FR-ca.UTF-8");
+    assert (locales.length == 2 && locales[0] == french && locales[1] == english);
+    locales = Emoji.annotation_locales ("zh_Hant_TW");
+    assert (locales.length >= 2 && locales[locales.length - 2] == chinese &&
+        locales[locales.length - 1] == english);
+    locales = Emoji.annotation_locales ("zh-TW");
+    assert (locales.length >= 2 && locales[locales.length - 1] == english);
+    locales = Emoji.annotation_locales ("unknown");
+    assert (locales.length == 1 && locales[0] == english);
+    locales = Emoji.annotation_locales ("en_US@custom");
+    assert (locales.length == 1 && locales[0] == english);
+    assert (Emoji.fold_term ("ÉMOTICÔNE") == "émoticône");
+    assert (Emoji.fold_term ("ＦＵＬＬ") == "full");
+    assert (Emoji.fold_term ("") == null);
+    var text_alias = Emoji.alias_index ("⌚︎");
+    assert (Emoji.alias_label (text_alias) == "Text presentation");
+    assert (Emoji.alias_name (text_alias) == "WATCH (Text presentation)");
+    assert (Unicode.sequence_name ({ 0x231Au, 0xFE0Eu }) == "WATCH (Text presentation)");
+    assert (Emoji.alias_name (size_t.MAX) == null);
+}
+
 /** Exercise the migrated variation domain directly in Vala. */
 int main () {
     test_families ();
     test_presentations ();
     test_invalid ();
+    test_annotation_policy ();
     return 0;
 }

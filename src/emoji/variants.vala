@@ -58,12 +58,12 @@ namespace Characters.Emoji {
         if (is_presentation_base (points[0]) && (points.length == 1 ||
             (points.length == 2 && (points[1] == 0xFE0E || points[1] == 0xFE0F)))) {
             uint32[] presentation = { points[0], 0xFE0E };
-            if (!variants.append (Unicode.encode (presentation[0:1]), "Default presentation") ||
-                !variants.append (Unicode.encode (presentation), "Text presentation")) {
+            if (!variants.append (Unicode.encode (presentation[0:1]), DEFAULT_PRESENTATION) ||
+                !variants.append (Unicode.encode (presentation), TEXT_PRESENTATION)) {
                 return null;
             }
             presentation[1] = 0xFE0F;
-            if (!variants.append (Unicode.encode (presentation), "Emoji presentation")) {
+            if (!variants.append (Unicode.encode (presentation), EMOJI_PRESENTATION)) {
                 return null;
             }
         }

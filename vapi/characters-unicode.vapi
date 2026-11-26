@@ -82,11 +82,11 @@ namespace Characters.Unicode {
     public static string? encode ([CCode (array_length_type = "gsize")] uint32[] points);
 
     /**
-     * Canonical scalar name, named sequence name or emoji label; NULL for unknown sequences.
+     * Canonical scalar, named sequence or fully qualified emoji name; null for unknown aliases.
      * Scalar emoji labels are available separately through the emoji catalog.
      */
-    [CCode (cname = "characters_unicode_sequence_name")]
-    public static string? sequence_name ([CCode (array_length_type = "gsize")] uint32[] points);
+    [CCode (cname = "characters_unicode_catalog_sequence_name")]
+    public static string? catalog_sequence_name ([CCode (array_length_type = "gsize")] uint32[] points);
 
     /**
      * Normalized UTF-8, or NULL for invalid text, form, size or allocation failure. The original

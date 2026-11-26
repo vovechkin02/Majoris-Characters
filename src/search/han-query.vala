@@ -95,6 +95,7 @@ namespace Characters.HanQuery {
         for (var index = 0; index < terms.length; index++) {
             folded[index] = describe (terms[index], rules, index * WORDS);
         }
-        return job.prepare (text, points, terms, folded, rules, exact, literal_letter);
+        return job.prepare (text, points, terms, folded, rules, exact, literal_letter) &&
+            Emoji.configure_terms (job, text, terms, literal_letter);
     }
 }

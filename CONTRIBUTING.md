@@ -59,3 +59,9 @@ rules, canonical component assembly, and reverse accent ranges. Keep raw ICU
 simple mappings and recursive canonical decomposition separate from direct
 compatibility decomposition. Native confusable access exposes immutable class
 membership only; the Vala collector owns validation, deduplication and ordering.
+
+Emoji annotation locale selection and fallback ordering belong in Vala. Fold
+query operands once before scanning using the bounded ICU adapter. Native
+lookup accepts resolved indexes and copied folded terms; do not reintroduce
+per-candidate locale resolution or term folding. Exact presentation aliases
+and their labels remain distinct from the immutable annotation keys.

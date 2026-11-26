@@ -107,8 +107,8 @@ namespace Characters.QueryParser {
     }
 
     /** Prepare one native scan without transferring ownership of any Vala strings or arrays. */
-    internal static bool prepare (Search.Job job, string? input) {
-        if (!Search.configure_metadata (job)) {
+    internal static bool prepare (Search.Job job, string? input, string locale = "en") {
+        if (!Search.configure_metadata (job) || !Emoji.configure_locale (job, locale)) {
             return false;
         }
         if (input == null || input.length > MAX_BYTES || !input.validate ()) {
@@ -161,12 +161,18 @@ namespace Characters.QueryParser {
     /** Construct a prepared synchronous request; used by headless clients and tests. */
     public static Search.Job? create (Search.Scope scope, int filter, int category,
                                       string? input) {
+        return create_localized (scope, filter, category, input, "en");
+    }
+
+    /** Construct a synchronous request with explicit annotation locale selection. */
+    public static Search.Job? create_localized (Search.Scope scope, int filter, int category,
+                                                string? input, string locale) {
         var job = Search.allocate (scope, filter, category);
         if (job != null) {
-            prepare (job, input);
+            prepare (job, input, locale);
             SemanticFilters.configure (job, scope, filter);
             if (scope == Search.Scope.LANGUAGE) {
-                LanguageSelection.configure (job, filter, "en", "");
+                LanguageSelection.configure (job, filter, locale, "");
             }
         }
         return (owned) job;

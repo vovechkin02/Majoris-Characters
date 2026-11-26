@@ -130,15 +130,16 @@ guint32 characters_unicode_block_end(gsize index);
 const gchar *characters_unicode_find_block(gunichar point);
 
 /**
- * characters_unicode_sequence_name:
+ * characters_unicode_catalog_sequence_name:
  * @points: (array length=length): Unicode scalars.
  * @length: Number of scalars, from 1 to 32.
  *
  * Returns: (transfer full) (nullable): Canonical scalar name, named sequence
- * name or emoji label; NULL for unknown sequences. Scalar emoji labels are
+ * name or fully qualified emoji label; NULL for unknown or supplementary alias sequences.
+ * Scalar emoji labels are
  * available separately through the emoji catalog.
  */
-gchar *characters_unicode_sequence_name(const gunichar *points, gsize length);
+gchar *characters_unicode_catalog_sequence_name(const gunichar *points, gsize length);
 
 /**
  * characters_unicode_emoji_group_count:

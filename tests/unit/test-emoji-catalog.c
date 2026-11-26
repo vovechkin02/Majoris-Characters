@@ -20,7 +20,9 @@ static void test_all_presentation_pairs(void) {
         const gchar *text = characters_emoji_alias_text(index);
         assert(text && characters_emoji_alias_index(text) == index);
         assert(characters_emoji_is_candidate(text));
-        assert(characters_emoji_alias_label(index));
+        gchar *label = characters_emoji_alias_label(index);
+        assert(label && *label);
+        g_free(label);
         gchar *name = characters_emoji_alias_name(index);
         assert(name && *name);
         g_free(name);
@@ -56,9 +58,9 @@ static void test_qualification(void) {
 
 /** Test localized, case-folded annotation search through the production search worker. */
 static void expect_search(const gchar *locale, const gchar *query, const gchar *expected) {
-    CharactersSearch *job = characters_query_parser_create(CHARACTERS_SEARCH_EMOJI, -1, -1, query);
+    CharactersSearch *job = characters_query_parser_create_localized(
+        CHARACTERS_SEARCH_EMOJI, -1, -1, query, locale);
     assert(job);
-    characters_search_set_locale(job, locale);
     assert(characters_search_run(job) == CHARACTERS_SEARCH_OK);
     gboolean found = FALSE;
     for (gsize index = 0; index < characters_search_count(job); index++) {
@@ -88,9 +90,9 @@ static void test_annotations(void) {
     expect_search("unknown", "cheery", "😀");
     expect_search("fr", "U+1F600", "😀");
     expect_search("fr", "👩‍💻", "👩‍💻");
-    CharactersSearch *job = characters_query_parser_create(CHARACTERS_SEARCH_EMOJI, -1, -1, "U+1F600");
+    CharactersSearch *job = characters_query_parser_create_localized(
+        CHARACTERS_SEARCH_EMOJI, -1, -1, "U+1F600", "fr");
     assert(job);
-    characters_search_set_locale(job, "fr");
     assert(characters_search_run(job) == CHARACTERS_SEARCH_OK);
     assert(characters_search_count(job) == 1);
     characters_search_free(job);

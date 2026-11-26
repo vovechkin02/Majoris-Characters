@@ -85,13 +85,26 @@ gboolean characters_search_set_rules(CharactersSearch *search, const guint32 *ru
                                  gsize length);
 
 /**
- * characters_search_set_locale:
- * @search: Request not yet submitted to a worker.
- * @locale: Locale identifier copied before execution; English is always a fallback.
+ * characters_search_set_annotation_locales:
+ * @search: Unstarted request.
+ * @locales: (array length=count): Ordered, resolved annotation table indexes.
+ * @count: Number of unique indexes.
  *
- * Selects emoji annotations. Do not call concurrently with run().
+ * Returns: Whether the validated locale chain was copied successfully.
  */
-void characters_search_set_locale(CharactersSearch *search, const gchar *locale);
+gboolean characters_search_set_annotation_locales(CharactersSearch *search,
+                                                  const guint32 *locales, gsize count);
+
+/**
+ * characters_search_set_annotation_terms:
+ * @search: Unstarted request with a prepared query.
+ * @terms: (array length=count): Folded UTF-8 operands; empty strings never match.
+ * @count: Number of terms, or one for a literal letter.
+ *
+ * Returns: Whether all operands were copied successfully.
+ */
+gboolean characters_search_set_annotation_terms(CharactersSearch *search,
+                                                gchar *const *terms, gsize count);
 
 /**
  * characters_search_set_scripts:
@@ -170,7 +183,7 @@ gchar *characters_search_text(guint32 id);
  * @id: Opaque non-scalar catalog identity.
  *
  * Returns: (transfer full) (nullable): Raw catalog sequence label, or NULL for
- * scalar or invalid identities. Presentation and scalar fallback policy live in Vala.
+ * scalar, supplementary alias or invalid identities. Presentation policy lives in Vala.
  */
 gchar *characters_search_sequence_label(guint32 id);
 

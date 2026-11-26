@@ -12,7 +12,6 @@
 
 #include "../allocation.h"
 #include "../scalar-validity.h"
-#include "emoji-catalog.h"
 #include "scalar-properties.h"
 #include "unihan.h"
 
@@ -303,7 +302,7 @@ const gchar *characters_unicode_find_block(gunichar point)
     return block ? block->name : NULL;
 }
 
-gchar *characters_unicode_sequence_name(const gunichar *points, gsize length)
+gchar *characters_unicode_catalog_sequence_name(const gunichar *points, gsize length)
 {
     if (!valid_sequence(points, length)) {
         return NULL;
@@ -321,10 +320,7 @@ gchar *characters_unicode_sequence_name(const gunichar *points, gsize length)
     if (emoji) {
         return characters_try_strdup(emoji->name);
     }
-    gchar *text = characters_unicode_encode(points, length);
-    gsize alias = characters_emoji_alias_index(text);
-    g_free(text);
-    return characters_emoji_alias_name(alias);
+    return NULL;
 }
 
 gsize characters_unicode_emoji_group_count(void)

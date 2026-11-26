@@ -180,7 +180,7 @@ class SourceContractsTest(unittest.TestCase):
             self.assertIn(f"'{name}.vala'", sources)
             self.assertTrue((ROOT / f"src/{name}.vala").is_file())
         request = (ROOT / "src/search/search-request.vala").read_text()
-        self.assertIn("QueryParser.prepare (job, query)", request)
+        self.assertIn("QueryParser.prepare (job, query, locale)", request)
         self.assertIn("LanguageSelection.configure (job, filter, locale, input_sources)", request)
         inspector = (ROOT / "src/unicode/inspection-snapshot.vala").read_text()
         self.assertIn("QueryParser.decode_code (code)", inspector)
@@ -348,6 +348,28 @@ class SourceContractsTest(unittest.TestCase):
         self.assertIn("search/collection-catalog.vala", source)
         self.assertIn("unicode/character-presentation.vala", source)
         self.assertIn("src/search/collection-catalog.vala", (ROOT / "po/POTFILES.in").read_text())
+
+    def test_emoji_annotation_migration(self) -> None:
+        """Keep locale and alias naming policies outside the native annotation scan."""
+        catalog = (ROOT / "native/unicode/emoji-catalog.c").read_text()
+        scanner = (ROOT / "native/unicode/character-search.c").read_text()
+        policy = (ROOT / "src/emoji/annotation-policy.vala").read_text()
+        presentation = (ROOT / "src/emoji/presentation.vala").read_text()
+        parser = (ROOT / "src/search/query-parser.vala").read_text()
+        han = (ROOT / "src/search/han-query.vala").read_text()
+        sources = (ROOT / "src/meson.build").read_text()
+        self.assertNotIn("matches_locale_chain", catalog)
+        self.assertNotIn("characters_emoji_alias_name", catalog + scanner)
+        self.assertNotIn("characters_emoji_fold_term", scanner)
+        self.assertNotIn("characters_search_set_locale", scanner)
+        self.assertIn("search->emoji_locales", scanner)
+        self.assertIn("query->emoji_terms", scanner)
+        self.assertIn('append_locale (locales, ref count, "en")', policy)
+        self.assertIn("Emoji.configure_locale (job, locale)", parser)
+        self.assertIn("Emoji.configure_terms (job, text, terms, literal_letter)", han)
+        self.assertIn("catalog_sequence_name (points)", presentation)
+        self.assertIn("emoji/annotation-policy.vala", sources)
+        self.assertIn("emoji/presentation.vala", sources)
 
     def test_release_gate(self) -> None:
         """Prove missing and skipped test records cannot pass the release log gate."""

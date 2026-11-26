@@ -40,9 +40,8 @@ namespace Characters {
             if (job == null) {
                 return Search.Status.FAILED;
             }
-            QueryParser.prepare (job, query);
+            QueryParser.prepare (job, query, locale);
             SemanticFilters.configure (job, scope, filter);
-            job.set_locale (locale);
             if (scope == Search.Scope.LANGUAGE) {
                 LanguageSelection.configure (job, filter, locale, input_sources);
             }
