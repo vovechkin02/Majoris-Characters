@@ -8,9 +8,9 @@ License: GPL-3+
 
 Files: po/*.po
 Copyright: 2026 Majoris contributors
-           2004-2025 Unicode, Inc. (CLDR script display names)
+           2004-2025 Unicode, Inc. (CLDR language and script display names)
 License: GPL-3+ and Unicode-3.0
-Comment: CLDR-derived names from Babel 2.18.0 locale data retain the Unicode
+Comment: CLDR-derived names from CLDR 48 and Babel 2.18.0 retain the Unicode
  license included in po/LICENSE.cldr. No Babel runtime code is bundled.
 
 Files: data/desktop/com.majoris.characters.metainfo.xml

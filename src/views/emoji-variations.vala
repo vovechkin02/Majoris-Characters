@@ -72,7 +72,8 @@ namespace Characters {
                 for (size_t index = 0; index < variants.count (); index++) {
                     unowned string? value = variants.text (index);
                     unowned string? label = variants.label (index);
-                    model.append ("%s — %s".printf (value ?? "", label ?? ""));
+                    model.append ("%s — %s".printf (value ?? "",
+                        PropertyLabels.emoji_variant_label (label ?? "")));
                     if (value == text) {
                         selected = (uint) index;
                     }
@@ -111,7 +112,8 @@ namespace Characters {
                 return;
             }
             preview.label = text;
-            preview_name.label = variants.label (variant_filter.selected) ?? "";
+            preview_name.label = PropertyLabels.emoji_variant_label (
+                variants.label (variant_filter.selected) ?? "");
             var snapshot = Inspector.from_text (text);
             preview_code.label = snapshot != null ?
                 (snapshot.format (Inspector.Format.CODE) ?? "") : "";

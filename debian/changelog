@@ -1,3 +1,11 @@
+majoris-characters (1.0.26-1) unstable; urgency=medium
+
+  * Complete French, German, and Spanish active-message translation catalogs.
+  * Localize language collections, presentation labels, and application metadata.
+  * Add deterministic gettext inventory and compiled-catalog regression checks.
+
+ -- Majoris Contributors <45165533+vovechkin02@users.noreply.github.com>  Fri, 27 Nov 2026 09:56:00 +1100
+
 majoris-characters (1.0.25-1) unstable; urgency=medium
 
   * Serialize saved collection and history policy updates across picker processes.

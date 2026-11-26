@@ -6,6 +6,33 @@ namespace Characters {
             return _(name).replace ("_", " ");
         }
 
+        /** Localize descriptive fallback names while retaining normative character names. */
+        public static string character_label (string name) {
+            switch (name) {
+                case "Noncharacter":
+                case "Unassigned Character":
+                case "Private Use Character":
+                case "Unnamed Character":
+                    return _(name);
+                default:
+                    return name;
+            }
+        }
+
+        /** Translate presentation labels without changing canonical emoji names. */
+        public static string emoji_variant_label (string label) {
+            switch (label) {
+                case Emoji.DEFAULT_PRESENTATION:
+                    return _("Default presentation");
+                case Emoji.TEXT_PRESENTATION:
+                    return _("Text presentation");
+                case Emoji.EMOJI_PRESENTATION:
+                    return _("Emoji presentation");
+                default:
+                    return label;
+            }
+        }
+
         /** Describes an enumerated property without modifying the native or clipboard value. */
         public static string? describe (string property, string? value) {
             if (value == null) {

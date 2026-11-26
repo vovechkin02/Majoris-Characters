@@ -33,29 +33,27 @@ The global shortcut and IBus sections describe their requirements explicitly.
 ## Translations
 
 Gettext catalogs are selected using the process locale and installed under the
-`majoris-characters` domain. French has been expanded; German and Spanish are
-new. English source messages remain the fallback. Standard script names are
-resolved through the existing Unicode 17 snapshot and translated using CLDR
-script display names where available in Babel 2.18.0. Untranslated scripts use
-readable English names. The editor, browser, inspector and metadata report
-continue to retain exact Unicode values.
+`majoris-characters` domain. French, German, and Spanish cover all 950 active
+literal messages in the checked-in template. English source messages remain
+available as fallback. Script and named language collection labels use CLDR
+48 and Babel 2.18.0 display names where available. Proper names without a
+localized CLDR equivalent use their established name or a readable spelling.
+Presentation-selector labels and descriptive fallback names are localized in
+the UI without modifying the search vocabulary or raw metadata.
 
 The inspector displays human-readable values for general category, bidi class,
 decomposition type, East Asian width, boolean emoji/mirroring properties,
 primary script and script extensions, and Unicode plane. Codes remain visible
 where appropriate. Copying an individual property or a complete report retains
-raw property values. Canonical names, aliases, exact code points, bytes, font
-names, raw Unihan readings, query grammar and stored identities are not
-translated. Some language and Unicode block names remain English.
+raw property values. Canonical names, aliases, Unicode block identifiers, exact
+code points, bytes, font names, raw Unihan readings, query grammar and stored
+identities are not translated. The block registry continues to use standard
+English Unicode block names. AppStream descriptions are localized separately.
 
-The application does not require Babel at build or runtime: the standard PO
-files are the translator-maintained source. Babel was used offline to extract
-CLDR script names and check catalog compilation. See third-party notices and
-`po/LICENSE.cldr`. Maintain extraction markers in generated tables when updating
-Unicode data. On a complete development installation, run `meson compile -C
-build majoris-characters-update-po` and review changes, then compile and test
-all catalogs using the Meson qualification gate. All catalogs require linguistic
-review; incomplete translations intentionally fall back to the source string.
+Babel is not required at build or runtime: the standard PO files are the
+translator-maintained source. See [translation completion](translation-completion.md)
+for extraction, catalog maintenance, and verification commands. All catalogs
+require linguistic review and live GTK qualification.
 
 ## Manual target qualification
 

@@ -36,7 +36,8 @@ namespace Characters {
         /** Replaces all data when GTK binds this recycled cell to a new identity. */
         public void bind_id (uint32 id, int size_pt = 24) {
             var code = Search.code (id) ?? "";
-            var name = Search.name (id) ?? _("Unknown Character");
+            var name = PropertyLabels.character_label (
+                Search.name (id) ?? _("Unknown Character"));
             bind_preview (id, null, size_pt, true, code, "%s\n%s".printf (name, code));
         }
 

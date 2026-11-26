@@ -103,3 +103,9 @@ advisory descriptor and backend snapshots, not collection policy. Font
 comparison verification must open the exact file and face on the source
 worker, never trust cached Fontconfig charset membership as proof of a glyph
 or perform installed-font I/O on the GTK main context.
+
+Maintain gettext markers on stable display labels without translating stored
+identities or raw Unicode values. Regenerate the translation inventory with
+`python3 tools/localization/catalogs.py`, merge and review the three catalogs,
+and run the compiled-catalog regression before release. See
+[translation completion](docs/translation-completion.md).

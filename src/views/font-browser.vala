@@ -671,7 +671,9 @@ namespace Characters {
             var id = (uint32) uint.parse (value.get_string ());
             var point = mode == FontBrowserMode.VARIATIONS ? compare_point : id;
             var caption = Search.code (point) ?? "";
-            var detail = "%s\n%s".printf (Search.name (point) ?? _("Unknown Character"), caption);
+            var name = PropertyLabels.character_label (
+                Search.name (point) ?? _("Unknown Character"));
+            var detail = "%s\n%s".printf (name, caption);
             string? description = null;
             bool fallback = mode == FontBrowserMode.ENCODINGS || font_fallback.active;
             if (mode != FontBrowserMode.ENCODINGS && inventory != null) {
@@ -776,7 +778,8 @@ namespace Characters {
                 clear_selection ();
                 return;
             }
-            font_selection.label = "%s — %s".printf (Search.name (point) ?? _("Unknown Character"),
+            font_selection.label = "%s — %s".printf (
+                PropertyLabels.character_label (Search.name (point) ?? _("Unknown Character")),
                 Search.code (point) ?? "");
             font_inspect.sensitive = true;
             if (mode == FontBrowserMode.VARIATIONS) {

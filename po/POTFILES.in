@@ -11,6 +11,7 @@ data/ui/library-dialog.ui
 data/ui/main-window.ui
 data/ui/preferences-dialog.ui
 data/ui/shortcuts-dialog.ui
+native/unicode/generated/languages.h
 native/unicode/generated/properties.h
 native/unicode/language-collections.c
 native/unicode/unicode-engine.c

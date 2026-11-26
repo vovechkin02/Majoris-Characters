@@ -79,12 +79,15 @@ application and GJS are not runtime dependencies of the main application. The op
   rasterization remain native. See [pass 6 qualification](vala-migration-pass-6.md).
   Establish a full build and benchmark baseline before additional migration.
 
-## Final functional completion priorities (1.0.24)
+## Final functional completion priorities (1.0.26)
 
 The official Unihan and CLDR data import (revised Priority 2) is complete.
 Revised Priority 3 implements pinned Unicode 17 grapheme and case mapping
 consistency and regenerates both search indexes. Official UCD corpus conformance
 and full target compilation remain unqualified. Revised Priority 4 implements
 IBus-aware international browsing at source level in 1.0.24; live desktop
-qualification is outstanding. The next functional priority is cross-process
-persistence coordination and exact font coverage refinement.
+qualification is outstanding. Revised Priority 5 implements cross-process
+persistence coordination and exact font coverage refinement in 1.0.25. Revised
+Priority 6 completes the three active translation catalogs in 1.0.26. The next
+functional priority is external Desktop Shell and ISO integration; compilation
+and final release qualification remain outstanding.

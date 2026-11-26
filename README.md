@@ -6,7 +6,7 @@ Unicode, international browsing, emoji data, and exact font inspection improveme
 
 | Project metadata | Value |
 | --- | --- |
-| Version | 1.0.25 |
+| Version | 1.0.26 |
 | Platform target | Majoris OS / Debian 13 (Trixie) |
 | Development status | GLib native standardization — qualification candidate (not a verified stable release) |
 | Application ID | `com.majoris.characters` |
@@ -33,8 +33,8 @@ Unicode, international browsing, emoji data, and exact font inspection improveme
 - Persistent normal window size and maximized state using GSettings.
 - Desktop launcher, application icon, AppStream metadata and D-Bus service.
 - Shared system theme and light/dark appearance through libadwaita.
-- Gettext catalogs: English source strings, expanded French, and German and Spanish
-  interface translations, with English fallback for untranslated messages.
+- Gettext catalogs: English source strings and complete active-message catalogs
+  for French, German, and Spanish, with English fallback.
 - Native Unicode names, aliases, scalar properties, scripts, blocks, named
   sequences, emoji catalogs, normalization, and related-character queries.
 - Independently versioned data and local database generation tools.
@@ -174,7 +174,7 @@ For Debian binary packages (run from the repository root):
 
 ```sh
 dpkg-buildpackage -us -uc -b
-sudo apt install ../majoris-characters_1.0.25-1_$(dpkg --print-architecture).deb
+sudo apt install ../majoris-characters_1.0.26-1_$(dpkg --print-architecture).deb
 ```
 
 The source package uses `3.0 (quilt)` and requires the corresponding upstream
@@ -335,9 +335,9 @@ After installing the Debian package, the same runtime tests can target the real
 installed executable:
 
 ```sh
-python3 tests/integration/test_application.py /usr/bin/majoris-characters 1.0.25 cli
+python3 tests/integration/test_application.py /usr/bin/majoris-characters 1.0.26 cli
 xvfb-run -a dbus-run-session -- python3 \
-  tests/integration/test_application.py /usr/bin/majoris-characters 1.0.25 gui
+  tests/integration/test_application.py /usr/bin/majoris-characters 1.0.26 gui
 ```
 
 For a fresh, fail-closed automated build/test and optional Debian package gate:
@@ -402,3 +402,6 @@ engine language descriptors without changing desktop settings. See
 
 The 1.0.25 collection transactions and exact font comparison changes are
 documented in [persistence and coverage refinements](docs/persistence-and-font-coverage.md).
+
+The 1.0.26 translation completion and verification workflow are documented in
+[translation completion](docs/translation-completion.md).

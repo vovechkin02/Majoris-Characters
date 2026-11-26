@@ -672,8 +672,9 @@ namespace Characters {
                 return;
             }
             var id = (uint32) uint.parse (item.get_string ());
-            var name = Search.name (id) ?? _("Unknown Character");
-            selected_name.label = scope == Search.Scope.UNASSIGNED ? _(name) : name;
+            var name = PropertyLabels.character_label (
+                Search.name (id) ?? _("Unknown Character"));
+            selected_name.label = name;
             selected_code.label = Search.code (id) ?? "";
             inspect_button.sensitive = true;
             var text = Search.text (id);

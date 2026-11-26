@@ -354,3 +354,8 @@ executable(
   build_by_default: false,
   install: false,
 )
+
+test('Translation inventory and compiled catalogs', python,
+  args: [files('unit/test_translation_catalogs.py')],
+  suite: 'source', timeout: 30,
+)

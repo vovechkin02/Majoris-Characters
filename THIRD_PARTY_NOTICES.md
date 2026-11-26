@@ -62,14 +62,14 @@ data now derive from the complete verified CLDR annotation import.
 
 ## Priority 8 localization
 
-The French, German and Spanish catalogs in `po/` include script display names
-from CLDR locale data distributed with Babel 2.18.0 (`Locale.scripts`). These
+The French, German and Spanish catalogs in `po/` include script and language display names
+from CLDR 48 and CLDR locale data distributed with Babel 2.18.0. These
 names are Unicode data, copyright 2004–2025 Unicode, Inc., and retain the exact
 Unicode License V3 notice in `po/LICENSE.cldr`. Babel's BSD license notice is
 preserved in `po/LICENSE.babel` for provenance. No Babel library or Python
 implementation is shipped or required to build or run Characters. Original
 interface translations and property descriptions are project-owned; all three
-catalogs are partial and require native-speaker review.
+catalogs cover all active extracted messages and require native-speaker review.
 
 ## Official data archive workflow (1.0.22)
 

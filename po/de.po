@@ -1,13 +1,13 @@
-# Majoris Characters 1.0.8 — de interface translations.
+# Majoris Characters — de interface translations.
 # Copyright (C) 2026 Majoris contributors.
-# CLDR script names sourced from Babel 2.18.0 locale data; see THIRD_PARTY_NOTICES.md.
+# CLDR language and script names: CLDR 48 and Babel 2.18.0.
 # Licensed under the project license; CLDR-derived names under Unicode-3.0.
 msgid ""
 msgstr ""
-"Project-Id-Version: majoris-characters 1.0.8\n"
+"Project-Id-Version: majoris-characters 1.0.26\n"
 "Report-Msgid-Bugs-To: https://github.com/vovechkin02/Majoris-Characters/issues\n"
-"POT-Creation-Date: 2026-11-25 21:10+0000\n"
-"PO-Revision-Date: 2026-11-26 08:00+1100\n"
+"POT-Creation-Date: 2026-11-27 00:00+0000\n"
+"PO-Revision-Date: 2026-11-27 00:00+0000\n"
 "Last-Translator: Majoris contributors\n"
 "Language: de\n"
 "Language-Team: de\n"
@@ -17,75 +17,110 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.18.0\n"
 
-#: src/views/compact-picker.vala src/views/main-window.vala
+#: src/views/font-browser.vala:687
+msgid " (Substituted)"
+msgstr " (Ersetzt)"
+
+#: src/views/composer-view.vala:154
+#, c-format
+msgid "%d code points · %d UTF-8 bytes"
+msgstr "%d Codepunkte · %d UTF-8-Bytes"
+
+#: src/views/composer-view.vala:152
+#, c-format
+msgid "%d code points · %d UTF-8 bytes · %d graphemes (Unicode 17)"
+msgstr "%d Codepunkte · %d UTF-8-Bytes · %d Grapheme (Unicode 17)"
+
+#: src/views/composer-view.vala:143
+#, c-format
+msgid "%d code points · Detailed counts limited to %d"
+msgstr "%d Codepunkte · Detaillierte Zählung auf %d begrenzt"
+
+#: src/views/font-browser.vala:765
+#, c-format
+msgid "%d mapped scalars. Coverage excludes fallback; preview uses %s. %s"
+msgstr ""
+"%d zugeordnete Skalarwerte. Die Abdeckung schließt Ersatzschriftarten aus; die "
+"Vorschau verwendet %s. %s"
+
+#: src/views/font-browser.vala:551
+#, c-format
+msgid ""
+"%s — compare faces that map this scalar. Sequence shaping is not inferred from scalar"
+" coverage."
+msgstr ""
+"%s — Schriftschnitte mit Zuordnung zu diesem Skalarwert vergleichen. Die Formung von "
+"Sequenzen wird nicht aus der Skalarabdeckung abgeleitet."
+
+#: src/views/compact-picker.vala:334 src/views/main-window.vala:598
 msgid "0 Characters"
 msgstr "0 Zeichen"
 
-#: native/unicode/character-search.c
+#: src/search/collection-catalog.vala:68
 msgid "0: Basic Multilingual Plane"
 msgstr "0: Mehrsprachige Basisebene"
 
-#: native/unicode/character-search.c
+#: src/search/collection-catalog.vala:88
 msgid "10: Plane 10 (Reserved)"
 msgstr "10: Ebene 10 (reserviert)"
 
-#: native/unicode/character-search.c
+#: src/search/collection-catalog.vala:90
 msgid "11: Plane 11 (Reserved)"
 msgstr "11: Ebene 11 (reserviert)"
 
-#: native/unicode/character-search.c
+#: src/search/collection-catalog.vala:92
 msgid "12: Plane 12 (Reserved)"
 msgstr "12: Ebene 12 (reserviert)"
 
-#: native/unicode/character-search.c
+#: src/search/collection-catalog.vala:94
 msgid "13: Plane 13 (Reserved)"
 msgstr "13: Ebene 13 (reserviert)"
 
-#: native/unicode/character-search.c
+#: src/search/collection-catalog.vala:96
 msgid "14: Supplementary Special-purpose Plane"
 msgstr "14: Ergänzende Spezialebene"
 
-#: native/unicode/character-search.c
+#: src/search/collection-catalog.vala:98
 msgid "15: Supplementary Private Use Area-A"
 msgstr "15: Ergänzender privater Nutzungsbereich A"
 
-#: native/unicode/character-search.c
+#: src/search/collection-catalog.vala:100
 msgid "16: Supplementary Private Use Area-B"
 msgstr "16: Ergänzender privater Nutzungsbereich B"
 
-#: native/unicode/character-search.c
+#: src/search/collection-catalog.vala:70
 msgid "1: Supplementary Multilingual Plane"
 msgstr "1: Ergänzende mehrsprachige Ebene"
 
-#: native/unicode/character-search.c
+#: src/search/collection-catalog.vala:72
 msgid "2: Supplementary Ideographic Plane"
 msgstr "2: Ergänzende ideografische Ebene"
 
-#: native/unicode/character-search.c
+#: src/search/collection-catalog.vala:74
 msgid "3: Tertiary Ideographic Plane"
 msgstr "3: Tertiäre ideografische Ebene"
 
-#: native/unicode/character-search.c
+#: src/search/collection-catalog.vala:76
 msgid "4: Plane 4 (Reserved)"
 msgstr "4: Ebene 4 (reserviert)"
 
-#: native/unicode/character-search.c
+#: src/search/collection-catalog.vala:78
 msgid "5: Plane 5 (Reserved)"
 msgstr "5: Ebene 5 (reserviert)"
 
-#: native/unicode/character-search.c
+#: src/search/collection-catalog.vala:80
 msgid "6: Plane 6 (Reserved)"
 msgstr "6: Ebene 6 (reserviert)"
 
-#: native/unicode/character-search.c
+#: src/search/collection-catalog.vala:82
 msgid "7: Plane 7 (Reserved)"
 msgstr "7: Ebene 7 (reserviert)"
 
-#: native/unicode/character-search.c
+#: src/search/collection-catalog.vala:84
 msgid "8: Plane 8 (Reserved)"
 msgstr "8: Ebene 8 (reserviert)"
 
-#: native/unicode/character-search.c
+#: src/search/collection-catalog.vala:86
 msgid "9: Plane 9 (Reserved)"
 msgstr "9: Ebene 9 (reserviert)"
 
@@ -93,11 +128,11 @@ msgstr "9: Ebene 9 (reserviert)"
 msgid "About Characters"
 msgstr "Über Zeichen"
 
-#: native/unicode/character-search.c
+#: src/search/collection-catalog.vala:50
 msgid "Accessibility Symbols"
 msgstr "Barrierefreiheitssymbole"
 
-#: native/unicode/unicode-engine.c
+#: native/unicode/unicode-engine.c:57
 msgid "Activities"
 msgstr "Aktivitäten"
 
@@ -108,16 +143,21 @@ msgstr "Zum Texteditor hinzufügen"
 
 #: data/ui/character-inspector.ui data/ui/compact-picker.ui data/ui/emoji-variations.ui
 #: data/ui/font-browser.ui data/ui/library-dialog.ui data/ui/main-window.ui
-#: src/views/compact-picker.vala
+#: src/views/compact-picker.vala:400
 msgid "Add to Favorites"
 msgstr "Zu Favoriten hinzufügen"
 
-#: src/views/character-inspector.vala src/views/composer-view.vala src/views/emoji-variations.vala
-#: src/views/font-browser.vala src/views/library-dialog.vala
+#: src/views/character-inspector.vala:552 src/views/composer-view.vala:112
+#: src/views/emoji-variations.vala:148 src/views/font-browser.vala:887
+#: src/views/library-dialog.vala:257
 msgid "Added to Composer"
 msgstr "Zum Texteditor hinzugefügt"
 
-#: native/unicode/generated/properties.h
+#: src/views/composer-view.vala:113
+msgid "Added to Composer; Usage History Could Not Be Saved"
+msgstr "Zum Editor hinzugefügt; Nutzungsverlauf konnte nicht gespeichert werden"
+
+#: native/unicode/generated/properties.h:4
 msgid "Adlam"
 msgstr "Adlam"
 
@@ -125,11 +165,31 @@ msgstr "Adlam"
 msgid "Affects rendering, not font coverage."
 msgstr "Beeinflusst die Darstellung, nicht die Zeichenabdeckung."
 
-#: src/views/character-inspector.vala
+#: native/unicode/generated/languages.h:3
+msgid "Afrikaans"
+msgstr "Afrikaans"
+
+#: native/unicode/generated/languages.h:4
+msgid "Aghem"
+msgstr "Aghem"
+
+#: native/unicode/generated/properties.h:6
+msgid "Ahom"
+msgstr "Ahom"
+
+#: native/unicode/generated/languages.h:5
+msgid "Akan"
+msgstr "Akan"
+
+#: native/unicode/generated/languages.h:6
+msgid "Albanian"
+msgstr "Albanisch"
+
+#: src/views/character-inspector.vala:311
 msgid "Aliases"
 msgstr "Aliase"
 
-#: data/ui/main-window.ui src/views/compact-picker.vala
+#: data/ui/main-window.ui src/views/compact-picker.vala:91
 msgid "All Characters"
 msgstr "Alle Zeichen"
 
@@ -137,11 +197,11 @@ msgstr "Alle Zeichen"
 msgid "All Characters and saved collections always remain available."
 msgstr "Alle Zeichen und gespeicherte Sammlungen bleiben verfügbar."
 
-#: src/views/compact-picker.vala src/views/main-window.vala
+#: src/views/compact-picker.vala:152 src/views/main-window.vala:515
 msgid "All Collections"
 msgstr "Alle Sammlungen"
 
-#: src/views/font-browser.vala src/views/main-window.vala
+#: src/views/font-browser.vala:211 src/views/main-window.vala:213
 msgid "All General Categories"
 msgstr "Alle allgemeinen Kategorien"
 
@@ -153,19 +213,27 @@ msgstr "Ersatzschriften zulassen"
 msgid "Allow font fallback"
 msgstr "Ersatzschriften zulassen"
 
-#: src/views/property-labels.vala
+#: src/views/property-labels.vala:257
 msgid "Ambiguous width"
 msgstr "Mehrdeutige Breite"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/languages.h:7
+msgid "Amharic"
+msgstr "Amharisch"
+
+#: native/unicode/generated/properties.h:59
 msgid "Anatolian_Hieroglyphs"
 msgstr "Hieroglyphen-Luwisch"
 
-#: native/unicode/unicode-engine.c
+#: native/unicode/generated/languages.h:8
+msgid "Anii"
+msgstr "Anii"
+
+#: native/unicode/unicode-engine.c:54
 msgid "Animals & Nature"
 msgstr "Tiere und Natur"
 
-#: src/views/emoji-variations.vala
+#: src/views/emoji-variations.vala:122
 msgid "Appearance depends on the installed emoji fonts."
 msgstr "Das Aussehen hängt von den installierten Emoji-Schriften ab."
 
@@ -173,19 +241,19 @@ msgstr "Das Aussehen hängt von den installierten Emoji-Schriften ab."
 msgid "Application"
 msgstr "Anwendung"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/languages.h:9 native/unicode/generated/properties.h:7
 msgid "Arabic"
 msgstr "Arabisch"
 
-#: src/views/property-labels.vala
+#: src/views/property-labels.vala:161
 msgid "Arabic letter"
 msgstr "Arabischer Buchstabe"
 
-#: src/views/property-labels.vala
+#: src/views/property-labels.vala:169
 msgid "Arabic number"
 msgstr "Arabische Zahl"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/languages.h:10 native/unicode/generated/properties.h:9
 msgid "Armenian"
 msgstr "Armenisch"
 
@@ -197,86 +265,180 @@ msgstr "Pfeiltasten"
 msgid "Arrow keys / Page Up / Page Down"
 msgstr "Pfeiltasten / Bild auf / Bild ab"
 
-#: native/unicode/character-search.c
+#: src/search/collection-catalog.vala:8
 msgid "Arrows"
 msgstr "Pfeile"
 
-#: src/views/character-inspector.vala
+#: native/unicode/generated/languages.h:11
+msgid "Assamese"
+msgstr "Assamesisch"
+
+#: src/views/character-inspector.vala:312
 msgid "Assigned in catalog"
 msgstr "Im Katalog zugewiesen"
 
-#: src/views/main-window.vala
+#: src/views/main-window.vala:538
 msgid "Assigned scalar values grouped by Unicode plane."
 msgstr "Zugewiesene Skalarwerte nach Unicode-Ebene gruppiert."
 
-#: src/views/emoji-variations.vala
+#: native/unicode/generated/languages.h:12
+msgid "Asturian"
+msgstr "Asturisch"
+
+#: native/unicode/generated/languages.h:13
+msgid "Asu"
+msgstr "Asu"
+
+#: src/views/character-inspector.vala:344
+msgid ""
+"Available in compatible GTK or input-method text fields. Other applications may not "
+"support this shortcut. For a sequence, enter each scalar separately or copy the "
+"complete sequence."
+msgstr ""
+"In kompatiblen GTK- oder Eingabemethoden-Textfeldern verfügbar. Andere Anwendungen "
+"unterstützen dieses Tastenkürzel möglicherweise nicht. Geben Sie bei einer Sequenz "
+"jeden Skalarwert einzeln ein oder kopieren Sie die gesamte Sequenz."
+
+#: src/views/emoji-variations.vala:85
 #, c-format
 msgid "Available variations: %u"
 msgstr "Verfügbare Varianten: %u"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/properties.h:10
 msgid "Avestan"
 msgstr "Avestisch"
+
+#: native/unicode/generated/languages.h:14
+msgid "Azerbaijani"
+msgstr "Aserbaidschanisch"
+
+#: native/unicode/generated/languages.h:15
+msgid "Azerbaijani (Cyrillic)"
+msgstr "Aserbaidschanisch (Kyrillisch)"
+
+#: native/unicode/generated/languages.h:16
+msgid "Azerbaijani (Latin)"
+msgstr "Aserbaidschanisch (Lateinisch)"
 
 #: data/ui/character-inspector.ui
 msgid "Back"
 msgstr "Zurück"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/languages.h:17
+msgid "Bafia"
+msgstr "Bafia"
+
+#: native/unicode/generated/properties.h:11
 msgid "Balinese"
 msgstr "Balinesisch"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/languages.h:18
+msgid "Bambara"
+msgstr "Bambara"
+
+#: native/unicode/generated/properties.h:12
 msgid "Bamum"
 msgstr "Bamun"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/languages.h:19
+msgid "Bangla"
+msgstr "Bengalisch"
+
+#: native/unicode/generated/languages.h:20
+msgid "Basaa"
+msgstr "Bassa"
+
+#: native/unicode/generated/languages.h:21
+msgid "Basque"
+msgstr "Baskisch"
+
+#: native/unicode/generated/properties.h:13
 msgid "Bassa_Vah"
 msgstr "Bassa"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/properties.h:14
 msgid "Batak"
 msgstr "Battakisch"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/languages.h:22
+msgid "Belarusian"
+msgstr "Belarussisch"
+
+#: native/unicode/generated/languages.h:23
+msgid "Bemba"
+msgstr "Bemba"
+
+#: native/unicode/generated/languages.h:24
+msgid "Bena"
+msgstr "Bena"
+
+#: native/unicode/generated/properties.h:15
 msgid "Bengali"
 msgstr "Bengalisch"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/properties.h:16
+msgid "Beria_Erfe"
+msgstr "Beria Erfe"
+
+#: native/unicode/generated/properties.h:17
 msgid "Bhaiksuki"
 msgstr "Bhaiksuki"
 
-#: src/views/character-inspector.vala
+#: native/unicode/generated/languages.h:25
+msgid "Bhojpuri"
+msgstr "Bhodschpuri"
+
+#: src/views/character-inspector.vala:320
 msgid "Bidirectional class"
 msgstr "Bidirektionale Klasse"
 
-#: src/views/character-inspector.vala
+#: src/views/character-inspector.vala:321
 msgid "Bidirectional mirrored"
 msgstr "Bidirektional gespiegelt"
 
-#: native/unicode/character-search.c
+#: src/search/collection-catalog.vala:58
 msgid "Block Elements"
 msgstr "Blockelemente"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/languages.h:26
+msgid "Bodo"
+msgstr "Bodo"
+
+#: native/unicode/generated/properties.h:18
 msgid "Bopomofo"
 msgstr "Bopomofo"
 
-#: src/views/property-labels.vala
+#: native/unicode/generated/languages.h:27
+msgid "Bosnian"
+msgstr "Bosnisch"
+
+#: native/unicode/generated/languages.h:28
+msgid "Bosnian (Cyrillic)"
+msgstr "Bosnisch (Kyrillisch)"
+
+#: native/unicode/generated/languages.h:29
+msgid "Bosnian (Latin)"
+msgstr "Bosnisch (Lateinisch)"
+
+#: src/views/property-labels.vala:175
 msgid "Boundary neutral"
 msgstr "Neutrale Grenze"
 
-#: native/unicode/character-search.c
+#: src/search/collection-catalog.vala:32
 msgid "Box Drawing"
 msgstr "Rahmenzeichen"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/properties.h:19
 msgid "Brahmi"
 msgstr "Brahmi"
 
-#: native/unicode/character-search.c native/unicode/generated/properties.h
+#: native/unicode/generated/properties.h:20 src/search/collection-catalog.vala:28
 msgid "Braille"
 msgstr "Braille"
+
+#: native/unicode/generated/languages.h:30
+msgid "Breton"
+msgstr "Bretonisch"
 
 #: data/ui/main-window.ui
 msgid "Browse Character Sets"
@@ -286,7 +448,7 @@ msgstr "Zeichensätze durchsuchen"
 msgid "Browse Fonts"
 msgstr "Schriften durchsuchen"
 
-#: data/desktop/com.majoris.characters.desktop
+#: data/desktop/com.majoris.characters.desktop:3
 msgid "Browse and search Unicode characters"
 msgstr "Unicode-Zeichen durchsuchen und suchen"
 
@@ -294,66 +456,115 @@ msgstr "Unicode-Zeichen durchsuchen und suchen"
 msgid "Browsing Mode"
 msgstr "Ansichtsmodus"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/properties.h:21
 msgid "Buginese"
 msgstr "Buginesisch"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/properties.h:22
 msgid "Buhid"
 msgstr "Buhid"
 
-#: native/unicode/character-search.c
+#: native/unicode/generated/languages.h:31
+msgid "Bulgarian"
+msgstr "Bulgarisch"
+
+#: src/search/collection-catalog.vala:10
 msgid "Bullets & Stars"
 msgstr "Aufzählungszeichen und Sterne"
 
-#: src/views/composer-view.vala
+#: native/unicode/generated/languages.h:32
+msgid "Burmese"
+msgstr "Birmanisch"
+
+#: src/views/composer-view.vala:69
 msgid "CSS Escapes"
 msgstr "CSS-Escapes"
 
-#: src/views/character-inspector.vala
+#: src/views/character-inspector.vala:401
 msgid "CSS escape notation"
 msgstr "CSS-Escape-Notation"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/properties.h:24
 msgid "Canadian_Aboriginal"
 msgstr "Kanadische Aborigine-Silbenschrift"
 
-#: src/views/library-dialog.vala src/views/preferences-dialog.vala
+#: src/views/library-dialog.vala:312 src/views/preferences-dialog.vala:125
 msgid "Cancel"
 msgstr "Abbrechen"
 
-#: src/views/property-labels.vala
+#: src/views/property-labels.vala:213
 msgid "Canonical"
 msgstr "Kanonisch"
 
-#: src/views/font-browser.vala
+#: src/views/font-browser.vala:795
 #, c-format
 msgid "Canonical bytes: %s"
 msgstr "Kanonische Bytes: %s"
 
-#: src/views/character-inspector.vala
+#: src/views/character-inspector.vala:321
 msgid "Canonical combining class"
 msgstr "Kanonische Kombinationsklasse"
 
-#: src/views/character-inspector.vala
+#: src/views/character-inspector.vala:307
 msgid "Canonical name"
 msgstr "Kanonischer Name"
 
-#: src/views/character-inspector.vala
+#: native/unicode/generated/languages.h:33
+msgid "Cantonese"
+msgstr "Kantonesisch"
+
+#: native/unicode/generated/languages.h:34
+msgid "Cantonese (Simplified)"
+msgstr "Kantonesisch (Vereinfacht)"
+
+#: native/unicode/generated/languages.h:35
+msgid "Cantonese (Traditional)"
+msgstr "Kantonesisch (Traditionell)"
+
+#: src/views/character-inspector.vala:362
 msgid "Cantonese (Unihan)"
 msgstr "Kantonesisch (Unihan)"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/properties.h:25
 msgid "Carian"
 msgstr "Karisch"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/languages.h:36
+msgid "Catalan"
+msgstr "Katalanisch"
+
+#: src/views/character-inspector.vala:286
+#, c-format
+msgid ""
+"Catalog: Unicode %s · Properties: Unicode %s · Aliases and named sequences: Unicode "
+"%s. Unavailable values are not inferred."
+msgstr ""
+"Katalog: Unicode %s · Eigenschaften: Unicode %s · Aliase und benannte Sequenzen: "
+"Unicode %s. Fehlende Werte werden nicht abgeleitet."
+
+#: native/unicode/generated/properties.h:5
 msgid "Caucasian_Albanian"
 msgstr "Kaukasisch-Albanisch"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/languages.h:37
+msgid "Cebuano"
+msgstr "Cebuano"
+
+#: native/unicode/generated/languages.h:38
+msgid "Central Atlas Tamazight"
+msgstr "Zentralatlas-Tamazight"
+
+#: native/unicode/generated/languages.h:39
+msgid "Central Kurdish"
+msgstr "Zentralkurdisch"
+
+#: native/unicode/generated/languages.h:40 native/unicode/generated/properties.h:23
 msgid "Chakma"
 msgstr "Chakma"
+
+#: native/unicode/generated/properties.h:26
+msgid "Cham"
+msgstr "Cham"
 
 #: data/ui/shortcuts-dialog.ui
 msgid "Character Browser"
@@ -375,8 +586,8 @@ msgstr "Zeichengröße im Raster (pt)"
 msgid "Character Inspector"
 msgstr "Zeicheninspektor"
 
-#: data/desktop/com.majoris.characters.desktop data/ui/compact-picker.ui data/ui/main-window.ui
-#: data/ui/shortcuts-dialog.ui
+#: data/desktop/com.majoris.characters.desktop:15 data/ui/compact-picker.ui
+#: data/ui/main-window.ui data/ui/shortcuts-dialog.ui
 msgid "Character Picker"
 msgstr "Zeichenauswahl"
 
@@ -388,11 +599,11 @@ msgstr "Zeichenvorschau"
 msgid "Character Properties"
 msgstr "Zeicheneigenschaften"
 
-#: src/views/compact-picker.vala src/views/library-dialog.vala
+#: src/views/compact-picker.vala:468 src/views/library-dialog.vala:286
 msgid "Character Removed"
 msgstr "Zeichen entfernt"
 
-#: src/views/character-inspector.vala src/views/library-dialog.vala
+#: src/views/character-inspector.vala:228 src/views/library-dialog.vala:141
 msgid "Character Sequence"
 msgstr "Zeichenfolge"
 
@@ -408,11 +619,11 @@ msgstr "Zeichenkategorie"
 msgid "Character collection"
 msgstr "Zeichensammlung"
 
-#: src/views/compact-picker.vala
+#: src/views/compact-picker.vala:444
 msgid "Character copied. Paste it into your application."
 msgstr "Zeichen kopiert. Fügen Sie es in Ihre Anwendung ein."
 
-#: src/views/character-inspector.vala
+#: src/views/character-inspector.vala:242
 #, c-format
 msgid "Character preview: %s — %s"
 msgstr "Zeichenvorschau: %s — %s"
@@ -421,35 +632,61 @@ msgstr "Zeichenvorschau: %s — %s"
 msgid "Character results"
 msgstr "Zeichenergebnisse"
 
-#: data/desktop/com.majoris.characters.desktop data/ui/main-window.ui src/app/application.vala
+#: data/desktop/com.majoris.characters.desktop:2 data/ui/main-window.ui
+#: src/app/application.vala:297
 msgid "Characters"
 msgstr "Zeichen"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/languages.h:41
+msgid "Chechen"
+msgstr "Tschetschenisch"
+
+#: native/unicode/generated/languages.h:42 native/unicode/generated/properties.h:27
 msgid "Cherokee"
 msgstr "Cherokee"
+
+#: native/unicode/generated/languages.h:43
+msgid "Chiga"
+msgstr "Rukiga"
+
+#: native/unicode/generated/languages.h:44
+msgid "Chinese"
+msgstr "Chinesisch"
+
+#: native/unicode/generated/languages.h:45
+msgid "Chinese (Simplified)"
+msgstr "Chinesisch (vereinfacht)"
+
+#: native/unicode/generated/languages.h:46
+msgid "Chinese (Traditional)"
+msgstr "Chinesisch (traditionell)"
 
 #: data/ui/emoji-variations.ui
 msgid "Choose Emoji Variation"
 msgstr "Emoji-Variante wählen"
 
-#: data/ui/legacy-sequence-dialog.ui src/views/legacy-sequence-dialog.vala
+#: data/ui/legacy-sequence-dialog.ui src/views/legacy-sequence-dialog.vala:72
 msgid "Choose a Conversion Action"
 msgstr "Konvertierung wählen"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/properties.h:28
 msgid "Chorasmian"
 msgstr "Choresmisch"
+
+#: native/unicode/generated/languages.h:47
+msgid "Chuvash"
+msgstr "Tschuwaschisch"
 
 #: data/ui/preferences-dialog.ui
 msgid "Clear"
 msgstr "Leeren"
 
-#: src/views/library-dialog.vala src/views/preferences-dialog.vala
+#: src/views/library-dialog.vala:310 src/views/preferences-dialog.vala:123
 msgid "Clear Character History?"
 msgstr "Zeichenverlauf löschen?"
 
-#: data/ui/library-dialog.ui src/views/library-dialog.vala src/views/preferences-dialog.vala
+#: data/ui/library-dialog.ui src/views/library-dialog.vala:313
+#: src/views/preferences-dialog.vala:126
 msgid "Clear History"
 msgstr "Verlauf löschen"
 
@@ -465,11 +702,11 @@ msgstr "Nutzungsverlauf löschen"
 msgid "Close picker"
 msgstr "Auswahl schließen"
 
-#: src/views/property-labels.vala
+#: src/views/property-labels.vala:131
 msgid "Closing punctuation"
 msgstr "Schließende Interpunktion"
 
-#: src/views/character-inspector.vala
+#: src/views/character-inspector.vala:306
 msgid "Code point"
 msgstr "Codepunkt"
 
@@ -477,19 +714,27 @@ msgstr "Codepunkt"
 msgid "Collection Filter"
 msgstr "Sammlungsfilter"
 
-#: native/unicode/character-search.c
+#: native/unicode/generated/languages.h:48
+msgid "Colognian"
+msgstr "Kölsch"
+
+#: src/search/collection-catalog.vala:30
 msgid "Combining Marks"
 msgstr "Kombinationszeichen"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/properties.h:178
 msgid "Common"
 msgstr "Unbestimmt"
 
-#: src/views/property-labels.vala
+#: src/views/property-labels.vala:171
 msgid "Common number separator"
 msgstr "Gemeinsamer Zahlentrenner"
 
-#: src/views/property-labels.vala
+#: data/ui/character-inspector.ui
+msgid "Compare installed faces for the selected scalar"
+msgstr "Installierte Schriftschnitte für den ausgewählten Skalarwert vergleichen"
+
+#: src/views/property-labels.vala:215
 msgid "Compatibility"
 msgstr "Kompatibilität"
 
@@ -501,7 +746,7 @@ msgstr "Zusammengestellter Text"
 msgid "Composer Editing"
 msgstr "Textbearbeitung"
 
-#: native/unicode/language-collections.c
+#: native/unicode/language-collections.c:82
 msgid "Configured Keyboard Languages"
 msgstr "Konfigurierte Tastatursprachen"
 
@@ -509,45 +754,47 @@ msgstr "Konfigurierte Tastatursprachen"
 msgid "Configured global picker shortcut"
 msgstr "Konfiguriertes globales Tastenkürzel"
 
-#: src/views/property-labels.vala
+#: src/views/property-labels.vala:133
 msgid "Connector punctuation"
 msgstr "Verbindungsinterpunktion"
 
-#: src/views/property-labels.vala
+#: src/views/property-labels.vala:119
 msgid "Control character"
 msgstr "Steuerzeichen"
 
-#: native/unicode/character-search.c
+#: src/search/collection-catalog.vala:122
 msgid "Controls & Formatting"
 msgstr "Steuer- und Formatierungszeichen"
 
-#: src/views/font-face-dialog.vala
+#: src/views/font-face-dialog.vala:161
 msgid "Copied Raw Code and Glyph Index"
 msgstr "Rohcode und Glyphenindex kopiert"
 
-#: src/views/composer-view.vala
+#: src/views/composer-view.vala:233
 msgid "Copied Representation to Clipboard"
 msgstr "Darstellung in die Zwischenablage kopiert"
 
-#: src/views/composer-view.vala
+#: src/views/composer-view.vala:192
 msgid "Copied Selection to Clipboard"
 msgstr "Auswahl in die Zwischenablage kopiert"
 
-#: src/views/composer-view.vala
+#: src/views/composer-view.vala:207
 msgid "Copied Text to Clipboard"
 msgstr "Text in die Zwischenablage kopiert"
 
-#: src/views/character-inspector.vala src/views/emoji-variations.vala src/views/font-browser.vala
-#: src/views/legacy-sequence-dialog.vala src/views/library-dialog.vala src/views/main-window.vala
+#: src/views/character-inspector.vala:567 src/views/emoji-variations.vala:138
+#: src/views/font-browser.vala:924 src/views/legacy-sequence-dialog.vala:140
+#: src/views/library-dialog.vala:247 src/views/main-window.vala:367
 msgid "Copied to Clipboard"
 msgstr "In die Zwischenablage kopiert"
 
-#: src/views/character-inspector.vala src/views/compact-picker.vala src/views/emoji-variations.vala
-#: src/views/font-browser.vala src/views/library-dialog.vala src/views/main-window.vala
+#: src/views/character-inspector.vala:568 src/views/compact-picker.vala:445
+#: src/views/emoji-variations.vala:139 src/views/font-browser.vala:925
+#: src/views/library-dialog.vala:248 src/views/main-window.vala:368
 msgid "Copied to Clipboard; Usage History Could Not Be Saved"
 msgstr "Kopiert; Nutzungsverlauf konnte nicht gespeichert werden"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/properties.h:29
 msgid "Coptic"
 msgstr "Koptisch"
 
@@ -555,12 +802,12 @@ msgstr "Koptisch"
 msgid "Copy"
 msgstr "Kopieren"
 
-#: src/views/character-inspector.vala
+#: src/views/character-inspector.vala:505
 #, c-format
 msgid "Copy %s"
 msgstr "%s kopieren"
 
-#: src/views/character-inspector.vala
+#: src/views/character-inspector.vala:423
 #, c-format
 msgid "Copy %s Text"
 msgstr "%s-Text kopieren"
@@ -570,7 +817,7 @@ msgid "Copy Bytes"
 msgstr "Bytes kopieren"
 
 #: data/ui/character-inspector.ui data/ui/compact-picker.ui data/ui/font-browser.ui
-#: src/views/emoji-variations.vala
+#: src/views/emoji-variations.vala:57
 msgid "Copy Character"
 msgstr "Zeichen kopieren"
 
@@ -598,6 +845,20 @@ msgstr "Auswahl kopieren"
 msgid "Copy Text"
 msgstr "Text kopieren"
 
+#: native/unicode/generated/languages.h:49
+msgid "Cornish"
+msgstr "Kornisch"
+
+#: src/views/font-browser.vala:485
+msgid "Coverage uses the selected face's Unicode cmap without fallback."
+msgstr ""
+"Die Abdeckung verwendet die Unicode-cmap des ausgewählten Schriftschnitts ohne "
+"Ersatzschriftart."
+
+#: native/unicode/generated/languages.h:50
+msgid "Croatian"
+msgstr "Kroatisch"
+
 #: data/ui/shortcuts-dialog.ui
 msgid "Ctrl+A"
 msgstr "Strg+A"
@@ -610,7 +871,7 @@ msgstr "Strg+F"
 msgid "Ctrl+Shift+Period"
 msgstr "Strg+Umschalt+Punkt"
 
-#: src/views/character-inspector.vala
+#: src/views/character-inspector.vala:342
 #, c-format
 msgid "Ctrl+Shift+U, then %X, then Enter"
 msgstr "Strg+Umschalt+U, dann %X, dann Eingabe"
@@ -623,19 +884,19 @@ msgstr "Strg+X / Strg+C / Strg+V"
 msgid "Ctrl+Z / Ctrl+Shift+Z"
 msgstr "Strg+Z / Strg+Umschalt+Z"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/properties.h:173
 msgid "Cuneiform"
 msgstr "Sumerisch-akkadische Keilschrift"
 
-#: native/unicode/character-search.c
+#: src/search/collection-catalog.vala:14
 msgid "Currencies"
 msgstr "Währungen"
 
-#: src/views/property-labels.vala
+#: src/views/property-labels.vala:139
 msgid "Currency symbol"
 msgstr "Währungssymbol"
 
-#: native/unicode/language-collections.c
+#: native/unicode/language-collections.c:79
 msgid "Current Locale"
 msgstr "Aktuelles Gebietsschema"
 
@@ -647,27 +908,35 @@ msgstr "Ausschneiden / Kopieren / Einfügen"
 msgid "Cut Selection"
 msgstr "Auswahl ausschneiden"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/properties.h:31
 msgid "Cypriot"
 msgstr "Zypriotisch"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/properties.h:30
 msgid "Cypro_Minoan"
 msgstr "Minoisch"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/properties.h:32
 msgid "Cyrillic"
 msgstr "Kyrillisch"
 
-#: src/views/property-labels.vala
+#: native/unicode/generated/languages.h:51
+msgid "Czech"
+msgstr "Tschechisch"
+
+#: native/unicode/generated/languages.h:52
+msgid "Danish"
+msgstr "Dänisch"
+
+#: src/views/property-labels.vala:127
 msgid "Dash punctuation"
 msgstr "Strichinterpunktion"
 
-#: src/views/character-inspector.vala src/views/composer-view.vala
+#: src/views/character-inspector.vala:398 src/views/composer-view.vala:67
 msgid "Decimal"
 msgstr "Dezimal"
 
-#: src/views/property-labels.vala
+#: src/views/property-labels.vala:107
 msgid "Decimal digit"
 msgstr "Dezimalziffer"
 
@@ -675,15 +944,19 @@ msgstr "Dezimalziffer"
 msgid "Decode Bytes"
 msgstr "Bytes dekodieren"
 
-#: src/views/character-inspector.vala
+#: src/views/character-inspector.vala:322
 msgid "Decomposition type"
 msgstr "Zerlegungstyp"
 
-#: src/views/character-inspector.vala
+#: src/views/property-labels.vala:26
+msgid "Default presentation"
+msgstr "Standarddarstellung"
+
+#: src/views/character-inspector.vala:365
 msgid "Definition (Unihan)"
 msgstr "Definition (Unihan)"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/properties.h:36
 msgid "Deseret"
 msgstr "Deseret"
 
@@ -695,11 +968,11 @@ msgstr "Designkoordinate"
 msgid "Desktop Integration"
 msgstr "Desktop-Integration"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/properties.h:33
 msgid "Devanagari"
 msgstr "Devanagari"
 
-#: src/views/character-inspector.vala
+#: src/views/character-inspector.vala:331
 msgid "Direct decomposition mapping"
 msgstr "Direkte Zerlegung"
 
@@ -707,35 +980,59 @@ msgstr "Direkte Zerlegung"
 msgid "Disabling recording also clears retained history."
 msgstr "Beim Deaktivieren wird auch der gespeicherte Verlauf gelöscht."
 
-#: src/views/font-browser.vala
+#: src/views/font-browser.vala:290
 msgid "Discovering Installed Fonts…"
 msgstr "Installierte Schriften werden ermittelt…"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/properties.h:34
+msgid "Dives_Akuru"
+msgstr "Dives Akuru"
+
+#: native/unicode/generated/properties.h:35
 msgid "Dogra"
 msgstr "Dogra"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/languages.h:53
+msgid "Dogri"
+msgstr "Dogri"
+
+#: native/unicode/generated/languages.h:54
+msgid "Duala"
+msgstr "Duala"
+
+#: native/unicode/generated/properties.h:37
 msgid "Duployan"
 msgstr "Duployanisch"
 
-#: src/views/character-inspector.vala
+#: native/unicode/generated/languages.h:55
+msgid "Dutch"
+msgstr "Niederländisch"
+
+#: native/unicode/generated/languages.h:56
+msgid "Dzongkha"
+msgstr "Dzongkha"
+
+#: src/views/character-inspector.vala:322
 msgid "East Asian width"
 msgstr "Ostasiatische Breite"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/properties.h:38
 msgid "Egyptian_Hieroglyphs"
 msgstr "Ägyptische Hieroglyphen"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/properties.h:39
 msgid "Elbasan"
 msgstr "Elbasanisch"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/properties.h:40
 msgid "Elymaic"
 msgstr "Elymäisch"
 
-#: data/ui/main-window.ui data/ui/preferences-dialog.ui src/views/compact-picker.vala
+#: native/unicode/generated/languages.h:57
+msgid "Embu"
+msgstr "Embu"
+
+#: data/ui/main-window.ui data/ui/preferences-dialog.ui src/views/compact-picker.vala:91
 msgid "Emoji"
 msgstr "Emoji"
 
@@ -747,31 +1044,31 @@ msgstr "Emoji-Vorschau"
 msgid "Emoji Variations"
 msgstr "Emoji-Varianten"
 
-#: src/views/character-inspector.vala
+#: src/views/character-inspector.vala:323
 msgid "Emoji modifier"
 msgstr "Emoji-Modifikator"
 
-#: src/views/character-inspector.vala
+#: src/views/character-inspector.vala:391
 msgid "Emoji name"
 msgstr "Emoji-Name"
 
-#: src/views/character-inspector.vala
+#: src/views/character-inspector.vala:323 src/views/property-labels.vala:30
 msgid "Emoji presentation"
 msgstr "Emoji-Darstellung"
 
-#: src/views/character-inspector.vala
+#: src/views/character-inspector.vala:322
 msgid "Emoji property"
 msgstr "Emoji-Eigenschaft"
 
-#: src/views/property-labels.vala
+#: src/views/property-labels.vala:217
 msgid "Encircled"
 msgstr "Eingekreist"
 
-#: native/unicode/character-search.c
+#: src/search/collection-catalog.vala:36
 msgid "Enclosed"
 msgstr "Umschlossene Zeichen"
 
-#: src/views/property-labels.vala
+#: src/views/property-labels.vala:103
 msgid "Enclosing mark"
 msgstr "Umschließendes Zeichen"
 
@@ -783,14 +1080,18 @@ msgstr "Codepunkte kodieren"
 msgid "Encode Literal Text"
 msgstr "Wörtlichen Text kodieren"
 
-#: src/views/font-browser.vala
+#: src/views/font-browser.vala:795
 #, c-format
 msgid "Encoded bytes: %s"
 msgstr "Kodierte Bytes: %s"
 
-#: data/ui/character-inspector.ui src/views/character-inspector.vala
+#: data/ui/character-inspector.ui src/views/character-inspector.vala:387
 msgid "Encodings and Representations"
 msgstr "Kodierungen und Darstellungen"
+
+#: native/unicode/generated/languages.h:58
+msgid "English"
+msgstr "Englisch"
 
 #: data/ui/shortcuts-dialog.ui
 msgid "Enter"
@@ -800,39 +1101,104 @@ msgstr "Eingabe"
 msgid "Enter / Escape"
 msgstr "Eingabe / Esc"
 
+#: src/views/character-inspector.vala:141
+msgid ""
+"Enter 1–32 valid scalars or explicit U+, 0x, or dec: values. Surrogates are not valid"
+" scalars."
+msgstr ""
+"Geben Sie 1–32 gültige Skalarwerte oder explizite U+-, 0x- oder dec:-Werte ein. "
+"Surrogatwerte sind keine gültigen Skalarwerte."
+
+#: data/ui/legacy-sequence-dialog.ui
+msgid ""
+"Enter up to 128 hexadecimal bytes or 32 Unicode scalars. Each conversion begins in "
+"the encoding's initial state. Encoding rejects any lossy round trip."
+msgstr ""
+"Geben Sie bis zu 128 hexadezimale Bytes oder 32 Unicode-Skalarwerte ein. Jede "
+"Konvertierung beginnt im Anfangszustand der Kodierung. Verlustbehaftete "
+"Rundlaufkonvertierungen werden abgelehnt."
+
+#: src/views/main-window.vala:590
+msgid "Enter valid code points or a search of up to 512 UTF-8 bytes and 64 words."
+msgstr ""
+"Geben Sie gültige Codepunkte oder eine Suchanfrage mit höchstens 512 UTF-8-Bytes und "
+"64 Wörtern ein."
+
 #: data/ui/shortcuts-dialog.ui
 msgid "Escape"
 msgstr "Esc"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/languages.h:59
+msgid "Esperanto"
+msgstr "Esperanto"
+
+#: native/unicode/generated/languages.h:60
+msgid "Estonian"
+msgstr "Estnisch"
+
+#: native/unicode/generated/properties.h:41
 msgid "Ethiopic"
 msgstr "Äthiopisch"
 
-#: src/views/property-labels.vala
+#: src/views/property-labels.vala:163
 msgid "European number"
 msgstr "Europäische Zahl"
 
-#: src/views/property-labels.vala
+#: src/views/property-labels.vala:165
 msgid "European number separator"
 msgstr "Europäischer Zahlentrenner"
 
-#: src/views/property-labels.vala
+#: src/views/property-labels.vala:167
 msgid "European number terminator"
 msgstr "Europäisches Zahlenendzeichen"
+
+#: native/unicode/generated/languages.h:61
+msgid "Ewe"
+msgstr "Ewe"
+
+#: native/unicode/generated/languages.h:62
+msgid "Ewondo"
+msgstr "Ewondo"
+
+#: src/views/legacy-sequence-dialog.vala:133
+msgid "Exact Decoding; Original Input Bytes Preserved"
+msgstr "Exakte Dekodierung; ursprüngliche Eingabebytes erhalten"
 
 #: data/ui/font-face-dialog.ui
 msgid "Exact Glyph Preview"
 msgstr "Exakte Glyphenvorschau"
 
-#: src/views/character-tile.vala
+#: src/views/legacy-sequence-dialog.vala:132
+msgid "Exact Round Trip; Canonical Encoded Bytes"
+msgstr "Exakte Rundlaufkonvertierung; kanonisch kodierte Bytes"
+
+#: src/views/font-browser.vala:813
+msgid "Exact file and face rendering; no fallback."
+msgstr "Exakte Darstellung von Datei und Schriftschnitt; keine Ersatzschriftart."
+
+#: src/views/font-face-dialog.vala:149
+msgid "Exact glyph rendering unavailable for this format."
+msgstr "Exakte Glyphendarstellung für dieses Format nicht verfügbar."
+
+#: src/views/character-tile.vala:78
 msgid "Exact glyph rendering unavailable."
 msgstr "Exakte Glyphendarstellung nicht verfügbar."
 
-#: src/views/library-dialog.vala
+#: src/views/font-face-dialog.vala:148
+msgid "Exact selected face, without fallback. Adjustments apply to this preview only."
+msgstr ""
+"Exakter ausgewählter Schriftschnitt ohne Ersatzschriftart. Anpassungen gelten nur für"
+" diese Vorschau."
+
+#: native/unicode/generated/languages.h:63
+msgid "Faroese"
+msgstr "Färöisch"
+
+#: src/views/library-dialog.vala:304
 msgid "Favorite Moved"
 msgstr "Favorit verschoben"
 
-#: data/ui/main-window.ui src/views/compact-picker.vala src/views/library-dialog.vala
+#: data/ui/main-window.ui src/views/compact-picker.vala:92 src/views/library-dialog.vala:70
 msgid "Favorites"
 msgstr "Favoriten"
 
@@ -840,19 +1206,27 @@ msgstr "Favoriten"
 msgid "Favorites are not affected."
 msgstr "Favoriten bleiben unverändert."
 
-#: src/views/property-labels.vala
+#: native/unicode/generated/languages.h:64
+msgid "Filipino"
+msgstr "Filipino"
+
+#: src/views/property-labels.vala:219
 msgid "Final form"
 msgstr "Endform"
 
-#: src/views/property-labels.vala
+#: src/views/property-labels.vala:147
 msgid "Final quote punctuation"
 msgstr "Schließendes Anführungszeichen"
 
-#: src/views/property-labels.vala
+#: native/unicode/generated/languages.h:65
+msgid "Finnish"
+msgstr "Finnisch"
+
+#: src/views/property-labels.vala:199
 msgid "First strong isolate"
 msgstr "Isolat des ersten starken Zeichens"
 
-#: native/unicode/unicode-engine.c
+#: native/unicode/unicode-engine.c:60
 msgid "Flags"
 msgstr "Flaggen"
 
@@ -880,13 +1254,23 @@ msgstr "Schriftfamilie"
 msgid "Font Preview Size (pt)"
 msgstr "Schriftvorschaugröße (pt)"
 
-#: data/ui/character-inspector.ui src/views/font-browser.vala
+#: data/ui/character-inspector.ui src/views/font-browser.vala:201
 msgid "Font Variations"
 msgstr "Schriftvarianten"
 
-#: src/views/property-labels.vala
+#: src/views/font-browser.vala:345
+msgid "Font discovery or coverage failed. Refresh Fonts to retry."
+msgstr ""
+"Schriftartermittlung oder Abdeckungsprüfung fehlgeschlagen. Aktualisieren Sie die "
+"Schriftarten, um es erneut zu versuchen."
+
+#: src/views/property-labels.vala:221
 msgid "Font variant"
 msgstr "Schriftvariante"
+
+#: src/views/font-browser.vala:291
+msgid "Fontconfig supplies the installed font inventory."
+msgstr "Fontconfig stellt das Verzeichnis der installierten Schriftarten bereit."
 
 #: data/ui/main-window.ui data/ui/preferences-dialog.ui
 msgid "Fonts"
@@ -896,95 +1280,149 @@ msgstr "Schriften"
 msgid "Fonts and Character Sets"
 msgstr "Schriften und Zeichensätze"
 
-#: native/unicode/unicode-engine.c
+#: native/unicode/unicode-engine.c:55
 msgid "Food & Drink"
 msgstr "Essen und Trinken"
 
-#: src/views/property-labels.vala
+#: src/views/property-labels.vala:121
 msgid "Format character"
 msgstr "Formatierungszeichen"
 
-#: src/views/property-labels.vala
+#: data/ui/composer-view.ui
+msgid "Format, normalize, or inspect the selection; otherwise use all text."
+msgstr ""
+"Auswahl formatieren, normalisieren oder untersuchen; ohne Auswahl den gesamten Text "
+"verwenden."
+
+#: src/views/property-labels.vala:223
 msgid "Fraction"
 msgstr "Bruch"
 
-#: native/unicode/character-search.c
+#: src/search/collection-catalog.vala:44
 msgid "Fractions"
 msgstr "Brüche"
 
-#: data/ui/main-window.ui src/views/compact-picker.vala src/views/library-dialog.vala
+#: native/unicode/generated/languages.h:66
+msgid "French"
+msgstr "Französisch"
+
+#: data/ui/main-window.ui src/views/compact-picker.vala:92 src/views/library-dialog.vala:71
 msgid "Frequently Used"
 msgstr "Häufig verwendet"
 
-#: src/views/property-labels.vala
+#: native/unicode/generated/languages.h:67
+msgid "Friulian"
+msgstr "Friaulisch"
+
+#: native/unicode/generated/languages.h:68
+msgid "Fula"
+msgstr "Ful"
+
+#: native/unicode/generated/languages.h:69
+msgid "Fula (Adlam)"
+msgstr "Ful (Adlam)"
+
+#: native/unicode/generated/languages.h:70
+msgid "Fula (Latin)"
+msgstr "Ful (Lateinisch)"
+
+#: src/views/property-labels.vala:263
 msgid "Fullwidth"
 msgstr "Vollbreit"
 
-#: native/unicode/character-search.c
+#: native/unicode/generated/languages.h:71
+msgid "Ga"
+msgstr "Ga"
+
+#: native/unicode/generated/languages.h:72
+msgid "Galician"
+msgstr "Galicisch"
+
+#: src/search/collection-catalog.vala:26
 msgid "Games"
 msgstr "Spiele"
+
+#: native/unicode/generated/languages.h:73
+msgid "Ganda"
+msgstr "Ganda"
+
+#: native/unicode/generated/properties.h:42
+msgid "Garay"
+msgstr "Garay"
 
 #: data/ui/font-browser.ui data/ui/main-window.ui
 msgid "General Category Filter"
 msgstr "Filter für allgemeine Kategorie"
 
-#: src/views/character-inspector.vala
+#: src/views/character-inspector.vala:320
 msgid "General category"
 msgstr "Allgemeine Kategorie"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/languages.h:74 native/unicode/generated/properties.h:43
 msgid "Georgian"
 msgstr "Georgisch"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/languages.h:75
+msgid "German"
+msgstr "Deutsch"
+
+#: native/unicode/generated/properties.h:44
 msgid "Glagolitic"
 msgstr "Glagolitisch"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/properties.h:47
 msgid "Gothic"
 msgstr "Gotisch"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/properties.h:48
 msgid "Grantha"
 msgstr "Grantha"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/languages.h:76 native/unicode/generated/properties.h:49
 msgid "Greek"
 msgstr "Griechisch"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/languages.h:77 native/unicode/generated/properties.h:50
 msgid "Gujarati"
 msgstr "Gujarati"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/properties.h:45
 msgid "Gunjala_Gondi"
 msgstr "Gunjala Gondi"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/properties.h:52
 msgid "Gurmukhi"
 msgstr "Gurmukhi"
 
-#: src/views/composer-view.vala
+#: native/unicode/generated/properties.h:51
+msgid "Gurung_Khema"
+msgstr "Gurung Khema"
+
+#: native/unicode/generated/languages.h:78
+msgid "Gusii"
+msgstr "Gusii"
+
+#: src/views/composer-view.vala:69
 msgid "HTML Decimal"
 msgstr "HTML dezimal"
 
-#: src/views/composer-view.vala
+#: src/views/composer-view.vala:69
 msgid "HTML Hexadecimal"
 msgstr "HTML hexadezimal"
 
-#: src/views/character-inspector.vala
+#: src/views/character-inspector.vala:400
 msgid "HTML decimal references"
 msgstr "Dezimale HTML-Referenzen"
 
-#: src/views/character-inspector.vala
+#: src/views/character-inspector.vala:400
 msgid "HTML hex references"
 msgstr "Hexadezimale HTML-Referenzen"
 
-#: src/views/property-labels.vala
+#: src/views/property-labels.vala:259
 msgid "Halfwidth"
 msgstr "Halbbreit"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/properties.h:54
 msgid "Han"
 msgstr "Chinesisch"
 
@@ -996,27 +1434,43 @@ msgstr "Han-Radikalgruppen"
 msgid "Han Stroke Groups"
 msgstr "Han-Strichgruppen"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/properties.h:53
 msgid "Hangul"
 msgstr "Hangul"
 
-#: src/views/character-inspector.vala
+#: src/views/character-inspector.vala:364
 msgid "Hangul (Unihan)"
 msgstr "Hangul (Unihan)"
 
-#: native/unicode/generated/properties.h
+#: src/views/character-inspector.vala:374
+msgid "Hangul reading (XeTeXko 4.4)"
+msgstr "Hangul-Lesung (XeTeXko 4.4)"
+
+#: native/unicode/generated/properties.h:127
 msgid "Hanifi_Rohingya"
 msgstr "Hanifi Rohingya"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/properties.h:55
 msgid "Hanunoo"
 msgstr "Hanunoo"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/languages.h:79
+msgid "Haryanvi"
+msgstr "Haryanvi"
+
+#: native/unicode/generated/properties.h:56
 msgid "Hatran"
 msgstr "Hatranisch"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/languages.h:80
+msgid "Hausa"
+msgstr "Haussa"
+
+#: native/unicode/generated/languages.h:81
+msgid "Hawaiian"
+msgstr "Hawaiisch"
+
+#: native/unicode/generated/languages.h:82 native/unicode/generated/properties.h:57
 msgid "Hebrew"
 msgstr "Hebräisch"
 
@@ -1024,7 +1478,15 @@ msgstr "Hebräisch"
 msgid "Hexadecimal Bytes"
 msgstr "Hexadezimale Bytes"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/languages.h:83
+msgid "Hindi"
+msgstr "Hindi"
+
+#: native/unicode/generated/languages.h:84
+msgid "Hindi (Latin)"
+msgstr "Hindi (lateinisch)"
+
+#: native/unicode/generated/properties.h:58
 msgid "Hiragana"
 msgstr "Hiragana"
 
@@ -1032,9 +1494,17 @@ msgstr "Hiragana"
 msgid "History"
 msgstr "Verlauf"
 
-#: src/views/library-dialog.vala src/views/preferences-dialog.vala
+#: src/views/library-dialog.vala:319 src/views/preferences-dialog.vala:132
 msgid "History Cleared"
 msgstr "Verlauf gelöscht"
+
+#: native/unicode/generated/languages.h:85
+msgid "Hungarian"
+msgstr "Ungarisch"
+
+#: native/unicode/generated/languages.h:86
+msgid "Icelandic"
+msgstr "Isländisch"
 
 #: data/ui/character-inspector.ui data/ui/main-window.ui
 msgid "Identify Characters"
@@ -1048,31 +1518,56 @@ msgstr "Codepunkte identifizieren"
 msgid "Identify Text"
 msgstr "Text identifizieren"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/languages.h:87
+msgid "Igbo"
+msgstr "Igbo"
+
+#: native/unicode/generated/properties.h:8
 msgid "Imperial_Aramaic"
 msgstr "Aramäisch"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/languages.h:88
+msgid "Inari Sami"
+msgstr "Inari-Samisch"
+
+#: src/views/main-window.vala:530
+msgid "Includes registered XKB layouts and available IBus engines."
+msgstr "Umfasst registrierte XKB-Tastaturbelegungen und verfügbare IBus-Engines."
+
+#: src/views/font-browser.vala:502
+msgid ""
+"Independent scalar mappings and byte alternatives. Search byte:80 or byte:82 A0. "
+"Inspect Byte Sequence accepts longer inputs and multi-scalar results."
+msgstr ""
+"Unabhängige Skalarzuordnungen und Bytealternativen. Suchen Sie nach byte:80 oder "
+"byte:82 A0. Die Bytefolgenprüfung akzeptiert längere Eingaben und Ergebnisse mit "
+"mehreren Skalarwerten."
+
+#: native/unicode/generated/languages.h:89
+msgid "Indonesian"
+msgstr "Indonesisch"
+
+#: native/unicode/generated/properties.h:177
 msgid "Inherited"
 msgstr "Geerbter Schriftwert"
 
-#: src/views/property-labels.vala
+#: src/views/property-labels.vala:225
 msgid "Initial form"
 msgstr "Anfangsform"
 
-#: src/views/property-labels.vala
+#: src/views/property-labels.vala:145
 msgid "Initial quote punctuation"
 msgstr "Öffnendes Anführungszeichen"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/properties.h:121
 msgid "Inscriptional_Pahlavi"
 msgstr "Buch-Pahlavi"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/properties.h:125
 msgid "Inscriptional_Parthian"
 msgstr "Parthisch"
 
-#: src/views/compact-picker.vala src/views/emoji-variations.vala
+#: src/views/compact-picker.vala:108 src/views/emoji-variations.vala:57
 msgid "Insert Character"
 msgstr "Zeichen einfügen"
 
@@ -1084,7 +1579,7 @@ msgstr "IBus-Auswahl einfügen oder abbrechen"
 msgid "Inspect"
 msgstr "Untersuchen"
 
-#: src/views/character-inspector.vala
+#: src/views/character-inspector.vala:461
 #, c-format
 msgid "Inspect %s — %s"
 msgstr "%s — %s untersuchen"
@@ -1097,7 +1592,7 @@ msgstr "Bytefolge untersuchen"
 msgid "Inspect Character"
 msgstr "Zeichen untersuchen"
 
-#: src/views/character-inspector.vala
+#: src/views/character-inspector.vala:335
 msgid "Inspect Decomposition"
 msgstr "Zerlegung untersuchen"
 
@@ -1125,115 +1620,293 @@ msgstr "Unicode-Zeichenfolge untersuchen"
 msgid "Inspect selected character"
 msgstr "Ausgewähltes Zeichen untersuchen"
 
-#: src/views/font-browser.vala
+#: src/views/font-browser.vala:430
+msgid "Install a font using the system font manager, then refresh."
+msgstr ""
+"Installieren Sie eine Schriftart mit der Schriftartenverwaltung des Systems und "
+"aktualisieren Sie anschließend."
+
+#: src/views/font-browser.vala:199
 msgid "Installed Fonts"
 msgstr "Installierte Schriften"
 
-#: src/views/font-browser.vala
+#: native/unicode/generated/languages.h:90
+msgid "Interlingua"
+msgstr "Interlingua"
+
+#: native/unicode/generated/languages.h:91
+msgid "Interlingue"
+msgstr "Interlingue"
+
+#: src/views/font-browser.vala:566
 msgid "Invalid Search Query"
 msgstr "Ungültige Suchanfrage"
 
-#: src/views/font-browser.vala
+#: src/app/application.vala:155
+msgid "Invalid character query\n"
+msgstr "Ungültige Zeichensuchanfrage\n"
+
+#: src/views/font-browser.vala:532
 msgid "Invalid or Unmapped Byte Sequence"
 msgstr "Ungültige oder nicht zugeordnete Bytefolge"
 
-#: src/views/property-labels.vala
+#: src/views/legacy-sequence-dialog.vala:101
+msgid "Invalid, Empty or Oversized Unicode Sequence"
+msgstr "Ungültige, leere oder zu lange Unicode-Sequenz"
+
+#: src/views/legacy-sequence-dialog.vala:81
+msgid "Invalid, Empty, Truncated or Oversized Byte Sequence"
+msgstr "Ungültige, leere, abgeschnittene oder zu lange Bytefolge"
+
+#: native/unicode/generated/languages.h:92
+msgid "Irish"
+msgstr "Irisch"
+
+#: src/views/property-labels.vala:227
 msgid "Isolated form"
 msgstr "Isolierte Form"
 
-#: src/views/character-inspector.vala
+#: native/unicode/generated/languages.h:93
+msgid "Italian"
+msgstr "Italienisch"
+
+#: native/unicode/generated/languages.h:94
+msgid "Japanese"
+msgstr "Japanisch"
+
+#: src/views/character-inspector.vala:364
 msgid "Japanese (Unihan)"
 msgstr "Japanisch (Unihan)"
 
-#: src/views/character-inspector.vala
+#: src/views/character-inspector.vala:363
 msgid "Japanese kun reading (Unihan)"
 msgstr "Japanische Kun-Lesung (Unihan)"
 
-#: src/views/character-inspector.vala
+#: src/views/character-inspector.vala:363
 msgid "Japanese on reading (Unihan)"
 msgstr "Japanische On-Lesung (Unihan)"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/languages.h:95 native/unicode/generated/properties.h:65
 msgid "Javanese"
 msgstr "Javanesisch"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/languages.h:96
+msgid "Jola-Fonyi"
+msgstr "Diola"
+
+#: native/unicode/generated/languages.h:97
+msgid "Kabuverdianu"
+msgstr "Kabuverdianu"
+
+#: native/unicode/generated/languages.h:98
+msgid "Kabyle"
+msgstr "Kabylisch"
+
+#: native/unicode/generated/languages.h:99
+msgid "Kaingang"
+msgstr "Kaingang"
+
+#: native/unicode/generated/properties.h:75
 msgid "Kaithi"
 msgstr "Kaithi"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/languages.h:100
+msgid "Kako"
+msgstr "Kako"
+
+#: native/unicode/generated/languages.h:101
+msgid "Kalaallisut"
+msgstr "Grönländisch"
+
+#: native/unicode/generated/languages.h:102
+msgid "Kalenjin"
+msgstr "Kalenjin"
+
+#: native/unicode/generated/languages.h:103
+msgid "Kamba"
+msgstr "Kamba"
+
+#: native/unicode/generated/languages.h:104
+msgid "Kangri"
+msgstr "Kangri"
+
+#: native/unicode/generated/languages.h:105 native/unicode/generated/properties.h:73
 msgid "Kannada"
 msgstr "Kannada"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/languages.h:106
+msgid "Kashmiri"
+msgstr "Kaschmiri"
+
+#: native/unicode/generated/languages.h:107
+msgid "Kashmiri (Arabic)"
+msgstr "Kaschmiri (Arabisch)"
+
+#: native/unicode/generated/languages.h:108
+msgid "Kashmiri (Devanagari)"
+msgstr "Kaschmiri (Devanagari)"
+
+#: native/unicode/generated/properties.h:67
 msgid "Katakana"
 msgstr "Katakana"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/properties.h:62
 msgid "Katakana_Or_Hiragana"
 msgstr "Japanische Silbenschrift"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/properties.h:68
+msgid "Kawi"
+msgstr "Kawi"
+
+#: native/unicode/generated/properties.h:66
 msgid "Kayah_Li"
 msgstr "Kayah Li"
+
+#: native/unicode/generated/languages.h:109
+msgid "Kazakh"
+msgstr "Kasachisch"
+
+#: native/unicode/generated/languages.h:110
+msgid "Kazakh (Cyrillic)"
+msgstr "Kasachisch (Kyrillisch)"
 
 #: data/ui/compact-picker.ui data/ui/main-window.ui data/ui/shortcuts-dialog.ui
 msgid "Keyboard Shortcuts"
 msgstr "Tastenkürzel"
 
-#: src/views/character-inspector.vala
+#: src/views/character-inspector.vala:343
 msgid "Keyboard entry note"
 msgstr "Hinweis zur Tastatureingabe"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/properties.h:69
 msgid "Kharoshthi"
 msgstr "Kharoshthi"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/properties.h:72
 msgid "Khitan_Small_Script"
 msgstr "Chitan"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/languages.h:111 native/unicode/generated/properties.h:70
 msgid "Khmer"
 msgstr "Khmer"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/properties.h:71
 msgid "Khojki"
 msgstr "Khojki"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/properties.h:137
 msgid "Khudawadi"
 msgstr "Khudawadi"
 
-#: src/views/character-inspector.vala
+#: native/unicode/generated/languages.h:112
+msgid "Kikuyu"
+msgstr "Kikuyu"
+
+#: native/unicode/generated/languages.h:113
+msgid "Kinyarwanda"
+msgstr "Kinyarwanda"
+
+#: native/unicode/generated/properties.h:74
+msgid "Kirat_Rai"
+msgstr "Kirat Rai"
+
+#: native/unicode/generated/languages.h:114
+msgid "Konkani"
+msgstr "Konkani"
+
+#: native/unicode/generated/languages.h:115
+msgid "Konkani (Devanagari)"
+msgstr "Konkani (Devanagari)"
+
+#: native/unicode/generated/languages.h:116
+msgid "Konkani (Latin)"
+msgstr "Konkani (Lateinisch)"
+
+#: native/unicode/generated/languages.h:117
+msgid "Korean"
+msgstr "Koreanisch"
+
+#: src/views/character-inspector.vala:364
 msgid "Korean (Unihan)"
 msgstr "Koreanisch (Unihan)"
+
+#: native/unicode/generated/languages.h:118
+msgid "Koyra Chiini"
+msgstr "Koyra Chiini"
+
+#: native/unicode/generated/languages.h:119
+msgid "Koyraboro Senni"
+msgstr "Koyra Senni"
+
+#: native/unicode/generated/languages.h:120
+msgid "Kurdish"
+msgstr "Kurmandschi"
+
+#: native/unicode/generated/languages.h:121
+msgid "Kuvi"
+msgstr "Kuvi"
+
+#: native/unicode/generated/languages.h:122
+msgid "Kuvi (Devanagari)"
+msgstr "Kuvi (Devanagari)"
+
+#: native/unicode/generated/languages.h:123
+msgid "Kuvi (Latin)"
+msgstr "Kuvi (Lateinisch)"
+
+#: native/unicode/generated/languages.h:124
+msgid "Kuvi (Odia)"
+msgstr "Kuvi (Oriya)"
+
+#: native/unicode/generated/languages.h:125
+msgid "Kuvi (Telugu)"
+msgstr "Kuvi (Telugu)"
+
+#: native/unicode/generated/languages.h:126
+msgid "Kwasio"
+msgstr "Kwasio"
+
+#: native/unicode/generated/languages.h:127
+msgid "Kyrgyz"
+msgstr "Kirgisisch"
+
+#: native/unicode/generated/languages.h:128
+msgid "Lakota"
+msgstr "Lakota"
+
+#: native/unicode/generated/languages.h:129
+msgid "Langi"
+msgstr "Langi"
 
 #: data/ui/main-window.ui data/ui/preferences-dialog.ui
 msgid "Languages"
 msgstr "Sprachen"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/languages.h:130 native/unicode/generated/properties.h:77
 msgid "Lao"
 msgstr "Laotisch"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/properties.h:78
 msgid "Latin"
 msgstr "Lateinisch"
 
-#: src/views/property-labels.vala
+#: native/unicode/generated/languages.h:131
+msgid "Latvian"
+msgstr "Lettisch"
+
+#: src/views/property-labels.vala:157
 msgid "Left-to-right"
 msgstr "Links nach rechts"
 
-#: src/views/property-labels.vala
+#: src/views/property-labels.vala:185
 msgid "Left-to-right embedding"
 msgstr "Einbettung links nach rechts"
 
-#: src/views/property-labels.vala
+#: src/views/property-labels.vala:195
 msgid "Left-to-right isolate"
 msgstr "Isolat links nach rechts"
 
-#: src/views/property-labels.vala
+#: src/views/property-labels.vala:187
 msgid "Left-to-right override"
 msgstr "Überschreibung links nach rechts"
 
@@ -1241,63 +1914,111 @@ msgstr "Überschreibung links nach rechts"
 msgid "Legacy Character Set"
 msgstr "Älterer Zeichensatz"
 
-#: src/views/font-browser.vala
+#: src/views/font-browser.vala:199
 msgid "Legacy Character Sets"
 msgstr "Ältere Zeichensätze"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/properties.h:79
 msgid "Lepcha"
 msgstr "Lepcha"
 
-#: src/views/property-labels.vala
+#: src/views/property-labels.vala:109
 msgid "Letter number"
 msgstr "Buchstabenzahl"
 
-#: native/unicode/character-search.c
+#: src/search/collection-catalog.vala:52
 msgid "Letterlike Symbols"
 msgstr "Buchstabenähnliche Symbole"
 
-#: native/unicode/character-search.c
+#: src/search/collection-catalog.vala:18 src/search/collection-catalog.vala:110
 msgid "Letters"
 msgstr "Buchstaben"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/languages.h:132
+msgid "Ligurian"
+msgstr "Ligurisch"
+
+#: native/unicode/generated/properties.h:80
 msgid "Limbu"
 msgstr "Limbu"
 
-#: src/views/property-labels.vala
+#: src/views/property-labels.vala:115
 msgid "Line separator"
 msgstr "Zeilentrennzeichen"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/properties.h:81
 msgid "Linear_A"
 msgstr "Linear A"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/properties.h:82
 msgid "Linear_B"
 msgstr "Linear B"
 
-#: src/views/character-inspector.vala
+#: native/unicode/generated/languages.h:133
+msgid "Lingala"
+msgstr "Lingala"
+
+#: src/views/character-inspector.vala:341
 msgid "Linux Unicode keyboard entry"
 msgstr "Unicode-Tastatureingabe unter Linux"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/properties.h:83
 msgid "Lisu"
 msgstr "Fraser"
 
-#: src/views/property-labels.vala
+#: native/unicode/generated/languages.h:134
+msgid "Lithuanian"
+msgstr "Litauisch"
+
+#: native/unicode/generated/languages.h:135
+msgid "Lombard"
+msgstr "Lombardisch"
+
+#: native/unicode/generated/languages.h:136
+msgid "Low German"
+msgstr "Niederdeutsch"
+
+#: native/unicode/generated/languages.h:137
+msgid "Lower Sorbian"
+msgstr "Niedersorbisch"
+
+#: src/views/property-labels.vala:93
 msgid "Lowercase letter"
 msgstr "Kleinbuchstabe"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/languages.h:138
+msgid "Luba-Katanga"
+msgstr "Luba-Katanga"
+
+#: native/unicode/generated/languages.h:139
+msgid "Luo"
+msgstr "Luo"
+
+#: native/unicode/generated/languages.h:140
+msgid "Luxembourgish"
+msgstr "Luxemburgisch"
+
+#: native/unicode/generated/languages.h:141
+msgid "Luyia"
+msgstr "Luhya"
+
+#: native/unicode/generated/properties.h:84
 msgid "Lycian"
 msgstr "Lykisch"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/properties.h:85
 msgid "Lydian"
 msgstr "Lydisch"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/languages.h:142
+msgid "Macedonian"
+msgstr "Mazedonisch"
+
+#: native/unicode/generated/languages.h:143
+msgid "Machame"
+msgstr "Machame"
+
+#: native/unicode/generated/properties.h:86
 msgid "Mahajani"
 msgstr "Mahajani"
 
@@ -1305,47 +2026,99 @@ msgstr "Mahajani"
 msgid "Main Menu"
 msgstr "Hauptmenü"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/languages.h:144
+msgid "Maithili"
+msgstr "Maithili"
+
+#: native/unicode/generated/properties.h:87
 msgid "Makasar"
 msgstr "Makasar"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/languages.h:145
+msgid "Makhuwa"
+msgstr "Makua"
+
+#: native/unicode/generated/languages.h:146
+msgid "Makhuwa-Meetto"
+msgstr "Makhuwa-Meetto"
+
+#: native/unicode/generated/languages.h:147
+msgid "Makonde"
+msgstr "Makonde"
+
+#: native/unicode/generated/languages.h:148
+msgid "Malagasy"
+msgstr "Malagasy"
+
+#: native/unicode/generated/languages.h:149
+msgid "Malay"
+msgstr "Malaiisch"
+
+#: native/unicode/generated/languages.h:150 native/unicode/generated/properties.h:95
 msgid "Malayalam"
 msgstr "Malayalam"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/languages.h:151
+msgid "Maltese"
+msgstr "Maltesisch"
+
+#: native/unicode/generated/properties.h:88
 msgid "Mandaic"
 msgstr "Mandäisch"
 
-#: src/views/character-inspector.vala
+#: src/views/character-inspector.vala:362
 msgid "Mandarin (Unihan)"
 msgstr "Mandarin (Unihan)"
 
-#: native/unicode/generated/properties.h
+#: src/views/character-inspector.vala:373
+msgid "Mandarin (xpinyin, Unicode 14)"
+msgstr "Mandarin (xpinyin, Unicode 14)"
+
+#: native/unicode/generated/properties.h:89
 msgid "Manichaean"
 msgstr "Manichäisch"
+
+#: native/unicode/generated/languages.h:152
+msgid "Manipuri"
+msgstr "Meithei"
+
+#: native/unicode/generated/languages.h:153
+msgid "Manipuri (Bangla)"
+msgstr "Meithei (Bengalisch)"
+
+#: native/unicode/generated/languages.h:154
+msgid "Manx"
+msgstr "Manx"
 
 #: data/ui/font-browser.ui
 msgid "Mapped Characters or Font Variations"
 msgstr "Zugeordnete Zeichen oder Schriftvarianten"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/languages.h:155
+msgid "Marathi"
+msgstr "Marathi"
+
+#: native/unicode/generated/properties.h:90
 msgid "Marchen"
 msgstr "Marchen"
 
-#: native/unicode/character-search.c
+#: src/search/collection-catalog.vala:112
 msgid "Marks"
 msgstr "Zeichenmarken"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/languages.h:156
+msgid "Masai"
+msgstr "Massai"
+
+#: native/unicode/generated/properties.h:46
 msgid "Masaram_Gondi"
 msgstr "Masaram-Gondi"
 
-#: src/views/property-labels.vala
+#: src/views/property-labels.vala:137
 msgid "Mathematical symbol"
 msgstr "Mathematisches Symbol"
 
-#: native/unicode/character-search.c
+#: src/search/collection-catalog.vala:16
 msgid "Mathematics"
 msgstr "Mathematik"
 
@@ -1353,31 +2126,43 @@ msgstr "Mathematik"
 msgid "Maximum History Entries"
 msgstr "Maximale Verlaufseinträge"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/languages.h:157
+msgid "Mazanderani"
+msgstr "Masanderanisch"
+
+#: native/unicode/generated/properties.h:91
 msgid "Medefaidrin"
 msgstr "Medefaidrin"
 
-#: src/views/property-labels.vala
+#: src/views/property-labels.vala:229
 msgid "Medial form"
 msgstr "Mittelform"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/properties.h:99
 msgid "Meetei_Mayek"
 msgstr "Meitei-Mayek"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/properties.h:92
 msgid "Mende_Kikakui"
 msgstr "Mende"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/properties.h:93
 msgid "Meroitic_Cursive"
 msgstr "Meroitisch kursiv"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/properties.h:94
 msgid "Meroitic_Hieroglyphs"
 msgstr "Meroitisch"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/languages.h:158
+msgid "Meru"
+msgstr "Meru"
+
+#: native/unicode/generated/languages.h:159
+msgid "Metaʼ"
+msgstr "Meta’"
+
+#: native/unicode/generated/properties.h:124
 msgid "Miao"
 msgstr "Pollard Phonetisch"
 
@@ -1385,22 +2170,30 @@ msgstr "Pollard Phonetisch"
 msgid "Microsoft Symbol Character Map"
 msgstr "Microsoft-Symbolzeichentabelle"
 
-#: src/views/font-face-dialog.vala
+#: src/views/font-face-dialog.vala:98
 #, c-format
 msgid "Minimum: %g · Maximum: %g · Default: %g"
 msgstr "Minimum: %g · Maximum: %g · Standard: %g"
 
-#: src/views/property-labels.vala
+#: native/unicode/generated/properties.h:96
+msgid "Modi"
+msgstr "Modi"
+
+#: src/views/property-labels.vala:97
 msgid "Modifier letter"
 msgstr "Modifikatorbuchstabe"
 
-#: src/views/property-labels.vala
+#: src/views/property-labels.vala:141
 msgid "Modifier symbol"
 msgstr "Modifikatorsymbol"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/languages.h:160 native/unicode/generated/properties.h:97
 msgid "Mongolian"
 msgstr "Mongolisch"
+
+#: native/unicode/generated/languages.h:161
+msgid "Morisyen"
+msgstr "Morisyen"
 
 #: data/ui/library-dialog.ui
 msgid "Move Down"
@@ -1418,35 +2211,51 @@ msgstr "Zwischen Zeichen wechseln"
 msgid "Move between controls"
 msgstr "Zwischen Steuerelementen wechseln"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/properties.h:98
 msgid "Mro"
 msgstr "Mro"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/properties.h:100
 msgid "Multani"
 msgstr "Multani"
 
-#: native/unicode/character-search.c
+#: native/unicode/generated/languages.h:162
+msgid "Mundang"
+msgstr "Mundang"
+
+#: src/search/collection-catalog.vala:24
 msgid "Music"
 msgstr "Musik"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/properties.h:101
 msgid "Myanmar"
 msgstr "Birmanisch"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/languages.h:163
+msgid "Māori"
+msgstr "Māori"
+
+#: native/unicode/generated/properties.h:105
 msgid "Nabataean"
 msgstr "Nabatäisch"
+
+#: native/unicode/generated/properties.h:102
+msgid "Nag_Mundari"
+msgstr "Nag Mundari"
+
+#: native/unicode/generated/languages.h:164
+msgid "Nama"
+msgstr "Nama"
 
 #: data/ui/main-window.ui data/ui/preferences-dialog.ui
 msgid "Named Sequences"
 msgstr "Benannte Zeichenfolgen"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/properties.h:103
 msgid "Nandinagari"
 msgstr "Nandinagari"
 
-#: src/views/property-labels.vala
+#: src/views/property-labels.vala:231 src/views/property-labels.vala:265
 msgid "Narrow"
 msgstr "Schmal"
 
@@ -1454,13 +2263,21 @@ msgstr "Schmal"
 msgid "Navigate IBus candidates"
 msgstr "IBus-Kandidaten durchlaufen"
 
-#: src/views/property-labels.vala
+#: native/unicode/generated/languages.h:165
+msgid "Nepali"
+msgstr "Nepalesisch"
+
+#: src/views/property-labels.vala:255
 msgid "Neutral"
 msgstr "Neutral"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/properties.h:150
 msgid "New_Tai_Lue"
 msgstr "Tai Lue"
+
+#: native/unicode/generated/properties.h:106
+msgid "Newa"
+msgstr "Newa"
 
 #: data/ui/font-browser.ui data/ui/main-window.ui
 msgid "Next Page"
@@ -1470,20 +2287,38 @@ msgstr "Nächste Seite"
 msgid "Next page"
 msgstr "Nächste Seite"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/languages.h:166
+msgid "Ngiemboon"
+msgstr "Ngiemboon"
+
+#: native/unicode/generated/languages.h:167
+msgid "Ngomba"
+msgstr "Ngomba"
+
+#: native/unicode/generated/languages.h:168
+msgid "Nheengatu"
+msgstr "Nheengatu"
+
+#: native/unicode/generated/languages.h:169
+msgid "Nigerian Pidgin"
+msgstr "Nigerianisches Pidgin"
+
+#: native/unicode/generated/properties.h:107
 msgid "Nko"
 msgstr "N’Ko"
 
-#: src/views/character-inspector.vala src/views/font-browser.vala src/views/property-labels.vala
+#: src/views/character-inspector.vala:313 src/views/font-browser.vala:807
+#: src/views/font-browser.vala:808 src/views/property-labels.vala:277
 msgid "No"
 msgstr "Nein"
 
-#: src/views/character-inspector.vala
+#: src/views/character-inspector.vala:228 src/views/character-inspector.vala:270
+#: src/views/character-inspector.vala:451
 msgid "No Canonical Name"
 msgstr "Kein kanonischer Name"
 
-#: data/ui/font-browser.ui data/ui/main-window.ui src/views/compact-picker.vala
-#: src/views/font-browser.vala src/views/main-window.vala
+#: data/ui/font-browser.ui data/ui/main-window.ui src/views/compact-picker.vala:403
+#: src/views/font-browser.vala:821 src/views/main-window.vala:689
 msgid "No Character Selected"
 msgstr "Kein Zeichen ausgewählt"
 
@@ -1491,59 +2326,67 @@ msgstr "Kein Zeichen ausgewählt"
 msgid "No Characters Found"
 msgstr "Keine Zeichen gefunden"
 
-#: src/views/library-dialog.vala
+#: src/views/library-dialog.vala:188
 msgid "No Characters in This View"
 msgstr "Keine Zeichen in dieser Ansicht"
 
-#: src/views/emoji-variations.vala
+#: src/views/emoji-variations.vala:109
 msgid "No Emoji Variations Available"
 msgstr "Keine Emoji-Varianten verfügbar"
 
-#: src/views/font-browser.vala
+#: src/views/legacy-sequence-dialog.vala:110
+msgid "No Exact Round-Trip Encoding Within the Byte Limit"
+msgstr "Keine exakte Rundlaufkodierung innerhalb des Byte-Limits"
+
+#: src/views/font-browser.vala:429
 msgid "No Installed Font Faces Found"
 msgstr "Keine installierten Schriftschnitte gefunden"
 
-#: src/views/font-face-dialog.vala
+#: src/views/font-face-dialog.vala:141
 msgid "No Mapped Glyph Selected"
 msgstr "Keine zugeordnete Glyphe ausgewählt"
 
-#: src/views/font-browser.vala
+#: src/views/font-browser.vala:589
 msgid "No Matching Characters"
 msgstr "Keine passenden Zeichen"
 
-#: src/views/font-browser.vala
+#: src/views/font-browser.vala:588
 msgid "No Matching Font Faces"
 msgstr "Keine passenden Schriftschnitte"
 
-#: src/views/font-browser.vala
+#: src/views/font-browser.vala:360
 msgid "No Unicode Mappings in This Face"
 msgstr "Keine Unicode-Zuordnungen in diesem Schriftschnitt"
 
-#: src/views/compact-picker.vala tools/input/characters_input.py
+#: src/views/compact-picker.vala:336 tools/input/characters_input.py:103
 msgid "No matching characters"
 msgstr "Keine passenden Zeichen"
 
-#: src/views/character-inspector.vala
+#: src/views/character-inspector.vala:438
 msgid "No related characters"
 msgstr "Keine verwandten Zeichen"
 
-#: src/views/property-labels.vala
+#: src/views/font-browser.vala:814
+msgid "Nominal preview face matches the installed file."
+msgstr "Der nominelle Vorschauschriftschnitt entspricht der installierten Datei."
+
+#: src/views/property-labels.vala:233
 msgid "Nonbreaking"
 msgstr "Nicht umbrechbar"
 
-#: native/unicode/character-search.c
+#: src/search/collection-catalog.vala:134
 msgid "Noncharacter"
 msgstr "Nichtzeichen"
 
-#: src/views/character-inspector.vala src/views/property-labels.vala
+#: src/views/character-inspector.vala:332 src/views/property-labels.vala:211
 msgid "None"
 msgstr "Keine"
 
-#: src/views/property-labels.vala
+#: src/views/property-labels.vala:101 src/views/property-labels.vala:173
 msgid "Nonspacing mark"
 msgstr "Nichtabstandhaltendes Zeichen"
 
-#: src/views/character-inspector.vala
+#: src/views/character-inspector.vala:415
 msgid "Normalization"
 msgstr "Normalisierung"
 
@@ -1555,96 +2398,154 @@ msgstr "Normalisierungsform"
 msgid "Normalization and Decomposition"
 msgstr "Normalisierung und Zerlegung"
 
+#: src/views/composer-view.vala:245
+msgid "Normalization unavailable for this text or output size."
+msgstr "Normalisierung für diesen Text oder diese Ausgabegröße nicht verfügbar."
+
 #: data/ui/composer-view.ui
 msgid "Normalize"
 msgstr "Normalisieren"
 
-#: src/views/composer-view.vala
+#: src/views/composer-view.vala:269
 #, c-format
 msgid "Normalized Text (%s)"
 msgstr "Normalisierter Text (%s)"
 
-#: src/views/shortcuts-dialog.vala
+#: native/unicode/generated/languages.h:170
+msgid "North Ndebele"
+msgstr "Nord-Ndebele"
+
+#: native/unicode/generated/languages.h:171
+msgid "Northern Luri"
+msgstr "Nördliches Luri"
+
+#: native/unicode/generated/languages.h:172
+msgid "Northern Sami"
+msgstr "Nordsamisch"
+
+#: native/unicode/generated/languages.h:173
+msgid "Northern Sotho"
+msgstr "Nord-Sotho"
+
+#: native/unicode/generated/languages.h:174
+msgid "Norwegian"
+msgstr "Norwegisch"
+
+#: native/unicode/generated/languages.h:175
+msgid "Norwegian Bokmål"
+msgstr "Norwegisch (Bokmål)"
+
+#: native/unicode/generated/languages.h:176
+msgid "Norwegian Nynorsk"
+msgstr "Norwegisch (Nynorsk)"
+
+#: src/views/shortcuts-dialog.vala:60
 msgid "Not assigned"
 msgstr "Nicht zugewiesen"
 
-#: src/views/character-inspector.vala
+#: src/views/character-inspector.vala:359
 msgid "Not bundled"
 msgstr "Nicht enthalten"
 
-#: native/unicode/character-search.c
+#: native/unicode/generated/languages.h:177
+msgid "Nuer"
+msgstr "Nuer"
+
+#: src/search/collection-catalog.vala:114
 msgid "Numbers"
 msgstr "Zahlen"
 
-#: native/unicode/character-search.c
+#: src/search/collection-catalog.vala:20
 msgid "Numbers & Fractions"
 msgstr "Zahlen und Brüche"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/properties.h:108
 msgid "Nushu"
 msgstr "Frauenschrift"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/languages.h:178
+msgid "Nyankole"
+msgstr "Nyankole"
+
+#: native/unicode/generated/properties.h:61
 msgid "Nyiakeng_Puachue_Hmong"
 msgstr "Nyiakeng Puachue Hmong"
 
-#: native/unicode/unicode-engine.c
+#: native/unicode/generated/languages.h:179
+msgid "N’Ko"
+msgstr "N’Ko"
+
+#: native/unicode/unicode-engine.c:58
 msgid "Objects"
 msgstr "Objekte"
 
-#: src/views/character-inspector.vala
+#: native/unicode/generated/languages.h:180
+msgid "Occitan"
+msgstr "Okzitanisch"
+
+#: native/unicode/generated/languages.h:181
+msgid "Odia"
+msgstr "Oriya"
+
+#: src/views/character-inspector.vala:358
 msgid "Official Unihan version"
 msgstr "Offizielle Unihan-Version"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/properties.h:109
 msgid "Ogham"
 msgstr "Ogham"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/properties.h:110
 msgid "Ol_Chiki"
 msgstr "Ol Chiki"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/properties.h:111
+msgid "Ol_Onal"
+msgstr "Ol Onal"
+
+#: native/unicode/generated/properties.h:63
 msgid "Old_Hungarian"
 msgstr "Altungarisch"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/properties.h:64
 msgid "Old_Italic"
 msgstr "Altitalisch"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/properties.h:104
 msgid "Old_North_Arabian"
 msgstr "Altnordarabisch"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/properties.h:119
 msgid "Old_Permic"
 msgstr "Altpermisch"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/properties.h:172
 msgid "Old_Persian"
 msgstr "Altpersisch"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/properties.h:140
 msgid "Old_Sogdian"
 msgstr "Alt-Sogdisch"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/properties.h:130
 msgid "Old_South_Arabian"
 msgstr "Altsüdarabisch"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/properties.h:112
 msgid "Old_Turkic"
 msgstr "Orchon-Runen"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/properties.h:116
 msgid "Old_Uyghur"
 msgstr "Altuigurisch"
 
 #: data/ui/preferences-dialog.ui
-msgid "Only explicit character copies, composer additions, and input-source insertions are recorded."
+msgid ""
+"Only explicit character copies, composer additions, and input-source insertions are "
+"recorded."
 msgstr ""
-"Nur ausdrücklich kopierte, zum Editor hinzugefügte oder über die Eingabequelle eingefügte Zeichen"
-" werden erfasst."
+"Nur ausdrücklich kopierte, zum Editor hinzugefügte oder über die Eingabequelle "
+"eingefügte Zeichen werden erfasst."
 
 #: data/ui/compact-picker.ui
 msgid "Open Characters"
@@ -1662,97 +2563,137 @@ msgstr "Zeicheneditor öffnen"
 msgid "Open character picker"
 msgstr "Zeichenauswahl öffnen"
 
-#: src/app/application.vala
+#: src/app/application.vala:30
 msgid "Open the compact character picker"
 msgstr "Kompakte Zeichenauswahl öffnen"
 
-#: src/views/property-labels.vala
+#: src/views/property-labels.vala:129
 msgid "Opening punctuation"
 msgstr "Öffnende Interpunktion"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/properties.h:113
 msgid "Oriya"
 msgstr "Oriya"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/languages.h:182
+msgid "Oromo"
+msgstr "Oromo"
+
+#: native/unicode/generated/properties.h:114
 msgid "Osage"
 msgstr "Osage"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/properties.h:115
 msgid "Osmanya"
 msgstr "Osmanisch"
 
-#: src/views/property-labels.vala
+#: native/unicode/generated/languages.h:183
+msgid "Ossetic"
+msgstr "Ossetisch"
+
+#: src/views/property-labels.vala:99
 msgid "Other letter"
 msgstr "Anderer Buchstabe"
 
-#: src/views/property-labels.vala
+#: src/views/property-labels.vala:183
 msgid "Other neutral"
 msgstr "Sonstiges neutrales Zeichen"
 
-#: src/views/property-labels.vala
+#: src/views/property-labels.vala:111
 msgid "Other number"
 msgstr "Andere Zahl"
 
-#: src/views/property-labels.vala
+#: src/views/property-labels.vala:135
 msgid "Other punctuation"
 msgstr "Andere Interpunktion"
 
-#: src/views/property-labels.vala
+#: src/views/property-labels.vala:143
 msgid "Other symbol"
 msgstr "Anderes Symbol"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/properties.h:60
 msgid "Pahawh_Hmong"
 msgstr "Pahawh Hmong"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/properties.h:117
 msgid "Palmyrene"
 msgstr "Palmyrenisch"
 
-#: src/views/property-labels.vala
+#: src/views/property-labels.vala:117 src/views/property-labels.vala:177
 msgid "Paragraph separator"
 msgstr "Absatztrennzeichen"
+
+#: native/unicode/generated/languages.h:184
+msgid "Pashto"
+msgstr "Paschtu"
 
 #: data/ui/composer-view.ui
 msgid "Paste"
 msgstr "Einfügen"
 
-#: native/unicode/generated/properties.h
+#: data/ui/character-inspector.ui
+msgid ""
+"Paste text or explicit code points (U+0041, 0x41, dec:65). Identify up to 32 Unicode "
+"scalars."
+msgstr ""
+"Fügen Sie Text oder explizite Codepunkte ein (U+0041, 0x41, dec:65). Identifizieren "
+"Sie bis zu 32 Unicode-Skalarwerte."
+
+#: native/unicode/generated/properties.h:118
 msgid "Pau_Cin_Hau"
 msgstr "Pau Cin Hau"
 
-#: native/unicode/unicode-engine.c
+#: native/unicode/unicode-engine.c:53
 msgid "People & Body"
 msgstr "Menschen und Körper"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/languages.h:185
+msgid "Persian"
+msgstr "Persisch"
+
+#: native/unicode/generated/properties.h:120
 msgid "Phags_Pa"
 msgstr "Phags-pa"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/properties.h:123
 msgid "Phoenician"
 msgstr "Phönizisch"
 
-#: native/unicode/character-search.c
+#: src/search/collection-catalog.vala:34
 msgid "Phonetics"
 msgstr "Phonetik"
 
-#: native/unicode/character-search.c
+#: src/search/collection-catalog.vala:12
 msgid "Pictures & Shapes"
 msgstr "Bilder und Formen"
 
-#: src/views/character-inspector.vala
+#: src/views/character-inspector.vala:256
+msgid ""
+"Placeholders show nonprinting or combining characters. Copy preserves the original "
+"sequence."
+msgstr ""
+"Platzhalter zeigen nicht druckbare oder kombinierende Zeichen an. Beim Kopieren "
+"bleibt die ursprüngliche Sequenz erhalten."
+
+#: src/views/character-inspector.vala:319
 msgid "Plane"
 msgstr "Ebene"
 
-#: src/views/property-labels.vala
+#: native/unicode/generated/languages.h:186
+msgid "Polish"
+msgstr "Polnisch"
+
+#: src/views/property-labels.vala:193
 msgid "Pop directional formatting"
 msgstr "Richtungsformatierung beenden"
 
-#: src/views/property-labels.vala
+#: src/views/property-labels.vala:201
 msgid "Pop directional isolate"
 msgstr "Richtungsisolat beenden"
+
+#: native/unicode/generated/languages.h:187
+msgid "Portuguese"
+msgstr "Portugiesisch"
 
 #: data/ui/main-window.ui data/ui/preferences-dialog.ui
 msgid "Preferences"
@@ -1766,6 +2707,12 @@ msgstr "Vorschau"
 msgid "Preview Size in Points"
 msgstr "Vorschaugröße in Punkten"
 
+#: src/views/font-browser.vala:815
+msgid "Preview substitution: renderer resolved a different face or no face."
+msgstr ""
+"Vorschauersetzung: Die Darstellung hat einen anderen oder keinen Schriftschnitt "
+"ermittelt."
+
 #: data/ui/font-browser.ui data/ui/main-window.ui
 msgid "Previous Page"
 msgstr "Vorherige Seite"
@@ -1774,21 +2721,49 @@ msgstr "Vorherige Seite"
 msgid "Previous page"
 msgstr "Vorherige Seite"
 
-#: native/unicode/character-search.c
+#: src/search/collection-catalog.vala:124
 msgid "Private Use"
 msgstr "Private Nutzung"
 
-#: src/views/property-labels.vala
+#: src/search/collection-catalog.vala:138
+msgid "Private Use Character"
+msgstr "Zeichen zur privaten Verwendung"
+
+#: src/views/property-labels.vala:123
 msgid "Private-use character"
 msgstr "Zeichen zur privaten Nutzung"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/languages.h:188
+msgid "Prussian"
+msgstr "Altpreußisch"
+
+#: native/unicode/generated/properties.h:122
 msgid "Psalter_Pahlavi"
 msgstr "Psalter-Pahlavi"
 
-#: native/unicode/character-search.c
+#: src/search/collection-catalog.vala:6 src/search/collection-catalog.vala:116
 msgid "Punctuation"
 msgstr "Interpunktion"
+
+#: native/unicode/generated/languages.h:189
+msgid "Punjabi"
+msgstr "Punjabi"
+
+#: native/unicode/generated/languages.h:190
+msgid "Punjabi (Arabic)"
+msgstr "Punjabi (Arabisch)"
+
+#: native/unicode/generated/languages.h:191
+msgid "Punjabi (Gurmukhi)"
+msgstr "Punjabi (Gurmukhi)"
+
+#: src/app/application.vala:32 src/app/application.vala:34
+msgid "QUERY"
+msgstr "SUCHANFRAGE"
+
+#: native/unicode/generated/languages.h:192
+msgid "Quechua"
+msgstr "Quechua"
 
 #: data/ui/main-window.ui
 msgid "Quit"
@@ -1798,36 +2773,60 @@ msgstr "Beenden"
 msgid "Quit Characters"
 msgstr "Zeichen beenden"
 
-#: native/unicode/character-search.c
+#: src/search/collection-catalog.vala:48
 msgid "Quotation Marks"
 msgstr "Anführungszeichen"
 
-#: src/views/character-inspector.vala
+#: src/views/character-inspector.vala:365
 msgid "Radical and residual strokes (Unihan)"
 msgstr "Radikal und Reststriche (Unihan)"
+
+#: src/views/character-inspector.vala:374
+msgid "Radical group (ICU 76 collation)"
+msgstr "Radikalgruppe (ICU-76-Sortierung)"
+
+#: native/unicode/generated/languages.h:193
+msgid "Rajasthani"
+msgstr "Rajasthani"
 
 #: data/ui/font-face-dialog.ui
 msgid "Raw Symbol Code"
 msgstr "Symbolrohcode"
 
-#: src/views/font-face-dialog.vala
+#: src/views/font-face-dialog.vala:138
 #, c-format
 msgid "Raw code 0x%04X · Glyph %u"
 msgstr "Rohcode 0x%04X · Glyphe %u"
 
-#: src/views/font-browser.vala
+#: data/ui/font-face-dialog.ui
+msgid ""
+"Raw font codes are not Unicode characters. Copying, favorites and composition are not"
+" available for these mappings."
+msgstr ""
+"Rohe Schriftartcodes sind keine Unicode-Zeichen. Kopieren, Favoriten und "
+"Zusammenstellen sind für diese Zuordnungen nicht verfügbar."
+
+#: src/views/font-browser.vala:770
+msgid "Raw symbol mappings are available in Font Face Inspector."
+msgstr "Rohe Symbolzuordnungen sind in der Schriftschnitt-Inspektion verfügbar."
+
+#: src/app/application.vala:36
+msgid "Read a bounded input-source query from standard input"
+msgstr "Eine begrenzte Eingabequellen-Suchanfrage von der Standardeingabe lesen"
+
+#: src/views/font-browser.vala:504
 msgid "Reading Character Set…"
 msgstr "Zeichensatz wird gelesen…"
 
-#: src/views/font-browser.vala
+#: src/views/font-browser.vala:484
 msgid "Reading Font Coverage…"
 msgstr "Zeichenabdeckung wird gelesen…"
 
-#: data/ui/main-window.ui src/views/compact-picker.vala src/views/library-dialog.vala
+#: data/ui/main-window.ui src/views/compact-picker.vala:92 src/views/library-dialog.vala:71
 msgid "Recently Used"
 msgstr "Kürzlich verwendet"
 
-#: src/views/library-dialog.vala src/views/preferences-dialog.vala
+#: src/views/library-dialog.vala:311 src/views/preferences-dialog.vala:124
 msgid "Recently and frequently used characters will be removed. Favorites are kept."
 msgstr "Kürzlich und häufig verwendete Zeichen werden entfernt. Favoriten bleiben erhalten."
 
@@ -1835,10 +2834,20 @@ msgstr "Kürzlich und häufig verwendete Zeichen werden entfernt. Favoriten blei
 msgid "Record Character Usage"
 msgstr "Zeichennutzung aufzeichnen"
 
-#: src/views/library-dialog.vala
+#: src/app/application.vala:38
+msgid "Record an explicitly inserted character without opening a window"
+msgstr "Ein ausdrücklich eingefügtes Zeichen ohne Öffnen eines Fensters erfassen"
+
+#: src/views/library-dialog.vala:145 src/views/library-dialog.vala:150
 #, c-format
 msgid "Recorded uses: %u"
 msgstr "Erfasste Verwendungen: %u"
+
+#: src/views/preferences-dialog.vala:102
+msgid "Recording Disabled; Unable to Clear History. Check Settings Permissions."
+msgstr ""
+"Aufzeichnung deaktiviert; Verlauf konnte nicht gelöscht werden. Prüfen Sie die "
+"Einstellungsberechtigungen."
 
 #: data/ui/composer-view.ui
 msgid "Redo"
@@ -1848,23 +2857,24 @@ msgstr "Wiederholen"
 msgid "Refresh Installed Fonts"
 msgstr "Installierte Schriften aktualisieren"
 
-#: src/views/font-browser.vala
+#: src/views/font-browser.vala:446 src/views/font-browser.vala:556
+#: src/views/font-browser.vala:742 src/views/font-browser.vala:743
 msgid "Regular"
 msgstr "Normal"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/properties.h:126
 msgid "Rejang"
 msgstr "Rejang"
 
-#: data/ui/character-inspector.ui src/views/character-inspector.vala
+#: data/ui/character-inspector.ui src/views/character-inspector.vala:435
 msgid "Related Characters"
 msgstr "Verwandte Zeichen"
 
-#: src/views/character-inspector.vala
+#: src/views/character-inspector.vala:439
 msgid "Related characters"
 msgstr "Verwandte Zeichen"
 
-#: native/unicode/character-search.c
+#: src/search/collection-catalog.vala:54
 msgid "Religious Symbols"
 msgstr "Religiöse Symbole"
 
@@ -1872,13 +2882,25 @@ msgstr "Religiöse Symbole"
 msgid "Remove Character"
 msgstr "Zeichen entfernen"
 
-#: src/views/compact-picker.vala
+#: src/views/compact-picker.vala:400
 msgid "Remove Favorite"
 msgstr "Favorit entfernen"
 
-#: src/views/character-inspector.vala
+#: src/views/font-browser.vala:688
+msgid "Renderer resolved another face."
+msgstr "Die Darstellung hat einen anderen Schriftschnitt ermittelt."
+
+#: src/views/character-inspector.vala:406
 msgid "Representation note"
 msgstr "Darstellungshinweis"
+
+#: src/views/main-window.vala:535
+msgid ""
+"Reserved scalar values and noncharacters; surrogates are excluded. No assigned glyph "
+"is implied."
+msgstr ""
+"Reservierte Skalarwerte und Nichtzeichen; Surrogatwerte sind ausgeschlossen. Es wird "
+"keine zugewiesene Glyphe vorausgesetzt."
 
 #: data/ui/main-window.ui
 msgid "Reset Search and Filters"
@@ -1888,31 +2910,91 @@ msgstr "Suche und Filter zurücksetzen"
 msgid "Reset to Selected Face"
 msgstr "Auf gewählten Schriftschnitt zurücksetzen"
 
-#: src/views/property-labels.vala
+#: src/app/application.vala:34
+msgid "Return bounded input-source results without opening a window"
+msgstr "Begrenzte Eingabequellen-Ergebnisse ohne Öffnen eines Fensters zurückgeben"
+
+#: src/app/application.vala:24
+msgid "Return one explicitly selected character to the requesting application"
+msgstr "Ein ausdrücklich ausgewähltes Zeichen an die anfragende Anwendung zurückgeben"
+
+#: src/views/property-labels.vala:159
 msgid "Right-to-left"
 msgstr "Rechts nach links"
 
-#: src/views/property-labels.vala
+#: src/views/property-labels.vala:189
 msgid "Right-to-left embedding"
 msgstr "Einbettung rechts nach links"
 
-#: src/views/property-labels.vala
+#: src/views/property-labels.vala:197
 msgid "Right-to-left isolate"
 msgstr "Isolat rechts nach links"
 
-#: src/views/property-labels.vala
+#: src/views/property-labels.vala:191
 msgid "Right-to-left override"
 msgstr "Überschreibung rechts nach links"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/languages.h:194
+msgid "Romanian"
+msgstr "Rumänisch"
+
+#: native/unicode/generated/languages.h:195
+msgid "Romansh"
+msgstr "Rätoromanisch"
+
+#: native/unicode/generated/languages.h:196
+msgid "Rombo"
+msgstr "Rombo"
+
+#: native/unicode/generated/languages.h:197
+msgid "Rundi"
+msgstr "Rundi"
+
+#: native/unicode/generated/properties.h:128
 msgid "Runic"
 msgstr "Runenschrift"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/languages.h:198
+msgid "Russian"
+msgstr "Russisch"
+
+#: native/unicode/generated/languages.h:199
+msgid "Rwa"
+msgstr "Rwa"
+
+#: native/unicode/generated/properties.h:129
 msgid "Samaritan"
 msgstr "Samaritanisch"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/languages.h:200
+msgid "Samburu"
+msgstr "Samburu"
+
+#: native/unicode/generated/languages.h:201
+msgid "Sango"
+msgstr "Sango"
+
+#: native/unicode/generated/languages.h:202
+msgid "Sangu"
+msgstr "Sangu"
+
+#: native/unicode/generated/languages.h:203
+msgid "Sanskrit"
+msgstr "Sanskrit"
+
+#: native/unicode/generated/languages.h:204
+msgid "Santali"
+msgstr "Santali"
+
+#: native/unicode/generated/languages.h:205
+msgid "Santali (Ol Chiki)"
+msgstr "Santali (Ol Chiki)"
+
+#: native/unicode/generated/languages.h:206
+msgid "Sardinian"
+msgstr "Sardisch"
+
+#: native/unicode/generated/properties.h:131
 msgid "Saurashtra"
 msgstr "Saurashtra"
 
@@ -1920,24 +3002,29 @@ msgstr "Saurashtra"
 msgid "Saved Characters"
 msgstr "Gespeicherte Zeichen"
 
-#: src/views/character-inspector.vala src/views/compact-picker.vala src/views/emoji-variations.vala
-#: src/views/font-browser.vala src/views/library-dialog.vala src/views/main-window.vala
+#: src/views/character-inspector.vala:575 src/views/compact-picker.vala:469
+#: src/views/emoji-variations.vala:168 src/views/font-browser.vala:954
+#: src/views/library-dialog.vala:276 src/views/main-window.vala:283
 msgid "Saved to Favorites"
 msgstr "In Favoriten gespeichert"
 
-#: src/views/character-inspector.vala
+#: src/views/character-inspector.vala:388
 msgid "Scalar count"
 msgstr "Anzahl der Skalarwerte"
 
-#: src/views/character-inspector.vala
+#: src/views/character-inspector.vala:309
 msgid "Scalar status"
 msgstr "Skalarwertstatus"
 
-#: src/views/character-inspector.vala
+#: native/unicode/generated/languages.h:207
+msgid "Scottish Gaelic"
+msgstr "Gälisch (Schottland)"
+
+#: src/views/character-inspector.vala:319
 msgid "Script"
 msgstr "Schriftsystem"
 
-#: src/views/character-inspector.vala
+#: src/views/character-inspector.vala:319
 msgid "Script extensions"
 msgstr "Schriftsystemerweiterungen"
 
@@ -1957,7 +3044,7 @@ msgstr "Aktuelles Repertoire durchsuchen"
 msgid "Search This Collection"
 msgstr "Diese Sammlung durchsuchen"
 
-#: data/ui/main-window.ui src/views/font-browser.vala src/views/main-window.vala
+#: data/ui/main-window.ui src/views/font-browser.vala:566 src/views/main-window.vala:592
 msgid "Search Unavailable"
 msgstr "Suche nicht verfügbar"
 
@@ -1965,23 +3052,31 @@ msgstr "Suche nicht verfügbar"
 msgid "Search by name or code point"
 msgstr "Nach Name oder Codepunkt suchen"
 
-#: src/views/font-browser.vala
+#: src/views/font-browser.vala:261
 msgid "Search by name, code point, or byte:80"
 msgstr "Nach Name, Codepunkt oder byte:80 suchen"
+
+#: data/ui/main-window.ui
+msgid ""
+"Search by name, code point, reading, or Han field (mandarin:, cantonese:, japanese:, "
+"korean:, definition:, radical:, strokes:)."
+msgstr ""
+"Nach Name, Codepunkt, Lesung oder Han-Feld suchen (mandarin:, cantonese:, japanese:, "
+"korean:, definition:, radical:, strokes:)."
 
 #: data/ui/compact-picker.ui
 msgid "Search characters"
 msgstr "Zeichen suchen"
 
-#: data/ui/font-browser.ui src/views/font-browser.vala
+#: data/ui/font-browser.ui src/views/font-browser.vala:262
 msgid "Search characters by name or code point"
 msgstr "Zeichen nach Name oder Codepunkt suchen"
 
-#: src/views/font-browser.vala
+#: src/views/font-browser.vala:260
 msgid "Search font families and faces"
 msgstr "Schriftfamilien und Schriftschnitte suchen"
 
-#: src/views/compact-picker.vala
+#: src/views/compact-picker.vala:275
 msgid "Search is too long or invalid"
 msgstr "Suche zu lang oder ungültig"
 
@@ -1989,7 +3084,11 @@ msgstr "Suche zu lang oder ungültig"
 msgid "Search names, keywords, aliases, characters, U+ notation, or dec: values"
 msgstr "Namen, Stichwörter, Aliase, Zeichen, U+- oder dec:-Werte suchen"
 
-#: src/views/compact-picker.vala tools/input/characters_input.py
+#: src/app/application.vala:32
+msgid "Search the full character catalog"
+msgstr "Den vollständigen Zeichenkatalog durchsuchen"
+
+#: src/views/compact-picker.vala:292 tools/input/characters_input.py:84
 msgid "Search unavailable"
 msgstr "Suche nicht verfügbar"
 
@@ -1997,19 +3096,20 @@ msgstr "Suche nicht verfügbar"
 msgid "Searching Characters…"
 msgstr "Zeichen werden gesucht…"
 
-#: src/views/compact-picker.vala src/views/font-browser.vala src/views/main-window.vala
+#: src/views/compact-picker.vala:283 src/views/font-browser.vala:539
+#: src/views/font-browser.vala:554 src/views/main-window.vala:571
 msgid "Searching…"
 msgstr "Suche läuft…"
 
-#: src/views/property-labels.vala
+#: src/views/property-labels.vala:179
 msgid "Segment separator"
 msgstr "Segmenttrenner"
 
-#: src/views/compact-picker.vala
+#: src/views/compact-picker.vala:337
 msgid "Select a character or activate it to use it."
 msgstr "Zeichen auswählen oder zur Verwendung aktivieren."
 
-#: src/views/font-face-dialog.vala
+#: src/views/font-face-dialog.vala:143
 msgid "Select a mapped character or raw symbol code."
 msgstr "Zugeordnetes Zeichen oder Symbolrohcode auswählen."
 
@@ -2017,12 +3117,16 @@ msgstr "Zugeordnetes Zeichen oder Symbolrohcode auswählen."
 msgid "Select all text"
 msgstr "Gesamten Text auswählen"
 
-#: src/views/composer-view.vala
+#: src/views/composer-view.vala:130
 #, c-format
 msgid "Select at most %d code points for this operation."
 msgstr "Für diesen Vorgang höchstens %d Codepunkte auswählen."
 
-#: native/unicode/character-search.c
+#: native/unicode/generated/languages.h:208
+msgid "Sena"
+msgstr "Sena"
+
+#: src/search/collection-catalog.vala:120
 msgid "Separators"
 msgstr "Trennzeichen"
 
@@ -2030,29 +3134,62 @@ msgstr "Trennzeichen"
 msgid "Sequence Component"
 msgstr "Bestandteil der Zeichenfolge"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/languages.h:209
+msgid "Serbian"
+msgstr "Serbisch"
+
+#: native/unicode/generated/languages.h:210
+msgid "Serbian (Cyrillic)"
+msgstr "Serbisch (Kyrillisch)"
+
+#: native/unicode/generated/languages.h:211
+msgid "Serbian (Latin)"
+msgstr "Serbisch (Lateinisch)"
+
+#: native/unicode/generated/languages.h:212
+msgid "Shambala"
+msgstr "Shambala"
+
+#: native/unicode/generated/properties.h:134
 msgid "Sharada"
 msgstr "Sharada"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/properties.h:133
 msgid "Shavian"
 msgstr "Shaw-Alphabet"
+
+#: native/unicode/generated/languages.h:213
+msgid "Shona"
+msgstr "Shona"
 
 #: data/ui/main-window.ui
 msgid "Show Categories"
 msgstr "Kategorien anzeigen"
 
-#: src/views/library-dialog.vala
+#: src/app/application.vala:28
+msgid "Show the Unicode database versions"
+msgstr "Versionen der Unicode-Datenbanken anzeigen"
+
+#: src/app/application.vala:26
+msgid "Show the application version"
+msgstr "Anwendungsversion anzeigen"
+
+#: src/views/library-dialog.vala:189
 #, c-format
 msgid "Showing %d of %d Characters"
 msgstr "%d von %d Zeichen werden angezeigt"
 
-#: src/views/compact-picker.vala src/views/font-browser.vala src/views/main-window.vala
+#: src/views/compact-picker.vala:335 src/views/font-browser.vala:606
+#: src/views/main-window.vala:645
 #, c-format
 msgid "Showing %u–%u of %u"
 msgstr "%u–%u von %u"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/languages.h:214
+msgid "Sichuan Yi"
+msgstr "Yi"
+
+#: native/unicode/generated/properties.h:135
 msgid "Siddham"
 msgstr "Siddham"
 
@@ -2060,11 +3197,31 @@ msgstr "Siddham"
 msgid "Sidebar Categories"
 msgstr "Kategorien der Seitenleiste"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/properties.h:136
+msgid "Sidetic"
+msgstr "Sidetisch"
+
+#: native/unicode/generated/properties.h:132
 msgid "SignWriting"
 msgstr "Gebärdensprache"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/languages.h:215
+msgid "Silesian"
+msgstr "Schlesisch (Wasserpolnisch)"
+
+#: native/unicode/generated/languages.h:216
+msgid "Sindhi"
+msgstr "Sindhi"
+
+#: native/unicode/generated/languages.h:217
+msgid "Sindhi (Arabic)"
+msgstr "Sindhi (Arabisch)"
+
+#: native/unicode/generated/languages.h:218
+msgid "Sindhi (Devanagari)"
+msgstr "Sindhi (Devanagari)"
+
+#: native/unicode/generated/languages.h:219 native/unicode/generated/properties.h:138
 msgid "Sinhala"
 msgstr "Singhalesisch"
 
@@ -2072,128 +3229,236 @@ msgstr "Singhalesisch"
 msgid "Size (pt)"
 msgstr "Größe (pt)"
 
-#: src/views/property-labels.vala
+#: native/unicode/generated/languages.h:220
+msgid "Slovak"
+msgstr "Slowakisch"
+
+#: native/unicode/generated/languages.h:221
+msgid "Slovenian"
+msgstr "Slowenisch"
+
+#: src/views/property-labels.vala:235
 msgid "Small variant"
 msgstr "Kleine Variante"
 
-#: native/unicode/unicode-engine.c
+#: native/unicode/unicode-engine.c:52
 msgid "Smileys & Emotion"
 msgstr "Smileys und Emotionen"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/languages.h:222
+msgid "Soga"
+msgstr "Soga"
+
+#: native/unicode/generated/properties.h:139
 msgid "Sogdian"
 msgstr "Sogdisch"
 
-#: src/views/character-inspector.vala src/views/emoji-variations.vala
+#: native/unicode/generated/languages.h:223
+msgid "Somali"
+msgstr "Somali"
+
+#: src/views/character-inspector.vala:259 src/views/emoji-variations.vala:121
 msgid "Some glyphs are unavailable in the current fonts."
 msgstr "Einige Glyphen sind in den aktuellen Schriften nicht verfügbar."
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/properties.h:141
 msgid "Sora_Sompeng"
 msgstr "Sora Sompeng"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/languages.h:224
+msgid "Southern Sotho"
+msgstr "Süd-Sotho"
+
+#: native/unicode/generated/properties.h:142
 msgid "Soyombo"
 msgstr "Sojombo"
 
-#: src/views/property-labels.vala
+#: src/views/property-labels.vala:113
 msgid "Space separator"
 msgstr "Leerraum-Trennzeichen"
 
-#: src/views/property-labels.vala
+#: src/views/property-labels.vala:105
 msgid "Spacing combining mark"
 msgstr "Abstandhaltendes Kombinationszeichen"
 
-#: native/unicode/character-search.c
+#: native/unicode/generated/languages.h:225
+msgid "Spanish"
+msgstr "Spanisch"
+
+#: src/search/collection-catalog.vala:38
 msgid "Special & Formatting"
 msgstr "Sonder- und Formatierungszeichen"
 
-#: src/views/property-labels.vala
+#: src/views/property-labels.vala:237
 msgid "Squared"
 msgstr "Eingerahmt"
 
-#: src/views/property-labels.vala
+#: src/views/font-browser.vala:500
+msgid ""
+"Standalone round-trip scalars and canonical bytes. Inspect Byte Sequence accepts "
+"state shifts and multi-scalar results."
+msgstr ""
+"Eigenständige rundlauffähige Skalarwerte und kanonische Bytes. Die Bytefolgenprüfung "
+"akzeptiert Zustandswechsel und Ergebnisse mit mehreren Skalarwerten."
+
+#: native/unicode/generated/languages.h:226
+msgid "Standard Moroccan Tamazight"
+msgstr "Tamazight"
+
+#: src/views/character-inspector.vala:375
+msgid "Stroke group (ICU 76 collation)"
+msgstr "Strichzahlgruppe (ICU-76-Sortierung)"
+
+#: src/views/property-labels.vala:239
 msgid "Subscript"
 msgstr "Tiefgestellt"
 
-#: native/unicode/character-search.c
+#: src/search/collection-catalog.vala:42
 msgid "Subscripts"
 msgstr "Tiefgestellte Zeichen"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/languages.h:227 native/unicode/generated/properties.h:143
 msgid "Sundanese"
 msgstr "Sundanesisch"
 
-#: src/views/property-labels.vala
+#: native/unicode/generated/languages.h:228
+msgid "Sundanese (Latin)"
+msgstr "Sundanesisch (Lateinisch)"
+
+#: native/unicode/generated/properties.h:144
+msgid "Sunuwar"
+msgstr "Sunuwar"
+
+#: src/views/property-labels.vala:241
 msgid "Superscript"
 msgstr "Hochgestellt"
 
-#: native/unicode/character-search.c
+#: src/search/collection-catalog.vala:40
 msgid "Superscripts"
 msgstr "Hochgestellte Zeichen"
 
-#: src/views/property-labels.vala
+#: src/views/property-labels.vala:125
 msgid "Surrogate"
 msgstr "Surrogat"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/languages.h:229
+msgid "Swahili"
+msgstr "Suaheli"
+
+#: native/unicode/generated/languages.h:230
+msgid "Swampy Cree"
+msgstr "Swampy Cree"
+
+#: native/unicode/generated/languages.h:231
+msgid "Swedish"
+msgstr "Schwedisch"
+
+#: native/unicode/generated/languages.h:232
+msgid "Swiss German"
+msgstr "Schweizerdeutsch"
+
+#: native/unicode/generated/properties.h:145
 msgid "Syloti_Nagri"
 msgstr "Syloti Nagri"
 
-#: data/ui/main-window.ui data/ui/preferences-dialog.ui native/unicode/character-search.c
-#: native/unicode/unicode-engine.c src/views/compact-picker.vala
+#: data/ui/main-window.ui data/ui/preferences-dialog.ui native/unicode/unicode-engine.c:59
+#: src/search/collection-catalog.vala:118 src/views/compact-picker.vala:92
 msgid "Symbols"
 msgstr "Symbole"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/languages.h:233 native/unicode/generated/properties.h:146
 msgid "Syriac"
 msgstr "Syrisch"
+
+#: src/app/application.vala:38
+msgid "TEXT"
+msgstr "TEXT"
 
 #: data/ui/shortcuts-dialog.ui
 msgid "Tab / Shift+Tab"
 msgstr "Tab / Umschalt+Tab"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/languages.h:234
+msgid "Tachelhit"
+msgstr "Taschelhit"
+
+#: native/unicode/generated/languages.h:235
+msgid "Tachelhit (Latin)"
+msgstr "Taschelhit (Lateinisch)"
+
+#: native/unicode/generated/languages.h:236
+msgid "Tachelhit (Tifinagh)"
+msgstr "Taschelhit (Tifinagh)"
+
+#: native/unicode/generated/properties.h:157
 msgid "Tagalog"
 msgstr "Tagalog"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/properties.h:147
 msgid "Tagbanwa"
 msgstr "Tagbanwa"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/properties.h:149
 msgid "Tai_Le"
 msgstr "Tai Le"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/properties.h:76
 msgid "Tai_Tham"
 msgstr "Lanna"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/properties.h:153
 msgid "Tai_Viet"
 msgstr "Tai-Viet"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/properties.h:154
+msgid "Tai_Yo"
+msgstr "Tai Yo"
+
+#: native/unicode/generated/languages.h:237
+msgid "Taita"
+msgstr "Taita"
+
+#: native/unicode/generated/languages.h:238
+msgid "Tajik"
+msgstr "Tadschikisch"
+
+#: native/unicode/generated/properties.h:148
 msgid "Takri"
 msgstr "Takri"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/languages.h:239 native/unicode/generated/properties.h:151
 msgid "Tamil"
 msgstr "Tamilisch"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/properties.h:162
+msgid "Tangsa"
+msgstr "Tangsa"
+
+#: native/unicode/generated/properties.h:152
 msgid "Tangut"
 msgstr "Xixia"
 
-#: native/unicode/character-search.c
+#: native/unicode/generated/languages.h:240
+msgid "Tasawaq"
+msgstr "Tasawaq"
+
+#: native/unicode/generated/languages.h:241
+msgid "Tatar"
+msgstr "Tatarisch"
+
+#: src/search/collection-catalog.vala:22
 msgid "Technical"
 msgstr "Technik"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/languages.h:242 native/unicode/generated/properties.h:155
 msgid "Telugu"
 msgstr "Telugu"
 
-#: src/views/composer-view.vala
+#: native/unicode/generated/languages.h:243
+msgid "Teso"
+msgstr "Teso"
+
+#: src/views/composer-view.vala:249
 msgid "Text is already normalized."
 msgstr "Der Text ist bereits normalisiert."
 
@@ -2201,47 +3466,105 @@ msgstr "Der Text ist bereits normalisiert."
 msgid "Text or Code Points to Identify"
 msgstr "Zu identifizierender Text oder Codepunkte"
 
-#: native/unicode/generated/properties.h
+#: src/views/property-labels.vala:28
+msgid "Text presentation"
+msgstr "Textdarstellung"
+
+#: native/unicode/generated/properties.h:158
 msgid "Thaana"
 msgstr "Thaana"
 
+#: native/unicode/generated/languages.h:244 native/unicode/generated/properties.h:159
+msgid "Thai"
+msgstr "Thailändisch"
+
 #: data/ui/shortcuts-dialog.ui
 msgid ""
-"The global shortcut requires an enabled Shell extension or a desktop binding. IBus shortcuts "
-"require the Characters input source."
+"The global shortcut requires an enabled Shell extension or a desktop binding. IBus "
+"shortcuts require the Characters input source."
 msgstr ""
-"Das globale Tastenkürzel benötigt eine aktivierte Shell-Erweiterung oder eine Desktop-"
-"Tastenbelegung. IBus-Kürzel benötigen die Eingabequelle Zeichen."
+"Das globale Tastenkürzel benötigt eine aktivierte Shell-Erweiterung oder eine "
+"Desktop-Tastenbelegung. IBus-Kürzel benötigen die Eingabequelle Zeichen."
 
-#: src/views/main-window.vala
+#: src/views/font-browser.vala:768
+msgid "The renderer resolved a different face or no face."
+msgstr "Die Darstellung hat einen anderen oder keinen Schriftschnitt ermittelt."
+
+#: src/views/main-window.vala:591
 msgid "The search could not be completed. Change the query to try again."
-msgstr "Die Suche konnte nicht abgeschlossen werden. Ändern Sie die Anfrage und versuchen Sie es erneut."
+msgstr ""
+"Die Suche konnte nicht abgeschlossen werden. Ändern Sie die Anfrage und versuchen Sie"
+" es erneut."
 
-#: src/views/composer-view.vala
+#: src/views/font-browser.vala:344
+msgid "The selected encoding is unavailable in ICU."
+msgstr "Die ausgewählte Kodierung ist in ICU nicht verfügbar."
+
+#: src/views/composer-view.vala:229
 msgid "The selected representation is unavailable."
 msgstr "Die ausgewählte Darstellung ist nicht verfügbar."
 
-#: native/unicode/generated/properties.h
+#: src/views/character-inspector.vala:250
+msgid ""
+"This sequence cannot be represented as clipboard text. Copy its code points or "
+"encodings instead."
+msgstr ""
+"Diese Sequenz kann nicht als Zwischenablagetext dargestellt werden. Kopieren Sie "
+"stattdessen ihre Codepunkte oder Kodierungen."
+
+#: src/views/character-inspector.vala:253
+msgid ""
+"This sequence contains reserved scalar values or noncharacters. No assigned glyph is "
+"implied. Copying preserves the code points."
+msgstr ""
+"Diese Sequenz enthält reservierte Skalarwerte oder Nichtzeichen. Es wird keine "
+"zugewiesene Glyphe vorausgesetzt. Beim Kopieren bleiben die Codepunkte erhalten."
+
+#: native/unicode/generated/languages.h:245 native/unicode/generated/properties.h:160
 msgid "Tibetan"
 msgstr "Tibetisch"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/properties.h:156
 msgid "Tifinagh"
 msgstr "Tifinagh"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/languages.h:246
+msgid "Tigrinya"
+msgstr "Tigrinya"
+
+#: native/unicode/generated/properties.h:161
 msgid "Tirhuta"
 msgstr "Tirhuta"
 
-#: src/views/property-labels.vala
+#: src/views/property-labels.vala:95
 msgid "Titlecase letter"
 msgstr "Titelbuchstabe"
 
-#: src/views/character-inspector.vala
+#: native/unicode/generated/properties.h:163
+msgid "Todhri"
+msgstr "Todhri"
+
+#: native/unicode/generated/languages.h:247
+msgid "Toki Pona"
+msgstr "Toki Pona"
+
+#: native/unicode/generated/properties.h:164
+msgid "Tolong_Siki"
+msgstr "Tolong Siki"
+
+#: native/unicode/generated/languages.h:248
+msgid "Tongan"
+msgstr "Tongaisch"
+
+#: src/views/character-inspector.vala:366
 msgid "Total strokes (Unihan)"
 msgstr "Gesamtstrichzahl (Unihan)"
 
-#: native/unicode/unicode-engine.c
+#: native/unicode/generated/properties.h:165
+msgid "Toto"
+msgstr "Toto"
+
+#: native/unicode/unicode-engine.c:56
 msgid "Travel & Places"
 msgstr "Reisen und Orte"
 
@@ -2249,44 +3572,112 @@ msgstr "Reisen und Orte"
 msgid "Try another search or change the filters."
 msgstr "Versuchen Sie eine andere Suche oder ändern Sie die Filter."
 
-#: tools/input/characters_input.py
+#: native/unicode/generated/languages.h:249
+msgid "Tswana"
+msgstr "Tswana"
+
+#: native/unicode/generated/properties.h:166
+msgid "Tulu_Tigalari"
+msgstr "Tulu Tigalari"
+
+#: native/unicode/generated/languages.h:250
+msgid "Turkish"
+msgstr "Türkisch"
+
+#: native/unicode/generated/languages.h:251
+msgid "Turkmen"
+msgstr "Turkmenisch"
+
+#: tools/input/characters_input.py:67
 msgid "Type a character name or code point; Enter inserts, Escape cancels."
 msgstr "Zeichennamen oder Codepunkt eingeben; Eingabe fügt ein, Esc bricht ab."
 
-#: src/views/font-face-dialog.vala
+#: src/views/font-face-dialog.vala:139
 #, c-format
 msgid "U+%04X · Glyph %u"
 msgstr "U+%04X · Glyphe %u"
 
-#: src/views/composer-view.vala
+#: src/views/composer-view.vala:68
 msgid "UTF-16 Code Units"
 msgstr "UTF-16-Codeeinheiten"
 
-#: src/views/character-inspector.vala
+#: src/views/character-inspector.vala:407
+msgid ""
+"UTF-16 and UTF-32 show code units, not byte order. HTML, CSS, and programming "
+"languages may reject or reinterpret values, including NUL."
+msgstr ""
+"UTF-16 und UTF-32 zeigen Codeeinheiten, nicht die Byte-Reihenfolge. HTML, CSS und "
+"Programmiersprachen können Werte einschließlich NUL ablehnen oder anders "
+"interpretieren."
+
+#: src/views/character-inspector.vala:399
 msgid "UTF-16 code units"
 msgstr "UTF-16-Codeeinheiten"
 
-#: src/views/composer-view.vala
+#: src/views/composer-view.vala:68
 msgid "UTF-32 Code Units"
 msgstr "UTF-32-Codeeinheiten"
 
-#: src/views/character-inspector.vala
+#: src/views/character-inspector.vala:400
 msgid "UTF-32 code units"
 msgstr "UTF-32-Codeeinheiten"
 
-#: src/views/composer-view.vala
+#: src/views/composer-view.vala:68
 msgid "UTF-8 Bytes"
 msgstr "UTF-8-Bytes"
 
-#: src/views/character-inspector.vala
+#: src/views/character-inspector.vala:398
 msgid "UTF-8 bytes"
 msgstr "UTF-8-Bytes"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/properties.h:167
 msgid "Ugaritic"
 msgstr "Ugaritisch"
 
-#: src/views/property-labels.vala
+#: native/unicode/generated/languages.h:252
+msgid "Ukrainian"
+msgstr "Ukrainisch"
+
+#: src/views/font-face-dialog.vala:110
+msgid "Unable to Apply Variation Coordinate"
+msgstr "Variationskoordinate konnte nicht angewendet werden"
+
+#: src/views/preferences-dialog.vala:133
+msgid "Unable to Clear History. Check Settings Permissions."
+msgstr "Verlauf konnte nicht gelöscht werden. Prüfen Sie die Einstellungsberechtigungen."
+
+#: src/views/font-browser.vala:842
+msgid "Unable to Open Exact Font Face"
+msgstr "Exakter Schriftschnitt konnte nicht geöffnet werden"
+
+#: src/views/font-face-dialog.vala:119
+msgid "Unable to Reset Variation Coordinates"
+msgstr "Variationskoordinaten konnten nicht zurückgesetzt werden"
+
+#: src/views/character-inspector.vala:576 src/views/emoji-variations.vala:169
+#: src/views/font-browser.vala:955 src/views/main-window.vala:284
+msgid "Unable to Save Favorite. Check the Limit or Settings Permissions."
+msgstr ""
+"Favorit konnte nicht gespeichert werden. Prüfen Sie das Limit oder die "
+"Einstellungsberechtigungen."
+
+#: src/views/library-dialog.vala:328
+msgid "Unable to Update Collection. Check the Limit or Settings Permissions."
+msgstr ""
+"Sammlung konnte nicht aktualisiert werden. Prüfen Sie das Limit oder die "
+"Einstellungsberechtigungen."
+
+#: src/views/compact-picker.vala:469
+msgid "Unable to Update Favorites"
+msgstr "Favoriten konnten nicht aktualisiert werden"
+
+#: src/views/preferences-dialog.vala:103 src/views/preferences-dialog.vala:117
+msgid "Unable to Update History Settings. Try Again or Check Settings Permissions."
+msgstr ""
+"Verlaufseinstellungen konnten nicht aktualisiert werden. Versuchen Sie es erneut oder"
+" prüfen Sie die Einstellungsberechtigungen."
+
+#: src/views/property-labels.vala:89
 msgid "Unassigned"
 msgstr "Nicht zugewiesen"
 
@@ -2294,16 +3685,17 @@ msgstr "Nicht zugewiesen"
 msgid "Unassigned & Noncharacters"
 msgstr "Nicht zugewiesene und Nichtzeichen"
 
-#: native/unicode/character-search.c
+#: src/search/collection-catalog.vala:136
 msgid "Unassigned Character"
 msgstr "Nicht zugewiesenes Zeichen"
 
-#: src/views/character-inspector.vala src/views/character-tile.vala src/views/font-browser.vala
-#: src/views/legacy-sequence-dialog.vala
+#: src/views/character-inspector.vala:438 src/views/character-inspector.vala:480
+#: src/views/character-inspector.vala:482 src/views/character-tile.vala:77
+#: src/views/font-browser.vala:796 src/views/legacy-sequence-dialog.vala:49
 msgid "Unavailable"
 msgstr "Nicht verfügbar"
 
-#: src/views/library-dialog.vala
+#: src/views/library-dialog.vala:137
 msgid "Unavailable Character"
 msgstr "Nicht verfügbares Zeichen"
 
@@ -2315,15 +3707,19 @@ msgstr "Rückgängig"
 msgid "Undo / Redo"
 msgstr "Rückgängig / Wiederholen"
 
+#: src/app/application.vala:162
+msgid "Unexpected command-line argument\n"
+msgstr "Unerwartetes Befehlszeilenargument\n"
+
 #: data/ui/main-window.ui data/ui/preferences-dialog.ui
 msgid "Unicode Blocks"
 msgstr "Unicode-Blöcke"
 
-#: src/views/composer-view.vala
+#: src/views/composer-view.vala:67
 msgid "Unicode Code Points"
 msgstr "Unicode-Codepunkte"
 
-#: src/views/composer-view.vala
+#: src/views/composer-view.vala:69
 msgid "Unicode Escapes"
 msgstr "Unicode-Escapes"
 
@@ -2335,15 +3731,15 @@ msgstr "Unicode-Eingabe"
 msgid "Unicode Planes"
 msgstr "Unicode-Ebenen"
 
-#: src/views/character-inspector.vala
+#: src/views/character-inspector.vala:314
 msgid "Unicode block"
 msgstr "Unicode-Block"
 
-#: src/views/character-inspector.vala
+#: src/views/character-inspector.vala:398
 msgid "Unicode code points"
 msgstr "Unicode-Codepunkte"
 
-#: src/views/character-inspector.vala
+#: src/views/character-inspector.vala:401
 msgid "Unicode escape notation"
 msgstr "Unicode-Escape-Notation"
 
@@ -2351,33 +3747,99 @@ msgstr "Unicode-Escape-Notation"
 msgid "Unicode notation or literal text"
 msgstr "Unicode-Notation oder wörtlicher Text"
 
-#: src/views/character-inspector.vala
+#: src/views/character-inspector.vala:320
 msgid "Unicode version introduced"
 msgstr "Eingeführt in Unicode-Version"
 
-#: native/unicode/generated/properties.h src/views/character-inspector.vala
+#: data/desktop/com.majoris.characters.desktop:9
+msgid "Unicode;Character;Symbol;Emoji;"
+msgstr "Unicode;Zeichen;Symbol;Emoji;"
+
+#: native/unicode/generated/properties.h:179 src/views/character-inspector.vala:288
 msgid "Unknown"
 msgstr "Unbekannt"
 
-#: src/views/character-tile.vala src/views/font-browser.vala src/views/main-window.vala
+#: src/views/character-tile.vala:40 src/views/font-browser.vala:675
+#: src/views/font-browser.vala:782 src/views/main-window.vala:676
 msgid "Unknown Character"
 msgstr "Unbekanntes Zeichen"
 
-#: src/views/font-browser.vala
+#: src/views/font-browser.vala:743
 msgid "Unknown Font"
 msgstr "Unbekannte Schrift"
 
-#: src/views/property-labels.vala
+#: src/search/collection-catalog.vala:140
+msgid "Unnamed Character"
+msgstr "Unbenanntes Zeichen"
+
+#: native/unicode/generated/languages.h:253
+msgid "Upper Sorbian"
+msgstr "Obersorbisch"
+
+#: src/views/property-labels.vala:91
 msgid "Uppercase letter"
 msgstr "Großbuchstabe"
+
+#: native/unicode/generated/languages.h:254
+msgid "Urdu"
+msgstr "Urdu"
+
+#: src/app/application.vala:44
+msgid "Use --pick-text without other arguments.\n"
+msgstr "Verwenden Sie --pick-text ohne weitere Argumente.\n"
 
 #: data/ui/shortcuts-dialog.ui
 msgid "Use selected character"
 msgstr "Ausgewähltes Zeichen verwenden"
 
-#: native/unicode/generated/properties.h
+#: src/views/main-window.vala:532
+msgid ""
+"Uses official Unihan where available, otherwise ICU collation groups. Characters "
+"without group data are excluded."
+msgstr ""
+"Verwendet offizielle Unihan-Daten, sofern verfügbar, andernfalls ICU-Sortiergruppen. "
+"Zeichen ohne Gruppendaten sind ausgeschlossen."
+
+#: native/unicode/generated/languages.h:255
+msgid "Uyghur"
+msgstr "Uigurisch"
+
+#: native/unicode/generated/languages.h:256
+msgid "Uzbek"
+msgstr "Usbekisch"
+
+#: native/unicode/generated/languages.h:257
+msgid "Uzbek (Arabic)"
+msgstr "Usbekisch (Arabisch)"
+
+#: native/unicode/generated/languages.h:258
+msgid "Uzbek (Cyrillic)"
+msgstr "Usbekisch (Kyrillisch)"
+
+#: native/unicode/generated/languages.h:259
+msgid "Uzbek (Latin)"
+msgstr "Usbekisch (Lateinisch)"
+
+#: native/unicode/generated/languages.h:260 native/unicode/generated/properties.h:168
 msgid "Vai"
 msgstr "Vai"
+
+#: native/unicode/generated/languages.h:261
+msgid "Vai (Latin)"
+msgstr "Vai (Lateinisch)"
+
+#: native/unicode/generated/languages.h:262
+msgid "Vai (Vai)"
+msgstr "Vai (Vai)"
+
+#: src/views/font-browser.vala:531
+msgid "Valid Sequence Outside the Scalar Grid. Choose Inspect Byte Sequence."
+msgstr "Gültige Sequenz außerhalb des Skalarrasters. Wählen Sie „Bytefolge untersuchen“."
+
+#: src/views/font-browser.vala:806
+#, c-format
+msgid "Variable: %s · Color glyphs: %s"
+msgstr "Variabel: %s · Farbglyphen: %s"
 
 #: data/ui/font-face-dialog.ui
 msgid "Variation Axes"
@@ -2387,7 +3849,7 @@ msgstr "Variationsachsen"
 msgid "Variation Axis"
 msgstr "Variationsachse"
 
-#: native/unicode/character-search.c
+#: src/search/collection-catalog.vala:56
 msgid "Variation Selectors"
 msgstr "Variationsselektoren"
 
@@ -2395,54 +3857,116 @@ msgstr "Variationsselektoren"
 msgid "Variations"
 msgstr "Varianten"
 
-#: src/views/property-labels.vala
+#: native/unicode/generated/languages.h:263
+msgid "Venetian"
+msgstr "Venetisch"
+
+#: src/views/property-labels.vala:243
 msgid "Vertical"
 msgstr "Vertikal"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/languages.h:264
+msgid "Vietnamese"
+msgstr "Vietnamesisch"
+
+#: native/unicode/generated/properties.h:169
+msgid "Vithkuqi"
+msgstr "Vithkuqi"
+
+#: native/unicode/generated/languages.h:265
+msgid "Vunjo"
+msgstr "Vunjo"
+
+#: native/unicode/generated/languages.h:266
+msgid "Walser"
+msgstr "Walliserdeutsch"
+
+#: native/unicode/generated/properties.h:171
 msgid "Wancho"
 msgstr "Wancho"
 
-#: native/unicode/generated/properties.h
+#: native/unicode/generated/properties.h:170
 msgid "Warang_Citi"
 msgstr "Varang Kshiti"
 
-#: native/unicode/character-search.c src/views/property-labels.vala
+#: native/unicode/generated/languages.h:267
+msgid "Welsh"
+msgstr "Walisisch"
+
+#: native/unicode/generated/languages.h:268
+msgid "Western Frisian"
+msgstr "Westfriesisch"
+
+#: src/search/collection-catalog.vala:46 src/views/property-labels.vala:181
 msgid "Whitespace"
 msgstr "Leerraum"
 
-#: src/views/property-labels.vala
+#: src/views/property-labels.vala:245 src/views/property-labels.vala:261
 msgid "Wide"
 msgstr "Breit"
 
-#: src/views/character-inspector.vala src/views/font-browser.vala src/views/property-labels.vala
-msgid "Yes"
-msgstr "Ja"
+#: native/unicode/generated/languages.h:269
+msgid "Wolof"
+msgstr "Wolof"
 
-#: native/unicode/generated/properties.h
-msgid "Yezidi"
-msgstr "Jesidisch"
-
-#: native/unicode/generated/properties.h
-msgid "Yi"
-msgstr "Yi"
-
-#: native/unicode/generated/properties.h
-msgid "Zanabazar_Square"
-msgstr "Dsanabadsar-Quadratschrift"
-
-#: src/views/main-window.vala
+#: src/views/main-window.vala:529
 msgid "Writing systems, not an exact language alphabet."
 msgstr "Schriftsysteme, kein exaktes Alphabet einer Sprache."
 
-#: src/views/main-window.vala
-msgid "Includes registered XKB layouts and available IBus engines."
-msgstr "Umfasst registrierte XKB-Tastaturbelegungen und verfügbare IBus-Engines."
+#: native/unicode/generated/languages.h:270
+msgid "Xhosa"
+msgstr "Xhosa"
 
-#: src/views/preferences-dialog.vala
-msgid "Unable to Update History Settings. Try Again or Check Settings Permissions."
-msgstr "Verlaufseinstellungen konnten nicht aktualisiert werden. Versuchen Sie es erneut oder prüfen Sie die Einstellungsberechtigungen."
+#: native/unicode/generated/languages.h:271
+msgid "Yakut"
+msgstr "Jakutisch"
 
-#: src/views/preferences-dialog.vala
-msgid "Recording Disabled; Unable to Clear History. Check Settings Permissions."
-msgstr "Aufzeichnung deaktiviert; Verlauf konnte nicht gelöscht werden. Prüfen Sie die Einstellungsberechtigungen."
+#: native/unicode/generated/languages.h:272
+msgid "Yangben"
+msgstr "Yangben"
+
+#: src/views/character-inspector.vala:313 src/views/font-browser.vala:807
+#: src/views/font-browser.vala:808 src/views/property-labels.vala:275
+msgid "Yes"
+msgstr "Ja"
+
+#: native/unicode/generated/properties.h:174
+msgid "Yezidi"
+msgstr "Jesidisch"
+
+#: native/unicode/generated/properties.h:175
+msgid "Yi"
+msgstr "Yi"
+
+#: native/unicode/generated/languages.h:273
+msgid "Yiddish"
+msgstr "Jiddisch"
+
+#: native/unicode/generated/languages.h:274
+msgid "Yoruba"
+msgstr "Yoruba"
+
+#: native/unicode/generated/properties.h:176
+msgid "Zanabazar_Square"
+msgstr "Dsanabadsar-Quadratschrift"
+
+#: native/unicode/generated/languages.h:275
+msgid "Zarma"
+msgstr "Zarma"
+
+#: native/unicode/generated/languages.h:276
+msgid "Zhuang"
+msgstr "Zhuang"
+
+#: native/unicode/generated/languages.h:277
+msgid "Zulu"
+msgstr "Zulu"
+
+#: src/views/font-browser.vala:767
+msgid "font fallback"
+msgstr "Ersatzschriftarten"
+
+#: src/views/font-browser.vala:767
+msgid "the exact file and face"
+msgstr "die exakte Datei und den Schriftschnitt"
+

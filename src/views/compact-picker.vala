@@ -316,7 +316,8 @@ namespace Characters {
                         snapshot != null ? (snapshot.format (Inspector.Format.CODE) ?? "") : "");
                 } else if (results != null) {
                     var id = results.id (index);
-                    append_result (Search.display (id) ?? "·", Search.name (id) ?? "",
+                    append_result (Search.display (id) ?? "·",
+                        PropertyLabels.character_label (Search.name (id) ?? ""),
                         Search.code (id) ?? "");
                 }
             }

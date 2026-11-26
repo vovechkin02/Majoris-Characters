@@ -156,7 +156,7 @@ def generate_languages(data: dict, output: Path) -> None:
         stream.write('/* Generated from ICU 76 and XKB registry; see international-browsing.md. */\n')
         stream.write('static const struct LanguageEntry language_entries[] = {\n')
         for tag, label in sorted(data['languages'].items(), key=lambda x: (x[1].casefold(), x[0])):
-            stream.write(f'    {{ {c_string(tag)}, {c_string(label)} }},\n')
+            stream.write(f'    {{ {c_string(tag)}, N_({c_string(label)}) }},\n')
         stream.write('};\nstatic const struct LayoutEntry layout_entries[] = {\n')
         for layout, codes in sorted(data['layouts'].items()):
             if codes:
