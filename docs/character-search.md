@@ -109,8 +109,10 @@ and compact-window allocation remain runtime qualification requirements.
 ## Native request lifecycle
 
 The Vala `QueryParser` interprets bounded UTF-8 input and shares explicit
-numeric decoding with the inspector. `LanguageSelection` resolves locale and
-XKB collection policies through the immutable registry and ICU adapter.
+numeric decoding with the inspector. `LanguageSelection` resolves locale,
+XKB layout and resolved IBus language operands through the immutable registry
+and ICU adapter. `KeyboardSourceMonitor` performs asynchronous IBus registry
+resolution on the main context; the worker receives only an immutable snapshot.
 `SearchRequest` captures input before worker execution; the worker prepares
 and copies scalar candidates, exact-match flags, metadata terms and the script
 mask into `CharactersSearch`. `SemanticFilters` builds a copied union of

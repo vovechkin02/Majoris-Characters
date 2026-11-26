@@ -88,3 +88,10 @@ runtime queries must use the same folding semantics. Keep exact text and
 metadata unchanged; only derived search operands may be folded. Official
 Unicode test corpus acquisition and the optional conformance driver are
 documented in `docs/unicode-algorithm-consistency.md`.
+
+Keep desktop input-source discovery in the main-context Adapter. Resolve only
+configured, exact IBus engine names using declared registry languages, never
+by guessing from engine names or physical keyboard layout. Use cancellable
+bounded IPC, immutable worker snapshots, and read-only desktop settings.
+Unavailable or neutral engines contribute no scripts. Keep IBus library
+ownership annotations accurate; do not pass live descriptors to search workers.

@@ -312,11 +312,13 @@ release checks complement, but do not replace, actual GTK and desktop testing.
 
 The native Han and language lookup modules own immutable generated data and
 expose borrowed labels or owned property strings. The search request resolves
-language filters once, using a bounded snapshot of configured XKB source IDs;
-its worker owns all subsequent matching state. Script-extension predicates
+language filters once, using a bounded snapshot of configured XKB IDs and
+resolved IBus locale operands; its worker owns all subsequent matching state. Script-extension predicates
 reuse the Unicode property snapshot without allocating per-character strings.
-The main window observes optional GSettings input-source changes and disconnects
-on closure; the existing request controller handles cancellation/supersession.
+`KeyboardSourceMonitor` observes optional GSettings input-source changes and
+asynchronous IBus registry replies on the main context. It disconnects and
+cancels obsolete discovery on closure; the existing request controller handles
+search cancellation and supersession.
 This uses native Observer signals and a direct data lookup rather than speculative
 strategy hierarchies. Formal Han properties and fallbacks have separate contracts.
 
@@ -527,3 +529,14 @@ relationship selection, but no longer duplicates Unicode 17 case exceptions.
 The composer, saved collections, font-label comparisons, Han search and emoji
 search use the pinned rules. Native traversal and existing GTK lifecycles remain
 unchanged. See [algorithm consistency](unicode-algorithm-consistency.md).
+
+## IBus-aware configured keyboard collections (1.0.24)
+
+`InputSourcePolicy` validates typed GNOME source tuples, exact engine identities,
+locale tags and bounded immutable worker snapshots. The desktop
+`KeyboardSourceMonitor` is an Adapter for GSettings and the IBus registry;
+its GObject `changed` signal is an Observer notification to the window. It
+queries only while the configured keyboard collection is active, discards
+canceled or obsolete responses, and clears registry data on disconnection.
+The native language lookup, script masks and scanner remain unchanged.
+See [IBus-aware browsing](ibus-aware-browsing.md).

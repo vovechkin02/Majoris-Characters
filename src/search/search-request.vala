@@ -11,7 +11,7 @@ namespace Characters {
         private string? query;
         /** Locale used by annotation search and language selection. */
         private string locale = "en";
-        /** Configured XKB layouts captured before worker execution. */
+        /** Configured XKB IDs and resolved IBus locales captured before worker execution. */
         private string input_sources = "";
         /** Scope and filter needed for language collection preparation. */
         private Search.Scope scope = Search.Scope.ALL;
@@ -27,7 +27,7 @@ namespace Characters {
             this.filter = filter;
             this.query = query.length <= QueryParser.MAX_BYTES ? query : null;
             locale = Intl.get_language_names ()[0];
-            this.input_sources = input_sources.length < 1024 ? input_sources : "";
+            this.input_sources = input_sources.length <= InputSourcePolicy.MAX_SNAPSHOT_BYTES ? input_sources : "";
             job = Search.allocate (scope, filter, category);
         }
 

@@ -1,3 +1,11 @@
+majoris-characters (1.0.24-1) unstable; urgency=medium
+
+  * Resolve configured IBus engines using read-only asynchronous registry metadata.
+  * Combine declared writing systems with registered XKB layout languages.
+  * Add bounded source snapshots and isolated input-source policy tests.
+
+ -- Majoris Contributors <45165533+vovechkin02@users.noreply.github.com>  Fri, 27 Nov 2026 08:53:00 +1100
+
 majoris-characters (1.0.23-1) unstable; urgency=medium
 
   * Pin Unicode 17 extended grapheme segmentation and simple/full case mappings.

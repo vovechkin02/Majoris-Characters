@@ -11,13 +11,21 @@ namespace Characters.LanguageSelection {
         return locale;
     }
 
-    /** Resolve named, current-locale and configured XKB collections before scanning. */
+    /** Resolve named, current-locale and configured XKB/IBus collections before scanning. */
     public static bool configure (Search.Job job, int filter, string locale, string sources) {
         var scripts = new uint8[SCRIPT_LIMIT];
         if (filter == 0) {
             LanguageData.add_locale (normalize_locale (locale), scripts);
-        } else if (filter == 1 && sources.length < 1024) {
+        } else if (filter == 1 && sources.length <= InputSourcePolicy.MAX_SNAPSHOT_BYTES) {
             foreach (var id in sources.split (",")) {
+                if (id.has_prefix (InputSourcePolicy.IBUS_PREFIX)) {
+                    var language = InputSourcePolicy.engine_language (
+                        id.substring (InputSourcePolicy.IBUS_PREFIX.length));
+                    if (language != null) {
+                        LanguageData.add_locale (language, scripts);
+                    }
+                    continue;
+                }
                 var languages = LanguageData.layout_languages (id);
                 if (languages == null) {
                     continue;

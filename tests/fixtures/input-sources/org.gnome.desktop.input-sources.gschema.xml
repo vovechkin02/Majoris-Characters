@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schemalist>
+  <!-- Minimal isolated test schema; never installed or used by the application build. -->
+  <schema id="org.gnome.desktop.input-sources" path="/org/gnome/desktop/input-sources/">
+    <key name="sources" type="a(ss)">
+      <default>[]</default>
+      <summary>Configured input sources for the memory-backend test</summary>
+    </key>
+  </schema>
+</schemalist>

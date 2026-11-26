@@ -82,8 +82,8 @@ namespace Characters {
 
         /** Owns persistent geometry settings for this window. */
         private GLib.Settings settings;
-        /** Optional GNOME input-source settings; read-only and desktop-independent otherwise. */
-        private GLib.Settings? input_settings;
+        /** Optional desktop input-source registry and immutable worker snapshots. */
+        private KeyboardSourceMonitor? input_sources;
         /** Input-source subscription, disconnected when this window closes. */
         private ulong input_sources_handler;
         /** Shared local collection repository, independent of search and clipboard state. */
@@ -526,8 +526,8 @@ namespace Characters {
             collection_filter.selected = scope == Search.Scope.LANGUAGE ? 1 : 0;
             collection_filter.visible = filter_slots.length > 1;
             if (scope == Search.Scope.LANGUAGE) {
-                collection_filter.tooltip_text = _("Writing systems, not an exact language alphabet. " +
-                    "Configured keyboard languages use registered XKB sources.");
+                collection_filter.tooltip_text = _("Writing systems, not an exact language alphabet.") +
+                    " " + _("Includes registered XKB layouts and available IBus engines.");
             } else if (scope == Search.Scope.RADICAL || scope == Search.Scope.STROKES) {
                 collection_filter.tooltip_text = _("Uses official Unihan where available, otherwise " +
                     "ICU collation groups. Characters without group data are excluded.");
@@ -541,49 +541,14 @@ namespace Characters {
             }
         }
 
-        /** Subscribe only when the optional GNOME schema has its expected source contract. */
+        /** Observe configuration and resolved engine metadata without modifying desktop settings. */
         private void configure_input_sources () {
-            var schemas = SettingsSchemaSource.get_default ();
-            if (schemas == null) {
-                return;
-            }
-            var schema = schemas.lookup ("org.gnome.desktop.input-sources", true);
-            if (schema == null || !schema.has_key ("sources")) {
-                return;
-            }
-            input_settings = new GLib.Settings.full (schema, null, null);
-            input_sources_handler = input_settings.changed["sources"].connect (() => {
+            input_sources = new KeyboardSourceMonitor ();
+            input_sources_handler = input_sources.changed.connect (() => {
                 if (scope == Search.Scope.LANGUAGE && collection_filter.selected == 2) {
                     submit_search ();
                 }
             });
-        }
-
-        /** Capture bounded configured XKB source IDs; never write or infer an IBus engine. */
-        private string configured_keyboard_sources () {
-            if (input_settings == null) {
-                return "";
-            }
-            var sources = input_settings.get_value ("sources");
-            if (!sources.is_of_type (new VariantType ("a(ss)"))) {
-                return "";
-            }
-            var result = new StringBuilder ();
-            for (size_t index = 0; index < sources.n_children (); index++) {
-                var source = sources.get_child_value (index);
-                var kind_value = source.get_child_value (0);
-                var id_value = source.get_child_value (1);
-                unowned string kind = kind_value.get_string ();
-                unowned string id = id_value.get_string ();
-                if (kind != "xkb" || id.contains (",") || result.len + id.length + 1 > 1023) {
-                    continue;
-                }
-                if (result.len > 0) {
-                    result.append_c (',');
-                }
-                result.append (id);
-            }
-            return result.str.dup ();
         }
 
         /** Clears stale results, requests cancellation, and submits current controls. */
@@ -606,8 +571,14 @@ namespace Characters {
             result_count.label = _("Searching…");
             results_stack.visible_child_name = "loading";
             loading_spinner.start ();
-            var sources = scope == Search.Scope.LANGUAGE && filter == 1 ?
-                configured_keyboard_sources () : "";
+            bool configured = scope == Search.Scope.LANGUAGE && filter == 1;
+            string sources = "";
+            if (input_sources != null) {
+                input_sources.set_active (configured);
+                if (configured) {
+                    sources = input_sources.snapshot ();
+                }
+            }
             controller.submit (scope, filter, category, search_entry.text, sources);
         }
 
@@ -730,9 +701,13 @@ namespace Characters {
                 settings.disconnect (preferences_handler);
                 preferences_handler = 0;
             }
-            if (input_sources_handler != 0 && input_settings != null) {
-                input_settings.disconnect (input_sources_handler);
-                input_sources_handler = 0;
+            if (input_sources != null) {
+                if (input_sources_handler != 0) {
+                    input_sources.disconnect (input_sources_handler);
+                    input_sources_handler = 0;
+                }
+                input_sources.shutdown ();
+                input_sources = null;
             }
             if (completion_handler != 0) {
                 controller.disconnect (completion_handler);

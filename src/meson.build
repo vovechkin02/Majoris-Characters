@@ -9,6 +9,7 @@ search_domain_sources = files(
   'emoji/presentation.vala',
   'search/collection-catalog.vala',
   'search/han-query.vala',
+  'search/input-source-policy.vala',
   'search/language-selection.vala',
   'search/query-parser.vala',
   'search/search-plan.vala',
@@ -44,7 +45,11 @@ library_sources = files(
   'library/library-store.vala',
   'library/usage-entry.vala',
 )
-integration_sources = files(
+keyboard_source_adapter = files(
+  'integration/keyboard-source-monitor.vala',
+  '../vapi/characters-ibus.vapi',
+)
+integration_sources = keyboard_source_adapter + files(
   'integration/desktop-search.vala',
   'integration/search-provider.vala',
 )
@@ -70,7 +75,7 @@ app_vala_args = [
   '--gresourcesdir=' + (meson.project_source_root() / 'data'),
 ]
 app_c_args = ['-DGETTEXT_PACKAGE="' + gettext_package + '"']
-app_dependencies = [adwaita_dep, gio_dep, gtk_dep, font_dep, unicode_dep]
+app_dependencies = [adwaita_dep, gio_dep, gtk_dep, ibus_dep, font_dep, unicode_dep]
 
 characters_executable = executable(
   meson.project_name(),

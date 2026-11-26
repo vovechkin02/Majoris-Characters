@@ -22,7 +22,7 @@ application and GJS are not runtime dependencies of the main application. The op
 
 - Priority 1: Unicode 17 scalar properties and normalization core implemented;
   official normalization and supplement conformance remains outstanding.
-- Priority 2: International browsing, script extensions, configured XKB scopes,
+- Priority 2: International browsing, script extensions, configured XKB and IBus scopes,
   Han search and metadata import implemented; the verified official Unihan
   17.0.0 dataset is bundled in 1.0.22. Runtime GUI qualification remains outstanding. See international-browsing.md.
 
@@ -79,10 +79,12 @@ application and GJS are not runtime dependencies of the main application. The op
   rasterization remain native. See [pass 6 qualification](vala-migration-pass-6.md).
   Establish a full build and benchmark baseline before additional migration.
 
-## Final functional completion priorities (1.0.23)
+## Final functional completion priorities (1.0.24)
 
 The official Unihan and CLDR data import (revised Priority 2) is complete.
 Revised Priority 3 implements pinned Unicode 17 grapheme and case mapping
 consistency and regenerates both search indexes. Official UCD corpus conformance
-and full target compilation remain unqualified. The next functional priority is
-IBus-aware international browsing.
+and full target compilation remain unqualified. Revised Priority 4 implements
+IBus-aware international browsing at source level in 1.0.24; live desktop
+qualification is outstanding. The next functional priority is cross-process
+persistence coordination and exact font coverage refinement.

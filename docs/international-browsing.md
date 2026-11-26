@@ -6,10 +6,15 @@ Scripts match the Unicode 17 primary script and Script_Extensions. Languages
 resolve to script unions using ICU locale-to-script data. The language filter
 contains Current Locale, Configured Keyboard Languages, and 275 named language
 labels. A language scope is a writing-system repertoire, not a dictionary or an
-exact alphabet. Configured keyboards use registered XKB layout/variant IDs from
-the optional GNOME input-sources GSettings schema; changes refresh the current
-search. Unknown or non-XKB input sources are ignored. The active IBus engine is
-not detected. Without a configured XKB source the corresponding scope is empty.
+exact alphabet. Configured keyboards use registered XKB layout/variant IDs and
+IBus engine IDs from the optional GNOME input-sources GSettings schema. The
+application resolves exact configured IBus IDs against the running daemon's
+engine registry, then combines their declared writing systems with XKB scripts.
+Changes refresh the selected collection; unavailable engines and neutral
+language descriptors are ignored, without guessing from engine names. The
+application never changes the configured or active input source. Without a
+resolved source the corresponding scope is empty. See
+[IBus-aware browsing](ibus-aware-browsing.md) for discovery and limitations.
 
 Radical and stroke collections provide additional filters. Bundled official records
 use kRSUnicode and kTotalStrokes. Where no formal value exists,

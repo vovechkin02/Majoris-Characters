@@ -78,6 +78,30 @@ search_controller_test = executable(
 test('Search bindings and request supersession', search_controller_test,
   suite: 'unit', timeout: 30)
 
+input_source_schema = custom_target(
+  'input-source-test-schema',
+  input: 'fixtures/input-sources/org.gnome.desktop.input-sources.gschema.xml',
+  output: 'gschemas.compiled',
+  command: [find_program('glib-compile-schemas'), '--strict', '--targetdir', '@OUTDIR@',
+            meson.current_source_dir() / 'fixtures/input-sources'],
+  build_by_default: true,
+)
+input_source_environment = environment()
+input_source_environment.set('GSETTINGS_SCHEMA_DIR', meson.current_build_dir())
+input_source_environment.set('GSETTINGS_BACKEND', 'memory')
+input_source_policy_test = executable(
+  'test-input-source-policy',
+  'unit/test-input-source-policy.vala',
+  keyboard_source_adapter,
+  search_sources,
+  search_domain_sources,
+  search_domain_vapis,
+  dependencies: [gio_dep, ibus_dep, unicode_dep],
+  c_args: app_c_args + ['-UNDEBUG'],
+)
+test('Configured input source policy', input_source_policy_test,
+  env: input_source_environment, depends: input_source_schema, suite: 'unit', timeout: 30)
+
 character_browser_test = executable(
   'test-character-browser',
   'integration/test-character-browser.vala',

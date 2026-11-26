@@ -2503,3 +2503,10 @@ msgstr "yi"
 msgid "Zanabazar_Square"
 msgstr "zanabazar carré"
 
+#: src/views/main-window.vala
+msgid "Writing systems, not an exact language alphabet."
+msgstr "Systèmes d’écriture, et non alphabet exact d’une langue."
+
+#: src/views/main-window.vala
+msgid "Includes registered XKB layouts and available IBus engines."
+msgstr "Inclut les dispositions XKB enregistrées et les moteurs IBus disponibles."

@@ -410,6 +410,30 @@ class SourceContractsTest(unittest.TestCase):
                       (ROOT / 'tools/unicode/generate_unihan.py').read_text())
         self.assertIn('unicode-algorithms.c', (native / 'meson.build').read_text())
 
+    def test_input_source_policy(self) -> None:
+        """Require read-only asynchronous IBus resolution and bounded worker operands."""
+        policy = (ROOT / "src/search/input-source-policy.vala").read_text()
+        monitor = (ROOT / "src/integration/keyboard-source-monitor.vala").read_text()
+        selection = (ROOT / "src/search/language-selection.vala").read_text()
+        window = (ROOT / "src/views/main-window.vala").read_text()
+        self.assertIn('kind == "ibus"', policy)
+        self.assertIn('languages.lookup (id)', policy)
+        self.assertIn('MAX_SNAPSHOT_BYTES = 1023', policy)
+        self.assertIn('LanguageData.layout_languages (id)', policy)
+        self.assertIn('id.has_prefix (InputSourcePolicy.IBUS_PREFIX)', selection)
+        self.assertIn('registry.list_engines_async.begin', monitor)
+        self.assertIn('pending != request', monitor)
+        self.assertIn('engine.get_name ()', monitor)
+        self.assertIn('engine.get_language ()', monitor)
+        self.assertIn('pending.cancel ()', monitor)
+        self.assertNotIn('set_global_engine', monitor)
+        self.assertNotIn('settings.set_', monitor)
+        self.assertIn('input_sources.shutdown ()', window)
+        self.assertIn("dependency('ibus-1.0'", (ROOT / "meson.build").read_text())
+        self.assertIn('libibus-1.0-dev', (ROOT / "debian/control").read_text())
+        self.assertIn("input_source_environment.set('GSETTINGS_BACKEND', 'memory')",
+                      (ROOT / "tests/meson.build").read_text())
+
     def test_release_gate(self) -> None:
         """Prove missing and skipped test records cannot pass the release log gate."""
         names = sorted(expected_tests())
