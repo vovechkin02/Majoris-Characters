@@ -3,7 +3,9 @@
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
+#include "icu-scalar-conversion.h"
 #include "scalar-properties.h"
 #include "unicode-engine.h"
 
@@ -69,11 +71,51 @@ static void test_graphemes(void) {
     assert(characters_icu_graphemes(NULL) == -1);
 }
 
+/** Exercise the shared bounded decoder and encoder without a Vala runtime. */
+static void test_scalar_conversion(void) {
+    uint32_t points[32];
+    UChar units[64];
+    const uint32_t source[] = { 0, 0x41, 0x1F600, 0x10FFFF, 0x0378 };
+    assert(characters_icu_encode_utf16(source, 5, units, 64) == 7);
+    assert(characters_icu_decode_utf16(units, 7, points, 32) == 5);
+    assert(!memcmp(points, source, sizeof(source)));
+    assert(!characters_icu_decode_utf16(units, 7, points, 4));
+    assert(!characters_icu_encode_utf16(source, 5, units, 6));
+    const uint32_t invalid[] = { 0xD800, 0x110000 };
+    assert(!characters_icu_encode_utf16(invalid, 2, units, 64));
+    const UChar isolated_lead[] = { 0xD800 };
+    const UChar isolated_trail[] = { 0xDC00 };
+    assert(!characters_icu_decode_utf16(isolated_lead, 1, points, 32));
+    assert(!characters_icu_decode_utf16(isolated_trail, 1, points, 32));
+    assert(characters_icu_decode_utf8("A😀", points, 2) == 2);
+    assert(points[0] == 0x41 && points[1] == 0x1F600);
+    assert(!characters_icu_decode_utf8("AA", points, 1));
+    assert(!characters_icu_decode_utf8("\xC0\x80", points, 32));
+    assert(!characters_icu_decode_utf8("\xED\xA0\x80", points, 32));
+    assert(!characters_icu_decode_utf8("\xF4\x90\x80\x80", points, 32));
+    assert(!characters_icu_decode_utf8("\xF0\x9F", points, 32));
+    assert(!characters_icu_decode_utf8("", points, 32));
+    assert(!characters_icu_decode_utf8(NULL, points, 32));
+    assert(!characters_icu_decode_utf8("A", NULL, 32));
+    assert(!characters_icu_decode_utf8("A", points, 0));
+    char text[129];
+    memset(text, 'A', 33);
+    text[33] = 0;
+    assert(!characters_icu_decode_utf8(text, points, 32));
+    text[32] = 0;
+    assert(characters_icu_decode_utf8(text, points, 32) == 32);
+    assert(characters_scalar_is_valid(0) && characters_scalar_is_valid(0x0378));
+    assert(characters_scalar_is_valid(0x10FFFF));
+    assert(!characters_scalar_is_valid(0xD800) && !characters_scalar_is_valid(0xDFFF));
+    assert(!characters_scalar_is_valid(0x110000));
+}
+
 /** Run the focused native ICU boundary checks. */
 int main(void) {
     test_normalize_points();
     test_decomposition();
     test_graphemes();
-    puts("3 ICU adapter contract groups passed");
+    test_scalar_conversion();
+    puts("4 ICU adapter contract groups passed");
     return 0;
 }

@@ -86,15 +86,6 @@ bool characters_font_face_reset(CharactersFontFace *face);
 uint32_t *characters_font_face_unicode_points(CharactersFontFace *face, size_t *length);
 
 /**
- * characters_font_face_symbol_points:
- * @face: Borrowed face.
- * @length: (out): Number of raw Microsoft Symbol cmap codes.
- *
- * Returns: (transfer none) (array length=length): Sorted raw codes, never Unicode identities.
- */
-const uint32_t *characters_font_face_symbol_points(const CharactersFontFace *face, size_t *length);
-
-/**
  * characters_font_face_symbol_count:
  * @face: Borrowed face.
  *

@@ -7,6 +7,8 @@
 #include FT_FREETYPE_H
 #include FT_MULTIPLE_MASTERS_H
 
+#include "../scalar-validity.h"
+
 /** Maximum accepted design axes in a single installed face. */
 #define AXIS_LIMIT 256u
 /** Upper bound on raw symbol entries, independent of malformed cmap sizes. */
@@ -32,18 +34,13 @@ struct CharactersFontFace {
     GArray *symbols;
 };
 
-/** Check a Unicode scalar without admitting UTF-16 surrogate values. */
-static bool is_scalar(uint32_t code) {
-    return code <= 0x10FFFFu && !(code >= 0xD800u && code <= 0xDFFFu);
-}
-
 /** Collect only codes actually enumerated by the selected cmap. */
 static GArray *collect_points(FT_Face face, bool symbol) {
     GArray *points = g_array_new(FALSE, FALSE, sizeof(uint32_t));
     FT_UInt glyph = 0;
     FT_ULong code = FT_Get_First_Char(face, &glyph);
     while (glyph) {
-        if (code <= UINT32_MAX && (symbol || is_scalar((uint32_t)code))) {
+        if (code <= UINT32_MAX && (symbol || characters_scalar_is_valid((uint32_t)code))) {
             uint32_t point = (uint32_t)code;
             if (symbol && points->len == SYMBOL_LIMIT) {
                 g_array_unref(points);
@@ -210,7 +207,8 @@ uint32_t *characters_font_face_unicode_points(CharactersFontFace *face, size_t *
     return (uint32_t *)g_array_free(points, FALSE);
 }
 
-const uint32_t *characters_font_face_symbol_points(const CharactersFontFace *face, size_t *length) {
+/** Borrow sorted raw symbol codes for internal membership lookup. */
+static const uint32_t *symbol_points(const CharactersFontFace *face, size_t *length) {
     if (!length) {
         return NULL;
     }
@@ -234,7 +232,7 @@ uint32_t characters_font_face_symbol_code(const CharactersFontFace *face, size_t
 /** Test raw membership to avoid FreeType's symbol alias fallback for unmapped low codes. */
 static bool has_symbol(const CharactersFontFace *face, uint32_t code) {
     size_t length;
-    const uint32_t *points = characters_font_face_symbol_points(face, &length);
+    const uint32_t *points = symbol_points(face, &length);
     size_t low = 0;
     size_t high = length;
     while (low < high) {
@@ -252,7 +250,7 @@ static bool has_symbol(const CharactersFontFace *face, uint32_t code) {
 }
 
 uint32_t characters_font_face_glyph(CharactersFontFace *face, uint32_t code, bool symbol) {
-    if (!face || (symbol ? !has_symbol(face, code) : !is_scalar(code))) {
+    if (!face || (symbol ? !has_symbol(face, code) : !characters_scalar_is_valid(code))) {
         return 0;
     }
     FT_CharMap map = symbol ? face->symbol_map : face->unicode_map;

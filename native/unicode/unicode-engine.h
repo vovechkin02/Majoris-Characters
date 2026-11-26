@@ -5,6 +5,8 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#include "icu-adapter.h"
+
 /** Maximum number of scalars in a supported catalog sequence. */
 #define CHARACTERS_UNICODE_MAX_SEQUENCE_LENGTH 32
 
@@ -130,16 +132,6 @@ uint32_t characters_unicode_block_end(size_t index);
 const char *characters_unicode_find_block(uint32_t point);
 
 /**
- * characters_unicode_encode:
- * @points: (array length=length): Unicode scalars.
- * @length: Number of scalars, from 1 to 32.
- *
- * Returns: (transfer full) (nullable): UTF-8 text, or NULL for invalid input,
- * embedded NUL or allocation failure. No normalization is performed.
- */
-char *characters_unicode_encode(const uint32_t *points, size_t length);
-
-/**
  * characters_unicode_sequence_name:
  * @points: (array length=length): Unicode scalars.
  * @length: Number of scalars, from 1 to 32.
@@ -149,16 +141,6 @@ char *characters_unicode_encode(const uint32_t *points, size_t length);
  * available separately through the emoji catalog.
  */
 char *characters_unicode_sequence_name(const uint32_t *points, size_t length);
-
-/**
- * characters_unicode_normalize:
- * @text: NUL-terminated UTF-8 text, at most 1 MiB.
- * @form: NFC, NFD, NFKC or NFKD.
- *
- * Returns: (transfer full) (nullable): Normalized UTF-8, or NULL for invalid
- * text, form, size or allocation failure. The original text is not modified.
- */
-char *characters_unicode_normalize(const char *text, const char *form);
 
 /**
  * characters_unicode_emoji_group_count:

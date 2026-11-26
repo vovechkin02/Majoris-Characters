@@ -261,6 +261,30 @@ class SourceContractsTest(unittest.TestCase):
         self.assertIn("inventory.open_face (index)", request)
         self.assertNotIn("get_catalog ()", browser + request)
 
+    def test_native_adapter_consolidation(self) -> None:
+        """Require one native conversion boundary and no exported raw symbol pointer."""
+        unicode = ROOT / "native/unicode"
+        adapter = (unicode / "icu-adapter.c").read_text()
+        engine = (unicode / "unicode-engine.c").read_text()
+        self.assertIn("characters_unicode_normalize(", adapter)
+        self.assertIn("characters_unicode_encode(", adapter)
+        self.assertNotIn("char *characters_unicode_normalize(", engine)
+        self.assertNotIn("char *characters_unicode_encode(", engine)
+        for name in ("character-search", "emoji-catalog"):
+            source = (unicode / f"{name}.c").read_text()
+            self.assertIn("characters_icu_decode_utf8(", source)
+            self.assertNotIn("U8_NEXT(", source)
+        legacy = (unicode / "legacy-encoding.c").read_text()
+        self.assertIn("characters_icu_decode_utf16(", legacy)
+        self.assertIn("characters_icu_encode_utf16(", legacy)
+        for name in ("font-catalog", "font-face"):
+            source = (ROOT / f"native/fonts/{name}.c").read_text()
+            self.assertIn("characters_scalar_is_valid(", source)
+            self.assertNotIn("static bool is_scalar(", source)
+        header = (ROOT / "native/fonts/font-face.h").read_text()
+        self.assertNotIn("characters_font_face_symbol_points(", header)
+        self.assertIn("characters_font_face_symbol_code(", header)
+
     def test_release_gate(self) -> None:
         """Prove missing and skipped test records cannot pass the release log gate."""
         names = sorted(expected_tests())

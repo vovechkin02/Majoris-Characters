@@ -7,14 +7,17 @@
 #include <unicode/uchar.h>
 #include <unicode/unorm2.h>
 #include <unicode/utext.h>
-#include <unicode/utf16.h>
+#include <unicode/ustring.h>
 
+#include "icu-scalar-conversion.h"
 #include "normalization.h"
 #include "scalar-properties.h"
 #include "unicode-engine.h"
 
 /** Maximum input length for inspector scalar operations. */
 #define MAX_POINTS CHARACTERS_UNICODE_MAX_SEQUENCE_LENGTH
+/** Maximum UTF-8 input size for text normalization, in bytes. */
+#define MAX_TEXT_BYTES (1024 * 1024)
 
 /** Count extended grapheme boundaries in a validated UTF-8 input. */
 int characters_icu_graphemes(const char *text) {
@@ -65,16 +68,7 @@ size_t characters_icu_decomposition(uint32_t point, uint32_t *points) {
     if (U_FAILURE(error) || length <= 0) {
         return 0;
     }
-    size_t count = 0;
-    for (int32_t offset = 0; offset < length;) {
-        UChar32 component;
-        U16_NEXT(units, offset, length, component);
-        if (count == MAX_POINTS || !characters_unicode_is_scalar((uint32_t)component)) {
-            return 0;
-        }
-        points[count++] = (uint32_t)component;
-    }
-    return count;
+    return characters_icu_decode_utf16(units, length, points, MAX_POINTS);
 }
 
 /** Bridge length-aware UTF-16 normalization to owned scalar storage. */
@@ -88,13 +82,15 @@ uint32_t *characters_icu_normalize_points(const uint32_t *input_points, int inpu
         return NULL;
     }
     UChar input[MAX_POINTS * 2];
-    int32_t length = 0;
     for (int index = 0; index < input_count; index++) {
-        uint32_t point = input_points[index];
-        if (!characters_unicode_is_assigned(point)) {
+        if (!characters_unicode_is_assigned(input_points[index])) {
             return NULL;
         }
-        U16_APPEND_UNSAFE(input, length, point);
+    }
+    int32_t length = characters_icu_encode_utf16(input_points, (size_t)input_count,
+                                                 input, MAX_POINTS * 2);
+    if (!length) {
+        return NULL;
     }
     int32_t actual = 0;
     UChar *normalized = characters_normalize_utf16(input, length, form, &actual);
@@ -107,14 +103,79 @@ uint32_t *characters_icu_normalize_points(const uint32_t *input_points, int inpu
         free(normalized);
         return NULL;
     }
-    int count = 0;
-    for (int32_t offset = 0; offset < actual;) {
-        UChar32 point;
-        U16_NEXT(normalized, offset, actual, point);
-        points[count++] = (uint32_t)point;
-    }
+    size_t count = characters_icu_decode_utf16(normalized, actual, points, (size_t)actual);
     free(normalized);
-    *output_count = count;
+    if (!count) {
+        free(points);
+        return NULL;
+    }
+    *output_count = (int)count;
     return points;
 }
 
+/** Convert a valid bounded UTF-16 buffer to newly allocated NUL-terminated UTF-8. */
+static char *from_utf16(const UChar *text, int32_t length) {
+    UErrorCode error = U_ZERO_ERROR;
+    int32_t bytes = 0;
+    u_strToUTF8(NULL, 0, &bytes, text, length, &error);
+    if (error != U_BUFFER_OVERFLOW_ERROR && U_FAILURE(error)) {
+        return NULL;
+    }
+    char *result = malloc((size_t)bytes + 1);
+    if (!result) {
+        return NULL;
+    }
+    error = U_ZERO_ERROR;
+    u_strToUTF8(result, bytes + 1, NULL, text, length, &error);
+    if (U_FAILURE(error)) {
+        free(result);
+        return NULL;
+    }
+    return result;
+}
+
+/** Encode an exact bounded catalog sequence; NUL is not representable as C text. */
+char *characters_unicode_encode(const uint32_t *points, size_t length) {
+    if (!points || !length || length > MAX_POINTS) {
+        return NULL;
+    }
+    uint8_t text[MAX_POINTS * 4 + 1];
+    int32_t offset = 0;
+    for (size_t index = 0; index < length; index++) {
+        if (!points[index] || !characters_scalar_is_valid(points[index])) {
+            return NULL;
+        }
+        U8_APPEND_UNSAFE(text, offset, points[index]);
+    }
+    text[offset] = 0;
+    return strdup((const char *)text);
+}
+
+/** Normalize bounded UTF-8 using the same engine as explicit scalar normalization. */
+char *characters_unicode_normalize(const char *text, const char *form) {
+    if (!text || strnlen(text, MAX_TEXT_BYTES + 1) > MAX_TEXT_BYTES) {
+        return NULL;
+    }
+    UErrorCode error = U_ZERO_ERROR;
+    int32_t length = 0;
+    u_strFromUTF8(NULL, 0, &length, text, -1, &error);
+    if (error != U_BUFFER_OVERFLOW_ERROR && U_FAILURE(error)) {
+        return NULL;
+    }
+    UChar *input = malloc(((size_t)length + 1) * sizeof(*input));
+    if (!input) {
+        return NULL;
+    }
+    error = U_ZERO_ERROR;
+    u_strFromUTF8(input, length + 1, NULL, text, -1, &error);
+    if (U_FAILURE(error)) {
+        free(input);
+        return NULL;
+    }
+    int32_t needed = 0;
+    UChar *output = characters_normalize_utf16(input, length, form, &needed);
+    free(input);
+    char *result = output ? from_utf16(output, needed) : NULL;
+    free(output);
+    return result;
+}

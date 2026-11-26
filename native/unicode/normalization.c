@@ -9,6 +9,7 @@
 #include <unicode/unorm2.h>
 #include <unicode/utf16.h>
 
+#include "../scalar-validity.h"
 #include "scalar-properties.h"
 
 /** Bound intermediate allocations to the maximum expanded input size. */
@@ -203,7 +204,7 @@ UChar *characters_normalize_utf16(const UChar *input, int32_t length,
     for (int32_t offset = 0; offset < length;) {
         UChar32 point;
         U16_NEXT(input, offset, length, point);
-        if (point < 0 || (point >= 0xD800 && point <= 0xDFFF)) {
+        if (!characters_scalar_is_valid((uint32_t)point)) {
             return NULL;
         }
         if ((u_charType(point) == U_UNASSIGNED) !=

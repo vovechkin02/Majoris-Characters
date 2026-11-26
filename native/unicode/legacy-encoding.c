@@ -7,8 +7,8 @@
 #include <unicode/ucnv.h>
 #include <unicode/ucnv_err.h>
 #include <unicode/uset.h>
-#include <unicode/utf16.h>
 
+#include "icu-scalar-conversion.h"
 #include "unicode-engine.h"
 
 /** Count elements in a compile-time array. */
@@ -177,17 +177,7 @@ static size_t decode_points(UConverter *converter, const char *bytes, size_t len
     if (U_FAILURE(error) || count <= 0) {
         return 0;
     }
-    int32_t offset = 0;
-    size_t used = 0;
-    while (offset < count) {
-        UChar32 point;
-        U16_NEXT(output, offset, count, point);
-        if (used == MAX_POINTS || point < 0 || !characters_unicode_is_scalar((uint32_t)point)) {
-            return 0;
-        }
-        points[used++] = (uint32_t)point;
-    }
-    return used;
+    return characters_icu_decode_utf16(output, count, points, MAX_POINTS);
 }
 
 /** Encode explicit scalars with strict callbacks, without imposing round-trip policy. */
@@ -197,12 +187,9 @@ static size_t encode_points(UConverter *converter, const uint32_t *points, size_
         return 0;
     }
     UChar input[MAX_POINTS * 2];
-    int32_t used = 0;
-    for (size_t index = 0; index < length; index++) {
-        if (!characters_unicode_is_scalar(points[index])) {
-            return 0;
-        }
-        U16_APPEND_UNSAFE(input, used, points[index]);
+    int32_t used = characters_icu_encode_utf16(points, length, input, COUNT(input));
+    if (!used) {
+        return 0;
     }
     UErrorCode error = U_ZERO_ERROR;
     int32_t count = ucnv_fromUChars(converter, bytes, MAX_BYTES, input, used, &error);

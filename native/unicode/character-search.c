@@ -7,11 +7,11 @@
 #include <string.h>
 
 #include <unicode/uchar.h>
-#include <unicode/utf8.h>
 
 #include "emoji-catalog.h"
 #include "language-collections.h"
 #include "scalar-properties.h"
+#include "icu-scalar-conversion.h"
 #include "unicode-engine.h"
 #include "unihan.h"
 
@@ -258,25 +258,6 @@ static bool contains_term(const char *field, const char *term) {
         }
     }
     return false;
-}
-
-/** Decode exact UTF-8 without normalization; return zero for invalid or oversized sequences. */
-static size_t decode_text(const char *text, uint32_t *points) {
-    if (!text || strlen(text) > MAX_QUERY_BYTES) {
-        return 0;
-    }
-    int32_t length = (int32_t)strlen(text);
-    int32_t offset = 0;
-    size_t count = 0;
-    while (offset < length) {
-        UChar32 point;
-        U8_NEXT((const uint8_t *)text, offset, length, point);
-        if (point < 0 || count == MAX_SEQUENCE_POINTS) {
-            return 0;
-        }
-        points[count++] = (uint32_t)point;
-    }
-    return count;
 }
 
 /** Match every query term, allowing different terms to occur in different metadata fields. */
@@ -531,7 +512,7 @@ static bool scan_points(CharactersSearch *search, const struct Query *query) {
 /** Search a catalog sequence with exact sequence matching or English metadata terms. */
 static bool sequence_matches(const struct Query *query, const char *text, const char *name,
                              const char *group, uint32_t *points, size_t *count) {
-    *count = decode_text(text, points);
+    *count = characters_icu_decode_utf8(text, points, MAX_SEQUENCE_POINTS);
     return *count && (matches_points(query, points, *count) ||
            matches_terms(query, name, NULL, NULL, NULL, group));
 }
@@ -1037,7 +1018,7 @@ char *characters_search_code(uint32_t id) {
         count = 1;
     } else {
         char *text = characters_search_text(id);
-        count = decode_text(text, points);
+        count = characters_icu_decode_utf8(text, points, MAX_SEQUENCE_POINTS);
         free(text);
     }
     if (!count) {

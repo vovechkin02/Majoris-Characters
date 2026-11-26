@@ -8,8 +8,8 @@
 
 #include <unicode/unorm2.h>
 #include <unicode/ustring.h>
-#include <unicode/utf8.h>
 
+#include "icu-scalar-conversion.h"
 #include "unicode-engine.h"
 
 #define COUNT(array) (sizeof(array) / sizeof((array)[0]))
@@ -46,24 +46,6 @@ struct SequenceAlias {
 };
 
 #include "generated/emoji-sequences.h"
-
-/** Decode bounded UTF-8, rejecting malformed input and oversized sequences. */
-static size_t decode(const char *text, uint32_t *points) {
-    if (!text || strnlen(text, MAX_TEXT_BYTES + 1) > MAX_TEXT_BYTES) {
-        return 0;
-    }
-    size_t count = 0;
-    int32_t length = (int32_t)strlen(text);
-    for (int32_t offset = 0; offset < length;) {
-        UChar32 point;
-        U8_NEXT((const uint8_t *)text, offset, length, point);
-        if (point < 0 || count == MAX_POINTS) {
-            return 0;
-        }
-        points[count++] = (uint32_t)point;
-    }
-    return count;
-}
 
 /** Identify the five standard Fitzpatrick modifiers. */
 static bool is_tone(uint32_t point) {
@@ -205,7 +187,7 @@ bool characters_emoji_keyword_matches(size_t index, const char *locale, const ch
     }
     uint32_t points[MAX_POINTS];
     char *text = characters_unicode_emoji_text(index);
-    size_t count = decode(text, points);
+    size_t count = characters_icu_decode_utf8(text, points, MAX_POINTS);
     free(text);
     if (!count) {
         return false;
@@ -273,7 +255,7 @@ size_t characters_emoji_alias_canonical(size_t index) {
 const char *characters_emoji_alias_label(size_t index) {
     const char *text = characters_emoji_alias_text(index);
     uint32_t points[MAX_POINTS];
-    size_t count = decode(text, points);
+    size_t count = characters_icu_decode_utf8(text, points, MAX_POINTS);
     if (!count) {
         return NULL;
     }
@@ -296,7 +278,7 @@ char *characters_emoji_alias_name(size_t index) {
     const char *label = characters_emoji_alias_label(index);
     const char *text = characters_emoji_alias_text(index);
     uint32_t points[MAX_POINTS];
-    size_t count = decode(text, points);
+    size_t count = characters_icu_decode_utf8(text, points, MAX_POINTS);
     if (!label || !count) {
         return NULL;
     }
@@ -324,7 +306,7 @@ const char *characters_emoji_annotation_source(void) {
 /** Validate the complete input before attempting catalog resolution. */
 bool characters_emoji_is_candidate(const char *text) {
     uint32_t points[MAX_POINTS];
-    size_t count = decode(text, points);
+    size_t count = characters_icu_decode_utf8(text, points, MAX_POINTS);
     return count && (characters_unicode_emoji_index(points, count) != SIZE_MAX ||
                      characters_emoji_alias_index(text) != SIZE_MAX);
 }

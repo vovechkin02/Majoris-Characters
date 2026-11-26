@@ -72,3 +72,9 @@ application and GJS are not runtime dependencies of the main application. The op
   Fontconfig discovery and exact FreeType operations remain native. See
   [pass 5 qualification](vala-migration-pass-5.md). Establish full compilation
   and parity before consolidating additional native adapters or moving scan loops.
+
+- Vala migration pass 6 (1.0.14): shared scalar validation and bounded ICU
+  conversion, centralized text normalization and encoding, and private raw
+  symbol storage. Native search traversal, immutable database access and font
+  rasterization remain native. See [pass 6 qualification](vala-migration-pass-6.md).
+  Establish a full build and benchmark baseline before additional migration.

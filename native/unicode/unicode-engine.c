@@ -7,12 +7,10 @@
 
 #include <unicode/uchar.h>
 #include <unicode/unorm2.h>
-#include <unicode/ustring.h>
 #include <unicode/utf16.h>
-#include <unicode/utf8.h>
 
+#include "../scalar-validity.h"
 #include "emoji-catalog.h"
-#include "normalization.h"
 #include "scalar-properties.h"
 #include "unihan.h"
 
@@ -26,7 +24,6 @@ typedef uint32_t gunichar;
 
 #define COUNT(array) (sizeof(array) / sizeof((array)[0]))
 #define MAX_SEQUENCE_LENGTH CHARACTERS_UNICODE_MAX_SEQUENCE_LENGTH
-#define MAX_TEXT_BYTES (1024 * 1024)
 
 /** An official alias and its UCD classification. */
 struct AliasEntry {
@@ -142,37 +139,22 @@ static bool has_properties(uint32_t point) {
     return characters_scalar_category(point) != U_UNASSIGNED;
 }
 
-/** Convert a valid bounded UTF-16 buffer to newly allocated NUL-terminated UTF-8. */
-static char *from_utf16(const UChar *text, int32_t length) {
+/** Read recursive canonical decomposition units into the caller's bounded buffer. */
+static int32_t canonical_decomposition(uint32_t point, UChar *buffer, int32_t capacity) {
     UErrorCode error = U_ZERO_ERROR;
-    int32_t bytes = 0;
-    u_strToUTF8(NULL, 0, &bytes, text, length, &error);
-    if (error != U_BUFFER_OVERFLOW_ERROR && U_FAILURE(error)) {
-        return NULL;
-    }
-    char *result = malloc((size_t)bytes + 1);
-    if (!result) {
-        return NULL;
-    }
-    error = U_ZERO_ERROR;
-    u_strToUTF8(result, bytes + 1, NULL, text, length, &error);
+    const UNormalizer2 *nfd = unorm2_getNFDInstance(&error);
     if (U_FAILURE(error)) {
-        free(result);
-        return NULL;
+        return 0;
     }
-    return result;
+    int32_t length = unorm2_getDecomposition(nfd, (UChar32)point, buffer, capacity, &error);
+    return U_SUCCESS(error) && length > 0 ? length : 0;
 }
 
 /** Return the first canonical decomposition scalar, or the original scalar. */
 static uint32_t canonical_base(uint32_t point) {
-    UErrorCode error = U_ZERO_ERROR;
-    const UNormalizer2 *nfd = unorm2_getNFDInstance(&error);
     UChar buffer[64];
-    if (U_FAILURE(error)) {
-        return point;
-    }
-    int32_t length = unorm2_getDecomposition(nfd, (UChar32)point, buffer, COUNT(buffer), &error);
-    if (U_FAILURE(error) || length <= 0) {
+    int32_t length = canonical_decomposition(point, buffer, COUNT(buffer));
+    if (!length) {
         return point;
     }
     int32_t offset = 0;
@@ -281,14 +263,9 @@ static void append_accent_variants(struct ScalarCandidates *list, uint32_t point
 
 /** Add canonical decomposition components, including Hangul Jamo. */
 static void append_decomposition(struct ScalarCandidates *list, uint32_t point) {
-    UErrorCode error = U_ZERO_ERROR;
-    const UNormalizer2 *nfd = unorm2_getNFDInstance(&error);
     UChar buffer[64];
-    if (U_FAILURE(error)) {
-        return;
-    }
-    int32_t length = unorm2_getDecomposition(nfd, (UChar32)point, buffer, COUNT(buffer), &error);
-    if (U_FAILURE(error) || length <= 0) {
+    int32_t length = canonical_decomposition(point, buffer, COUNT(buffer));
+    if (!length) {
         return;
     }
     for (int32_t offset = 0; offset < length;) {
@@ -299,7 +276,7 @@ static void append_decomposition(struct ScalarCandidates *list, uint32_t point) 
 }
 
 bool characters_unicode_is_scalar(uint32_t point) {
-    return point <= 0x10FFFF && !(point >= 0xD800 && point <= 0xDFFF);
+    return characters_scalar_is_valid(point);
 }
 
 bool characters_unicode_is_assigned(uint32_t point) {
@@ -433,22 +410,6 @@ const char *characters_unicode_find_block(uint32_t point) {
     return block ? block->name : NULL;
 }
 
-char *characters_unicode_encode(const uint32_t *points, size_t length) {
-    if (!valid_sequence(points, length)) {
-        return NULL;
-    }
-    uint8_t text[MAX_SEQUENCE_LENGTH * 4 + 1];
-    int32_t offset = 0;
-    for (size_t index = 0; index < length; index++) {
-        if (points[index] == 0) {
-            return NULL;
-        }
-        U8_APPEND_UNSAFE(text, offset, points[index]);
-    }
-    text[offset] = 0;
-    return strdup((const char *)text);
-}
-
 char *characters_unicode_sequence_name(const uint32_t *points, size_t length) {
     if (!valid_sequence(points, length)) {
         return NULL;
@@ -470,34 +431,6 @@ char *characters_unicode_sequence_name(const uint32_t *points, size_t length) {
     size_t alias = characters_emoji_alias_index(text);
     free(text);
     return characters_emoji_alias_name(alias);
-}
-
-char *characters_unicode_normalize(const char *text, const char *form) {
-    if (!text || strnlen(text, MAX_TEXT_BYTES + 1) > MAX_TEXT_BYTES) {
-        return NULL;
-    }
-    UErrorCode error = U_ZERO_ERROR;
-    int32_t length = 0;
-    u_strFromUTF8(NULL, 0, &length, text, -1, &error);
-    if (error != U_BUFFER_OVERFLOW_ERROR && U_FAILURE(error)) {
-        return NULL;
-    }
-    UChar *input = malloc(((size_t)length + 1) * sizeof(*input));
-    if (!input) {
-        return NULL;
-    }
-    error = U_ZERO_ERROR;
-    u_strFromUTF8(input, length + 1, NULL, text, -1, &error);
-    if (U_FAILURE(error)) {
-        free(input);
-        return NULL;
-    }
-    int32_t needed = 0;
-    UChar *output = characters_normalize_utf16(input, length, form, &needed);
-    free(input);
-    char *result = output ? from_utf16(output, needed) : NULL;
-    free(output);
-    return result;
 }
 
 size_t characters_unicode_emoji_group_count(void) {

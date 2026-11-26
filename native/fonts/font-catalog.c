@@ -7,6 +7,8 @@
 #include <pango/pangofc-font.h>
 #include <pango/pangofc-fontmap.h>
 
+#include "../scalar-validity.h"
+
 /** Owns the isolated Fontconfig configuration and immutable result patterns. */
 struct CharactersFontCatalog {
     /** Independent configuration loaded from the installed system and user font locations. */
@@ -45,11 +47,6 @@ static FcPattern *get_face(const CharactersFontCatalog *catalog, size_t index) {
 static bool get_bool(FcPattern *pattern, const char *property) {
     FcBool value = FcFalse;
     return pattern && FcPatternGetBool(pattern, property, 0, &value) == FcResultMatch && value;
-}
-
-/** Restrict coverage to valid scalar values, excluding UTF-16 surrogate code units. */
-static bool is_scalar(uint32_t point) {
-    return point <= 0x10FFFFu && !(point >= 0xD800u && point <= 0xDFFFu);
 }
 
 CharactersFontCatalog *characters_fonts_load(void) {
@@ -142,7 +139,7 @@ bool characters_fonts_is_color(const CharactersFontCatalog *catalog, size_t inde
 
 bool characters_fonts_contains(const CharactersFontCatalog *catalog, size_t index, uint32_t point) {
     FcCharSet *charset = get_charset(get_face(catalog, index));
-    if (!charset || !is_scalar(point) || !FcCharSetHasChar(charset, point)) {
+    if (!charset || !characters_scalar_is_valid(point) || !FcCharSetHasChar(charset, point)) {
         return false;
     }
     if (get_bool(get_face(catalog, index), FC_SYMBOL)) {

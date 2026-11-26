@@ -6,6 +6,8 @@
 
 #include <unicode/uchar.h>
 
+#include "../scalar-validity.h"
+
 #define COUNT(array) (sizeof(array) / sizeof((array)[0]))
 
 /** An ISO 15924 code and its standardized long script name. */
@@ -41,7 +43,7 @@ static int compare_range(const void *key, const void *item) {
 
 /** Borrow the immutable property row for a valid scalar. */
 static const struct PropertyRange *lookup(uint32_t point) {
-    if (point > 0x10FFFF || (point >= 0xD800 && point <= 0xDFFF)) {
+    if (!characters_scalar_is_valid(point)) {
         return NULL;
     }
     return bsearch(&point, property_ranges, COUNT(property_ranges),

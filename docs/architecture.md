@@ -424,8 +424,16 @@ legacy conversion and repertoire enumeration remain in C. Byte parsing,
 presentation, explicit conversion policy, installed-face validation, sorting,
 family grouping and comparison filtering belong to Vala. `FontInventory` owns
 its immutable records and maps application positions back to native pattern
-indexes; worker refresh and exact face ownership are unchanged. No new pattern hierarchy or
-public ABI is introduced. See [pass 5 qualification](vala-migration-pass-5.md),
+indexes; worker refresh and exact face ownership are unchanged. Native scalar
+validity is shared in `native/scalar-validity.h`, independent of assignment or
+font coverage. `icu-scalar-conversion.h` owns bounded, allocation-free scalar
+conversion for search, emoji, legacy encodings and ICU normalization; it does
+not impose repertoire or round-trip policy. String encoding and normalization
+are implemented by `icu-adapter.c`, while their established declarations
+remain accessible through the Unicode engine header. Raw symbol map storage is
+private to the FreeType adapter; indexed access remains unchanged. No new
+pattern hierarchy or public ABI is introduced. See
+[pass 6 qualification](vala-migration-pass-6.md), [pass 5 qualification](vala-migration-pass-5.md),
 [pass 4 qualification](vala-migration-pass-4.md),
 [pass 3 qualification](vala-migration-pass-3.md),
 [pass 2 qualification](vala-migration-pass-2.md), and the earlier
