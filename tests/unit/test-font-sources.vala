@@ -12,7 +12,7 @@ private size_t encoding_index (string name) {
             return index;
         }
     }
-    return (size_t) -1;
+    return size_t.MAX;
 }
 
 /** Checks returned-array ownership and the exact repertoire Vala binding. */
@@ -92,7 +92,7 @@ private void test_exact_face_bindings () {
     assert (heavy != null && heavy.get_size () == 96 * 96 * 4);
     assert (face.set_axis (0, 100));
     var light = face.render (0x41, false, 48, 0, 0, 0);
-    assert (light != null && !heavy.equal (light));
+    assert (light != null && heavy.compare (light) != 0);
     assert (face.reset ());
     assert (face.axis_range (0, out minimum, out maximum, out default_value, out current));
     assert (current == 900);
@@ -175,12 +175,12 @@ private void test_inventory_policy () {
             if (index > 0) {
                 unowned FontFaceRecord? previous = inventory.record (index - 1);
                 assert (previous != null);
-                var order = strcmp0 (previous.family, record.family);
+                var order = GLib.strcmp (previous.family, record.family);
                 if (order == 0) {
-                    order = strcmp0 (raw.style (previous.native_index) ?? "", raw_style ?? "");
+                    order = GLib.strcmp (raw.style (previous.native_index) ?? "", raw_style ?? "");
                 }
                 if (order == 0) {
-                    order = strcmp0 (previous.file, record.file);
+                    order = GLib.strcmp (previous.file, record.file);
                 }
                 assert (order < 0 || (order == 0 && previous.face_index <= record.face_index));
             }

@@ -69,6 +69,7 @@ namespace Characters {
         public PreferencesDialog (GLib.Settings settings, LibraryStore library) {
             this.settings = settings;
             this.library = library;
+            show_unassigned.title = _("Unassigned & Noncharacters");
             settings.bind ("history-enabled", history_enabled, "active", SettingsBindFlags.GET);
             settings.bind ("history-limit", history_limit, "value", SettingsBindFlags.GET);
             settings.bind ("grid-preview-size", grid_size, "value", SettingsBindFlags.DEFAULT);

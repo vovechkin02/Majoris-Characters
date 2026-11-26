@@ -51,7 +51,7 @@ namespace Characters {
             var attributes = new Pango.AttrList ();
             if (description != null) {
                 var font = Pango.FontDescription.from_string (description);
-                attributes.insert (Pango.attr_font_desc_new (font));
+                attributes.insert (new Pango.AttrFontDesc (font));
             }
             attributes.insert (new Pango.AttrSize (size_pt * Pango.SCALE));
             attributes.insert (Pango.attr_fallback_new (fallback));

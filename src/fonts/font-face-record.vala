@@ -45,12 +45,12 @@ namespace Characters {
 
         /** Orders bytewise by family, raw style, path, and exact face index. */
         public static int compare (FontFaceRecord left, FontFaceRecord right) {
-            var result = strcmp0 (left.family, right.family);
+            var result = GLib.strcmp (left.family, right.family);
             if (result == 0) {
-                result = strcmp0 (left.sort_style, right.sort_style);
+                result = GLib.strcmp (left.sort_style, right.sort_style);
             }
             if (result == 0) {
-                result = strcmp0 (left.file, right.file);
+                result = GLib.strcmp (left.file, right.file);
             }
             if (result == 0) {
                 result = (left.face_index > right.face_index ? 1 : 0) -

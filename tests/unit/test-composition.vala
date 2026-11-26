@@ -32,7 +32,7 @@ private void test_normalization () {
     assert (Composition.normalize ("①ﬁ", "NFKC") == "1fi");
     assert (Composition.normalize ("①é", "NFKD") == "1é");
     assert (Composition.normalize ("", "NFC") == "");
-    assert (Composition.normalize ("\uA7F1\U000323B0", "NFKC") == "S\U000323B0");
+    assert (Composition.normalize ("\uA7F1𲎰", "NFKC") == "S𲎰");
     assert (Composition.normalize ("a\u0301\u1ADD", "NFD") == "a\u1ADD\u0301");
     assert (Composition.normalize ("\u0378", "NFC") == null);
     assert (Composition.normalize ("A", "invalid") == null);

@@ -21,6 +21,7 @@ gtk_dep = dependency('gtk4', version: '>=4.14')
 ibus_dep = dependency('ibus-1.0', version: '>=1.5.3')
 icu_i18n_dep = dependency('icu-i18n', version: '>=76')
 icu_dep = dependency('icu-uc', version: '>=76')
+pango_dep = dependency('pango', version: '>=1.50')
 pangoft2_dep = dependency('pangoft2', version: '>=1.50')
 
 configuration = configuration_data()

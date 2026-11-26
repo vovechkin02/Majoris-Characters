@@ -141,7 +141,7 @@ namespace Characters.QueryParser {
             Emoji.alias_index (text) != size_t.MAX)) {
             return HanQuery.prepare (job, text, points, no_terms, true, false);
         }
-        uint32 raw;
+        uint32 raw = 0;
         if (text.length >= 2 && text.length <= 6 && parse_number (text, 16, out raw)) {
             for (var index = 0; index < text.length; index++) {
                 if (text[index] >= '0' && text[index] <= '9') {

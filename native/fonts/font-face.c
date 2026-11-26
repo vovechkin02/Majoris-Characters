@@ -1,6 +1,7 @@
 #include "font-face.h"
 
 #include <math.h>
+#include <stdint.h>
 #include <string.h>
 
 #include <glib.h>

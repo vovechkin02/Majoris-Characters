@@ -39,6 +39,11 @@ private void wait_for_page (Gtk.SingleSelection selection, uint expected, string
         }
         Thread.usleep (POLL_INTERVAL_US);
     }
+    var model = selection.model as Gtk.StringList;
+    var count = model != null ? model.get_n_items () : 0;
+    var actual_first = model != null && count > 0 ? model.get_string (0) : null;
+    Test.message ("Expected %u items (first: %s), found %u (first: %s)",
+                  expected, first ?? "any", count, actual_first ?? "none");
     assert_not_reached ();
 }
 
@@ -237,18 +242,19 @@ private void test_inspector (MainWindow window) {
     var dialog = window.get_visible_dialog () as CharacterInspector;
     assert (dialog != null);
     var identity = find_widget (dialog, "identity_code") as Gtk.Label;
+    var expander = find_widget (dialog, "identify_expander") as Gtk.Expander;
+    assert (expander != null);
+    expander.expanded = true;
     var input = find_widget (dialog, "identify_input") as Gtk.TextView;
     var error_label = find_widget (dialog, "input_error") as Gtk.Label;
     var copy = find_widget (dialog, "copy_character") as Gtk.Button;
     var components = find_widget (dialog, "component_filter") as Gtk.DropDown;
-    var expander = find_widget (dialog, "identify_expander") as Gtk.Expander;
     assert (identity != null && input != null && error_label != null);
-    assert (copy != null && components != null && expander != null);
+    assert (copy != null && components != null);
     assert (identity.label == "U+20AC" && copy.sensitive);
     assert (dialog.activate_action_variant ("inspect.copy-character", null));
     expect_clipboard (dialog, "€");
 
-    expander.expanded = true;
     input.buffer.text = "👩‍💻";
     assert (dialog.activate_action_variant ("inspect.identify-text", null));
     assert (identity.label == "U+1F469 U+200D U+1F4BB");
@@ -257,10 +263,10 @@ private void test_inspector (MainWindow window) {
     assert (dialog.activate_action_variant ("inspect.copy-character", null));
     expect_clipboard (dialog, "👩‍💻");
     var add = find_widget (dialog, "inspect_add") as Gtk.Button;
-    var editor = find_widget (window, "composer_input") as Gtk.TextView;
-    assert (add != null && editor != null && add.sensitive);
+    assert (add != null && add.sensitive);
     add.clicked ();
-    assert (editor.buffer.text == "👩‍💻");
+    var editor = find_widget (window, "composer_input") as Gtk.TextView;
+    assert (editor != null && editor.buffer.text == "👩‍💻");
     assert (dialog.activate_action_variant ("inspect.related", new Variant.string ("U+1F469")));
     assert (identity.label == "U+1F469");
     assert (dialog.activate_action_variant ("inspect.back", null));
@@ -296,7 +302,8 @@ private void test_emoji_variations (MainWindow window) {
     var copy = find_widget (dialog, "copy_button") as Gtk.Button;
     assert (filter != null && preview != null && copy != null);
     var model = filter.model as Gtk.StringList;
-    assert (model != null && model.get_n_items () == 6);
+    // The base and five skin tones are joined by two Unicode presentation variants.
+    assert (model != null && model.get_n_items () == 8);
     assert (preview.label == "👍");
     bool found = false;
     for (uint index = 0; index < model.get_n_items (); index++) {
@@ -476,6 +483,17 @@ private void wait_for_picker_page (Gtk.FlowBox results, int count) {
     assert_not_reached ();
 }
 
+/** Waits for a closed dialog to release the picker after its dismissal animation. */
+private void wait_for_picker_dialog_close (CompactPicker picker, Adw.Dialog dialog) {
+    var deadline = get_monotonic_time () + WAIT_TIMEOUT_US;
+    var context = MainContext.default ();
+    while (dialog.get_root () != null && get_monotonic_time () < deadline) {
+        context.iteration (false);
+        Thread.usleep (POLL_INTERVAL_US);
+    }
+    assert (dialog.get_root () == null && picker.get_visible_dialog () == null);
+}
+
 /** Verifies compact picker activation, supersession, exact copy and independent closure. */
 private void test_compact_picker (Characters.Application application, MainWindow window) {
     var action = application.lookup_action ("picker");
@@ -549,9 +567,11 @@ private void test_compact_picker (Characters.Application application, MainWindow
     assert (variant_copy != null);
     variant_copy.clicked ();
     expect_clipboard (picker, "👩‍💻");
+    wait_for_picker_dialog_close (picker, variant_dialog);
     inspect.clicked ();
     var inspector = picker.get_visible_dialog () as CharacterInspector;
     assert (inspector != null && inspector.close ());
+    wait_for_picker_dialog_close (picker, inspector);
     commit.clicked ();
     expect_clipboard (picker, "👩‍💻");
     // Saved collection matches use the same literal-text filter as the full dialog.

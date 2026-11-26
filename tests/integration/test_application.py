@@ -1,6 +1,7 @@
 """Exercise the real executable in isolated CLI and graphical sessions."""
 
 import argparse
+import ast
 import base64
 import os
 from pathlib import Path
@@ -144,9 +145,13 @@ class LifecycleTest(ApplicationTest):
                     self.fail("Primary application did not acquire its D-Bus name")
                 self.run_command(EXECUTABLE)
                 self.assertIsNone(process.poll(), "Reactivation closed the primary instance")
-                actions = self.run_command("gapplication", "list-actions", APP_ID)
-                self.assertIn("about", actions.stdout.split())
-                self.assertIn("quit", actions.stdout.split())
+                actions = self.run_command(
+                    "gdbus", "call", "--session", "--dest", APP_ID, "--object-path",
+                    "/com/majoris/characters", "--method", "org.gtk.Actions.List",
+                )
+                registered_actions, = ast.literal_eval(actions.stdout)
+                self.assertIn("about", registered_actions)
+                self.assertIn("quit", registered_actions)
                 self.run_command("gapplication", "action", APP_ID, "quit")
                 self.assertEqual(process.wait(timeout=10), 0, "Quit did not exit cleanly")
                 for key, expected in (("window-width", "800"), ("window-height", "600")):
@@ -168,6 +173,9 @@ class LifecycleTest(ApplicationTest):
             process = subprocess.Popen([EXECUTABLE, "--picker"], env=self.env,
                                        stdout=log, stderr=subprocess.STDOUT, text=True)
             try:
+                # Wait for the directly launched picker before introspecting, which
+                # would otherwise also trigger the installed D-Bus activation service.
+                self.run_command("gdbus", "wait", "--session", "--timeout", "10", APP_ID)
                 deadline = time.monotonic() + 10
                 while time.monotonic() < deadline:
                     self.assertIsNone(process.poll())
@@ -198,7 +206,7 @@ class LifecycleTest(ApplicationTest):
                                  "['U+20AC']", "0")
                 self.run_command(EXECUTABLE, "--record-insertion=👩‍💻")
                 history = self.run_command("gsettings", "get", APP_ID, "usage-history")
-                self.assertIn("👩‍💻", history.stdout)
+                self.assertIn("1:👩‍💻", ast.literal_eval(history.stdout))
                 self.run_command("gapplication", "action", APP_ID, "quit")
                 self.assertEqual(process.wait(timeout=10), 0)
             finally:

@@ -461,7 +461,7 @@ msgstr ""
 msgid "Canadian_Aboriginal"
 msgstr ""
 
-#: src/views/library-dialog.vala:312 src/views/preferences-dialog.vala:125
+#: src/views/library-dialog.vala:312 src/views/preferences-dialog.vala:126
 msgid "Cancel"
 msgstr ""
 
@@ -648,11 +648,11 @@ msgstr ""
 msgid "Clear"
 msgstr ""
 
-#: src/views/library-dialog.vala:310 src/views/preferences-dialog.vala:123
+#: src/views/library-dialog.vala:310 src/views/preferences-dialog.vala:124
 msgid "Clear Character History?"
 msgstr ""
 
-#: data/ui/library-dialog.ui src/views/library-dialog.vala:313 src/views/preferences-dialog.vala:126
+#: data/ui/library-dialog.ui src/views/library-dialog.vala:313 src/views/preferences-dialog.vala:127
 msgid "Clear History"
 msgstr ""
 
@@ -1436,7 +1436,7 @@ msgstr ""
 msgid "History"
 msgstr ""
 
-#: src/views/library-dialog.vala:319 src/views/preferences-dialog.vala:132
+#: src/views/library-dialog.vala:319 src/views/preferences-dialog.vala:133
 msgid "History Cleared"
 msgstr ""
 
@@ -2740,7 +2740,7 @@ msgstr ""
 msgid "Recently Used"
 msgstr ""
 
-#: src/views/library-dialog.vala:311 src/views/preferences-dialog.vala:124
+#: src/views/library-dialog.vala:311 src/views/preferences-dialog.vala:125
 msgid "Recently and frequently used characters will be removed. Favorites are kept."
 msgstr ""
 
@@ -2757,7 +2757,7 @@ msgstr ""
 msgid "Recorded uses: %u"
 msgstr ""
 
-#: src/views/preferences-dialog.vala:102
+#: src/views/preferences-dialog.vala:103
 msgid "Recording Disabled; Unable to Clear History. Check Settings Permissions."
 msgstr ""
 
@@ -3517,7 +3517,7 @@ msgstr ""
 msgid "Unable to Apply Variation Coordinate"
 msgstr ""
 
-#: src/views/preferences-dialog.vala:133
+#: src/views/preferences-dialog.vala:134
 msgid "Unable to Clear History. Check Settings Permissions."
 msgstr ""
 
@@ -3541,7 +3541,7 @@ msgstr ""
 msgid "Unable to Update Favorites"
 msgstr ""
 
-#: src/views/preferences-dialog.vala:103 src/views/preferences-dialog.vala:117
+#: src/views/preferences-dialog.vala:104 src/views/preferences-dialog.vala:118
 msgid "Unable to Update History Settings. Try Again or Check Settings Permissions."
 msgstr ""
 
@@ -3549,7 +3549,7 @@ msgstr ""
 msgid "Unassigned"
 msgstr ""
 
-#: data/ui/main-window.ui data/ui/preferences-dialog.ui
+#: data/ui/main-window.ui data/ui/preferences-dialog.ui src/views/preferences-dialog.vala:72
 msgid "Unassigned & Noncharacters"
 msgstr ""
 

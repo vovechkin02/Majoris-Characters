@@ -179,7 +179,7 @@ namespace Characters.Relationships {
         for (var index = 1; index < result.length; index++) {
             var candidate = result[index];
             var position = index;
-            while (position > 0 && strcmp0 (result[position - 1], candidate) > 0) {
+            while (position > 0 && GLib.strcmp (result[position - 1], candidate) > 0) {
                 result[position] = result[position - 1];
                 position--;
             }

@@ -75,7 +75,7 @@ namespace Characters {
         [GtkChild]
         private unowned Gtk.Button inspect_favorite;
         /** Owns the inspected identity independently of the browser and its worker. */
-        private Inspector.Snapshot? snapshot;
+        private new Inspector.Snapshot? snapshot;
         /** Code notation for previously inspected identities; never persists on disk. */
         private GLib.Queue<string> history = new GLib.Queue<string> ();
         /** Prevents component callbacks during an atomic snapshot replacement. */

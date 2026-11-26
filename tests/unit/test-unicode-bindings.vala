@@ -10,7 +10,7 @@ private void expect_related (uint32 point, string expected) {
     for (var index = 0; index < alternatives.length; index++) {
         assert (alternatives[index] != original);
         if (index > 0) {
-            assert (strcmp0 (alternatives[index - 1], alternatives[index]) < 0);
+            assert (GLib.strcmp (alternatives[index - 1], alternatives[index]) < 0);
         }
         found |= alternatives[index] == expected;
     }
@@ -116,7 +116,7 @@ int main () {
     expect_related (0x41, "Α");
     expect_related (0xA9, "©️");
     expect_related (0xA7D3, "\uA7D2");
-    expect_related (0x16EA0, "\U00016EBB");
+    expect_related (0x16EA0, "𖺻");
     expect_related (0x231A, "⌚︎");
     expect_related (0x231A, "⌚️");
     uint32[] invalid = { 0x110000 };

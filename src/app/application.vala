@@ -18,7 +18,7 @@ namespace Characters {
         public Application (bool client_mode = false) {
             Object (application_id: client_mode ? null : APP_ID,
                 flags: ApplicationFlags.HANDLES_COMMAND_LINE |
-                (client_mode ? ApplicationFlags.NON_UNIQUE : ApplicationFlags.FLAGS_NONE));
+                (client_mode ? ApplicationFlags.NON_UNIQUE : ApplicationFlags.DEFAULT_FLAGS));
             this.client_mode = client_mode;
             add_main_option ("pick-text", 0, OptionFlags.NONE, OptionArg.NONE,
                 _("Return one explicitly selected character to the requesting application"), null);

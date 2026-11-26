@@ -111,7 +111,7 @@ namespace Characters {
             }
             var keys = new Gtk.EventControllerKey ();
             keys.key_pressed.connect (on_key_pressed);
-            add_controller (keys);
+            ((Gtk.Widget) this).add_controller (keys);
             on_scope_changed ();
         }
 

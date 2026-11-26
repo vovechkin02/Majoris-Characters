@@ -13,227 +13,232 @@
               <object class="AdwHeaderBar"/>
             </child>
             <property name="content">
-              <object class="GtkBox">
-                <property name="orientation">vertical</property>
-                <property name="spacing">8</property>
-                <property name="margin-start">16</property>
-                <property name="margin-end">16</property>
-                <property name="margin-top">8</property>
-                <property name="margin-bottom">8</property>
+              <object class="GtkScrolledWindow">
+                <property name="hscrollbar-policy">never</property>
                 <child>
                   <object class="GtkBox">
-                    <property name="spacing">8</property>
-                    <child>
-                      <object class="GtkDropDown" id="source_mode">
-                        <property name="hexpand">True</property>
-                        <accessibility><property name="label" translatable="yes">Browsing Mode</property></accessibility>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkButton" id="refresh_fonts">
-                        <property name="icon-name">view-refresh-symbolic</property>
-                        <property name="tooltip-text" translatable="yes">Refresh Installed Fonts</property>
-                        <accessibility><property name="label" translatable="yes">Refresh Installed Fonts</property></accessibility>
-                      </object>
-                    </child>
-                  </object>
-                </child>
-                <child>
-                  <object class="GtkBox" id="face_controls">
                     <property name="orientation">vertical</property>
-                    <property name="spacing">4</property>
-                    <child>
-                      <object class="GtkDropDown" id="family_filter">
-                        <property name="enable-search">True</property>
-                        <accessibility><property name="label" translatable="yes">Font Family</property></accessibility>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkDropDown" id="face_filter">
-                        <property name="enable-search">True</property>
-                        <accessibility><property name="label" translatable="yes">Font Face</property></accessibility>
-                      </object>
-                    </child>
-                  </object>
-                </child>
-                <child>
-                  <object class="GtkDropDown" id="encoding_filter">
-                    <property name="enable-search">True</property>
-                    <property name="visible">False</property>
-                    <accessibility><property name="label" translatable="yes">Legacy Character Set</property></accessibility>
-                  </object>
-                </child>
-                <child>
-                  <object class="GtkButton" id="inspect_bytes">
-                    <property name="label" translatable="yes">Inspect Byte Sequence</property>
-                    <property name="visible">False</property>
-                  </object>
-                </child>
-                <child>
-                  <object class="GtkSearchEntry" id="font_query">
-                    <property name="placeholder-text" translatable="yes">Search characters by name or code point</property>
-                    <accessibility><property name="label" translatable="yes">Search Current Repertoire</property></accessibility>
-                  </object>
-                </child>
-                <child>
-                  <object class="GtkDropDown" id="font_category">
-                    <property name="enable-search">True</property>
-                    <accessibility><property name="label" translatable="yes">General Category Filter</property></accessibility>
-                  </object>
-                </child>
-                <child>
-                  <object class="GtkBox">
                     <property name="spacing">8</property>
-                    <property name="orientation">horizontal</property>
+                    <property name="margin-start">16</property>
+                    <property name="margin-end">16</property>
+                    <property name="margin-top">8</property>
+                    <property name="margin-bottom">8</property>
                     <child>
-                      <object class="GtkLabel">
-                        <property name="label" translatable="yes">Size (pt)</property>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkSpinButton" id="preview_size">
-                        <property name="numeric">True</property>
-                        <property name="adjustment">
-                          <object class="GtkAdjustment">
-                            <property name="lower">12</property>
-                            <property name="upper">72</property>
-                            <property name="step-increment">4</property>
-                            <property name="page-increment">8</property>
-                            <property name="value">24</property>
+                      <object class="GtkBox">
+                        <property name="spacing">8</property>
+                        <child>
+                          <object class="GtkDropDown" id="source_mode">
+                            <property name="hexpand">True</property>
+                            <accessibility><property name="label" translatable="yes">Browsing Mode</property></accessibility>
                           </object>
-                        </property>
-                        <accessibility><property name="label" translatable="yes">Preview Size in Points</property></accessibility>
+                        </child>
+                        <child>
+                          <object class="GtkButton" id="refresh_fonts">
+                            <property name="icon-name">view-refresh-symbolic</property>
+                            <property name="tooltip-text" translatable="yes">Refresh Installed Fonts</property>
+                            <accessibility><property name="label" translatable="yes">Refresh Installed Fonts</property></accessibility>
+                          </object>
+                        </child>
                       </object>
                     </child>
                     <child>
-                      <object class="GtkCheckButton" id="font_fallback">
-                        <property name="label" translatable="yes">Allow font fallback</property>
-                        <property name="active">False</property>
-                      </object>
-                    </child>
-                  </object>
-                </child>
-                <child>
-                  <object class="GtkButton" id="inspect_face">
-                    <property name="label" translatable="yes">Inspect Font Face and Symbol Map</property>
-                    <property name="sensitive">False</property>
-                  </object>
-                </child>
-                <child>
-                  <object class="GtkLabel" id="source_note">
-                    <property name="wrap">True</property>
-                    <property name="xalign">0</property>
-                    <style><class name="dim-label"/></style>
-                  </object>
-                </child>
-                <child>
-                  <object class="GtkSeparator"/>
-                </child>
-                <child>
-                  <object class="GtkScrolledWindow" id="font_scroll">
-                    <property name="hscrollbar-policy">never</property>
-                    <property name="vexpand">True</property>
-                    <property name="min-content-height">96</property>
-                    <child>
-                      <object class="GtkGridView" id="font_grid">
-                        <property name="min-columns">1</property>
-                        <property name="max-columns">16</property>
-                        <accessibility><property name="label" translatable="yes">Mapped Characters or Font Variations</property></accessibility>
-                      </object>
-                    </child>
-                  </object>
-                </child>
-                <child>
-                  <object class="GtkBox">
-                    <property name="spacing">8</property>
-                    <child>
-                      <object class="GtkButton" id="font_previous">
-                        <property name="icon-name">go-previous-symbolic</property>
-                        <property name="sensitive">False</property>
-                        <accessibility><property name="label" translatable="yes">Previous Page</property></accessibility>
+                      <object class="GtkBox" id="face_controls">
+                        <property name="orientation">vertical</property>
+                        <property name="spacing">4</property>
+                        <child>
+                          <object class="GtkDropDown" id="family_filter">
+                            <property name="enable-search">True</property>
+                            <accessibility><property name="label" translatable="yes">Font Family</property></accessibility>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkDropDown" id="face_filter">
+                            <property name="enable-search">True</property>
+                            <accessibility><property name="label" translatable="yes">Font Face</property></accessibility>
+                          </object>
+                        </child>
                       </object>
                     </child>
                     <child>
-                      <object class="GtkSpinner" id="font_spinner">
+                      <object class="GtkDropDown" id="encoding_filter">
+                        <property name="enable-search">True</property>
+                        <property name="visible">False</property>
+                        <accessibility><property name="label" translatable="yes">Legacy Character Set</property></accessibility>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkButton" id="inspect_bytes">
+                        <property name="label" translatable="yes">Inspect Byte Sequence</property>
                         <property name="visible">False</property>
                       </object>
                     </child>
                     <child>
-                      <object class="GtkLabel" id="font_status">
-                        <property name="hexpand">True</property>
+                      <object class="GtkSearchEntry" id="font_query">
+                        <property name="placeholder-text" translatable="yes">Search characters by name or code point</property>
+                        <accessibility><property name="label" translatable="yes">Search Current Repertoire</property></accessibility>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkDropDown" id="font_category">
+                        <property name="enable-search">True</property>
+                        <accessibility><property name="label" translatable="yes">General Category Filter</property></accessibility>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkBox">
+                        <property name="spacing">8</property>
+                        <property name="orientation">horizontal</property>
+                        <child>
+                          <object class="GtkLabel">
+                            <property name="label" translatable="yes">Size (pt)</property>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkSpinButton" id="preview_size">
+                            <property name="numeric">True</property>
+                            <property name="adjustment">
+                              <object class="GtkAdjustment">
+                                <property name="lower">12</property>
+                                <property name="upper">72</property>
+                                <property name="step-increment">4</property>
+                                <property name="page-increment">8</property>
+                                <property name="value">24</property>
+                              </object>
+                            </property>
+                            <accessibility><property name="label" translatable="yes">Preview Size in Points</property></accessibility>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkCheckButton" id="font_fallback">
+                            <property name="label" translatable="yes">Allow font fallback</property>
+                            <property name="active">False</property>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkButton" id="inspect_face">
+                        <property name="label" translatable="yes">Inspect Font Face and Symbol Map</property>
+                        <property name="sensitive">False</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="source_note">
                         <property name="wrap">True</property>
+                        <property name="xalign">0</property>
+                        <style><class name="dim-label"/></style>
                       </object>
                     </child>
                     <child>
-                      <object class="GtkButton" id="font_next">
-                        <property name="icon-name">go-next-symbolic</property>
-                        <property name="sensitive">False</property>
-                        <accessibility><property name="label" translatable="yes">Next Page</property></accessibility>
-                      </object>
-                    </child>
-                  </object>
-                </child>
-                <child>
-                  <object class="GtkSeparator"/>
-                </child>
-                <child>
-                  <object class="GtkLabel" id="font_selection">
-                    <property name="label" translatable="yes">No Character Selected</property>
-                    <property name="xalign">0</property>
-                    <property name="wrap">True</property>
-                    <property name="selectable">True</property>
-                    <style><class name="heading"/></style>
-                  </object>
-                </child>
-                <child>
-                  <object class="GtkLabel" id="font_detail">
-                    <property name="xalign">0</property>
-                    <property name="wrap">True</property>
-                    <property name="wrap-mode">word-char</property>
-                    <property name="selectable">True</property>
-                    <property name="max-width-chars">60</property>
-                    <style><class name="dim-label"/></style>
-                  </object>
-                </child>
-                <child>
-                  <object class="GtkBox">
-                    <property name="orientation">vertical</property>
-                    <property name="spacing">4</property>
-                    <child>
-                      <object class="GtkButton" id="font_inspect">
-                        <property name="label" translatable="yes">Inspect Character</property>
-                        <property name="sensitive">False</property>
-                      </object>
+                      <object class="GtkSeparator"/>
                     </child>
                     <child>
-                      <object class="GtkButton" id="font_add">
-                        <property name="label" translatable="yes">Add to Composer</property>
-                        <property name="visible">False</property>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkButton" id="font_favorite">
-                        <property name="label" translatable="yes">Add to Favorites</property>
-                        <property name="sensitive">False</property>
-                        <property name="visible">False</property>
+                      <object class="GtkScrolledWindow" id="font_scroll">
+                        <property name="hscrollbar-policy">never</property>
+                        <property name="vexpand">True</property>
+                        <property name="min-content-height">96</property>
+                        <child>
+                          <object class="GtkGridView" id="font_grid">
+                            <property name="min-columns">1</property>
+                            <property name="max-columns">16</property>
+                            <accessibility><property name="label" translatable="yes">Mapped Characters or Font Variations</property></accessibility>
+                          </object>
+                        </child>
                       </object>
                     </child>
                     <child>
                       <object class="GtkBox">
                         <property name="spacing">8</property>
                         <child>
-                          <object class="GtkButton" id="font_copy">
-                            <property name="label" translatable="yes">Copy Character</property>
+                          <object class="GtkButton" id="font_previous">
+                            <property name="icon-name">go-previous-symbolic</property>
+                            <property name="sensitive">False</property>
+                            <accessibility><property name="label" translatable="yes">Previous Page</property></accessibility>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkSpinner" id="font_spinner">
+                            <property name="visible">False</property>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkLabel" id="font_status">
                             <property name="hexpand">True</property>
+                            <property name="wrap">True</property>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkButton" id="font_next">
+                            <property name="icon-name">go-next-symbolic</property>
+                            <property name="sensitive">False</property>
+                            <accessibility><property name="label" translatable="yes">Next Page</property></accessibility>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkSeparator"/>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="font_selection">
+                        <property name="label" translatable="yes">No Character Selected</property>
+                        <property name="xalign">0</property>
+                        <property name="wrap">True</property>
+                        <property name="selectable">True</property>
+                        <style><class name="heading"/></style>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="font_detail">
+                        <property name="xalign">0</property>
+                        <property name="wrap">True</property>
+                        <property name="wrap-mode">word-char</property>
+                        <property name="selectable">True</property>
+                        <property name="max-width-chars">60</property>
+                        <style><class name="dim-label"/></style>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkBox">
+                        <property name="orientation">vertical</property>
+                        <property name="spacing">4</property>
+                        <child>
+                          <object class="GtkButton" id="font_inspect">
+                            <property name="label" translatable="yes">Inspect Character</property>
                             <property name="sensitive">False</property>
                           </object>
                         </child>
                         <child>
-                          <object class="GtkButton" id="bytes_copy">
-                            <property name="label" translatable="yes">Copy Bytes</property>
-                            <property name="hexpand">True</property>
+                          <object class="GtkButton" id="font_add">
+                            <property name="label" translatable="yes">Add to Composer</property>
                             <property name="visible">False</property>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkButton" id="font_favorite">
+                            <property name="label" translatable="yes">Add to Favorites</property>
                             <property name="sensitive">False</property>
+                            <property name="visible">False</property>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkBox">
+                            <property name="spacing">8</property>
+                            <child>
+                              <object class="GtkButton" id="font_copy">
+                                <property name="label" translatable="yes">Copy Character</property>
+                                <property name="hexpand">True</property>
+                                <property name="sensitive">False</property>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="GtkButton" id="bytes_copy">
+                                <property name="label" translatable="yes">Copy Bytes</property>
+                                <property name="hexpand">True</property>
+                                <property name="visible">False</property>
+                                <property name="sensitive">False</property>
+                              </object>
+                            </child>
                           </object>
                         </child>
                       </object>

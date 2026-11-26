@@ -8,6 +8,6 @@ font_catalog = static_library(
 font_dep = declare_dependency(
   link_with: font_catalog,
   include_directories: font_include,
-  dependencies: [glib_dep, fontconfig_dep, freetype_dep, pangoft2_dep],
+  dependencies: [glib_dep, pango_dep],
 )
 font_vapi = files('../../vapi/characters-fonts.vapi')
