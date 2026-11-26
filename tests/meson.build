@@ -90,6 +90,7 @@ character_browser_test = executable(
   legacy_vapi,
   emoji_vapi,
   language_vapi,
+  han_vapi,
   app_resources,
   dependencies: app_dependencies,
   vala_args: app_vala_args,

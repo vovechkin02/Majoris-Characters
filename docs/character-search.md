@@ -113,7 +113,10 @@ numeric decoding with the inspector. `LanguageSelection` resolves locale and
 XKB collection policies through the immutable registry and ICU adapter.
 `SearchRequest` captures input before worker execution; the worker prepares
 and copies scalar candidates, exact-match flags, metadata terms and the script
-mask into `CharactersSearch`. The native scanner is run at most once and owns
+mask into `CharactersSearch`. `SemanticFilters` builds a copied union of
+property/range clauses once per request. `HanQuery` folds text through ICU and
+selects field masks or validates numeric group operands before scanning. The
+native scanner is run at most once and owns
 its result vector; it does not interpret raw query syntax. Its only concurrent operation is atomic cancellation.
 The worker checks cancellation every 256 scalar candidates and each sequence.
 Cancellation/failure does not publish a partial vector. After completion, the

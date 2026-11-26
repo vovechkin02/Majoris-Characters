@@ -25,6 +25,10 @@
 #define MAX_SEQUENCE_POINTS CHARACTERS_UNICODE_MAX_SEQUENCE_LENGTH
 #define MAX_TERMS 64
 #define CANCEL_INTERVAL 256u
+#define RULE_WORDS 4u
+#define MAX_RULE_WORDS (RULE_WORDS * 128u)
+#define HAN_WORDS 3u
+#define MAX_HAN_TERM_BYTES (MAX_QUERY_BYTES * 3 + 1)
 
 /** Semantic symbol collections; also the index into symbol_names. */
 enum SymbolCollection {
@@ -182,6 +186,10 @@ struct CharactersSearch {
     char locale[64];
     /** Script membership mask resolved once before scanning a language collection. */
     bool scripts[CHARACTERS_LANGUAGE_SCRIPT_LIMIT];
+    /** Copied union of Vala semantic clauses, each containing four unsigned words. */
+    uint32_t rules[MAX_RULE_WORDS];
+    /** Number of initialized rule words; zero until semantic configuration succeeds. */
+    size_t rule_count;
     /** Optional copied scalar repertoire; NULL denotes ordinary catalog search. */
     uint32_t *points;
     /** Number of input scalars in the explicit repertoire. */
@@ -202,7 +210,7 @@ struct CharactersSearch {
     bool started;
 };
 
-/** Parsed input, containing only stack-owned data; terms point into the local buffer. */
+/** Parsed input in one owned allocation; term pointers refer to its internal buffer. */
 struct Query {
     /** Exact literal text, used for single-letter emoji keyword searches. */
     char text[MAX_QUERY_BYTES + 1];
@@ -213,7 +221,9 @@ struct Query {
     /** Number of parsed AND terms. */
     size_t term_count;
     /** Independently folded Han search terms; empty if folding was unavailable. */
-    char han_terms[MAX_TERMS][MAX_QUERY_BYTES * 3 + 1];
+    char han_terms[MAX_TERMS][MAX_HAN_TERM_BYTES];
+    /** Prepared Han term descriptors: kind, field mask, numeric group. */
+    uint32_t han_rules[MAX_TERMS][HAN_WORDS];
     /** An explicit Han field disables non-Han sequence matching. */
     bool han_field;
     /** Decoded exact scalar sequence, never normalized. */
@@ -320,208 +330,31 @@ static int category_for(uint32_t point) {
     }
 }
 
-/** One inclusive range of scalars in a curated semantic collection. */
-struct SymbolRange {
-    /** First scalar in the range. */
-    uint32_t first;
-    /** Last scalar in the range. */
-    uint32_t last;
-};
-
-/** Maximum number of ranges in one collection, including the terminating empty slot. */
-#define SYMBOL_RANGE_SLOTS 12
-
-/** Curated semantic ranges indexed by stable collection slot; overlaps are intentional. */
-static const struct SymbolRange symbol_ranges[COUNT(symbol_names)][SYMBOL_RANGE_SLOTS] = {
-    [SYMBOL_ARROWS] = {
-        { 0x2190, 0x21FF },
-        { 0x27F0, 0x27FF },
-        { 0x2900, 0x297F },
-        { 0x2B00, 0x2B11 },
-        { 0x1F800, 0x1F8FF },
-    },
-    [SYMBOL_BULLETS] = {
-        { 0x2022, 0x2022 },
-        { 0x2023, 0x2023 },
-        { 0x2043, 0x2043 },
-        { 0x2219, 0x2219 },
-        { 0x25E6, 0x25E6 },
-        { 0x2605, 0x2606 },
-        { 0x2720, 0x274B },
-    },
-    [SYMBOL_PICTURES] = {
-        { 0x25A0, 0x27BF },
-        { 0x1F300, 0x1F5FF },
-        { 0x1F780, 0x1F7FF },
-    },
-    [SYMBOL_MATH] = {
-        { 0x2200, 0x22FF },
-        { 0x27C0, 0x27EF },
-        { 0x2980, 0x2AFF },
-        { 0x1D400, 0x1D7FF },
-    },
-    [SYMBOL_LETTERS] = {
-        { 0x0000, 0x024F },
-        { 0x1E00, 0x1EFF },
-        { 0x2100, 0x214F },
-    },
-    [SYMBOL_TECHNICAL] = {
-        { 0x2300, 0x23FF },
-        { 0x2400, 0x245F },
-        { 0x1FB00, 0x1FBFF },
-        { 0x2699, 0x2699 },
-        { 0x26A1, 0x26A1 },
-        { 0x1F50C, 0x1F50C },
-        { 0x1F4BB, 0x1F4BB },
-        { 0x1F5A5, 0x1F5A8 },
-    },
-    [SYMBOL_MUSIC] = {
-        { 0x2669, 0x266F },
-        { 0x1D000, 0x1D24F },
-    },
-    [SYMBOL_GAMES] = {
-        { 0x2654, 0x2667 },
-        { 0x2680, 0x2685 },
-        { 0x1F000, 0x1F0FF },
-        { 0x1FA00, 0x1FA6F },
-    },
-    [SYMBOL_BRAILLE] = {
-        { 0x2800, 0x28FF },
-    },
-    [SYMBOL_BOX_DRAWING] = {
-        { 0x2500, 0x259F },
-    },
-    [SYMBOL_PHONETICS] = {
-        { 0x0250, 0x02AF },
-        { 0x1D00, 0x1DBF },
-        { 0x10780, 0x107BF },
-    },
-    [SYMBOL_ENCLOSED] = {
-        { 0x2460, 0x24FF },
-        { 0x3200, 0x32FF },
-        { 0x1F100, 0x1F2FF },
-    },
-    [SYMBOL_ACCESSIBILITY] = {
-        { 0x267F, 0x267F },
-        { 0x1F9AF, 0x1F9AF },
-        { 0x1F9BB, 0x1F9BB },
-        { 0x1F9BC, 0x1F9BC },
-        { 0x1F9BD, 0x1F9BD },
-        { 0x1F9BE, 0x1F9BE },
-        { 0x1F9BF, 0x1F9BF },
-        { 0x1F9CF, 0x1F9CF },
-        { 0x2800, 0x28FF },
-    },
-    [SYMBOL_LETTERLIKE] = {
-        { 0x2100, 0x214F },
-    },
-    [SYMBOL_RELIGIOUS] = {
-        { 0x2626, 0x262A },
-        { 0x262C, 0x262F },
-        { 0x2638, 0x2638 },
-        { 0x271D, 0x2721 },
-        { 0x1F549, 0x1F54E },
-        { 0x1F6D0, 0x1F6D0 },
-    },
-    [SYMBOL_VARIATION] = {
-        { 0x180B, 0x180D },
-        { 0x180F, 0x180F },
-        { 0xFE00, 0xFE0F },
-        { 0xE0100, 0xE01EF },
-    },
-    [SYMBOL_BLOCK_ELEMENTS] = {
-        { 0x2580, 0x259F },
-        { 0x1FB00, 0x1FB3B },
-        { 0x1FB70, 0x1FB8B },
-    },
-    [SYMBOL_QUOTATION] = {
-        { 0x0022, 0x0022 },
-        { 0x0027, 0x0027 },
-        { 0x300C, 0x300F },
-        { 0x301D, 0x301F },
-    },
-};
-
-/** Match only ranges in one indexed collection without allocating or looking up properties. */
-static bool symbol_range_matches(uint32_t point, int filter) {
-    if ((size_t)filter >= COUNT(symbol_ranges)) {
+/** Evaluate the prepared union of property/range clauses without allocating. */
+static bool rules_match(const CharactersSearch *search, uint32_t point) {
+    int type = characters_scalar_category(point);
+    if (type < 0 || type >= 32) {
         return false;
     }
-    for (size_t index = 0; index < SYMBOL_RANGE_SLOTS; index++) {
-        const struct SymbolRange *rule = &symbol_ranges[filter][index];
-        if (!rule->last) {
-            break;
+    uint32_t category = UINT32_C(1) << type;
+    int decomposition = -1;
+    for (size_t index = 0; index < search->rule_count; index += RULE_WORDS) {
+        const uint32_t *rule = search->rules + index;
+        if (!(rule[0] & category) || point < rule[2] || point > rule[3]) {
+            continue;
         }
-        if (point >= rule->first && point <= rule->last) {
+        if (!rule[1]) {
+            return true;
+        }
+        if (decomposition < 0) {
+            decomposition = characters_scalar_decomposition_type(point);
+        }
+        if (decomposition >= 0 && decomposition < 32 &&
+            (rule[1] & (UINT32_C(1) << decomposition))) {
             return true;
         }
     }
     return false;
-}
-
-/** Classify semantic collections with Unicode properties and curated range data. */
-static bool symbol_matches(uint32_t point, int filter) {
-    int category = category_for(point);
-    int type = characters_scalar_category(point);
-    if (filter < 0) {
-        if (category >= CATEGORY_MARKS && category <= CATEGORY_CONTROLS) {
-            return true;
-        }
-        if (category != CATEGORY_LETTERS) {
-            return false;
-        }
-        int decomposition = characters_scalar_decomposition_type(point);
-        if (decomposition == U_DT_SUPER || decomposition == U_DT_SUB ||
-            decomposition == U_DT_FRACTION) {
-            return true;
-        }
-        for (size_t index = 0; index < COUNT(symbol_names); index++) {
-            if (symbol_range_matches(point, (int)index)) {
-                return true;
-            }
-        }
-        return false;
-    }
-    switch (filter) {
-        case SYMBOL_PUNCTUATION:
-            return category == CATEGORY_PUNCTUATION;
-        case SYMBOL_CURRENCY:
-            return type == U_CURRENCY_SYMBOL;
-        case SYMBOL_NUMBERS:
-            return category == CATEGORY_NUMBERS;
-        case SYMBOL_MARKS:
-            return category == CATEGORY_MARKS;
-        case SYMBOL_SPECIAL:
-            return category == CATEGORY_SEPARATORS || category == CATEGORY_CONTROLS;
-        case SYMBOL_SUPERSCRIPTS:
-            return characters_scalar_decomposition_type(point) == U_DT_SUPER;
-        case SYMBOL_SUBSCRIPTS:
-            return characters_scalar_decomposition_type(point) == U_DT_SUB;
-        case SYMBOL_FRACTIONS:
-            return characters_scalar_decomposition_type(point) == U_DT_FRACTION ||
-                   point == 0x2044;
-        case SYMBOL_WHITESPACE:
-            // White_Space is stable for the Unicode 17 repertoire.
-            return u_hasBinaryProperty((UChar32)point, UCHAR_WHITE_SPACE);
-        case SYMBOL_QUOTATION:
-            if (type == U_INITIAL_PUNCTUATION || type == U_FINAL_PUNCTUATION) {
-                return true;
-            }
-            break;
-        case SYMBOL_MATH:
-            if (type == U_MATH_SYMBOL) {
-                return true;
-            }
-            break;
-        case SYMBOL_LETTERS:
-            if (category != CATEGORY_LETTERS) {
-                return false;
-            }
-            break;
-        default:
-            break;
-    }
-    return symbol_range_matches(point, filter);
 }
 
 /** Whether the scalar passes the collection, script extensions and category constraints. */
@@ -530,7 +363,7 @@ static bool scalar_matches(const CharactersSearch *search, uint32_t point) {
         return false;
     }
     if (search->scope == CHARACTERS_SEARCH_SYMBOLS) {
-        return symbol_matches(point, search->filter);
+        return rules_match(search, point);
     }
     if (search->scope == CHARACTERS_SEARCH_SCRIPT && search->filter >= 0) {
         return characters_scalar_has_script(point, search->filter) &&
@@ -581,6 +414,22 @@ static bool append_id(CharactersSearch *search, uint32_t id) {
     return true;
 }
 
+/** Execute a prepared Han predicate against the immutable database. */
+static bool han_matches(uint32_t point, const struct Query *query, size_t index) {
+    const uint32_t *rule = query->han_rules[index];
+    switch (rule[0]) {
+        case CHARACTERS_HAN_ORDINARY:
+        case CHARACTERS_HAN_FIELD:
+            return characters_unihan_match_fields(point, rule[1], query->han_terms[index]);
+        case CHARACTERS_HAN_RADICAL:
+        case CHARACTERS_HAN_STROKES:
+            return characters_unihan_match_group(point, rule[0] == CHARACTERS_HAN_RADICAL,
+                                                 rule[2]);
+        default:
+            return false;
+    }
+}
+
 /** Resolve scalar metadata on demand; empty and numeric queries avoid name allocations. */
 static bool scalar_query_matches(uint32_t point, const struct Query *query) {
     if (matches_points(query, &point, 1)) {
@@ -595,8 +444,8 @@ static bool scalar_query_matches(uint32_t point, const struct Query *query) {
     /* Explicit field-only searches need no allocation of scalar name metadata. */
     bool needs_metadata = false;
     for (size_t index = 0; index < query->term_count; index++) {
-        if (characters_unihan_is_field_query(query->han_terms[index])) {
-            if (!characters_unihan_matches(point, query->han_terms[index])) {
+        if (query->han_rules[index][0] != CHARACTERS_HAN_ORDINARY) {
+            if (!han_matches(point, query, index)) {
                 return false;
             }
         } else {
@@ -615,13 +464,12 @@ static bool scalar_query_matches(uint32_t point, const struct Query *query) {
     bool matches = true;
     for (size_t index = 0; index < query->term_count; index++) {
         const char *term = query->terms[index];
-        const char *han_term = query->han_terms[index];
-        if (characters_unihan_is_field_query(han_term)) {
+        if (query->han_rules[index][0] != CHARACTERS_HAN_ORDINARY) {
             continue;
         }
         if (!contains_term(name, term) && !contains_term(aliases, term) &&
             !contains_term(block, term) && !contains_term(script, term) &&
-            !contains_term(category, term) && !characters_unihan_matches(point, han_term)) {
+            !contains_term(category, term) && !han_matches(point, query, index)) {
             matches = false;
             break;
         }
@@ -882,15 +730,55 @@ void characters_search_set_scripts(CharactersSearch *search, const uint8_t *scri
     }
 }
 
-/** Copy bounded parser output and fold the Han search terms once. */
+/** Copy a validated union of semantic rules before worker traversal. */
+bool characters_search_set_rules(CharactersSearch *search, const uint32_t *rules,
+                                 size_t length) {
+    if (!search || search->started || search->scope != CHARACTERS_SEARCH_SYMBOLS ||
+        search->rule_count || !rules || !length || length > MAX_RULE_WORDS ||
+        length % RULE_WORDS) {
+        return false;
+    }
+    for (size_t index = 0; index < length; index += RULE_WORDS) {
+        if (!rules[index] || rules[index] & ~UINT32_C(0x3FFFFFFF) ||
+            rules[index + 1] & ~UINT32_C(0x3FFFF) ||
+            rules[index + 2] > rules[index + 3] || rules[index + 3] >= SCALAR_LIMIT) {
+            return false;
+        }
+    }
+    memcpy(search->rules, rules, length * sizeof(*rules));
+    search->rule_count = length;
+    return true;
+}
+
+/** Validate prepared Han operands without interpreting query syntax. */
+static bool valid_han_rule(const uint32_t *rule) {
+    switch (rule[0]) {
+        case CHARACTERS_HAN_ORDINARY:
+        case CHARACTERS_HAN_FIELD:
+            return rule[1] && !(rule[1] & ~CHARACTERS_HAN_TEXT_FIELDS) && !rule[2];
+        case CHARACTERS_HAN_RADICAL:
+        case CHARACTERS_HAN_STROKES:
+            return !rule[1] && rule[2] > 0 &&
+                   rule[2] <= (rule[0] == CHARACTERS_HAN_RADICAL ? 214u : 128u);
+        case CHARACTERS_HAN_REJECT:
+            return !rule[1] && !rule[2];
+        default:
+            return false;
+    }
+}
+
+/** Copy bounded parser output and prepared Han operands. */
 bool characters_search_prepare(CharactersSearch *search, const char *text,
                                const uint32_t *points, size_t point_count,
                                char *const *terms, size_t term_count,
+                               char *const *han_terms, size_t han_count,
+                               const uint32_t *han_rules, size_t han_rule_count,
                                bool exact, bool literal_letter) {
     if (!search || search->started || search->query || !text ||
         strnlen(text, MAX_QUERY_BYTES + 1) > MAX_QUERY_BYTES ||
         point_count > MAX_SEQUENCE_POINTS || (point_count && !points) ||
-        term_count > MAX_TERMS || (term_count && !terms) ||
+        term_count > MAX_TERMS || (term_count && (!terms || !han_terms || !han_rules)) ||
+        han_count != term_count || han_rule_count != term_count * HAN_WORDS ||
         (exact && (!point_count || term_count)) ||
         (literal_letter && (!exact || point_count != 1))) {
         return false;
@@ -902,7 +790,9 @@ bool characters_search_prepare(CharactersSearch *search, const char *text,
     }
     size_t offset = 0;
     for (size_t index = 0; index < term_count; index++) {
-        if (!terms[index]) {
+        if (!terms[index] || !han_terms[index] ||
+            strnlen(han_terms[index], MAX_HAN_TERM_BYTES) >= MAX_HAN_TERM_BYTES ||
+            !valid_han_rule(han_rules + index * HAN_WORDS)) {
             return false;
         }
         size_t length = strnlen(terms[index], MAX_QUERY_BYTES + 1);
@@ -930,11 +820,10 @@ bool characters_search_prepare(CharactersSearch *search, const char *text,
         query->terms[index] = query->term_text + offset;
         memcpy(query->terms[index], terms[index], length);
         offset += length;
-        if (!characters_unihan_fold(query->terms[index], query->han_terms[index],
-                                   sizeof(query->han_terms[index]))) {
-            query->han_terms[index][0] = '\0';
-        }
-        query->han_field |= characters_unihan_is_field_query(query->han_terms[index]);
+        strcpy(query->han_terms[index], han_terms[index]);
+        memcpy(query->han_rules[index], han_rules + index * HAN_WORDS,
+               sizeof(query->han_rules[index]));
+        query->han_field |= query->han_rules[index][0] != CHARACTERS_HAN_ORDINARY;
     }
     search->query = query;
     return true;
@@ -966,7 +855,7 @@ CharactersSearchStatus characters_search_run(CharactersSearch *search) {
         search->filter < -1 || (search->filter >= 0 &&
         !characters_search_filter_name(search->scope, (size_t)search->filter)) ||
         search->category < -1 || search->category >= (int)COUNT(category_names) ||
-        !query) {
+        (search->scope == CHARACTERS_SEARCH_SYMBOLS && !search->rule_count) || !query) {
         return search->status;
     }
     if (is_canceled(search)) {

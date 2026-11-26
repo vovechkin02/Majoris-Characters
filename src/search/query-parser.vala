@@ -115,13 +115,13 @@ namespace Characters.QueryParser {
         string[] no_terms = {};
         uint32[] no_points = {};
         if (text.length == 0) {
-            return job.prepare (text, no_points, no_terms, false, false);
+            return HanQuery.prepare (job, text, no_points, no_terms, false, false);
         }
         var lower = text.ascii_down ();
         if (lower.has_prefix ("u+") || lower.has_prefix ("0x") || lower.has_prefix ("dec:")) {
             var explicit_points = decode_code (text);
             return explicit_points != null &&
-                job.prepare (text, explicit_points, no_terms, true, false);
+                HanQuery.prepare (job, text, explicit_points, no_terms, true, false);
         }
         var decoded = ScalarSequence.decode (text, MAX_POINTS);
         if (decoded == null) {
@@ -132,18 +132,18 @@ namespace Characters.QueryParser {
             var category = Unicode.get_property_value (points[0], "General_Category");
             var literal_letter = points[0] > 0x7F && category != null &&
                 category.has_prefix ("L");
-            return job.prepare (text, points, no_terms, true, literal_letter);
+            return HanQuery.prepare (job, text, points, no_terms, true, literal_letter);
         }
         if (points.length > 1 && (Unicode.emoji_index (points) != size_t.MAX ||
             Emoji.alias_index (text) != size_t.MAX)) {
-            return job.prepare (text, points, no_terms, true, false);
+            return HanQuery.prepare (job, text, points, no_terms, true, false);
         }
         uint32 raw;
         if (text.length >= 2 && text.length <= 6 && parse_number (text, 16, out raw)) {
             for (var index = 0; index < text.length; index++) {
                 if (text[index] >= '0' && text[index] <= '9') {
                     uint32[] numeric = { raw };
-                    return job.prepare (text, numeric, no_terms, true, false);
+                    return HanQuery.prepare (job, text, numeric, no_terms, true, false);
                 }
             }
             // All-letter hexadecimal values of four or more digits are also metadata terms.
@@ -152,7 +152,7 @@ namespace Characters.QueryParser {
             }
         }
         var terms = split_terms (text);
-        return terms != null && job.prepare (text, points, terms, false, false);
+        return terms != null && HanQuery.prepare (job, text, points, terms, false, false);
     }
 
     /** Construct a prepared synchronous request; used by headless clients and tests. */
@@ -161,6 +161,7 @@ namespace Characters.QueryParser {
         var job = Search.allocate (scope, filter, category);
         if (job != null) {
             prepare (job, input);
+            SemanticFilters.configure (job, scope, filter);
             if (scope == Search.Scope.LANGUAGE) {
                 LanguageSelection.configure (job, filter, "en", "");
             }

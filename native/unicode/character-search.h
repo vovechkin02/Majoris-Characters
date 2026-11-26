@@ -65,14 +65,26 @@ CharactersSearch *characters_search_allocate_points(const uint32_t *points, size
 /**
  * characters_search_prepare:
  *
- * Copy validated Vala parser output and fold Han terms once before worker scanning.
+ * Copy validated Vala parser output and prepared Han predicates before scanning.
  * No borrowed arrays survive this call. Failed preparation exposes no results.
  * Call at most once successfully before run; only cancel may run concurrently.
  */
 bool characters_search_prepare(CharactersSearch *search, const char *text,
                                const uint32_t *points, size_t point_count,
                                char *const *terms, size_t term_count,
+                               char *const *han_terms, size_t han_count,
+                               const uint32_t *han_rules, size_t han_rule_count,
                                bool exact, bool literal_letter);
+
+/**
+ * characters_search_set_rules:
+ *
+ * Copy a bounded union of semantic clauses (category mask, decomposition mask,
+ * first scalar, last scalar). A zero decomposition mask means any type.
+ * Required for symbol scope; false on invalid input or repeated configuration.
+ */
+bool characters_search_set_rules(CharactersSearch *search, const uint32_t *rules,
+                                 size_t length);
 
 /**
  * characters_search_set_locale:

@@ -326,8 +326,15 @@ static void test_han_search(void) {
     job = search(CHARACTERS_SEARCH_STROKES, strokes, -1, "U+4E2D");
     assert(contains_id(job, 0x4E2D));
     characters_search_free(job);
-    job = search(CHARACTERS_SEARCH_ALL, -1, -1, "radical:215");
-    assert(characters_search_count(job) == 0);
+    const char *invalid[] = { "radical:215", "strokes:129", "radical:0", "radical:+2",
+                              "radical:2x", "mandarin:", "strokes:999999999999999999" };
+    for (size_t index = 0; index < sizeof(invalid) / sizeof(invalid[0]); index++) {
+        job = search(CHARACTERS_SEARCH_ALL, -1, -1, invalid[index]);
+        assert(characters_search_count(job) == 0);
+        characters_search_free(job);
+    }
+    job = search(CHARACTERS_SEARCH_ALL, -1, -1, "RADICAL:002 strokes:004 mandarin:zhong");
+    assert(contains_id(job, 0x4E2D));
     characters_search_free(job);
 
     char *value = characters_unicode_property(0x4E2D, "Mandarin_Fallback");
@@ -397,6 +404,14 @@ static void test_semantic_collections(void) {
         /** Representative matching scalar. */
         uint32_t point;
     } cases[] = {
+        { "Punctuation", 0x0021 }, { "Arrows", 0x2190 },
+        { "Bullets & Stars", 0x2022 }, { "Pictures & Shapes", 0x25A0 },
+        { "Currencies", 0x20AC }, { "Mathematics", 0x2211 },
+        { "Letters", 0x0041 }, { "Numbers & Fractions", 0x0031 },
+        { "Music", 0x266A }, { "Games", 0x2654 }, { "Braille", 0x2801 },
+        { "Combining Marks", 0x0301 }, { "Box Drawing", 0x2500 },
+        { "Phonetics", 0x0250 }, { "Enclosed", 0x2460 },
+        { "Special & Formatting", 0x200D },
         { "Superscripts", 0xA7F1 }, { "Subscripts", 0x2082 },
         { "Fractions", 0x00BD }, { "Whitespace", 0x0009 },
         { "Quotation Marks", 0x201C }, { "Accessibility Symbols", 0x267F },
@@ -409,9 +424,13 @@ static void test_semantic_collections(void) {
         int filter = find_filter(CHARACTERS_SEARCH_SYMBOLS, cases[index].label);
         CharactersSearch *job = search(CHARACTERS_SEARCH_SYMBOLS, filter, -1, "");
         assert(contains_id(job, cases[index].point));
-        assert(!contains_id(job, 'A'));
+        assert(contains_id(job, 'A') == (cases[index].point == 'A'));
+        assert(!contains_id(job, 0x4E2D));
         characters_search_free(job);
     }
+    CharactersSearch *all = search(CHARACTERS_SEARCH_SYMBOLS, -1, -1, "");
+    assert(contains_id(all, 'A') && !contains_id(all, 0x4E2D));
+    characters_search_free(all);
 }
 
 /** Execute focused native search contracts, with assertions enabled by the test target. */

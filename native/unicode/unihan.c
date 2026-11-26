@@ -87,7 +87,7 @@ const char *characters_unihan_version(void) {
 }
 
 /** Normalize bounded reading search text without changing original metadata. */
-bool characters_unihan_fold(const char *term, char *output, size_t capacity) {
+static bool fold(const char *term, char *output, size_t capacity) {
     if (!term || !output || !capacity || capacity > INT32_MAX) {
         return false;
     }
@@ -159,81 +159,38 @@ static bool group_matches(const struct HanRecord *row, bool radical, unsigned gr
     return fallback && (!group || fallback == group);
 }
 
-/** Supported explicit query prefixes; Japanese and Korean each span multiple fields. */
-static const char *const prefixes[] = {
-    "mandarin:", "cantonese:", "japanese:", "korean:", "definition:",
-    "radical:", "strokes:"
-};
-
-/** Locate an explicit field prefix; -1 for ordinary metadata terms. */
-static int prefix_index(const char *term) {
-    for (size_t index = 0; index < COUNT(prefixes); index++) {
-        if (strncmp(term, prefixes[index], strlen(prefixes[index])) == 0) {
-            return (int)index;
-        }
-    }
-    return -1;
+/** Fold one query term using the same bounded ICU operation as the previous scanner. */
+char *characters_unihan_fold_text(const char *term) {
+    char output[512 * 3 + 1];
+    return fold(term, output, sizeof(output)) ? strdup(output) : NULL;
 }
 
-/** Recognize a supported Han-only query prefix. */
-bool characters_unihan_is_field_query(const char *term) {
-    return term && prefix_index(term) >= 0;
-}
-
-/** Match an individual field using its precomputed folded text. */
-static bool field_matches(const struct HanRecord *row, size_t field, const char *term) {
-    return row->folded[field] && strstr(han_strings + row->folded[field], term) != NULL;
-}
-
-/** Apply a field-specific or ordinary folded metadata query. */
-bool characters_unihan_matches(uint32_t point, const char *term) {
-    if (!term || !*term) {
+/** Match selected immutable folded fields without allocation or prefix interpretation. */
+bool characters_unihan_match_fields(uint32_t point, uint32_t fields, const char *term) {
+    if (!term || !*term || !(fields & CHARACTERS_HAN_TEXT_FIELDS)) {
         return false;
     }
     const struct HanRecord *row = lookup(point);
     if (!row) {
         return false;
     }
-    int prefix = prefix_index(term);
-    if (prefix >= 0) {
-        term += strlen(prefixes[prefix]);
-        if (!*term) {
-            return false;
+    fields &= CHARACTERS_HAN_TEXT_FIELDS;
+    for (size_t field = 0; field < HAN_FIELD_COUNT; field++) {
+        if ((fields & (UINT32_C(1) << field)) && row->folded[field] &&
+            strstr(han_strings + row->folded[field], term)) {
+            return true;
         }
     }
-    switch (prefix) {
-        case 0:
-            return field_matches(row, HAN_MANDARIN, term) ||
-                   field_matches(row, HAN_MANDARIN_FALLBACK, term);
-        case 1:
-            return field_matches(row, HAN_CANTONESE, term);
-        case 2:
-            return field_matches(row, HAN_JAPANESE_ON, term) ||
-                   field_matches(row, HAN_JAPANESE_KUN, term) ||
-                   field_matches(row, HAN_JAPANESE, term);
-        case 3:
-            return field_matches(row, HAN_KOREAN, term) || field_matches(row, HAN_HANGUL, term) ||
-                   field_matches(row, HAN_HANGUL_FALLBACK, term);
-        case 4:
-            return field_matches(row, HAN_DEFINITION, term);
-        case 5: case 6: {
-            char *end;
-            if (*term < '0' || *term > '9') {
-                return false;
-            }
-            unsigned long group = strtoul(term, &end, 10);
-            return !*end && group > 0 && group <= (prefix == 5 ? 214u : 128u) &&
-                   group_matches(row, prefix == 5, (unsigned)group);
-        }
-        default:
-            for (size_t field = 0; field < HAN_FIELD_COUNT; field++) {
-                if (field != HAN_RADICAL && field != HAN_STROKES &&
-                    field_matches(row, field, term)) {
-                    return true;
-                }
-            }
-            return false;
+    return false;
+}
+
+/** Match an explicit numeric constraint using the same group data as browsing. */
+bool characters_unihan_match_group(uint32_t point, bool radical, unsigned group) {
+    if (!group || group > (radical ? 214u : 128u)) {
+        return false;
     }
+    const struct HanRecord *row = lookup(point);
+    return row && group_matches(row, radical, group);
 }
 
 /** Return the number of group filter slots. */

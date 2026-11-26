@@ -200,6 +200,27 @@ class SourceContractsTest(unittest.TestCase):
             self.assertIn("characters_query_parser_create", fixture)
             self.assertIn("characters_run_contract_tests", fixture)
 
+    def test_third_vala_migration_wiring(self) -> None:
+        """Require Vala semantic and Han policies at the prepared native boundary."""
+        sources = (ROOT / "src/meson.build").read_text()
+        request = (ROOT / "src/search/search-request.vala").read_text()
+        parser = (ROOT / "src/search/query-parser.vala").read_text()
+        for name in ("search/semantic-filters", "search/han-query"):
+            self.assertIn(f"'{name}.vala'", sources)
+            self.assertTrue((ROOT / f"src/{name}.vala").is_file())
+        self.assertIn("han_vapi", sources)
+        self.assertIn("SemanticFilters.configure (job, scope, filter)", request)
+        self.assertIn("SemanticFilters.configure (job, scope, filter)", parser)
+        self.assertIn("HanQuery.prepare (job,", parser)
+        scanner = (ROOT / "native/unicode/character-search.c").read_text()
+        self.assertIn("characters_search_set_rules", scanner)
+        self.assertNotIn("symbol_ranges", scanner)
+        self.assertNotIn("symbol_matches(", scanner)
+        han = (ROOT / "native/unicode/unihan.c").read_text()
+        self.assertNotIn("prefix_index(", han)
+        self.assertNotIn('"mandarin:"', han)
+        self.assertIn("characters_unihan_match_fields", han)
+
     def test_release_gate(self) -> None:
         """Prove missing and skipped test records cannot pass the release log gate."""
         names = sorted(expected_tests())

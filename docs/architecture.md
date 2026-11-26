@@ -34,7 +34,7 @@ transfer ownership to the caller. Stage 2 itself creates no worker or callback.
 
 ## Stage 3 boundaries
 
-`native/unicode/character-search.c` owns bounded query parsing, classification,
+`src/search/query-parser.vala` owns bounded query parsing. The native scanner owns
 collection traversal, compact result identities and sequence-aware display
 representations. It reuses the immutable engine APIs and ICU, and has no GTK
 or GLib dependency. `SearchRequest` owns a native request across worker and
@@ -411,10 +411,14 @@ focused library Adapter and direct composition of domain services, not a new
 pattern hierarchy. The Vala `QueryParser` and `LanguageSelection` interpret input on the existing
 search worker and supply a copied, prepared query and script mask. The native
 scanner retains compact integer results, bitset deduplication, hot metadata
-matching and atomic cancellation. `Relationships` assembles, deduplicates and
+matching and atomic cancellation. `SemanticFilters` supplies a bounded union of
+category/decomposition/range clauses; `HanQuery` supplies folded term payloads,
+field masks and validated numeric operands. The scanner evaluates these without
+interpreting query prefixes or hardcoding semantic collection ranges. `Relationships` assembles, deduplicates and
 sorts exact text alternatives from native scalar candidates and emoji catalog
 lookups. Native scalar enumeration avoids per-candidate GObjects. The property
 tables, ICU normalization, FreeType rasterizer, Fontconfig inventory and legacy
 converters remain in C. No new pattern hierarchy or public ABI is introduced.
-See [pass 2 qualification](vala-migration-pass-2.md) and the earlier
+See [pass 3 qualification](vala-migration-pass-3.md),
+[pass 2 qualification](vala-migration-pass-2.md), and the earlier
 [pass 1 qualification](vala-migration.md).

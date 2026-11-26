@@ -54,12 +54,18 @@ namespace Characters.Search {
         [CCode (cname = "characters_search_set_scripts")]
         public void set_scripts ([CCode (array_length_type = "size_t")] uint8[] scripts);
 
-        /** Copy parser output, folding Han terms once; no borrowed data survives. */
+        /** Copy parser output and prepared Han operands; no borrowed data survives. */
         [CCode (cname = "characters_search_prepare")]
         public bool prepare (string text,
             [CCode (array_length_type = "size_t")] uint32[] points,
             [CCode (array_length_type = "size_t")] string[] terms,
+            [CCode (array_length_type = "size_t")] string[] han_terms,
+            [CCode (array_length_type = "size_t")] uint32[] han_rules,
             bool exact, bool literal_letter);
+
+        /** Copy a bounded union of four-word semantic clauses before scanning. */
+        [CCode (cname = "characters_search_set_rules")]
+        public bool set_rules ([CCode (array_length_type = "size_t")] uint32[] rules);
 
         /** Request cancellation without waiting for its worker. */
         [CCode (cname = "characters_search_cancel")]
