@@ -139,7 +139,7 @@ namespace Characters.Unicode {
     [CCode (cname = "characters_unicode_named_text")]
     public static string? named_text (size_t index);
 
-    /** Owned raw scalar candidates; the Vala relationship policy sorts and deduplicates. */
-    [CCode (cname = "characters_unicode_related_scalars", array_length_type = "gint")]
-    public static uint32[]? related_scalars (uint32 point);
+    /** Owned exact confusable-class members, or null on invalid input or failure. */
+    [CCode (cname = "characters_unicode_confusables", array_length_type = "gint")]
+    public static uint32[]? confusables (uint32 point);
 }

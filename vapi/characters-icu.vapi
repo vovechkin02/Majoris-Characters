@@ -10,6 +10,27 @@ namespace Characters.Icu {
     public static size_t decomposition (uint32 point,
         [CCode (array_length = false)] uint32[] points);
 
+    /** ICU simple uppercase mapping; application-level Unicode version deltas are separate. */
+    [CCode (cname = "characters_icu_uppercase")]
+    public static uint32 uppercase (uint32 point);
+
+    /** ICU simple lowercase mapping. */
+    [CCode (cname = "characters_icu_lowercase")]
+    public static uint32 lowercase (uint32 point);
+
+    /** ICU simple titlecase mapping. */
+    [CCode (cname = "characters_icu_titlecase")]
+    public static uint32 titlecase (uint32 point);
+
+    /** ICU bidirectional mirror mapping. */
+    [CCode (cname = "characters_icu_mirror")]
+    public static uint32 mirror (uint32 point);
+
+    /** Write recursive canonical decomposition into a caller-owned 32-scalar array. */
+    [CCode (cname = "characters_icu_canonical_decomposition")]
+    public static size_t canonical_decomposition (uint32 point,
+        [CCode (array_length = false)] uint32[] points);
+
     /** Return an owned scalar array with explicit length, including embedded NUL. */
     [CCode (cname = "characters_icu_normalize_points", array_length_type = "gint")]
     public static uint32[]? normalize_points (uint32[] points, string form);
@@ -55,6 +76,10 @@ namespace Characters.Scalar {
     /** Return the Unicode 17 decomposition type, with zero denoting no mapping. */
     [CCode (cname = "characters_scalar_decomposition_type")]
     public static int decomposition_type (uint32 point);
+
+    /** Return the primary script ID from the Unicode 17 snapshot, or -1 if invalid. */
+    [CCode (cname = "characters_scalar_script")]
+    public static int script (uint32 point);
 
     /** Number of snapshot script slots. */
     [CCode (cname = "characters_scalar_script_count")]

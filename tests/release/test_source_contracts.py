@@ -191,7 +191,8 @@ class SourceContractsTest(unittest.TestCase):
         self.assertIn("characters_search_prepare", scanner)
         engine = (ROOT / "native/unicode/unicode-engine.c").read_text()
         self.assertNotIn("characters_unicode_related(", engine)
-        self.assertIn("characters_unicode_related_scalars", engine)
+        self.assertIn("characters_unicode_confusables", engine)
+        self.assertNotIn("characters_unicode_related_scalars", engine)
         self.assertIn("unit/test-prepared-search.c", tests)
         self.assertIn("support/search-contract-driver.vala", tests)
         self.assertIn("language_vapi", sources)
@@ -199,6 +200,25 @@ class SourceContractsTest(unittest.TestCase):
             fixture = (ROOT / f"tests/unit/test-{name}.c").read_text()
             self.assertIn("characters_query_parser_create", fixture)
             self.assertIn("characters_run_contract_tests", fixture)
+
+    def test_relationship_migration_wiring(self) -> None:
+        """Keep scalar relationship selection in Vala and raw mappings in the native layer."""
+        policy = (ROOT / "src/unicode/relationships.vala").read_text()
+        engine = (ROOT / "native/unicode/unicode-engine.c").read_text()
+        icu = (ROOT / "native/unicode/icu-adapter.c").read_text()
+        binding = (ROOT / "vapi/characters-icu.vapi").read_text()
+        for name in ("append_case_variants", "append_accent_variants",
+                     "append_scalar_relationships"):
+            self.assertIn(name, policy)
+            self.assertNotIn(name, engine)
+        for name in ("uppercase", "lowercase", "titlecase", "mirror",
+                     "canonical_decomposition"):
+            self.assertIn(f"Icu.{name} (", policy)
+            self.assertIn(f"characters_icu_{name}", icu)
+            self.assertIn(f"characters_icu_{name}", binding)
+        self.assertIn("Unicode.confusables (point)", policy)
+        self.assertNotIn("struct ScalarCandidates", engine)
+        self.assertNotIn("unorm2_getDecomposition", engine)
 
     def test_third_vala_migration_wiring(self) -> None:
         """Require Vala semantic and Han policies at the prepared native boundary."""

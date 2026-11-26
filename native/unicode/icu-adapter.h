@@ -9,6 +9,26 @@ gint characters_icu_graphemes(const gchar *text);
 /** Write direct decomposition scalars to a caller-owned 32-element array; zero if absent. */
 gsize characters_icu_decomposition(gunichar point, gunichar *points);
 
+/** Return the ICU simple uppercase mapping, or the input if invalid or unmapped. */
+gunichar characters_icu_uppercase(gunichar point);
+
+/** Return the ICU simple lowercase mapping, or the input if invalid or unmapped. */
+gunichar characters_icu_lowercase(gunichar point);
+
+/** Return the ICU simple titlecase mapping, or the input if invalid or unmapped. */
+gunichar characters_icu_titlecase(gunichar point);
+
+/** Return the ICU bidirectional mirror, or the input if invalid or unmapped. */
+gunichar characters_icu_mirror(gunichar point);
+
+/**
+ * Write recursive canonical decomposition to a caller-owned 32-element scalar
+ * array. Return its scalar count, or zero for no mapping, invalid input or error.
+ * Compatibility mappings are not included. Unlike direct decomposition, this
+ * operation recursively expands canonical mappings, including Hangul Jamo.
+ */
+gsize characters_icu_canonical_decomposition(gunichar point, gunichar *points);
+
 /**
  * Normalize a bounded scalar array, preserving embedded NUL.
  * Return an owned scalar array (free with g_free()), or NULL; length is in scalars.

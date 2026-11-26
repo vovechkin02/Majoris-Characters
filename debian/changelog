@@ -1,3 +1,11 @@
+majoris-characters (1.0.17-1) unstable; urgency=medium
+
+  * Move scalar relationship assembly and Unicode 17 case policy into Vala.
+  * Expose raw ICU mappings and immutable confusable class membership.
+  * Preserve canonical accent families, ordering, and exact identities.
+
+ -- Majoris Contributors <45165533+vovechkin02@users.noreply.github.com>  Thu, 26 Nov 2026 17:00:00 +1100
+
 majoris-characters (1.0.16-1) unstable; urgency=medium
 
   * Move collection labels and category metadata policies into Vala.

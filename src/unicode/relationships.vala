@@ -16,6 +16,118 @@ namespace Characters.Relationships {
         return true;
     }
 
+    /** Encode only valid non-NUL candidates, retaining exact scalar identity. */
+    private static bool append_scalar (GenericArray<string> result, string original,
+        uint32 point) {
+        if (point == 0 || !Unicode.is_scalar (point)) {
+            return true;
+        }
+        uint32[] single = { point };
+        return append (result, original, Unicode.encode (single));
+    }
+
+    /** Apply Unicode 17 simple-case additions before the older ICU mapping primitives. */
+    private static bool append_case_variants (GenericArray<string> result, string original,
+        uint32 point) {
+        if (point >= 0x16EA0 && point <= 0x16EB8) {
+            return append_scalar (result, original, point + 0x1B);
+        }
+        if (point >= 0x16EBB && point <= 0x16ED3) {
+            return append_scalar (result, original, point - 0x1B);
+        }
+        if ((point >= 0xA7CE && point <= 0xA7CF) ||
+            (point >= 0xA7D2 && point <= 0xA7D5)) {
+            return append_scalar (result, original, point ^ 1u);
+        }
+        return append_scalar (result, original, Icu.uppercase (point)) &&
+            append_scalar (result, original, Icu.lowercase (point)) &&
+            append_scalar (result, original, Icu.titlecase (point));
+    }
+
+    /** Return the first recursive canonical component, reusing caller-owned scratch space. */
+    private static uint32 canonical_base (uint32 point, uint32[] scratch) {
+        return Icu.canonical_decomposition (point, scratch) > 0 ? scratch[0] : point;
+    }
+
+    /** Scan a fixed inclusive range for assigned characters sharing the canonical base. */
+    private static bool append_accent_range (GenericArray<string> result, string original,
+        uint32 first, uint32 last, uint32 base_point, uint32[] scratch) {
+        for (var candidate = first; candidate <= last; candidate++) {
+            if (Unicode.is_assigned (candidate) &&
+                canonical_base (candidate, scratch) == base_point &&
+                !append_scalar (result, original, candidate)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /** Preserve the existing GNOME-derived reverse accent families and primary-script policy. */
+    private static bool append_accent_variants (GenericArray<string> result, string original,
+        uint32 point, uint32[] scratch) {
+        var script_id = Scalar.script (point);
+        if (script_id < 0) {
+            return true;
+        }
+        unowned string? script = Scalar.script_name ((size_t) script_id);
+        if (script == null) {
+            return true;
+        }
+        var base_point = canonical_base (point, scratch);
+        if (!append_scalar (result, original, base_point)) {
+            return false;
+        }
+        // Adjacent Basic Latin through Latin Extended-B blocks form one contiguous range.
+        switch (script) {
+            case "Latin":
+                return append_accent_range (result, original, 0x0000, 0x024F,
+                    base_point, scratch) &&
+                    append_accent_range (result, original, 0x1E00, 0x1EFF,
+                        base_point, scratch);
+            case "Hiragana":
+                return append_accent_range (result, original, 0x3040, 0x309F,
+                    base_point, scratch);
+            case "Katakana":
+                return append_accent_range (result, original, 0x30A0, 0x30FF,
+                    base_point, scratch) &&
+                    append_accent_range (result, original, 0x31F0, 0x31FF,
+                        base_point, scratch);
+            default:
+                return true;
+        }
+    }
+
+    /** Assemble assigned scalar mappings and advisory confusable class members. */
+    private static bool append_scalar_relationships (GenericArray<string> result,
+        string original, uint32 point) {
+        if (Unicode.is_assigned (point)) {
+            if (!append_case_variants (result, original, point) ||
+                !append_scalar (result, original, Icu.mirror (point))) {
+                return false;
+            }
+            var scratch = new uint32[32];
+            var count = Icu.canonical_decomposition (point, scratch);
+            for (size_t index = 0; index < count; index++) {
+                if (!append_scalar (result, original, scratch[index])) {
+                    return false;
+                }
+            }
+            if (!append_accent_variants (result, original, point, scratch)) {
+                return false;
+            }
+        }
+        var confusables = Unicode.confusables (point);
+        if (confusables == null) {
+            return false;
+        }
+        foreach (var candidate in confusables) {
+            if (!append_scalar (result, original, candidate)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     /** Collect exact scalar, component, presentation and canonical emoji relationships. */
     public static string[]? collect (uint32[] points) {
         if (points.length == 0 || points.length > 32) {
@@ -35,15 +147,8 @@ namespace Characters.Relationships {
         }
         var collected = new GenericArray<string> ();
         if (points.length == 1) {
-            var candidates = Unicode.related_scalars (points[0]);
-            if (candidates == null) {
+            if (!append_scalar_relationships (collected, original, points[0])) {
                 return null;
-            }
-            foreach (var candidate in candidates) {
-                uint32[] single = { candidate };
-                if (!append (collected, original, Unicode.encode (single))) {
-                    return null;
-                }
             }
         } else {
             for (var index = 0; index < points.length;) {

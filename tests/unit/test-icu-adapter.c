@@ -64,6 +64,35 @@ static void test_decomposition(void) {
     printf("Direct decomposition mappings: %zu\n", mappings);
 }
 
+/** Verify raw simple mappings and recursive canonical (not compatibility) decomposition. */
+static void test_relationship_primitives(void)
+{
+    assert(characters_icu_uppercase('a') == 'A');
+    assert(characters_icu_lowercase('A') == 'a');
+    assert(characters_icu_uppercase(0x01C5) == 0x01C4);
+    assert(characters_icu_lowercase(0x01C5) == 0x01C6);
+    assert(characters_icu_titlecase(0x01C4) == 0x01C5);
+    assert(characters_icu_mirror('(') == ')');
+    assert(characters_icu_mirror('A') == 'A');
+    assert(characters_icu_uppercase(0x110000) == 0x110000);
+    assert(characters_icu_lowercase(0xD800) == 0xD800);
+    assert(characters_icu_titlecase(0xDFFF) == 0xDFFF);
+    assert(characters_icu_mirror(0x110000) == 0x110000);
+    gunichar points[CHARACTERS_UNICODE_MAX_SEQUENCE_LENGTH];
+    assert(characters_icu_canonical_decomposition(0x01FA, points) == 3);
+    assert(points[0] == 'A' && points[1] == 0x030A && points[2] == 0x0301);
+    assert(characters_icu_canonical_decomposition(0xAC01, points) == 3);
+    assert(points[0] == 0x1100 && points[1] == 0x1161 && points[2] == 0x11A8);
+    assert(characters_icu_canonical_decomposition(0x304C, points) == 2);
+    assert(points[0] == 0x304B && points[1] == 0x3099);
+    assert(!characters_icu_canonical_decomposition(0x00BC, points));
+    assert(!characters_icu_canonical_decomposition(0xA7F1, points));
+    assert(!characters_icu_canonical_decomposition(0x0378, points));
+    assert(!characters_icu_canonical_decomposition(0xD800, points));
+    assert(!characters_icu_canonical_decomposition(0x110000, points));
+    assert(!characters_icu_canonical_decomposition(0x01FA, NULL));
+}
+
 /** Check ICU grapheme segmentation independently of the Vala input validation policy. */
 static void test_graphemes(void) {
     assert(characters_icu_graphemes("") == 0);
@@ -116,8 +145,9 @@ static void test_scalar_conversion(void) {
 int main(void) {
     test_normalize_points();
     test_decomposition();
+    test_relationship_primitives();
     test_graphemes();
     test_scalar_conversion();
-    puts("4 ICU adapter contract groups passed");
+    puts("5 ICU adapter contract groups passed");
     return 0;
 }

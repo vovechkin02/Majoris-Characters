@@ -96,3 +96,10 @@ alongside `emoji-test.txt`. Catalog replacement stages and validates the new
 presentation bases, selector-omission indexes, and annotation coverage report
 before replacing generated catalog files. Full CLDR annotations are updated
 separately through `generate_emoji_annotations.py`.
+
+The Vala relationship collector owns Unicode 17 case exceptions, reverse accent
+range selection, canonical component assembly, and confusable deduplication.
+The ICU adapter supplies raw simple case and mirror mappings and recursive
+canonical decomposition (not compatibility mappings). The native catalog only
+copies the immutable confusable class. See the
+[relationship migration report](unicode-relationship-migration.md).

@@ -9,8 +9,6 @@
 #include <glib.h>
 
 #include <unicode/uchar.h>
-#include <unicode/unorm2.h>
-#include <unicode/utf16.h>
 
 #include "../allocation.h"
 #include "../scalar-validity.h"
@@ -67,14 +65,6 @@ static const struct EmojiGroup emoji_groups[] = {
 struct Sequence {
     gunichar points[MAX_SEQUENCE_LENGTH];
     gsize length;
-};
-
-/** A growable native scalar candidate vector; failure is sticky. */
-struct ScalarCandidates {
-    guint32 *items;
-    gsize count;
-    gsize capacity;
-    gboolean failed;
 };
 
 /** Compare a scalar against an inclusive block range for binary search. */
@@ -147,148 +137,12 @@ static gboolean has_properties(gunichar point)
     return characters_scalar_category(point) != U_UNASSIGNED;
 }
 
-/** Read recursive canonical decomposition units into the caller's bounded buffer. */
-static int32_t canonical_decomposition(gunichar point, UChar *buffer, int32_t capacity)
-{
-    UErrorCode error = U_ZERO_ERROR;
-    const UNormalizer2 *nfd = unorm2_getNFDInstance(&error);
-    if (U_FAILURE(error)) {
-        return 0;
-    }
-    int32_t length = unorm2_getDecomposition(nfd, (UChar32)point, buffer, capacity, &error);
-    return U_SUCCESS(error) && length > 0 ? length : 0;
-}
-
-/** Return the first canonical decomposition scalar, or the original scalar. */
-static guint32 canonical_base(gunichar point)
-{
-    UChar buffer[64];
-    int32_t length = canonical_decomposition(point, buffer, G_N_ELEMENTS(buffer));
-    if (!length) {
-        return point;
-    }
-    int32_t offset = 0;
-    UChar32 base;
-    U16_NEXT(buffer, offset, length, base);
-    return (guint32)base;
-}
-
-/** Append a valid non-NUL scalar without encoding or applying presentation policy. */
-static void append_scalar(struct ScalarCandidates *list, gunichar point)
-{
-    if (list->failed || !point || !characters_unicode_is_scalar(point)) {
-        return;
-    }
-    if (list->count == list->capacity) {
-        if (list->capacity > G_MAXINT / 2) {
-            list->failed = TRUE;
-            return;
-        }
-        gsize capacity = list->capacity ? list->capacity * 2 : 16;
-        guint32 *items = g_try_realloc_n(list->items, capacity, sizeof(*items));
-        if (!items) {
-            list->failed = TRUE;
-            return;
-        }
-        list->items = items;
-        list->capacity = capacity;
-    }
-    list->items[list->count++] = point;
-}
-
 /** Compare a scalar against the GNOME confusable-class index. */
 static gint compare_confusable(gconstpointer key, gconstpointer item)
 {
     gunichar point = *(const guint32 *)key;
     const struct ConfusableCharacterClass *entry = item;
     return (point > entry->uc) - (point < entry->uc);
-}
-
-/** Adapt GNOME's single-code-point confusable class lookup. Not a security test. */
-static void append_confusables(struct ScalarCandidates *list, gunichar point)
-{
-    const struct ConfusableCharacterClass *entry = bsearch(
-        &point, confusable_character_classes, G_N_ELEMENTS(confusable_character_classes),
-        sizeof(confusable_character_classes[0]), compare_confusable);
-    if (!entry || entry->index >= G_N_ELEMENTS(confusable_classes)) {
-        return;
-    }
-    const struct ConfusableClass *group = &confusable_classes[entry->index];
-    for (gsize index = group->offset; index < (gsize)group->offset + group->length; index++) {
-        if (index < G_N_ELEMENTS(confusable_characters)) {
-            append_scalar(list, confusable_characters[index]);
-        }
-    }
-}
-
-/** Add the new simple case pairs defined by Unicode 17 before consulting ICU 16. */
-static void append_case_variants(struct ScalarCandidates *list, gunichar point)
-{
-    if (point >= 0x16EA0 && point <= 0x16EB8) {
-        append_scalar(list, point + 0x1B);
-    } else if (point >= 0x16EBB && point <= 0x16ED3) {
-        append_scalar(list, point - 0x1B);
-    } else if ((point >= 0xA7CE && point <= 0xA7CF) ||
-               (point >= 0xA7D2 && point <= 0xA7D5)) {
-        append_scalar(list, point ^ 1u);
-    } else {
-        append_scalar(list, (guint32)u_toupper((UChar32)point));
-        append_scalar(list, (guint32)u_tolower((UChar32)point));
-        append_scalar(list, (guint32)u_totitle((UChar32)point));
-    }
-}
-
-/** Find reverse canonical variants in the same families used by GNOME Characters. */
-static void append_accent_variants(struct ScalarCandidates *list, gunichar point)
-{
-    const gchar *script = characters_scalar_script_name((gsize)characters_scalar_script(point));
-    if (!script) {
-        return;
-    }
-    static const guint32 latin[] = { 0x0000, 0x0080, 0x0100, 0x0180, 0x1E00 };
-    static const guint32 hiragana[] = { 0x3040 };
-    static const guint32 katakana[] = { 0x30A0, 0x31F0 };
-    const guint32 *starts = NULL;
-    gsize count = 0;
-    if (strcmp(script, "Latin") == 0) {
-        starts = latin;
-        count = G_N_ELEMENTS(latin);
-    } else if (strcmp(script, "Hiragana") == 0) {
-        starts = hiragana;
-        count = G_N_ELEMENTS(hiragana);
-    } else if (strcmp(script, "Katakana") == 0) {
-        starts = katakana;
-        count = G_N_ELEMENTS(katakana);
-    }
-    guint32 base = canonical_base(point);
-    append_scalar(list, base);
-    for (gsize index = 0; index < count; index++) {
-        const struct Block *block = bsearch(&starts[index], all_blocks, G_N_ELEMENTS(all_blocks),
-                                            sizeof(all_blocks[0]), compare_block);
-        if (!block) {
-            continue;
-        }
-        for (guint32 candidate = block->start; candidate <= block->end; candidate++) {
-            if (has_properties(candidate) && canonical_base(candidate) == base) {
-                append_scalar(list, candidate);
-            }
-        }
-    }
-}
-
-/** Add canonical decomposition components, including Hangul Jamo. */
-static void append_decomposition(struct ScalarCandidates *list, gunichar point)
-{
-    UChar buffer[64];
-    int32_t length = canonical_decomposition(point, buffer, G_N_ELEMENTS(buffer));
-    if (!length) {
-        return;
-    }
-    for (int32_t offset = 0; offset < length;) {
-        UChar32 component;
-        U16_NEXT(buffer, offset, length, component);
-        append_scalar(list, (guint32)component);
-    }
 }
 
 gboolean characters_unicode_is_scalar(gunichar point)
@@ -539,7 +393,7 @@ gchar *characters_unicode_named_text(gsize index)
     return characters_unicode_encode(named_sequences[index].points, named_sequences[index].length);
 }
 
-gunichar *characters_unicode_related_scalars(gunichar point, gint *count)
+gunichar *characters_unicode_confusables(gunichar point, gint *count)
 {
     if (!count) {
         return NULL;
@@ -548,25 +402,27 @@ gunichar *characters_unicode_related_scalars(gunichar point, gint *count)
     if (!characters_unicode_is_scalar(point)) {
         return NULL;
     }
-    struct ScalarCandidates list = { 0 };
-    if (point && has_properties(point)) {
-        append_case_variants(&list, point);
-        append_scalar(&list, (guint32)u_charMirror((UChar32)point));
-        append_decomposition(&list, point);
-        append_accent_variants(&list, point);
+    const struct ConfusableCharacterClass *entry = bsearch(
+        &point, confusable_character_classes, G_N_ELEMENTS(confusable_character_classes),
+        sizeof(confusable_character_classes[0]), compare_confusable);
+    gsize length = 0;
+    gsize offset = 0;
+    if (entry && entry->index < G_N_ELEMENTS(confusable_classes)) {
+        const struct ConfusableClass *group = &confusable_classes[entry->index];
+        offset = group->offset;
+        length = group->length;
+        if (offset > G_N_ELEMENTS(confusable_characters) ||
+            length > G_N_ELEMENTS(confusable_characters) - offset || length > G_MAXINT) {
+            return NULL;
+        }
     }
-    if (point) {
-        append_confusables(&list, point);
-    }
-    if (list.failed) {
-        g_free(list.items);
+    gunichar *items = g_try_new(gunichar, length ? length : 1);
+    if (!items) {
         return NULL;
     }
-    if (!list.items) {
-        list.items = g_try_new0(gunichar, 1);
+    if (length) {
+        memcpy(items, confusable_characters + offset, length * sizeof(*items));
     }
-    if (list.items) {
-        *count = (gint)list.count;
-    }
-    return list.items;
+    *count = (gint)length;
+    return items;
 }

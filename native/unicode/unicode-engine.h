@@ -228,15 +228,15 @@ const gchar *characters_unicode_named_name(gsize index);
 gchar *characters_unicode_named_text(gsize index);
 
 /**
- * characters_unicode_related_scalars:
+ * characters_unicode_confusables:
  * @point: Valid Unicode scalar.
- * @count: (out): Number of returned scalar candidates.
+ * @count: (out): Number of returned class members.
  *
- * Returns: (transfer full) (array length=count) (nullable): Raw scalar candidates
- * from case, mirror, canonical and confusable lookups. Duplicates and the input
- * can occur; no presentation or sequence policy is applied. Empty results are
- * allocated empty vectors; NULL indicates invalid input or allocation failure.
+ * Returns: (transfer full) (array length=count) (nullable): Exact members of
+ * the immutable single-scalar confusable class, including the input if present.
+ * Empty classes return an allocated empty vector; NULL indicates invalid input,
+ * invalid table bounds or allocation failure. This is not a security test.
  */
-gunichar *characters_unicode_related_scalars(gunichar point, gint *count);
+gunichar *characters_unicode_confusables(gunichar point, gint *count);
 
 #endif

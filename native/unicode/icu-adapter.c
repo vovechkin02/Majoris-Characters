@@ -77,6 +77,50 @@ gsize characters_icu_decomposition(gunichar point, gunichar *points)
     return characters_icu_decode_utf16(units, length, points, MAX_POINTS);
 }
 
+/** Return ICU's simple uppercase mapping for a valid scalar. */
+gunichar characters_icu_uppercase(gunichar point)
+{
+    return characters_scalar_is_valid(point) ? (gunichar)u_toupper((UChar32)point) : point;
+}
+
+/** Return ICU's simple lowercase mapping for a valid scalar. */
+gunichar characters_icu_lowercase(gunichar point)
+{
+    return characters_scalar_is_valid(point) ? (gunichar)u_tolower((UChar32)point) : point;
+}
+
+/** Return ICU's simple titlecase mapping for a valid scalar. */
+gunichar characters_icu_titlecase(gunichar point)
+{
+    return characters_scalar_is_valid(point) ? (gunichar)u_totitle((UChar32)point) : point;
+}
+
+/** Return the ICU bidirectional mirror, or the input when no mapping exists. */
+gunichar characters_icu_mirror(gunichar point)
+{
+    return characters_scalar_is_valid(point) ? (gunichar)u_charMirror((UChar32)point) : point;
+}
+
+/** Read recursive canonical decomposition without compatibility mappings. */
+gsize characters_icu_canonical_decomposition(gunichar point, gunichar *points)
+{
+    if (!points || !characters_scalar_is_valid(point)) {
+        return 0;
+    }
+    UErrorCode error = U_ZERO_ERROR;
+    const UNormalizer2 *normalizer = unorm2_getNFDInstance(&error);
+    if (U_FAILURE(error)) {
+        return 0;
+    }
+    UChar units[MAX_POINTS * 2];
+    int32_t length = unorm2_getDecomposition(normalizer, (UChar32)point, units,
+                                             G_N_ELEMENTS(units), &error);
+    if (U_FAILURE(error) || length <= 0) {
+        return 0;
+    }
+    return characters_icu_decode_utf16(units, length, points, MAX_POINTS);
+}
+
 /** Bridge length-aware UTF-16 normalization to owned scalar storage. */
 gunichar *characters_icu_normalize_points(const gunichar *input_points, gint input_count,
                                          const gchar *form, gint *output_count)

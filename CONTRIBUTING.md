@@ -53,3 +53,9 @@ domain layer. Native search may consume copied, untranslated metadata vocabulary
 and validated numeric predicates; do not reintroduce native UI formatters or
 locale-dependent matching. Keep the exact text and visible glyph representation
 separate, and preserve explicit scalar arrays for embedded NUL values.
+
+Unicode relationship selection belongs in Vala, including version-specific case
+rules, canonical component assembly, and reverse accent ranges. Keep raw ICU
+simple mappings and recursive canonical decomposition separate from direct
+compatibility decomposition. Native confusable access exposes immutable class
+membership only; the Vala collector owns validation, deduplication and ordering.

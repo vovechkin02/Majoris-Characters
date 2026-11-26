@@ -466,3 +466,16 @@ sequence-label access. `Inspector.from_id()` receives exact scalar arrays
 without formatting and parsing numeric strings. NUL remains a valid inspected
 scalar but has no NUL-terminated clipboard text. No external API or serialized
 identity format is added. See [migration evidence](character-presentation-migration.md).
+
+## Unicode relationship policy (1.0.17)
+
+`Relationships` owns the complete scalar and sequence relationship assembly,
+including Unicode 17 case additions, mirrored pairs, canonical components,
+reverse accent ranges and advisory confusable membership. The Vala service
+reuses one 32-scalar buffer during each reverse accent scan and retains the
+primary-script and fixed Latin, Hiragana and Katakana range selection of the
+previous implementation. ICU exposes only raw simple mappings and canonical
+decomposition; the generated confusable table exposes an owned class copy.
+Direct decomposition for the inspector is unchanged. The original filtering,
+exact identity deduplication and binary UTF-8 ordering remain in one collector.
+See [Unicode relationship migration](unicode-relationship-migration.md).

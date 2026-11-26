@@ -210,32 +210,33 @@ static void test_encoding(void) {
     assert(!characters_unicode_encode(nul, 1));
 }
 
-/** Assert the native candidate vector includes one expected scalar. */
-static void expect_related(gunichar point, guint32 expected) {
+/** Verify exact immutable confusable class ownership, bounds and empty results. */
+static void test_confusables(void)
+{
     gint count = 0;
-    guint32 *items = characters_unicode_related_scalars(point, &count);
-    assert(items);
-    gboolean found = FALSE;
+    gunichar *items = characters_unicode_confusables('A', &count);
+    assert(items && count > 0);
+    gboolean found_greek = FALSE;
+    gboolean found_original = FALSE;
     for (gint index = 0; index < count; index++) {
-        found |= items[index] == expected;
+        assert(characters_unicode_is_scalar(items[index]));
+        found_greek |= items[index] == 0x391;
+        found_original |= items[index] == 'A';
     }
-    assert(found);
+    assert(found_greek && found_original);
+    items[0] = 0;
     g_free(items);
-}
-
-/** Verify native case, mirror, canonical, Hangul and confusable primitives. */
-static void test_relationships(void) {
-    expect_related('a', 'A');
-    expect_related('(', ')');
-    expect_related('e', 0xE9);
-    expect_related(0xE9, 'e');
-    expect_related(0xAC00, 0x1100);
-    expect_related('A', 0x391);
-    expect_related(0xA7D3, 0xA7D2);
-    expect_related(0x16EA0, 0x16EBB);
-    gint count = 0;
-    assert(!characters_unicode_related_scalars(0x110000, &count));
+    items = characters_unicode_confusables('A', &count);
+    assert(items && count > 0 && items[0] != 0);
+    g_free(items);
+    items = characters_unicode_confusables(0x0378, &count);
+    assert(items && count == 0);
+    g_free(items);
+    assert(!characters_unicode_confusables(0x110000, &count));
     assert(count == 0);
+    assert(!characters_unicode_confusables(0xD800, &count));
+    assert(count == 0);
+    assert(!characters_unicode_confusables('A', NULL));
 }
 
 /** Run the headless native contract suite and report the catalog sizes. */
@@ -245,7 +246,7 @@ int main(void) {
     test_blocks();
     test_catalogs();
     test_encoding();
-    test_relationships();
+    test_confusables();
     puts("Six native Unicode test groups passed.");
     return 0;
 }
