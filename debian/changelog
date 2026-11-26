@@ -1,3 +1,12 @@
+majoris-characters (1.0.25-1) unstable; urgency=medium
+
+  * Serialize saved collection and history policy updates across picker processes.
+  * Verify actual Unicode cmap coverage for exact installed font files and faces.
+  * Run font comparisons on the existing cancellable source worker.
+  * Add concurrent persistence, stale font metadata, and worker regression tests.
+
+ -- Majoris Contributors <45165533+vovechkin02@users.noreply.github.com>  Fri, 27 Nov 2026 09:30:00 +1100
+
 majoris-characters (1.0.24-1) unstable; urgency=medium
 
   * Resolve configured IBus engines using read-only asynchronous registry metadata.

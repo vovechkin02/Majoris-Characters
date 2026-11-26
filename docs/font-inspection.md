@@ -20,8 +20,11 @@ Fontconfig-reported capabilities. Refresh explicitly or use the periodic
 
 Disable fallback (the default) to render the mapped scalar directly from the
 selected file and exact collection/named-instance index using FreeType. The grid
-uses actual Unicode cmap enumeration for the selected face. Comparisons use
-Fontconfig coverage discovery and exact rendering when fallback is disabled.
+uses actual Unicode cmap enumeration for the selected face. Comparisons use Fontconfig for inventory discovery, then independently check
+actual Unicode cmap mappings in each matching exact file and face. They use
+exact rendering when fallback is disabled. The comparison query runs on the
+existing worker and obsolete requests are canceled between faces; a stale
+Fontconfig charset cannot admit or exclude a mapped scalar.
 A mapped whitespace glyph can be transparent; an unsupported raster format or
 unavailable font is explicitly marked unavailable, never silently substituted.
 With fallback enabled, Pango renders as before and nominal face substitution is

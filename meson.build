@@ -1,7 +1,7 @@
 project(
   'majoris-characters',
   ['c', 'vala'],
-  version: '1.0.24',
+  version: '1.0.25',
   meson_version: '>=1.3.0',
   default_options: ['c_std=gnu11', 'warning_level=2'],
   license: 'GPL-3.0-or-later',
@@ -35,6 +35,7 @@ configuration.set('INPUT_ENGINE', get_option('prefix') / get_option('libexecdir'
 
 subdir('data')
 subdir('native/fonts')
+subdir('native/library')
 subdir('native/unicode')
 subdir('src')
 subdir('po')

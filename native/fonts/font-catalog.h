@@ -102,8 +102,10 @@ gboolean characters_fonts_is_color(const CharactersFontCatalog *catalog, gsize i
  * @index: Raw pattern index within this snapshot.
  * @point: Unicode scalar.
  *
- * Returns: Whether Fontconfig advertises a Unicode cmap mapping; symbol faces
- * are checked directly with FreeType. No fallback is used.
+ * Returns: Whether the exact installed file and face currently have a nonzero
+ * glyph index in the FreeType-selected Unicode cmap. Fontconfig coverage is not
+ * authoritative; symbol-only faces and unreadable files are excluded. Run on a
+ * worker because opening installed font files performs I/O. No fallback is used.
  * This does not guarantee a visible glyph, variation-selector mapping, or sequence shaping.
  */
 gboolean characters_fonts_contains(const CharactersFontCatalog *catalog, gsize index,

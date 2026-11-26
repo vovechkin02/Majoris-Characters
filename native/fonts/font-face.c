@@ -86,6 +86,27 @@ static void load_axes(CharactersFontFace *face)
     memcpy(face->initial, face->coordinates, count * sizeof(FT_Fixed));
 }
 
+/** Check one exact Unicode cmap without allocating axis or symbol metadata. */
+gboolean characters_font_file_contains(const gchar *file, gint index, gunichar point)
+{
+    if (!file || index < 0 || !characters_scalar_is_valid(point)) {
+        return FALSE;
+    }
+    FT_Library library;
+    if (FT_Init_FreeType(&library) != 0) {
+        return FALSE;
+    }
+    FT_Face face;
+    gboolean mapped = FALSE;
+    if (FT_New_Face(library, file, index, &face) == 0) {
+        mapped = FT_Select_Charmap(face, FT_ENCODING_UNICODE) == 0 &&
+            FT_Get_Char_Index(face, point) != 0;
+        FT_Done_Face(face);
+    }
+    FT_Done_FreeType(library);
+    return mapped;
+}
+
 CharactersFontFace *characters_font_face_open(const gchar *file, gint index)
 {
     if (!file || index < 0) {

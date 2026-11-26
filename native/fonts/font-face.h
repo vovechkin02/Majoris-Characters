@@ -7,6 +7,18 @@
 typedef struct CharactersFontFace CharactersFontFace;
 
 /**
+ * characters_font_file_contains:
+ * @file: (nullable): Installed font path.
+ * @index: Exact FreeType face/named-instance index.
+ * @point: Unicode scalar.
+ *
+ * Returns: Whether this exact file and face map the scalar to a nonzero glyph
+ * in the Unicode cmap. No axis enumeration, symbol fallback, or rasterization
+ * is performed. Each call owns its independent FreeType library and face.
+ */
+gboolean characters_font_file_contains(const gchar *file, gint index, gunichar point);
+
+/**
  * characters_font_face_open:
  * @file: Installed font path (native filesystem encoding).
  * @index: Exact FreeType face/named-instance index.

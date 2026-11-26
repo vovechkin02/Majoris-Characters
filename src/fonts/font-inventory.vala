@@ -70,18 +70,23 @@ namespace Characters {
         }
 
         /** Returns sorted application identities with exact coverage and a matching label. */
-        public uint[] comparisons (uint32 point, string query, string regular) {
+        public uint[] comparisons (uint32 point, string query, string regular,
+                                   Cancellable? cancellation = null) {
             var term = Unicode.casefold (query.strip ());
-            if (term == null) {
+            if (term == null || !Unicode.is_scalar (point)) {
                 return new uint[0];
             }
             var result = new uint[faces.length];
             int matched = 0;
             for (uint index = 0; index < count (); index++) {
-                if (!catalog.contains (faces[index].native_index, point)) {
+                if (cancellation != null && cancellation.is_cancelled ()) {
+                    return new uint[0];
+                }
+                if (term != "" && !(Unicode.casefold (
+                    faces[index].display_name (regular)) ?? "").contains (term)) {
                     continue;
                 }
-                if (term != "" && !(Unicode.casefold (faces[index].display_name (regular)) ?? "").contains (term)) {
+                if (!catalog.contains (faces[index].native_index, point)) {
                     continue;
                 }
                 result[matched++] = index;

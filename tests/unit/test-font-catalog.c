@@ -7,6 +7,7 @@
 #include <pango/pangoft2.h>
 
 #include <glib.h>
+#include <glib/gstdio.h>
 
 /** Validate raw installed face access and exact mapped-scalar enumeration. */
 static gsize test_coverage(CharactersFontCatalog *catalog) {
@@ -30,11 +31,13 @@ static gsize test_coverage(CharactersFontCatalog *catalog) {
     gsize length = 0;
     gunichar *points = characters_fonts_points(catalog, matching, &length);
     assert(points && length > 0);
+    CharactersFontFace *face = characters_fonts_open_face(catalog, matching);
+    assert(face);
     gboolean contains_a = FALSE;
     for (gsize index = 0; index < length; index++) {
         assert(points[index] <= 0x10FFFF);
         assert(points[index] < 0xD800 || points[index] > 0xDFFF);
-        assert(characters_fonts_contains(catalog, matching, points[index]));
+        assert(characters_font_face_glyph(face, points[index], FALSE) != 0);
         if (index) {
             assert(points[index] > points[index - 1]);
         }
@@ -43,6 +46,11 @@ static gsize test_coverage(CharactersFontCatalog *catalog) {
         }
     }
     assert(contains_a);
+    // Coverage opens the file, so check representative boundary mappings instead of reopening
+    // the same face for every enumerated scalar.
+    assert(characters_fonts_contains(catalog, matching, points[0]));
+    assert(characters_fonts_contains(catalog, matching, points[length - 1]));
+    characters_font_face_free(face);
     assert(!characters_fonts_contains(catalog, matching, 0xD800));
     assert(!characters_fonts_contains(catalog, matching, G_MAXUINT32));
     printf("%zu installed faces; selected DejaVu face has %zu mapped scalars\n", count, length);
@@ -90,8 +98,53 @@ static void test_invalid(CharactersFontCatalog *catalog) {
     characters_fonts_free(NULL);
 }
 
+/** Find a fixture by exact installed path and face, independent of Fontconfig ordering. */
+static gsize find_fixture(CharactersFontCatalog *catalog, const gchar *path, gint face_index)
+{
+    for (gsize index = 0; index < characters_fonts_count(catalog); index++) {
+        if (g_strcmp0(characters_fonts_file(catalog, index), path) == 0 &&
+            characters_fonts_face_index(catalog, index) == face_index) {
+            return index;
+        }
+    }
+    return G_MAXSIZE;
+}
+
+/** Replace a fixture without refreshing the catalog, testing stale positive and negative metadata. */
+static void test_stale_coverage(const gchar *unicode_path, const gchar *symbol_path,
+                                const gchar *unicode_fixture, const gchar *symbol_fixture)
+{
+    CharactersFontCatalog *catalog = characters_fonts_load();
+    assert(catalog);
+    gsize unicode_index = find_fixture(catalog, unicode_path, 0);
+    gsize symbol_index = find_fixture(catalog, symbol_path, 0);
+    assert(unicode_index != G_MAXSIZE && symbol_index != G_MAXSIZE);
+    assert(characters_fonts_contains(catalog, unicode_index, 'A'));
+    assert(!characters_fonts_contains(catalog, symbol_index, 'A'));
+    gchar *bytes = NULL;
+    gsize length = 0;
+    assert(g_file_get_contents(symbol_fixture, &bytes, &length, NULL));
+    assert(g_file_set_contents(unicode_path, bytes, (gssize)length, NULL));
+    g_free(bytes);
+    bytes = NULL;
+    assert(g_file_get_contents(unicode_fixture, &bytes, &length, NULL));
+    assert(g_file_set_contents(symbol_path, bytes, (gssize)length, NULL));
+    g_free(bytes);
+    assert(!characters_fonts_contains(catalog, unicode_index, 'A'));
+    assert(characters_fonts_contains(catalog, symbol_index, 'A'));
+    assert(g_remove(symbol_path) == 0);
+    assert(!characters_fonts_contains(catalog, symbol_index, 'A'));
+    characters_fonts_free(catalog);
+}
+
 /** Exercises the installed inventory through its actual Fontconfig and PangoFc dependencies. */
-int main(void) {
+int main(int argc, char **argv) {
+    if (argc == 6 && strcmp(argv[1], "--stale-coverage") == 0) {
+        test_stale_coverage(argv[2], argv[3], argv[4], argv[5]);
+        puts("Stale font catalog coverage contracts passed");
+        return 0;
+    }
+    assert(argc == 1);
     CharactersFontCatalog *catalog = characters_fonts_load();
     assert(catalog);
     gsize face = test_coverage(catalog);

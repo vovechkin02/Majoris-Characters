@@ -113,6 +113,26 @@ static void test_invalid(void) {
     characters_font_face_free(NULL);
 }
 
+/** Verify lightweight coverage against exact faces, including empty mapped glyphs. */
+static void test_exact_coverage(const gchar *collection, const gchar *variable,
+                                const gchar *symbol)
+{
+    assert(characters_font_file_contains(collection, 0, 'A'));
+    assert(characters_font_file_contains(collection, 1, 'A'));
+    assert(characters_font_file_contains(collection, 0, ' '));
+    assert(!characters_font_file_contains(collection, 0, 'Z'));
+    assert(!characters_font_file_contains(collection, 2, 'A'));
+    assert(characters_font_file_contains(variable, 0, 'A'));
+    assert(characters_font_file_contains(variable, 0x10000, 'A'));
+    assert(!characters_font_file_contains(symbol, 0, 'A'));
+    assert(!characters_font_file_contains(symbol, 0, 0xF041));
+    assert(!characters_font_file_contains(collection, 0, 0xD800));
+    assert(!characters_font_file_contains(collection, 0, G_MAXUINT32));
+    assert(!characters_font_file_contains(NULL, 0, 'A'));
+    assert(!characters_font_file_contains(collection, -1, 'A'));
+    assert(!characters_font_file_contains("/nonexistent/font.ttf", 0, 'A'));
+}
+
 /** Execute deterministic exact-face, variable-font and symbol-map contract tests. */
 int main(int argc, char **argv) {
     assert(argc == 4);
@@ -120,6 +140,7 @@ int main(int argc, char **argv) {
     test_variable(argv[2]);
     test_symbol(argv[3]);
     test_invalid();
-    puts("4 exact font face contract groups passed");
+    test_exact_coverage(argv[1], argv[2], argv[3]);
+    puts("5 exact font face contract groups passed");
     return 0;
 }

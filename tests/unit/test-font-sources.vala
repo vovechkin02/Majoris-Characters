@@ -102,6 +102,42 @@ private void test_exact_face_bindings () {
     assert (symbol.glyph (0xF041, true) == 1 && symbol.glyph (0xF041, false) == 0);
 }
 
+/** Superseded comparison jobs must not publish or return partially scanned IDs. */
+private void test_latest_comparison () {
+    var catalog = Fonts.load ();
+    assert (catalog != null);
+    var inventory = new FontInventory ((owned) catalog);
+    var canceled = new FontSourceRequest.for_comparison (inventory, 0x41, "", "Regular");
+    canceled.cancel ();
+    assert (!canceled.run () && canceled.take_comparisons () == null);
+    var loader = new FontSourceLoader ();
+    uint publications = 0;
+    FontSourceRequest? received = null;
+    loader.completed.connect ((request, success) => {
+        assert (success && request.kind == FontSourceKind.COMPARISON);
+        publications++;
+        received = request;
+    });
+    loader.submit (new FontSourceRequest.for_comparison (inventory, 0x41, "", "Regular"));
+    loader.submit (new FontSourceRequest.for_comparison (inventory, 0x41,
+        "DejaVu Sans", "Regular"));
+    var context = MainContext.default ();
+    var deadline = get_monotonic_time () + WAIT_TIMEOUT_US;
+    while (received == null && get_monotonic_time () < deadline) {
+        context.iteration (false);
+        Thread.usleep (POLL_INTERVAL_US);
+    }
+    assert (received != null && publications == 1 && received.inventory == inventory);
+    var ids = received.take_comparisons ();
+    assert (ids != null && ids.length > 0 && received.take_comparisons () == null);
+    foreach (var id in ids) {
+        var face = inventory.open_face (id);
+        assert (face != null && face.glyph (0x41, false) != 0);
+        assert (inventory.record (id).display_name ("Regular").casefold ().contains ("dejavu sans"));
+    }
+    loader.shutdown ();
+}
+
 /** Checks the complete ordered inventory, grouping, and remapped native identities. */
 private void test_inventory_policy () {
     var catalog = Fonts.load ();
@@ -200,5 +236,6 @@ int main (string[] args) {
     Test.add_func ("/characters/fonts/sequence-bindings", test_sequence_bindings);
     Test.add_func ("/characters/fonts/exact-face-bindings", test_exact_face_bindings);
     Test.add_func ("/characters/fonts/inventory-policy", test_inventory_policy);
+    Test.add_func ("/characters/fonts/latest-comparison", test_latest_comparison);
     return Test.run ();
 }

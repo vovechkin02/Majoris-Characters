@@ -316,6 +316,10 @@ namespace Characters {
             if (stopped) {
                 return;
             }
+            if (request.kind == FontSourceKind.COMPARISON &&
+                (mode != FontBrowserMode.VARIATIONS || request.inventory != inventory)) {
+                return;
+            }
             if (request.kind == FontSourceKind.INVENTORY) {
                 inventory_refreshing = false;
                 face_controls.sensitive = true;
@@ -357,6 +361,11 @@ namespace Characters {
                     } else {
                         submit_search ();
                     }
+                    break;
+                case FontSourceKind.COMPARISON:
+                    comparison_ids = request.take_comparisons () ?? new uint[0];
+                    comparison_count = (uint) comparison_ids.length;
+                    show_page ();
                     break;
                 case FontSourceKind.ENCODING:
                     repertoire = request.take_points ();
@@ -537,13 +546,14 @@ namespace Characters {
                 return;
             }
             clear_page ();
-            unowned FontInventory catalog = inventory;
-            comparison_ids = catalog.comparisons (compare_point, font_query.text, _("Regular"));
-            comparison_count = (uint) comparison_ids.length;
+            comparison_ids = {};
+            comparison_count = 0;
             source_note.label = _("%s — compare faces that map this scalar. " +
                 "Sequence shaping is not inferred from scalar coverage.").printf (
                 Search.code (compare_point) ?? "");
-            show_page ();
+            set_loading (_("Searching…"));
+            loader.submit (new FontSourceRequest.for_comparison (inventory, compare_point,
+                font_query.text, _("Regular")));
         }
 
         /** Receives only the latest successful native search and displays its first page. */

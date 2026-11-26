@@ -2510,3 +2510,11 @@ msgstr "Systèmes d’écriture, et non alphabet exact d’une langue."
 #: src/views/main-window.vala
 msgid "Includes registered XKB layouts and available IBus engines."
 msgstr "Inclut les dispositions XKB enregistrées et les moteurs IBus disponibles."
+
+#: src/views/preferences-dialog.vala
+msgid "Unable to Update History Settings. Try Again or Check Settings Permissions."
+msgstr "Impossible de mettre à jour les paramètres de l’historique. Réessayez ou vérifiez les autorisations des paramètres."
+
+#: src/views/preferences-dialog.vala
+msgid "Recording Disabled; Unable to Clear History. Check Settings Permissions."
+msgstr "Enregistrement désactivé ; impossible d’effacer l’historique. Vérifiez les autorisations des paramètres."

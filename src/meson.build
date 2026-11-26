@@ -41,7 +41,7 @@ font_sources = files(
   'fonts/font-source-loader.vala',
   'fonts/font-source-request.vala',
 )
-library_sources = files(
+library_sources = library_vapi + files(
   'library/library-store.vala',
   'library/usage-entry.vala',
 )
@@ -75,7 +75,7 @@ app_vala_args = [
   '--gresourcesdir=' + (meson.project_source_root() / 'data'),
 ]
 app_c_args = ['-DGETTEXT_PACKAGE="' + gettext_package + '"']
-app_dependencies = [adwaita_dep, gio_dep, gtk_dep, ibus_dep, font_dep, unicode_dep]
+app_dependencies = [adwaita_dep, gio_dep, gtk_dep, ibus_dep, font_dep, library_dep, unicode_dep]
 
 characters_executable = executable(
   meson.project_name(),

@@ -6,7 +6,7 @@ Unicode, international browsing, emoji data, and exact font inspection improveme
 
 | Project metadata | Value |
 | --- | --- |
-| Version | 1.0.24 |
+| Version | 1.0.25 |
 | Platform target | Majoris OS / Debian 13 (Trixie) |
 | Development status | GLib native standardization — qualification candidate (not a verified stable release) |
 | Application ID | `com.majoris.characters` |
@@ -146,7 +146,7 @@ Install the build tools on Debian 13:
 sudo apt-get install build-essential valac meson ninja-build pkgconf \
   libgtk-4-dev libadwaita-1-dev libglib2.0-dev libglib2.0-bin libibus-1.0-dev libicu-dev gettext \
   libfontconfig-dev libfreetype-dev libpango1.0-dev fonts-dejavu-core fonts-noto-color-emoji \
-  python3 xvfb xauth dbus-daemon debhelper
+  python3 xvfb xauth dbus-daemon dconf-gsettings-backend debhelper
 ```
 
 Configure, compile and test (no network is used by the build):
@@ -174,7 +174,7 @@ For Debian binary packages (run from the repository root):
 
 ```sh
 dpkg-buildpackage -us -uc -b
-sudo apt install ../majoris-characters_1.0.24-1_$(dpkg --print-architecture).deb
+sudo apt install ../majoris-characters_1.0.25-1_$(dpkg --print-architecture).deb
 ```
 
 The source package uses `3.0 (quilt)` and requires the corresponding upstream
@@ -335,9 +335,9 @@ After installing the Debian package, the same runtime tests can target the real
 installed executable:
 
 ```sh
-python3 tests/integration/test_application.py /usr/bin/majoris-characters 1.0.24 cli
+python3 tests/integration/test_application.py /usr/bin/majoris-characters 1.0.25 cli
 xvfb-run -a dbus-run-session -- python3 \
-  tests/integration/test_application.py /usr/bin/majoris-characters 1.0.24 gui
+  tests/integration/test_application.py /usr/bin/majoris-characters 1.0.25 gui
 ```
 
 For a fresh, fail-closed automated build/test and optional Debian package gate:
@@ -399,3 +399,6 @@ The 1.0.23 Unicode 17 algorithm changes and conformance workflow are described i
 The 1.0.24 configured keyboard collection resolves XKB layouts and live IBus
 engine language descriptors without changing desktop settings. See
 [IBus-aware browsing](docs/ibus-aware-browsing.md) for behavior and qualification.
+
+The 1.0.25 collection transactions and exact font comparison changes are
+documented in [persistence and coverage refinements](docs/persistence-and-font-coverage.md).

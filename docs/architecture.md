@@ -376,8 +376,9 @@ owns insertion and cancellation; no general input-injection service or extra
 D-Bus API is introduced. This is direct composition with two delivery paths,
 not a speculative Strategy hierarchy. The standard picker retains its existing
 single-instance and clipboard hold contract, including nested dialog copies.
-The existing library settings backend is shared across processes; concurrent
-mutations are subject to its existing last-writer behavior. No new runtime
+The existing library settings backend is shared across processes. Since 1.0.25,
+cooperating application collection writers serialize mutations through the
+per-user lock and fresh settings transaction described below. No new runtime
 dependency or schema migration is required. GUI lifecycle, exact handoff, and
 client output tests are registered in the existing integration test profiles.
 
@@ -540,3 +541,24 @@ queries only while the configured keyboard collection is active, discards
 canceled or obsolete responses, and clears registry data on disconnection.
 The native language lookup, script masks and scanner remain unchanged.
 See [IBus-aware browsing](ibus-aware-browsing.md).
+
+## Coordinated collections and exact font comparisons (1.0.25)
+
+`LibraryStore` owns mutation policy and stages changes on an independent
+GSettings instance. `native/library/collection-lock.c` is the focused POSIX/GIO
+Adapter: it acquires and releases a stable advisory lock and reopens keyfile
+backends for fresh reads. The native compact binding owns the descriptor.
+The existing GSettings Observer remains responsible for view refreshes;
+external policy cleanup is deferred and bounded rather than recursively
+acquiring the lock inside change notifications. Preferences route history
+changes through the same transaction. The persistent schema and data formats
+are unchanged. The normal GNOME dconf backend commits per-key changes;
+keyfile guarantees are limited to cooperating collection writers.
+
+The font inventory no longer uses Fontconfig's cached charset as the authority
+for comparisons. It filters label queries and verifies the exact file and face's
+FreeType Unicode cmap on the existing `FontSourceLoader` worker. Superseded
+requests are canceled between faces and cannot publish old results. This uses
+the same immutable inventory, source request, and native Adapter contracts;
+there is no new pluggable backend or additional thread pool. See
+[persistence and coverage refinements](persistence-and-font-coverage.md).

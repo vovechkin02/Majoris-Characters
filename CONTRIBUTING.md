@@ -95,3 +95,11 @@ by guessing from engine names or physical keyboard layout. Use cancellable
 bounded IPC, immutable worker snapshots, and read-only desktop settings.
 Unavailable or neutral engines contribute no scripts. Keep IBus library
 ownership annotations accurate; do not pass live descriptors to search workers.
+
+Keep saved collection and history-policy read-modify-write operations inside
+`LibraryStore`'s coordinated transaction. Do not write the four collection
+keys directly from views or private pickers. The native adapter owns the
+advisory descriptor and backend snapshots, not collection policy. Font
+comparison verification must open the exact file and face on the source
+worker, never trust cached Fontconfig charset membership as proof of a glyph
+or perform installed-font I/O on the GTK main context.

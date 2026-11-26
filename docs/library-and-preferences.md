@@ -85,6 +85,23 @@ and privacy policy. `UsageEntry` is an independent immutable count snapshot.
 `LibraryDialog` uses a bounded GtkStringList, GtkSingleSelection and recyclable
 GtkListView, derives safe display from the existing inspector, and preserves
 selection by exact text when records change. `PreferencesDialog` uses native
-bidirectional GSettings bindings. The main window owns the shared repository
+bidirectional GSettings bindings for ordinary preferences, and read bindings
+with explicit coordinated transactions for history policy. The main window owns the shared repository
 and passes it to transient dialogs and the composer. No duplicate storage
 service or custom event bus is introduced.
+
+## Cross-process coordination (1.0.25)
+
+All application collection mutations use one private advisory lock under
+`$XDG_CONFIG_HOME/majoris-characters/collections.lock` (or the GLib default
+configuration directory). Read, modify, delayed apply, backend synchronization
+and read-back verification occur within the transaction. The existing
+`favorites`, `usage-history`, `history-enabled` and `history-limit` keys remain
+unchanged. A lock failure rejects the mutation; it never falls back to an
+uncoordinated write. A killed process releases its descriptor automatically.
+Do not delete the lock file while any process may be using it. The file carries
+no character or history data. The default GNOME dconf backend is the intended
+multi-process backend; arbitrary direct external writers, older app versions,
+and unrelated whole-file writes from an explicitly selected keyfile backend
+are not part of the advisory-lock contract. See
+[persistence and coverage refinements](persistence-and-font-coverage.md).

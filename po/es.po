@@ -2222,3 +2222,11 @@ msgstr "Sistemas de escritura, no un alfabeto exacto de un idioma."
 #: src/views/main-window.vala
 msgid "Includes registered XKB layouts and available IBus engines."
 msgstr "Incluye distribuciones XKB registradas y motores IBus disponibles."
+
+#: src/views/preferences-dialog.vala
+msgid "Unable to Update History Settings. Try Again or Check Settings Permissions."
+msgstr "No se pudieron actualizar los ajustes del historial. Inténtelo de nuevo o compruebe los permisos de los ajustes."
+
+#: src/views/preferences-dialog.vala
+msgid "Recording Disabled; Unable to Clear History. Check Settings Permissions."
+msgstr "Registro desactivado; no se pudo borrar el historial. Compruebe los permisos de los ajustes."

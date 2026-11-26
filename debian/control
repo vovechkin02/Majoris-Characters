@@ -4,6 +4,7 @@ Priority: optional
 Maintainer: Vlad Ovechkin <45165533+vovechkin02@users.noreply.github.com>
 Build-Depends: debhelper-compat (= 13),
                dbus-daemon,
+               dconf-gsettings-backend,
                fonts-dejavu-core,
                gettext,
                libadwaita-1-dev (>= 1.7),

@@ -18,6 +18,7 @@ namespace Characters {
             if (closed) {
                 return;
             }
+            active?.cancel ();
             pending = request;
             start_pending ();
         }
@@ -25,6 +26,7 @@ namespace Characters {
         /** Clears queued work and discards completion from any uninterruptible native call. */
         public void cancel () {
             pending = null;
+            active?.cancel ();
             discard_active = true;
         }
 

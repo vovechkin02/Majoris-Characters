@@ -277,10 +277,32 @@ class SourceContractsTest(unittest.TestCase):
         self.assertNotIn("FcFontSetAdd(", native)
         self.assertIn("catalog.open_face (faces[index].native_index)", inventory)
         self.assertIn("catalog.matches (faces[index].native_index, font)", inventory)
-        self.assertIn("catalog.comparisons (compare_point,", browser)
+        self.assertIn("FontSourceRequest.for_comparison (inventory, compare_point,", browser)
+        self.assertIn("inventory.comparisons (comparison_point, comparison_query,", request)
         self.assertIn("catalog.find_selection (previous_file,", browser)
         self.assertIn("inventory.open_face (index)", request)
         self.assertNotIn("get_catalog ()", browser + request)
+
+    def test_collection_coordination_and_exact_font_coverage(self) -> None:
+        """Keep all collection writes coordinated and exact cmap I/O off the GTK context."""
+        library = (ROOT / "src/library/library-store.vala").read_text()
+        lock = (ROOT / "native/library/collection-lock.c").read_text()
+        preferences = (ROOT / "src/views/preferences-dialog.vala").read_text()
+        catalog = (ROOT / "native/fonts/font-catalog.c").read_text()
+        face = (ROOT / "native/fonts/font-face.c").read_text()
+        self.assertIn("Collections.acquire (settings)", library)
+        self.assertIn("target.delay ()", library)
+        self.assertIn("target.apply ()", library)
+        self.assertIn("GLib.Settings.sync ()", library)
+        self.assertIn("flock(descriptor, LOCK_EX | LOCK_NB)", lock)
+        self.assertIn("O_NOFOLLOW", lock)
+        self.assertIn("reopen_keyfile(backend)", lock)
+        self.assertNotIn("settings.set_strv (", library)
+        self.assertIn("library.set_history_enabled", preferences)
+        self.assertIn("library.set_history_limit", preferences)
+        self.assertNotIn("FcCharSetHasChar", catalog)
+        self.assertIn("characters_font_file_contains", catalog)
+        self.assertIn("FT_Get_Char_Index(face, point) != 0", face)
 
     def test_native_adapter_consolidation(self) -> None:
         """Require one native conversion boundary and no exported raw symbol pointer."""
@@ -303,7 +325,10 @@ class SourceContractsTest(unittest.TestCase):
         self.assertIn("characters_icu_encode_utf16(", legacy)
         for name in ("font-catalog", "font-face"):
             source = (ROOT / f"native/fonts/{name}.c").read_text()
-            self.assertIn("characters_scalar_is_valid(", source)
+            if name == "font-face":
+                self.assertIn("characters_scalar_is_valid(", source)
+            else:
+                self.assertIn("characters_font_file_contains(", source)
             self.assertNotIn("static gboolean is_scalar(", source)
         header = (ROOT / "native/fonts/font-face.h").read_text()
         self.assertNotIn("characters_font_face_symbol_points(", header)

@@ -9,8 +9,6 @@
 #include <pango/pangofc-font.h>
 #include <pango/pangofc-fontmap.h>
 
-#include "../scalar-validity.h"
-
 /** Owns the isolated Fontconfig configuration and immutable result patterns. */
 struct CharactersFontCatalog {
     /** Independent configuration loaded from the installed system and user font locations. */
@@ -33,14 +31,6 @@ static gint get_face_index(FcPattern *pattern)
     gint index;
     return pattern && FcPatternGetInteger(pattern, FC_INDEX, 0, &index) == FcResultMatch ?
         index : -1;
-}
-
-/** Return a borrowed coverage set belonging to its installed pattern. */
-static FcCharSet *get_charset(FcPattern *pattern)
-{
-    FcCharSet *charset = NULL;
-    return pattern && FcPatternGetCharSet(pattern, FC_CHARSET, 0, &charset) == FcResultMatch ?
-        charset : NULL;
 }
 
 /** Retrieve one pattern only within the bounds of the immutable snapshot. */
@@ -156,17 +146,10 @@ gboolean characters_fonts_is_color(const CharactersFontCatalog *catalog, gsize i
 
 gboolean characters_fonts_contains(const CharactersFontCatalog *catalog, gsize index, gunichar point)
 {
-    FcCharSet *charset = get_charset(get_face(catalog, index));
-    if (!charset || !characters_scalar_is_valid(point) || !FcCharSetHasChar(charset, point)) {
-        return FALSE;
-    }
-    if (get_bool(get_face(catalog, index), FC_SYMBOL)) {
-        CharactersFontFace *face = characters_fonts_open_face(catalog, index);
-        gboolean mapped = characters_font_face_glyph(face, point, FALSE) != 0;
-        characters_font_face_free(face);
-        return mapped;
-    }
-    return TRUE;
+    // Fontconfig describes the inventory, but its cached coverage may be stale.
+    // Verify the current file and exact face index, including named-instance bits.
+    return characters_font_file_contains(characters_fonts_file(catalog, index),
+        characters_fonts_face_index(catalog, index), point);
 }
 
 gunichar *characters_fonts_points(const CharactersFontCatalog *catalog, gsize index,

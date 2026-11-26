@@ -38,7 +38,7 @@ namespace Characters.Fonts {
         [CCode (cname = "characters_fonts_is_color")]
         public bool is_color (size_t index);
 
-        /** Checks exact face coverage without fallback. */
+        /** Checks the exact file and Unicode cmap without fallback; run on a worker. */
         [CCode (cname = "characters_fonts_contains")]
         public bool contains (size_t index, uint32 point);
 

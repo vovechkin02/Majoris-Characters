@@ -69,8 +69,8 @@ namespace Characters {
         public PreferencesDialog (GLib.Settings settings, LibraryStore library) {
             this.settings = settings;
             this.library = library;
-            settings.bind ("history-enabled", history_enabled, "active", SettingsBindFlags.DEFAULT);
-            settings.bind ("history-limit", history_limit, "value", SettingsBindFlags.DEFAULT);
+            settings.bind ("history-enabled", history_enabled, "active", SettingsBindFlags.GET);
+            settings.bind ("history-limit", history_limit, "value", SettingsBindFlags.GET);
             settings.bind ("grid-preview-size", grid_size, "value", SettingsBindFlags.DEFAULT);
             settings.bind ("font-preview-size", font_size, "value", SettingsBindFlags.DEFAULT);
             settings.bind ("font-fallback", font_fallback, "active", SettingsBindFlags.DEFAULT);
@@ -87,14 +87,34 @@ namespace Characters {
             settings.bind ("show-fonts", show_fonts, "active", SettingsBindFlags.DEFAULT);
             settings.bind ("show-encodings", show_encodings, "active", SettingsBindFlags.DEFAULT);
             clear_history.clicked.connect (confirm_clear);
-            history_enabled.notify["active"].connect (check_privacy);
+            history_enabled.notify["active"].connect (change_history_enabled);
+            history_limit.notify["value"].connect (change_history_limit);
         }
 
-        /** Reports a locked history key if recording was disabled but old records remain. */
-        private void check_privacy () {
-            if (!history_enabled.active && settings.get_strv ("usage-history").length > 0) {
+        /** Commit opt-out and clearing together; restore the actual policy on rejection. */
+        private void change_history_enabled () {
+            if (history_enabled.active == library.history_enabled ()) {
+                return;
+            }
+            if (!library.set_history_enabled (history_enabled.active)) {
+                history_enabled.active = library.history_enabled ();
+                var message = !history_enabled.active ?
+                    _("Recording Disabled; Unable to Clear History. Check Settings Permissions.") :
+                    _("Unable to Update History Settings. Try Again or Check Settings Permissions.");
+                preferences_toasts.add_toast (new Adw.Toast (message));
+            }
+        }
+
+        /** Commit retention and trimming together rather than writing the policy separately. */
+        private void change_history_limit () {
+            var limit = (int) history_limit.value;
+            if (limit == library.history_limit ()) {
+                return;
+            }
+            if (!library.set_history_limit (limit)) {
+                history_limit.value = library.history_limit ();
                 preferences_toasts.add_toast (new Adw.Toast (
-                    _("Recording Disabled; Unable to Clear History. Check Settings Permissions.")));
+                    _("Unable to Update History Settings. Try Again or Check Settings Permissions.")));
             }
         }
 

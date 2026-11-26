@@ -187,6 +187,12 @@ font_catalog_test = executable(
   c_args: ['-UNDEBUG'],
 )
 test('Installed font catalog contracts', font_catalog_test, suite: 'unit', timeout: 30)
+test('Exact coverage with stale font catalog', python,
+  args: [files('integration/test_font_coverage.py'), font_catalog_test,
+         meson.current_source_dir() / 'fixtures/fonts'],
+  depends: font_catalog_test,
+  suite: 'integration', timeout: 30,
+)
 
 font_sources_test = executable(
   'test-font-sources',
@@ -246,7 +252,7 @@ library_store_test = executable(
   'unit/test-library-store.vala',
   library_sources,
   app_config,
-  dependencies: gio_dep,
+  dependencies: [gio_dep, library_dep],
   c_args: ['-UNDEBUG'],
 )
 test('Saved collection ordering and privacy', library_store_test,
@@ -260,7 +266,7 @@ test('Saved collections across process restarts', python,
   env: test_environment,
   depends: [library_store_test, schema_target],
   suite: 'integration',
-  timeout: 45,
+  timeout: 180,
 )
 
 test('Input source response protocol', python,
