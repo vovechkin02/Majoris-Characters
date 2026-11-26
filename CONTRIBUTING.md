@@ -73,3 +73,11 @@ recoverable allocation, and bounded cancellation. Prefer immutable property
 spans and borrowed catalog scalars over per-candidate conversion. Any further
 migration of the hot scan loops requires a compiled behavioral and performance
 baseline; language statistics alone are not a justification.
+
+
+Official data updates use the pinned maintainer import workflow in
+`docs/official-data-import.md`. Keep formal Unihan properties and fallback
+collation metadata distinct. Verify the source archive digests, stage generated
+outputs before replacement, preserve Unicode notices, and report actual locale
+coverage without treating English search fallback as a translation. Do not
+mark a dataset as imported until its original release inputs were processed.

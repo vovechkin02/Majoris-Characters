@@ -13,6 +13,8 @@ engine.
 | Generated scalar snapshot | 17.0.0 | Assignment, general category, primary script, script extensions, age, combining class, bidi, decomposition type, East Asian width, supported binary flags |
 | ICU system library | Unicode 16.0 on Debian 13 | Stable names, normalization primitives, grapheme segmentation, legacy encodings, case folding |
 | Alias supplement | 15.0 baseline plus verified 16/17 deltas | 481 aliases |
+| Official Unihan | 17.0.0 | 102,998 records; ten formal fields |
+| CLDR emoji annotations | 48 | 171 locale tables; complete English catalog coverage |
 | Named-sequence supplement | 15.0 baseline reviewed through 17.0 | 461 records; full official-file comparison pending |
 
 The snapshot is generated from regex 2026.5.9 Unicode 17 property tables,
@@ -30,9 +32,10 @@ The CLI reports effective property and catalog versions. The supplement version
 identifies its target release, not a byte-for-byte official-file verification.
 The raw UCD archive could not be acquired in the delivery environment. Full
 UCD source comparison and the official normalization conformance suite remain
-required for formal conformance. Script-extension-aware browsing and a partial
-Han database with official Unihan import are provided in Priority 2; full CLDR
-annotations and official emoji variation data remain separate priorities.
+required for formal conformance. Script-extension-aware browsing and a
+Han database with official Unihan metadata are provided in Priority 2.
+The verified CLDR 48 annotations and Unicode 17 Unihan data are bundled as of
+1.0.22; official emoji variation and UCD conformance remain separate work.
 
 ## Query API
 

@@ -29,13 +29,12 @@ https://github.com/unicode-org/icu for its licensing and source.
 
 ## Emoji annotations
 
-Stage 6 includes annotation records exported from Debian GTK 3.24.49-3 emoji
-chooser resources (Emojibase-derived). The original GTK Debian copyright file
-is preserved in `data/unicode/emoji/GTK-DEBIAN-COPYRIGHT`; it identifies the
-Emojibase source as Expat-licensed, copyright 2017–2019 Miles Johnson. Unicode
-source data retain their Unicode license, included under `data/unicode/supplement/`.
-The source export and generated lookup tables are data, not a GTK3 runtime
-requirement. See `data/unicode/emoji/README.md` for exact provenance and regeneration.
+The production annotation tables and compressed snapshot are derived from the
+verified CLDR 48 base and derived annotation release (Unicode-3.0, copyright
+1991–2025 Unicode, Inc.). The original GTK Debian copyright file is retained in
+`data/unicode/emoji/GTK-DEBIAN-COPYRIGHT` for historical provenance of the
+superseded Emojibase-derived snapshot. No GTK3 runtime dependency is introduced.
+See `data/unicode/emoji/README.md` and the import manifest for exact provenance.
 
 ## International browsing data
 
@@ -46,8 +45,7 @@ LPPL 1.3c or later). Their original source tables are retained unchanged in
 labels, and the XKB registry supplies configured keyboard language mappings.
 Full original copyright notices, source hashes, and the LPPL license are
 retained in `data/unicode/han/`. The derived snapshot and generated tables
-retain the source data attribution and licensing. Official Unihan files are
-not bundled; any later imported official data retain the Unicode data license.
+retain the source data attribution and licensing. The verified official Unihan 17.0.0 archive is bundled and retains the Unicode data license.
 
 ## Priority 3 emoji sequence and annotation data
 
@@ -59,8 +57,8 @@ base annotations derive from CLDR 48 `common/annotations/en.xml`
 (Copyright 1991–2025 Unicode, Inc.), at
 https://github.com/unicode-org/cldr/blob/release-48/common/annotations/en.xml.
 These Unicode data are licensed under Unicode-3.0; see the included license
-under `data/unicode/supplement/`. The remaining annotation data retain the
-original GTK/Emojibase attribution and licensing.
+under `data/unicode/supplement/`. The historical eight-entry source remains attributed; production annotation
+data now derive from the complete verified CLDR annotation import.
 
 ## Priority 8 localization
 
@@ -72,3 +70,14 @@ preserved in `po/LICENSE.babel` for provenance. No Babel library or Python
 implementation is shipped or required to build or run Characters. Original
 interface translations and property descriptions are project-owned; all three
 catalogs are partial and require native-speaker review.
+
+## Official data archive workflow (1.0.22)
+
+The verified official inputs are Unicode 17.0.0 `Unihan.zip` and CLDR 48
+`cldr-common-48.zip`, copyright 1991–2025 Unicode, Inc., Unicode-3.0.
+Their source URLs and pinned digests are documented in
+`docs/official-data-import.md`. The retained Unicode License V3 notice in
+`data/unicode/supplement/LICENSE.unicode` applies to official data and derived
+lookup tables. The archive workflow has populated the official datasets in this release.
+The Unihan archive and resolved CLDR snapshot are retained; fallback Han data
+and historical source notices remain unchanged.

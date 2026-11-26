@@ -23,13 +23,13 @@ application and GJS are not runtime dependencies of the main application. The op
 - Priority 1: Unicode 17 scalar properties and normalization core implemented;
   official normalization and supplement conformance remains outstanding.
 - Priority 2: International browsing, script extensions, configured XKB scopes,
-  Han search and metadata import implemented; full official Unihan acquisition
-  and runtime GUI qualification remain outstanding. See international-browsing.md.
+  Han search and metadata import implemented; the verified official Unihan
+  17.0.0 dataset is bundled in 1.0.22. Runtime GUI qualification remains outstanding. See international-browsing.md.
 
 - Priority 3: Standardized presentation and selector-omission lookup, exact
-  search, structural families, CLDR 48 English additions, and locale coverage
-  tooling implemented. Full multilingual CLDR import and official emoji-test
-  file comparison remain outstanding.
+  search, structural families and locale coverage tooling implemented. The
+  verified CLDR 48 base and derived annotations are bundled in 1.0.22.
+  Official emoji-test file comparison and target qualification remain outstanding.
 - Priority 4: Exact selected-face rasterization, variable-axis controls and raw
   Microsoft Symbol cmap inspection implemented at source level; native font and
   GTK qualification remain outstanding.

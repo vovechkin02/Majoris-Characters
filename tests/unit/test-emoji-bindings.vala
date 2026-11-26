@@ -89,7 +89,8 @@ private void test_annotation_policy () {
     var french = Emoji.locale_index ("fr");
     var chinese = Emoji.locale_index ("zh");
     var locales = Emoji.annotation_locales ("FR-ca.UTF-8");
-    assert (locales.length == 2 && locales[0] == french && locales[1] == english);
+    assert (locales.length >= 2 && locales[locales.length - 2] == french &&
+        locales[locales.length - 1] == english);
     locales = Emoji.annotation_locales ("zh_Hant_TW");
     assert (locales.length >= 2 && locales[locales.length - 2] == chinese &&
         locales[locales.length - 1] == english);
@@ -98,7 +99,7 @@ private void test_annotation_policy () {
     locales = Emoji.annotation_locales ("unknown");
     assert (locales.length == 1 && locales[0] == english);
     locales = Emoji.annotation_locales ("en_US@custom");
-    assert (locales.length == 1 && locales[0] == english);
+    assert (locales[locales.length - 1] == english);
     assert (Emoji.fold_term ("ÉMOTICÔNE") == "émoticône");
     assert (Emoji.fold_term ("ＦＵＬＬ") == "full");
     assert (Emoji.fold_term ("") == null);

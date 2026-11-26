@@ -1,7 +1,7 @@
 # Han and language data provenance
 
-This directory contains a reproducible fallback snapshot, not official Unihan
-17.0.0 data. `sources/xpinyin-database.def` is the unmodified Unicode 14-derived
+This directory contains the verified original Unicode 17.0.0 Unihan archive
+`official-unihan.zip` and an independently attributed reproducible fallback snapshot. `sources/xpinyin-database.def` is the unmodified Unicode 14-derived
 xpinyin database (copyright 2012–2022 Qing Lee); the three `hanja*_hangul.tab`
 files are unmodified XeTeXko 4.4 tables (copyright 2013–2025 Dohyun Kim).
 Both are distributed under the LaTeX Project Public License 1.3c or later.
@@ -16,3 +16,9 @@ identifies the source inputs. No external runtime is needed to read the snapshot
 
 The official-data importer accepts separately acquired Unicode 17 Unihan files.
 See `docs/international-browsing.md` for regeneration and limitations.
+
+The recommended verified import is now `tools/unicode/import_official_data.py`
+with both original release archives. It retains the verified Unihan archive
+as `official-unihan.zip` here. Subsequent normal regeneration of
+Han tables automatically uses that archive rather than reverting to fallback.
+See [official data import](../../../docs/official-data-import.md).

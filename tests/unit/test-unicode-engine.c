@@ -73,6 +73,31 @@ static void test_scalar_metadata(void) {
     assert(!characters_unihan_value(0x4E2D, CHARACTERS_HAN_VALUE_COUNT));
     assert(!characters_unihan_value('A', CHARACTERS_HAN_VALUE_MANDARIN_FALLBACK));
     assert(characters_unihan_collation('A', TRUE) == 0);
+    assert(strcmp(characters_unihan_version(), "17.0.0") == 0);
+    assert(strcmp(characters_unihan_value(0x6C34, CHARACTERS_HAN_VALUE_MANDARIN),
+                  "shuǐ") == 0);
+    assert(strcmp(characters_unihan_value(0x6C34, CHARACTERS_HAN_VALUE_CANTONESE),
+                  "seoi2") == 0);
+    assert(strcmp(characters_unihan_value(0x6C34, CHARACTERS_HAN_VALUE_JAPANESE_ON),
+                  "SUI") == 0);
+    assert(strcmp(characters_unihan_value(0x6C34, CHARACTERS_HAN_VALUE_JAPANESE_KUN),
+                  "MIZU") == 0);
+    assert(strcmp(characters_unihan_value(0x6C34, CHARACTERS_HAN_VALUE_JAPANESE),
+                  "スイ みず かわ") == 0);
+    assert(strcmp(characters_unihan_value(0x6C34, CHARACTERS_HAN_VALUE_KOREAN),
+                  "SWU") == 0);
+    assert(strcmp(characters_unihan_value(0x6C34, CHARACTERS_HAN_VALUE_HANGUL),
+                  "수:0E") == 0);
+    assert(strcmp(characters_unihan_value(0x6C34, CHARACTERS_HAN_VALUE_DEFINITION),
+                  "water, liquid, lotion, juice") == 0);
+    assert(strcmp(characters_unihan_value(0x6C34, CHARACTERS_HAN_VALUE_RADICAL),
+                  "85.0") == 0);
+    assert(strcmp(characters_unihan_value(0x6C34, CHARACTERS_HAN_VALUE_STROKES),
+                  "4") == 0);
+    assert(characters_unihan_match_group(0x6F22, TRUE, 85));
+    assert(characters_unihan_match_group(0x6F22, FALSE, 14));
+    assert(!characters_unihan_match_group(0x6F22, FALSE, 4));
+    assert(!characters_unihan_value('A', CHARACTERS_HAN_VALUE_DEFINITION));
     gchar *version = characters_unicode_properties_version();
     assert(version && *version);
     printf("Property data: %s; catalog: %s; supplement: %s\n", version,

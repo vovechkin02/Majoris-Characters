@@ -281,7 +281,12 @@ test('Unihan offline importer contracts', python,
 test('Emoji offline data and coverage contracts', python,
   args: [files('unit/test_emoji_data.py')],
   suite: 'unit',
-  timeout: 30,
+  timeout: 120,
+)
+
+test('Official Unicode data archive import', python,
+  args: [files('unit/test_official_data_import.py')],
+  suite: 'unit', timeout: 120,
 )
 
 font_face_test = executable(

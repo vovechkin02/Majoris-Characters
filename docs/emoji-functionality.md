@@ -52,13 +52,12 @@ fallback settings are unchanged.
 ## Annotations
 
 `--unicode-version` reports annotation provenance independently of the catalog,
-ICU properties, and alias supplements. The bundled dataset is from Debian GTK
-3.24.49-3 Emojibase annotation resources (24 languages, 1,915 original source
-records per language), plus eight English base records from CLDR 48 for Emoji 17.
-This is not a complete CLDR 48 dataset. Supported primary languages:
-Bengali, Danish, Dutch, English, Estonian, Finnish, French, German, Hindi,
-Hungarian, Italian, Japanese, Korean, Lithuanian, Malay, Norwegian Bokmal,
-Polish, Portuguese, Russian, Spanish, Swedish, Thai, Ukrainian, and Chinese.
+ICU properties, and alias supplements. The verified CLDR 48 release supplies
+base and derived annotations for 171 locale tables, including all 24 previously
+bundled languages, regional variants and script variants. This replaces the
+older GTK/Emojibase annotation snapshot. Annotation locales are not interface
+translation locales. See `data/unicode/emoji/coverage.json` for the complete
+list of bundled tags and their coverage.
 
 A request captures the locale on the main context before worker dispatch.
 Locale lookup uses case-insensitive normalized tags, less-specific tags,
@@ -79,16 +78,14 @@ regenerated offline. See [annotation input](../data/unicode/emoji/README.md)
 for provenance and importing direct CLDR annotation XML. No network requests,
 service accounts, font installation commands or usage tracking are introduced.
 
-The per-locale `data/unicode/emoji/coverage.json` report counts exact normalized
-annotation keys, tone-base fallback keys, and uncovered catalog entries. The
-English data covers 1,914 directly and 1,790 through tone-base fallback; 240
-catalog entries lack either annotation key. Catalog names are still searchable
-for all entries. The other 23 languages each have 253 uncovered entries by the
-same measure. The report does not count parent-locale or English fallback as
-native localized coverage. Use the full CLDR `common/annotations` and
-`common/annotationsDerived` directories for broader coverage. Full locale
-inheritance/alias resolution requires resolved input; the runtime supports
-common parent tags but is not a complete LDML resolver.
+The per-locale `data/unicode/emoji/coverage.json` report counts direct normalized
+annotation keys, tone-base fallback keys, and uncovered catalog entries after
+import-time parent field resolution. English has direct keys for all 3,944
+catalog emoji. Of the 171 locale tables, 91 have complete coverage by direct
+or tone-base keys. Remaining tables contain upstream gaps; runtime English
+fallback is not counted as localized coverage. Catalog names remain searchable
+for every entry. Locale aliases and synthesis beyond the supplied derived
+annotations are not implemented as a general LDML processor.
 
 ## Implementation boundary
 
@@ -96,3 +93,6 @@ The Vala `Variants` collection owns exact text and labels. `variation-family.val
 constructs structural keys from scalar arrays; no generated data is duplicated.
 The native catalog retains immutable alias and annotation lookups used by both
 the search worker and Vala. See [migration qualification](vala-migration.md).
+
+The 1.0.22 dataset was populated by the verified CLDR 48 workflow. See
+[official data import](official-data-import.md) for provenance and qualification.

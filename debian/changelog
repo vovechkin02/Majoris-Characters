@@ -1,3 +1,21 @@
+majoris-characters (1.0.22-1) unstable; urgency=medium
+
+  * Import the verified Unicode 17.0.0 Unihan and CLDR 48 release archives.
+  * Bundle official Han metadata, 171 resolved annotation locales and coverage.
+  * Verify source provenance, deterministic regeneration and native lookups.
+  * Update data licensing, documentation and release regression expectations.
+
+ -- Majoris Contributors <45165533+vovechkin02@users.noreply.github.com>  Fri, 27 Nov 2026 07:17:00 +1100
+
+majoris-characters (1.0.21-1) unstable; urgency=medium
+
+  * Prepare verified offline Unicode 17 Unihan and CLDR 48 archive imports.
+  * Accept the Unicode 17 version header and resolve CLDR parent-locale fields.
+  * Stage both databases, record source and output hashes, and verify imports.
+  * Retain the existing fallback datasets until the official archives are supplied.
+
+ -- Majoris Contributors <45165533+vovechkin02@users.noreply.github.com>  Fri, 27 Nov 2026 07:15:00 +1100
+
 majoris-characters (1.0.20-1) unstable; urgency=medium
 
   * Prepare bounded traversal phases and scalar ranges in Vala.

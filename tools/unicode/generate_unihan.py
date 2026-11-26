@@ -2,16 +2,20 @@
 
 import argparse
 import gzip
+import hashlib
 import json
 from pathlib import Path
 import re
 import unicodedata
+from zipfile import ZipFile
 
 
 FIELDS = ('kMandarin', 'kCantonese', 'kJapaneseOn', 'kJapaneseKun', 'kJapanese',
           'kKorean', 'kHangul', 'kDefinition', 'kRSUnicode', 'kTotalStrokes',
           'Mandarin_Fallback', 'Hangul_Fallback')
 VERSION = '17.0.0'
+# FreeBSD textproc/UCD distinfo for the original Unicode 17 release.
+OFFICIAL_SHA256 = 'f7a48b2b545acfaa77b2d607ae28747404ce02baefee16396c5d2d7a8ef34b5e'
 
 
 def fold(value: str) -> str:
@@ -39,13 +43,33 @@ def read_official(directory: Path) -> dict[int, dict[str, str]]:
     paths = sorted(directory.glob('Unihan_*.txt'))
     if not paths:
         raise ValueError('No extracted Unihan data files')
+    return read_official_sources({path.name: path.read_text(encoding='utf-8')
+                                  for path in paths})
+
+
+def read_official_archive(path: Path) -> dict[int, dict[str, str]]:
+    """Verify the pinned release archive before parsing its original text members."""
+    with path.open('rb') as stream:
+        if hashlib.file_digest(stream, 'sha256').hexdigest() != OFFICIAL_SHA256:
+            raise ValueError('Unihan archive does not match the pinned Unicode 17 SHA-256')
+    with ZipFile(path) as archive:
+        names = archive.namelist()
+        sources = {name: archive.read(name).decode('utf-8-sig')
+                   for name in names if re.fullmatch(r'Unihan_\w+\.txt', name)}
+        if len(set(names)) != len(names) or not sources:
+            raise ValueError('Missing or duplicate Unihan archive members')
+        return read_official_sources(sources)
+
+
+def read_official_sources(sources: dict[str, str]) -> dict[int, dict[str, str]]:
+    """Parse supported formal fields from one consistently versioned release."""
     records = {}
     seen = set()
-    for path in paths:
-        text = path.read_text(encoding='utf-8')
-        if not re.search(r'^#\s*Unicode version:\s*' + re.escape(VERSION) + r'\s*$',
-                         text, re.MULTILINE | re.IGNORECASE):
-            raise ValueError(f'Incorrect or missing Unicode version: {path}')
+    for name, text in sorted(sources.items()):
+        versions = re.findall(r'^#\s*Unicode version\s*:?\s*(\d+\.\d+\.\d+)\s*$',
+                              text, re.MULTILINE | re.IGNORECASE)
+        if versions != [VERSION]:
+            raise ValueError(f'Incorrect or missing Unicode version: {name}')
         for line in text.splitlines():
             if not line or line.startswith('#'):
                 continue
@@ -151,10 +175,18 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('fallback', type=Path)
     parser.add_argument('output', type=Path)
-    parser.add_argument('--official', type=Path)
+    source = parser.add_mutually_exclusive_group()
+    source.add_argument('--official', type=Path)
+    source.add_argument('--official-archive', type=Path)
     args = parser.parse_args()
     data = json.loads(gzip.decompress(args.fallback.read_bytes()))
-    official = read_official(args.official) if args.official else {}
+    bundled = args.fallback.parent / 'official-unihan.zip'
+    if args.official:
+        official = read_official(args.official)
+    elif args.official_archive or bundled.is_file():
+        official = read_official_archive(args.official_archive or bundled)
+    else:
+        official = {}
     generate(data, official, args.output / 'unihan.h')
     generate_languages(data, args.output / 'languages.h')
     return 0

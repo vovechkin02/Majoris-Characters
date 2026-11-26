@@ -1,24 +1,14 @@
 # Emoji annotation input
 
-`annotations.json.gz` includes a lossless export of the names, keyword lists, and
-code-point fields in Debian 13's GTK 3.24.49-3 emoji chooser resources. The
-English resource was read from `libgtk-3.so.0` after GTK initialization; the
-other 23 resources were read from `/usr/share/gtk-3.0/emoji/*.gresource`.
-Each serialized resource is a GVariant of type `a(ausasu)` (code points,
-name, keywords, group). The group field is not needed by Characters. Every
-locale originally contained 1,915 source records. The eight English Emoji 17
-base annotations in `cldr-48-en-additions.json` are incorporated into the
-English snapshot (1,923 source records). These records come from
-https://github.com/unicode-org/cldr/blob/release-48/common/annotations/en.xml
-(Copyright 1991–2025 Unicode, Inc.; Unicode-3.0). The Emoji catalog itself comes from
-the separately vendored Unicode 17 GNOME Characters tables, not GTK 3.
-
-GTK's Debian copyright manifest identifies the bundled Emojibase source as
-Expat-licensed (Miles Johnson, 2017–2019); the original GTK Debian copyright
-manifest is preserved here. Unicode source data attribution and license are
-preserved in `../supplement/LICENSE.unicode`. The precise upstream CLDR release
-used by these GTK resources was not established; do not label the dataset CLDR
-48 or Unicode 17. This is not a GTK3 runtime dependency.
+`annotations.json.gz` contains the imported CLDR 48 base and derived annotations
+with parent-locale fields resolved for 171 locale tables. The original archive
+matched its pinned release checksum; the source URL, digest and output hashes
+are recorded in `../official-data.json`. CLDR annotations are Unicode-3.0;
+see `../supplement/LICENSE.unicode`. The original archive remains an external
+maintainer input, while the compressed resolved snapshot is bundled for offline
+regeneration. The original GTK/Emojibase copyright notice and eight early CLDR
+English additions remain as historical source references, not the current
+production annotation source.
 
 The compressed input is the source for regeneration:
 
@@ -63,3 +53,10 @@ Without these optional files the tool regenerates the checked-in data. The
 published qualification counts match the generated selector omissions, but
 full file-level comparison remains outstanding. Unicode data attribution and
 license are in `../supplement/LICENSE.unicode`.
+
+For the pinned CLDR 48 release, prefer the paired verified archive workflow
+in [official data import](../../../docs/official-data-import.md). It imports
+base and derived files, resolves explicit parent-locale fields, and preserves
+actual coverage and output digests. The original CLDR archive is an external
+maintainer input; the compressed imported snapshot is retained for offline
+regeneration. The verified CLDR 48 archive has been imported in 1.0.22.

@@ -283,6 +283,15 @@ static void test_annotation_operands(void)
     gunichar dancer[] = { 0x1F9D1, 0x1F3FD, 0x200D, 0x1FA70 };
     assert(characters_emoji_keyword_matches(dancer, 4, locales, 2, "ballet"));
     assert(!characters_emoji_keyword_matches(dancer, 4, locales, 2, ""));
+    assert(characters_emoji_locale_count() == 171);
+    guint32 arabic = characters_emoji_locale_index("ar");
+    guint32 traditional = characters_emoji_locale_index("zh_Hant");
+    guint32 canadian = characters_emoji_locale_index("fr_CA");
+    gunichar cat[] = { 0x1F408 };
+    assert(arabic != G_MAXUINT32 && traditional != G_MAXUINT32 && canadian != G_MAXUINT32);
+    assert(characters_emoji_keyword_matches(smile, 1, &arabic, 1, "ابتسامة"));
+    assert(characters_emoji_keyword_matches(cat, 1, &traditional, 1, "貓"));
+    assert(characters_emoji_keyword_matches(smile, 1, &canadian, 1, "large sourire"));
     CharactersSearch *job = fixture_job(CHARACTERS_SEARCH_EMOJI, -1, -1);
     gchar *terms[] = { "ÉMOTICÔNE" };
     gchar *han[] = { "" };

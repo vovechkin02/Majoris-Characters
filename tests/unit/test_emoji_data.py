@@ -26,11 +26,17 @@ class EmojiDataTest(unittest.TestCase):
         self.assertEqual(len(sequences.build_aliases(catalog, bases)), 1819)
         with gzip.open(sequences.DATA / "annotations.json.gz", "rt", encoding="utf-8") as stream:
             data = json.load(stream)
-        self.assertEqual(len(data["locales"]), 24)
         report = annotations.coverage(data["locales"], catalog)
         expected = json.loads((sequences.DATA / "coverage.json").read_text())
         self.assertEqual(report, expected["locales"])
-        self.assertEqual(report["en"], {"direct": 1914, "tone_base": 1790, "missing": 240})
+        self.assertEqual(data["source"], expected["source"])
+        manifest = json.loads((ROOT / "data/unicode/official-data.json").read_text())
+        self.assertEqual(manifest["status"], "imported")
+        self.assertEqual(manifest["cldr"]["locale_count"], len(data["locales"]))
+        self.assertEqual(len(data["locales"]), 171)
+        self.assertEqual(report["en"], {"direct": 3944, "tone_base": 0, "missing": 0})
+        self.assertEqual(sum(not row["missing"] for row in report.values()), 91)
+        self.assertEqual(manifest["cldr"]["english_missing"], report["en"]["missing"])
         with tempfile.TemporaryDirectory() as directory:
             output = Path(directory) / "generated.h"
             sequences.generate(bases, catalog, output)

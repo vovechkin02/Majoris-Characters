@@ -86,7 +86,10 @@ static void test_annotations(void) {
     expect_search("en", "bloated", "🫪");
     expect_search("en", "ballet", "🧑🏽‍🩰");
     expect_search("fr_FR", "joyeux dents", "😀");
-    expect_search("zh_Hant_TW", "猫", "🐈");
+    expect_search("zh_Hant_TW", "貓", "🐈");
+    expect_search("zh_CN", "猫", "🐈");
+    expect_search("ar", "ابتسامة", "😀");
+    expect_search("fr_CA", "large sourire", "😀");
     expect_search("unknown", "cheery", "😀");
     expect_search("fr", "U+1F600", "😀");
     expect_search("fr", "👩‍💻", "👩‍💻");

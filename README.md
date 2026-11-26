@@ -6,7 +6,7 @@ Unicode, international browsing, emoji data, and exact font inspection improveme
 
 | Project metadata | Value |
 | --- | --- |
-| Version | 1.0.20 |
+| Version | 1.0.22 |
 | Platform target | Majoris OS / Debian 13 (Trixie) |
 | Development status | GLib native standardization — qualification candidate (not a verified stable release) |
 | Application ID | `com.majoris.characters` |
@@ -107,12 +107,13 @@ the 461 named-sequence records are retained pending full official-file compariso
 Normalization uses ICU 76 with the Unicode 17 combining-class and compatibility
 delta. See [Unicode engine](docs/unicode-engine.md) for provenance and limits.
 See [international browsing](docs/international-browsing.md) for CJK query syntax,
-source coverage and official Unihan import instructions. The bundled fallback is
-not the full official Unihan database.
-Emoji annotations from Debian GTK 3.24.49-3 (Emojibase-derived data) are
-bundled for 24 languages, plus CLDR 48 English annotations for the eight new
-Emoji 17 bases. Full multilingual coverage remains outstanding. Direct CLDR
-XML imports and coverage reporting are supported by the offline generator. The
+source coverage and regeneration. The verified Unicode 17 Unihan release supplies
+102,998 official records across the ten supported formal metadata fields, with
+fallback data retained independently. The verified CLDR 48 base and derived
+annotations supply 171 locale tables. English covers all 3,944 catalog emoji;
+91 locale tables have complete direct or tone-base coverage, while other locales
+retain upstream gaps. The [official data import workflow](docs/official-data-import.md)
+records source and output digests and supports offline regeneration. The
 picker exposes catalog-backed skin tone, gender, hair, direction, relationship,
 flag and keycap choices, all 742 standardized presentation sequences, and
 selector-omission forms. Exact search retains supplementary identities without
@@ -172,7 +173,7 @@ For Debian binary packages (run from the repository root):
 
 ```sh
 dpkg-buildpackage -us -uc -b
-sudo apt install ../majoris-characters_1.0.20-1_$(dpkg --print-architecture).deb
+sudo apt install ../majoris-characters_1.0.22-1_$(dpkg --print-architecture).deb
 ```
 
 The source package uses `3.0 (quilt)` and requires the corresponding upstream
@@ -333,9 +334,9 @@ After installing the Debian package, the same runtime tests can target the real
 installed executable:
 
 ```sh
-python3 tests/integration/test_application.py /usr/bin/majoris-characters 1.0.20 cli
+python3 tests/integration/test_application.py /usr/bin/majoris-characters 1.0.22 cli
 xvfb-run -a dbus-run-session -- python3 \
-  tests/integration/test_application.py /usr/bin/majoris-characters 1.0.20 gui
+  tests/integration/test_application.py /usr/bin/majoris-characters 1.0.22 gui
 ```
 
 For a fresh, fail-closed automated build/test and optional Debian package gate:
@@ -387,3 +388,6 @@ The 1.0.19 property and metadata migration is documented in
 The 1.0.20 search plan migration, native scanner evaluation, measured compatibility
 and optional headless benchmark are documented in
 [the scanner evaluation](docs/native-search-scanner-evaluation.md).
+
+The 1.0.22 official dataset import, pinned source digests, coverage, and
+qualification results are documented in [official data import](docs/official-data-import.md).

@@ -26,7 +26,7 @@ def quote(text: str) -> str:
     return json.dumps(text, ensure_ascii=False)
 
 
-def read_cldr(root: Path) -> dict:
+def read_cldr(root: Path, preserve_no_inheritance: bool = False) -> dict:
     """Import resolved or explicit CLDR annotation XML, merging derived entries by locale."""
     if not (root / "annotations").is_dir():
         raise ValueError("CLDR common/annotations is required")
@@ -41,6 +41,8 @@ def read_cldr(root: Path) -> dict:
                 value = (node.text or "").strip()
                 if not text or not value or value == "↑↑↑" or node.get("alt"):
                     continue
+                if value == "∅∅∅" and not preserve_no_inheritance:
+                    continue
                 text = key(list(map(ord, text)))
                 if not text:
                     continue
@@ -50,6 +52,63 @@ def read_cldr(root: Path) -> dict:
                 else:
                     record[2].extend(word.strip() for word in value.split("|") if word.strip())
     return {lang: list(rows.values()) for lang, rows in locales.items() if rows}
+
+
+def resolve_cldr(root: Path, required_locales: set[str]) -> dict:
+    """Materialize missing annotation fields using the CLDR parent-locale rules.
+
+    Root annotations contain internal identifiers, not translated search words.
+    Runtime English fallback remains separate from these locale tables.
+    """
+    explicit = read_cldr(root, preserve_no_inheritance=True)
+    parents = {}
+    supplemental = ET.parse(root / "supplemental/supplementalData.xml")
+    for group in supplemental.iter("parentLocales"):
+        components = group.get("component", "").split()
+        if components and "annotations" not in components:
+            continue
+        for node in group.findall("parentLocale"):
+            parent = node.attrib["parent"]
+            for child in node.attrib["locales"].split():
+                parents[child] = parent
+    resolved = {"root": {}}
+    active = set()
+
+    def resolve(locale: str) -> dict:
+        """Resolve parent fields recursively, rejecting cyclic parent metadata."""
+        if locale in resolved:
+            return resolved[locale]
+        if locale in active:
+            raise ValueError(f"Cyclic CLDR annotation inheritance: {locale}")
+        active.add(locale)
+        parent = parents.get(locale, locale.rpartition("_")[0] or "root")
+        rows = resolve(parent).copy()
+        for points, name, keywords in explicit.get(locale, []):
+            sequence = key(points)
+            inherited = rows.get(sequence, [points, "", []])
+            rows[sequence] = [points, name or inherited[1], keywords or inherited[2]]
+        active.remove(locale)
+        resolved[locale] = rows
+        return rows
+
+    # Include sparse or inheritance-only files, and locales already supported by Characters.
+    locales = set(required_locales) | set(explicit)
+    for directory in ("annotations", "annotationsDerived"):
+        locales.update(path.stem for path in (root / directory).glob("*.xml"))
+    locales.discard("root")
+    result = {}
+    for locale in sorted(locales):
+        rows = resolve(locale)
+        cleaned = []
+        for sequence in sorted(rows):
+            points, name, keywords = rows[sequence]
+            name = "" if name == "∅∅∅" else name
+            keywords = [word for word in keywords if word != "∅∅∅"]
+            if name or keywords:
+                cleaned.append([points, name, keywords])
+        if cleaned:
+            result[locale] = cleaned
+    return result
 
 
 def coverage(locales: dict, catalog: list[tuple[int, ...]]) -> dict:

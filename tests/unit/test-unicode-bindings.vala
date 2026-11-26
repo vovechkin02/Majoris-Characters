@@ -83,10 +83,13 @@ private void test_property_metadata () {
     assert (Unicode.get_property_value (0x4E2D, "Hangul_Fallback") == "중");
     assert (Unicode.get_property_value (0x4E2D, "Radical_Collation") == "2");
     assert (Unicode.get_property_value (0x4E2D, "Stroke_Collation") == "4");
-    if (Unicode.unihan_version () == "none") {
-        assert (Unicode.get_property_value (0x4E2D, "kMandarin") == null);
-        assert (Unicode.get_property_value (0x4E2D, "kDefinition") == null);
-    }
+    assert (Unicode.unihan_version () == "17.0.0");
+    assert (Unicode.get_property_value (0x4E2D, "kMandarin") == "zhōng");
+    assert (Unicode.get_property_value (0x6C34, "kCantonese") == "seoi2");
+    assert (Unicode.get_property_value (0x6C34, "kJapaneseKun") == "MIZU");
+    assert (Unicode.get_property_value (0x6C34, "kDefinition") == "water, liquid, lotion, juice");
+    assert (Unicode.get_property_value (0x6C34, "kRSUnicode") == "85.0");
+    assert (Unicode.get_property_value (0x6C34, "kTotalStrokes") == "4");
     assert (Unicode.get_property_value (0x41, "Mandarin_Fallback") == null);
     assert (Unicode.get_property_value (0x41, "Radical_Collation") == null);
 }

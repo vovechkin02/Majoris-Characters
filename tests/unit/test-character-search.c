@@ -342,6 +342,11 @@ static void test_han_search(void) {
     assert(contains_id(job, 0x4E2D));
     characters_search_free(job);
 
+    job = search(CHARACTERS_SEARCH_ALL, -1, -1,
+                 "cantonese:seoi2 japanese:mizu definition:water radical:85 strokes:4");
+    assert(contains_id(job, 0x6C34) && !contains_id(job, 'A'));
+    characters_search_free(job);
+
     const gchar *value = characters_unihan_value(0x4E2D, CHARACTERS_HAN_VALUE_MANDARIN_FALLBACK);
     assert(value && strstr(value, "zhōng"));
     value = characters_unihan_value(0x4E2D, CHARACTERS_HAN_VALUE_HANGUL_FALLBACK);

@@ -34,12 +34,12 @@ Comment: Unicode data underlying the generated tables. Upstream generator
  licensing and attribution are separately preserved.
 
 Files: data/unicode/emoji/annotations.json.gz native/unicode/generated/emoji-annotations.h
-Copyright: 2017-2019 Miles Johnson (Emojibase)
-           Unicode, Inc.
-License: Expat and Unicode-3.0
-Comment: Exported from Debian GTK 3.24.49-3 emoji chooser resources. The
- original upstream notices are preserved in data/unicode/emoji/GTK-DEBIAN-COPYRIGHT.
- Eight CLDR 48 English base annotation records are included under Unicode-3.0.
+Copyright: 1991-2025 Unicode, Inc.
+License: Unicode-3.0
+Comment: Derived from verified CLDR 48 base and derived annotations, with
+ parent-locale fields resolved. The source and output digests are recorded
+ in data/unicode/official-data.json. Historical GTK and Emojibase notices
+ are retained separately in data/unicode/emoji/GTK-DEBIAN-COPYRIGHT.
 
 License: GPL-2+
  On Debian systems, the complete text of the GNU General Public License
@@ -160,6 +160,11 @@ Copyright: X Keyboard Configuration contributors
 License: XKB-registry
 Comment: Complete original copyright and license notices are retained in
  data/unicode/han/XKB-DEBIAN-COPYRIGHT.
+
+Files: data/unicode/han/official-unihan.zip
+Copyright: 1991-2025 Unicode, Inc.
+License: Unicode-3.0
+Comment: Original verified Unicode 17 archive retained after offline import.
 
 Files: data/unicode/han/fallback.json.gz native/unicode/generated/unihan.h
        native/unicode/generated/languages.h
