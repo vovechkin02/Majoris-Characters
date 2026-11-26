@@ -52,7 +52,7 @@ namespace Characters {
             switch (kind) {
                 case FontSourceKind.INVENTORY:
                     if (!force_refresh && inventory != null &&
-                        inventory.get_catalog ().is_current ()) {
+                        inventory.is_current ()) {
                         return true;
                     }
                     var catalog = Fonts.load ();
@@ -65,7 +65,7 @@ namespace Characters {
                     if (inventory == null) {
                         return false;
                     }
-                    exact_face = inventory.get_catalog ().open_face (index);
+                    exact_face = inventory.open_face (index);
                     if (exact_face == null) {
                         return false;
                     }

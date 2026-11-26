@@ -102,6 +102,96 @@ private void test_exact_face_bindings () {
     assert (symbol.glyph (0xF041, true) == 1 && symbol.glyph (0xF041, false) == 0);
 }
 
+/** Checks the complete ordered inventory, grouping, and remapped native identities. */
+private void test_inventory_policy () {
+    var catalog = Fonts.load ();
+    assert (catalog != null);
+    unowned Fonts.Catalog raw = catalog;
+    var inventory = new FontInventory ((owned) catalog);
+    assert (inventory.count () > 0 && inventory.family_count > 0);
+    var included = new bool[(int) raw.count ()];
+    uint position = 0;
+    for (uint group = 0; group < inventory.family_count; group++) {
+        var first = inventory.family_start (group);
+        var end = inventory.family_start (group + 1);
+        assert (first == position && end > first);
+        unowned FontFaceRecord? first_record = inventory.record (first);
+        assert (first_record != null);
+        var family = first_record.family;
+        if (first > 0) {
+            assert (inventory.record (first - 1).family != family);
+        }
+        for (uint index = first; index < end; index++) {
+            var record = inventory.record (index);
+            assert (record != null && record.family == family);
+            var native_index = record.native_index;
+            assert (native_index < raw.count () && !included[native_index]);
+            included[native_index] = true;
+            assert (record.family == raw.family (native_index));
+            assert (record.file == raw.file (native_index));
+            assert (record.face_index == raw.face_index (native_index));
+            unowned string? raw_style = raw.style (native_index);
+            assert (record.style == (raw_style != null && raw_style.validate () ?
+                raw_style : null));
+            assert (record.variable == raw.is_variable (native_index));
+            assert (record.color == raw.is_color (native_index));
+            assert (inventory.description (index) == raw.description (native_index));
+            if (index > 0) {
+                unowned FontFaceRecord? previous = inventory.record (index - 1);
+                assert (previous != null);
+                var order = strcmp0 (previous.family, record.family);
+                if (order == 0) {
+                    order = strcmp0 (raw.style (previous.native_index) ?? "", raw_style ?? "");
+                }
+                if (order == 0) {
+                    order = strcmp0 (previous.file, record.file);
+                }
+                assert (order < 0 || (order == 0 && previous.face_index <= record.face_index));
+            }
+            position++;
+        }
+    }
+    assert (position == inventory.count ());
+    for (size_t index = 0; index < raw.count (); index++) {
+        unowned string? family = raw.family (index);
+        var valid = family != null && family.validate () && raw.file (index) != null &&
+            raw.face_index (index) >= 0;
+        assert (included[index] == valid);
+    }
+    assert (inventory.record (size_t.MAX) == null);
+    assert (inventory.open_face (size_t.MAX) == null);
+    assert (inventory.description (size_t.MAX) == null);
+    assert (inventory.family_start (uint.MAX) == inventory.count ());
+    var matches = inventory.comparisons (0x41, "  DEJAVU SANS  ", "Regular");
+    int offset = 0;
+    for (uint index = 0; index < inventory.count (); index++) {
+        var record = inventory.record (index);
+        assert (record != null);
+        var expected = raw.contains (record.native_index, 0x41) &&
+            record.display_name ("Regular").casefold ().contains ("dejavu sans");
+        if (expected) {
+            assert (offset < matches.length && matches[offset++] == index);
+        }
+    }
+    assert (offset == matches.length && matches.length > 0);
+    assert (inventory.comparisons (0xD800, "", "Regular").length == 0);
+    var selected = inventory.record (matches[0]);
+    assert (selected != null);
+    uint family_index, face_index;
+    inventory.find_selection (selected.file, selected.face_index, out family_index,
+        out face_index);
+    var restored = inventory.record (inventory.family_start (family_index) + face_index);
+    assert (restored != null && restored.file == selected.file && restored.face_index == selected.face_index);
+    var request = new FontSourceRequest.for_face (inventory, matches[0]);
+    assert (request.run ());
+    var face = request.take_face ();
+    var points = request.take_points ();
+    assert (face != null && points != null && face.glyph (0x41, false) != 0);
+    assert (request.take_face () == null && request.take_points () == null);
+    inventory.find_selection (null, -1, out family_index, out face_index);
+    assert (family_index == 0 && face_index == 0);
+}
+
 /** Registers focused bindings and source supersession tests without initializing GTK. */
 int main (string[] args) {
     Test.init (ref args);
@@ -109,5 +199,6 @@ int main (string[] args) {
     Test.add_func ("/characters/fonts/latest-source", test_latest_source);
     Test.add_func ("/characters/fonts/sequence-bindings", test_sequence_bindings);
     Test.add_func ("/characters/fonts/exact-face-bindings", test_exact_face_bindings);
+    Test.add_func ("/characters/fonts/inventory-policy", test_inventory_policy);
     return Test.run ();
 }

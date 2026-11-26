@@ -62,3 +62,13 @@ application and GJS are not runtime dependencies of the main application. The op
   The compact native scanner and scalar lookup primitives remain. Full Vala
   compilation and performance parity are required before further hot-path
   migration. See [pass 2 qualification](vala-migration-pass-2.md).
+
+- Vala migration pass 3 (1.0.11): semantic filters and Han query policies moved
+  to Vala, preserving prepared native scanning.
+- Vala migration pass 4 (1.0.12): legacy encoding workflows moved to Vala,
+  preserving strict ICU operations and compact mapping enumeration.
+- Vala migration pass 5 (1.0.13): font inventory validation, ordering, grouping,
+  selection restoration, metadata and comparison filtering moved to Vala.
+  Fontconfig discovery and exact FreeType operations remain native. See
+  [pass 5 qualification](vala-migration-pass-5.md). Establish full compilation
+  and parity before consolidating additional native adapters or moving scan loops.

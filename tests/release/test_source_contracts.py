@@ -240,6 +240,27 @@ class SourceContractsTest(unittest.TestCase):
         self.assertIn("characters_legacy_decode_raw", binding)
         self.assertIn("characters_legacy_encode_raw", binding)
 
+    def test_fifth_vala_migration_wiring(self) -> None:
+        """Require Vala inventory policy and raw-index remapping at the native boundary."""
+        sources = (ROOT / "src/meson.build").read_text()
+        inventory = (ROOT / "src/fonts/font-inventory.vala").read_text()
+        record = (ROOT / "src/fonts/font-face-record.vala").read_text()
+        browser = (ROOT / "src/views/font-browser.vala").read_text()
+        request = (ROOT / "src/fonts/font-source-request.vala").read_text()
+        native = (ROOT / "native/fonts/font-catalog.c").read_text()
+        self.assertIn("fonts/font-face-record.vala", sources)
+        self.assertIn("ordered.sort (FontFaceRecord.compare)", inventory)
+        self.assertIn("family.validate ()", record)
+        self.assertIn("catalog->faces = listed;", native)
+        self.assertNotIn("qsort(", native)
+        self.assertNotIn("FcFontSetAdd(", native)
+        self.assertIn("catalog.open_face (faces[index].native_index)", inventory)
+        self.assertIn("catalog.matches (faces[index].native_index, font)", inventory)
+        self.assertIn("catalog.comparisons (compare_point,", browser)
+        self.assertIn("catalog.find_selection (previous_file,", browser)
+        self.assertIn("inventory.open_face (index)", request)
+        self.assertNotIn("get_catalog ()", browser + request)
+
     def test_release_gate(self) -> None:
         """Prove missing and skipped test records cannot pass the release log gate."""
         names = sorted(expected_tests())

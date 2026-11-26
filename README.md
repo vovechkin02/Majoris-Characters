@@ -6,9 +6,9 @@ Unicode, international browsing, emoji data, and exact font inspection improveme
 
 | Project metadata | Value |
 | --- | --- |
-| Version | 1.0.12 |
+| Version | 1.0.13 |
 | Platform target | Majoris OS / Debian 13 (Trixie) |
-| Development status | Vala migration pass 4 — qualification candidate (not a verified stable release) |
+| Development status | Vala migration pass 5 — qualification candidate (not a verified stable release) |
 | Application ID | `com.majoris.characters` |
 | Debian package | `majoris-characters` |
 | License | GPL-3.0-or-later |
@@ -172,7 +172,7 @@ For Debian binary packages (run from the repository root):
 
 ```sh
 dpkg-buildpackage -us -uc -b
-sudo apt install ../majoris-characters_1.0.12-1_$(dpkg --print-architecture).deb
+sudo apt install ../majoris-characters_1.0.13-1_$(dpkg --print-architecture).deb
 ```
 
 The source package uses `3.0 (quilt)` and requires the corresponding upstream
@@ -333,9 +333,9 @@ After installing the Debian package, the same runtime tests can target the real
 installed executable:
 
 ```sh
-python3 tests/integration/test_application.py /usr/bin/majoris-characters 1.0.12 cli
+python3 tests/integration/test_application.py /usr/bin/majoris-characters 1.0.13 cli
 xvfb-run -a dbus-run-session -- python3 \
-  tests/integration/test_application.py /usr/bin/majoris-characters 1.0.12 gui
+  tests/integration/test_application.py /usr/bin/majoris-characters 1.0.13 gui
 ```
 
 For a fresh, fail-closed automated build/test and optional Debian package gate:
@@ -347,7 +347,7 @@ python3 tools/qualification/qualify.py build-release --package
 See [ISO integration and desktop qualification](docs/release-integration.md) for
 installation and target runtime checks. See [Accessibility and localization](docs/accessibility-and-localization.md) for
 keyboard guidance, translation coverage, and manual accessibility qualification.
-See [Vala migration qualification](docs/vala-migration-pass-4.md) for current evidence,
+See [Vala migration qualification](docs/vala-migration-pass-5.md) for current evidence,
 [Priority 8 qualification](docs/priority-8-qualification.md) for earlier evidence, and
 [Stage 10 qualification](docs/stage-10-qualification.md) for historical
 verification results and remaining build/package checks. Historical Stage 1–9

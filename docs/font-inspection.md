@@ -69,3 +69,11 @@ is opened on a worker and transferred once; comparison cells and the face
 inspector open independent faces on demand. The main-context raster work is
 bounded per glyph but not benchmarked. No custom CSS is used. Three original
 miniature fonts are included as test fixtures only; they are never installed.
+
+## Inventory policy boundary
+
+Vala `FontInventory` builds validated, sorted face records and family offsets
+on the source worker. The native adapter retains raw Fontconfig patterns;
+application face positions are translated to original pattern indexes for
+coverage, Pango resolution and FreeType opening. Comparison filtering and
+selection restoration use the same immutable inventory.

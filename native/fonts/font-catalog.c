@@ -11,7 +11,7 @@
 struct CharactersFontCatalog {
     /** Independent configuration loaded from the installed system and user font locations. */
     FcConfig *config;
-    /** Sorted patterns, including exact file and face identity and cmap coverage. */
+    /** Raw discovery patterns, including exact file and face identity and cmap coverage. */
     FcFontSet *faces;
 };
 
@@ -39,30 +39,6 @@ static FcCharSet *get_charset(FcPattern *pattern) {
 /** Retrieve one pattern only within the bounds of the immutable snapshot. */
 static FcPattern *get_face(const CharactersFontCatalog *catalog, size_t index) {
     return catalog && index < (size_t)catalog->faces->nfont ? catalog->faces->fonts[index] : NULL;
-}
-
-/** Compare nullable labels without treating missing properties as valid face identities. */
-static int compare_strings(const char *left, const char *right) {
-    return strcmp(left ? left : "", right ? right : "");
-}
-
-/** Sort by primary family, style, file and exact face index for deterministic grouping. */
-static int compare_faces(const void *left, const void *right) {
-    FcPattern *a = *(FcPattern *const *)left;
-    FcPattern *b = *(FcPattern *const *)right;
-    int result = compare_strings(get_string(a, FC_FAMILY), get_string(b, FC_FAMILY));
-    if (!result) {
-        result = compare_strings(get_string(a, FC_STYLE), get_string(b, FC_STYLE));
-    }
-    if (!result) {
-        result = compare_strings(get_string(a, FC_FILE), get_string(b, FC_FILE));
-    }
-    if (!result) {
-        int a_index = get_face_index(a);
-        int b_index = get_face_index(b);
-        result = (a_index > b_index) - (a_index < b_index);
-    }
-    return result;
 }
 
 /** Read a Fontconfig boolean property without inventing support when absent. */
@@ -101,32 +77,7 @@ CharactersFontCatalog *characters_fonts_load(void) {
         characters_fonts_free(catalog);
         return NULL;
     }
-    catalog->faces = FcFontSetCreate();
-    if (!catalog->faces) {
-        FcFontSetDestroy(listed);
-        characters_fonts_free(catalog);
-        return NULL;
-    }
-    for (int index = 0; index < listed->nfont; index++) {
-        FcPattern *pattern = listed->fonts[index];
-        const char *family = get_string(pattern, FC_FAMILY);
-        if (!family || !g_utf8_validate(family, -1, NULL) || !get_string(pattern, FC_FILE) ||
-            get_face_index(pattern) < 0) {
-            continue;
-        }
-        FcPatternReference(pattern);
-        if (!FcFontSetAdd(catalog->faces, pattern)) {
-            FcPatternDestroy(pattern);
-            FcFontSetDestroy(listed);
-            characters_fonts_free(catalog);
-            return NULL;
-        }
-    }
-    FcFontSetDestroy(listed);
-    if (catalog->faces->nfont > 1) {
-        qsort(catalog->faces->fonts, (size_t)catalog->faces->nfont,
-              sizeof(*catalog->faces->fonts), compare_faces);
-    }
+    catalog->faces = listed;
     return catalog;
 }
 
@@ -152,8 +103,7 @@ const char *characters_fonts_family(const CharactersFontCatalog *catalog, size_t
 }
 
 const char *characters_fonts_style(const CharactersFontCatalog *catalog, size_t index) {
-    const char *style = get_string(get_face(catalog, index), FC_STYLE);
-    return style && g_utf8_validate(style, -1, NULL) ? style : NULL;
+    return get_string(get_face(catalog, index), FC_STYLE);
 }
 
 const char *characters_fonts_file(const CharactersFontCatalog *catalog, size_t index) {
@@ -235,8 +185,10 @@ bool characters_fonts_matches(const CharactersFontCatalog *catalog, size_t index
     }
     FcPattern *actual = pango_fc_font_get_pattern(PANGO_FC_FONT(font));
     const char *file = get_string(actual, FC_FILE);
-    return file && strcmp(file, get_string(expected, FC_FILE)) == 0 &&
-        get_face_index(actual) == get_face_index(expected);
+    const char *expected_file = get_string(expected, FC_FILE);
+    int expected_index = get_face_index(expected);
+    return file && expected_file && expected_index >= 0 &&
+        strcmp(file, expected_file) == 0 && get_face_index(actual) == expected_index;
 }
 
 CharactersFontFace *characters_fonts_open_face(const CharactersFontCatalog *catalog, size_t index) {

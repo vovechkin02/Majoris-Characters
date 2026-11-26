@@ -120,8 +120,6 @@ namespace Characters {
         private Legacy.Table? mapping;
         /** Current successful scalar search, with bounded grid pages. */
         private SearchRequest? results;
-        /** Family dropdown offsets into the sorted inventory, ending with a sentinel. */
-        private uint[] family_starts = {};
         /** Count of initialized family offsets, excluding the sentinel. */
         private uint family_count = 0;
         /** Face index in the current immutable catalog, or GTK's invalid position. */
@@ -130,7 +128,7 @@ namespace Characters {
         private uint32 compare_point;
         /** Filtered face IDs for the comparison mode. */
         private uint[] comparison_ids = {};
-        /** Number of valid comparison identities in the preallocated vector. */
+        /** Number of valid comparison identities in the compact vector. */
         private uint comparison_count = 0;
         /** GTK model selection and cell recycling lifetime. */
         private Gtk.SingleSelection selection;
@@ -373,9 +371,12 @@ namespace Characters {
             string? previous_file = null;
             int previous_index = -1;
             if (inventory != null && current_face != Gtk.INVALID_LIST_POSITION) {
-                unowned Fonts.Catalog old = inventory.get_catalog ();
-                previous_file = old.file (current_face);
-                previous_index = old.face_index (current_face);
+                unowned FontInventory old = inventory;
+                unowned FontFaceRecord? record = old.record (current_face);
+                if (record != null) {
+                    previous_file = record.file;
+                    previous_index = record.face_index;
+                }
             }
             controller.cancel ();
             clear_page ();
@@ -383,7 +384,7 @@ namespace Characters {
             exact_face = null;
             inspect_face.sensitive = false;
             inventory = next;
-            unowned Fonts.Catalog catalog = next.get_catalog ();
+            unowned FontInventory catalog = next;
             catalog.apply_config (get_pango_context ().get_font_map ());
             current_face = Gtk.INVALID_LIST_POSITION;
             if (mode == FontBrowserMode.VARIATIONS) {
@@ -399,27 +400,17 @@ namespace Characters {
                 return;
             }
             updating = true;
-            unowned Fonts.Catalog catalog = inventory.get_catalog ();
+            unowned FontInventory catalog = inventory;
             var families = new Gtk.StringList (null);
-            family_starts = new uint[(int) catalog.count () + 1];
-            family_count = 0;
-            uint preferred_family = 0;
-            uint preferred_face = 0;
-            string last = "";
-            for (uint index = 0; index < catalog.count (); index++) {
-                unowned string? family = catalog.family (index);
-                if (family_count == 0 || family != last) {
-                    family_starts[family_count++] = index;
-                    families.append (family ?? _("Unknown Font"));
-                    last = family ?? "";
-                }
-                if (previous_file != null && previous_file == catalog.file (index) &&
-                    previous_index == catalog.face_index (index)) {
-                    preferred_family = family_count - 1;
-                    preferred_face = index - family_starts[preferred_family];
-                }
+            family_count = catalog.family_count;
+            uint preferred_family, preferred_face;
+            catalog.find_selection (previous_file, previous_index, out preferred_family,
+                out preferred_face);
+            for (uint group = 0; group < family_count; group++) {
+                unowned FontFaceRecord? record = catalog.record (catalog.family_start (group));
+                assert (record != null);
+                families.append (record.family);
             }
-            family_starts[family_count] = (uint) catalog.count ();
             family_filter.model = families;
             family_filter.selected = family_count == 0 ? Gtk.INVALID_LIST_POSITION :
                 preferred_family;
@@ -437,13 +428,14 @@ namespace Characters {
         private void rebuild_faces (uint preferred) {
             var faces = new Gtk.StringList (null);
             if (inventory != null && family_filter.selected < family_count) {
-                unowned Fonts.Catalog catalog = inventory.get_catalog ();
-                var start = family_starts[family_filter.selected];
-                var end = family_starts[family_filter.selected + 1];
+                unowned FontInventory catalog = inventory;
+                var start = inventory.family_start (family_filter.selected);
+                var end = inventory.family_start (family_filter.selected + 1);
                 for (uint index = start; index < end; index++) {
-                    var file = catalog.file (index) ?? "";
-                    faces.append ("%s — %s [%d]".printf (catalog.style (index) ?? _("Regular"),
-                        Filename.display_basename (file), catalog.face_index (index)));
+                    unowned FontFaceRecord? record = catalog.record (index);
+                    assert (record != null);
+                    faces.append ("%s — %s [%d]".printf (record.style ?? _("Regular"),
+                        Filename.display_basename (record.file), record.face_index));
                 }
             }
             face_filter.model = faces;
@@ -470,8 +462,8 @@ namespace Characters {
                 face_filter.selected == Gtk.INVALID_LIST_POSITION) {
                 return;
             }
-            var index = family_starts[family_filter.selected] + face_filter.selected;
-            if (index >= family_starts[family_filter.selected + 1]) {
+            var index = inventory.family_start (family_filter.selected) + face_filter.selected;
+            if (index >= inventory.family_start (family_filter.selected + 1)) {
                 return;
             }
             current_face = index;
@@ -545,19 +537,9 @@ namespace Characters {
                 return;
             }
             clear_page ();
-            unowned Fonts.Catalog catalog = inventory.get_catalog ();
-            comparison_ids = new uint[(int) catalog.count ()];
-            comparison_count = 0;
-            var query = font_query.text.strip ().casefold ();
-            for (uint index = 0; index < catalog.count (); index++) {
-                if (!catalog.contains (index, compare_point)) {
-                    continue;
-                }
-                if (query != "" && !face_name (catalog, index).casefold ().contains (query)) {
-                    continue;
-                }
-                comparison_ids[comparison_count++] = index;
-            }
+            unowned FontInventory catalog = inventory;
+            comparison_ids = catalog.comparisons (compare_point, font_query.text, _("Regular"));
+            comparison_count = (uint) comparison_ids.length;
             source_note.label = _("%s — compare faces that map this scalar. " +
                 "Sequence shaping is not inferred from scalar coverage.").printf (
                 Search.code (compare_point) ?? "");
@@ -683,7 +665,7 @@ namespace Characters {
             string? description = null;
             bool fallback = mode == FontBrowserMode.ENCODINGS || font_fallback.active;
             if (mode != FontBrowserMode.ENCODINGS && inventory != null) {
-                unowned Fonts.Catalog catalog = inventory.get_catalog ();
+                unowned FontInventory catalog = inventory;
                 var face = mode == FontBrowserMode.VARIATIONS ? id : current_face;
                 description = catalog.description (face);
                 if (mode == FontBrowserMode.VARIATIONS) {
@@ -704,7 +686,7 @@ namespace Characters {
             var size_pt = preview_size.get_value_as_int ();
             if (!fallback && mode != FontBrowserMode.ENCODINGS && inventory != null) {
                 if (mode == FontBrowserMode.VARIATIONS) {
-                    var face = inventory.get_catalog ().open_face (id);
+                    var face = inventory.open_face (id);
                     tile.bind_exact (point, face, size_pt, caption, detail, true);
                 } else {
                     tile.bind_exact (point, exact_face, size_pt, caption, detail);
@@ -743,13 +725,14 @@ namespace Characters {
         }
 
         /** Provides stable family/style labels from the installed native inventory. */
-        private static string face_name (Fonts.Catalog catalog, uint face) {
-            return "%s — %s".printf (catalog.family (face) ?? _("Unknown Font"),
-                catalog.style (face) ?? _("Regular"));
+        private static string face_name (FontInventory catalog, uint face) {
+            unowned FontFaceRecord? record = catalog.record (face);
+            return record != null ? record.display_name (_("Regular")) :
+                "%s — %s".printf (_("Unknown Font"), _("Regular"));
         }
 
         /** Verifies the nominal Pango face identity without treating fallback as coverage. */
-        private bool matches_preview (Fonts.Catalog catalog, uint face, string? description) {
+        private bool matches_preview (FontInventory catalog, uint face, string? description) {
             if (description == null) {
                 return false;
             }
@@ -764,7 +747,7 @@ namespace Characters {
             if (mode != FontBrowserMode.FONTS || inventory == null || repertoire == null) {
                 return;
             }
-            unowned Fonts.Catalog catalog = inventory.get_catalog ();
+            unowned FontInventory catalog = inventory;
             var matched = !font_fallback.active || matches_preview (catalog, current_face,
                 catalog.description (current_face));
             source_note.label = _("%d mapped scalars. Coverage excludes fallback; " +
@@ -800,15 +783,20 @@ namespace Characters {
                 font_detail.label = format.printf (bytes ?? _("Unavailable"));
                 bytes_copy.sensitive = bytes != null;
             } else if (inventory != null) {
-                unowned Fonts.Catalog catalog = inventory.get_catalog ();
+                unowned FontInventory catalog = inventory;
                 var face = mode == FontBrowserMode.VARIATIONS ? selected_id () : current_face;
+                unowned FontFaceRecord? record = catalog.record (face);
+                if (record == null) {
+                    clear_selection ();
+                    return;
+                }
                 var flags = _("Variable: %s · Color glyphs: %s").printf (
-                    catalog.is_variable (face) ? _("Yes") : _("No"),
-                    catalog.is_color (face) ? _("Yes") : _("No"));
+                    record.variable ? _("Yes") : _("No"),
+                    record.color ? _("Yes") : _("No"));
                 var matches = !font_fallback.active ||
                     matches_preview (catalog, face, catalog.description (face));
                 font_detail.label = "%s\n%s [%d]\n%s\n%s".printf (face_name (catalog, face),
-                    Filename.display_name (catalog.file (face) ?? ""), catalog.face_index (face), flags,
+                    Filename.display_name (record.file), record.face_index, flags,
                     !font_fallback.active ? _("Exact file and face rendering; no fallback.") :
                     matches ? _("Nominal preview face matches the installed file.") :
                     _("Preview substitution: renderer resolved a different face or no face."));
@@ -835,7 +823,7 @@ namespace Characters {
                 return;
             }
             var index = mode == FontBrowserMode.VARIATIONS ? selected_id () : current_face;
-            unowned Fonts.Catalog catalog = inventory.get_catalog ();
+            unowned FontInventory catalog = inventory;
             var face = catalog.open_face (index);
             if (face == null) {
                 font_toasts.add_toast (new Adw.Toast (_("Unable to Open Exact Font Face")));
@@ -849,8 +837,12 @@ namespace Characters {
                     point = 0x41;
                 }
             }
+            unowned FontFaceRecord? record = catalog.record (index);
+            if (record == null) {
+                return;
+            }
             var identity = "%s\n%s [%d]".printf (face_name (catalog, index),
-                Filename.display_name (catalog.file (index) ?? ""), catalog.face_index (index));
+                Filename.display_name (record.file), record.face_index);
             new FontFaceDialog ((owned) face, identity, point).present (this);
         }
 

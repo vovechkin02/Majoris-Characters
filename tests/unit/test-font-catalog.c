@@ -6,18 +6,17 @@
 
 #include <pango/pangoft2.h>
 
-/** Validate real installed face metadata and exact mapped-scalar enumeration. */
+/** Validate raw installed face access and exact mapped-scalar enumeration. */
 static size_t test_coverage(CharactersFontCatalog *catalog) {
     size_t matching = SIZE_MAX;
     size_t count = characters_fonts_count(catalog);
     assert(count > 0);
     for (size_t index = 0; index < count; index++) {
         const char *family = characters_fonts_family(catalog, index);
-        assert(family && *family);
-        assert(characters_fonts_file(catalog, index));
-        assert(characters_fonts_face_index(catalog, index) >= 0);
-        if (index) {
-            assert(strcmp(characters_fonts_family(catalog, index - 1), family) <= 0);
+        if (!family || !g_utf8_validate(family, -1, NULL) ||
+            !characters_fonts_file(catalog, index) ||
+            characters_fonts_face_index(catalog, index) < 0) {
+            continue;
         }
         if (matching == SIZE_MAX && strcmp(family, "DejaVu Sans") == 0 &&
             characters_fonts_contains(catalog, index, 'A')) {

@@ -6,7 +6,7 @@ namespace Characters.Fonts {
     [CCode (cname = "CharactersFontCatalog", free_function = "characters_fonts_free",
         has_type_id = false)]
     public class Catalog {
-        /** Number of usable installed faces. */
+        /** Number of discovered patterns before application filtering and sorting. */
         [CCode (cname = "characters_fonts_count")]
         public size_t count ();
 
@@ -14,7 +14,7 @@ namespace Characters.Fonts {
         [CCode (cname = "characters_fonts_family")]
         public unowned string? family (size_t index);
 
-        /** Primary style label, borrowed until the snapshot is destroyed. */
+        /** Raw style bytes, borrowed until snapshot destruction; validate before display. */
         [CCode (cname = "characters_fonts_style")]
         public unowned string? style (size_t index);
 

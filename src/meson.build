@@ -29,6 +29,7 @@ search_sources = files(
 )
 legacy_sources = files('encodings/legacy-workflow.vala')
 font_sources = files(
+  'fonts/font-face-record.vala',
   'fonts/font-inventory.vala',
   'fonts/font-source-loader.vala',
   'fonts/font-source-request.vala',

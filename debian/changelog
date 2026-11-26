@@ -1,3 +1,11 @@
+majoris-characters (1.0.13-1) unstable; urgency=medium
+
+  * Move installed-face validation, sorting, grouping and comparison policy to Vala.
+  * Retain raw Fontconfig snapshots and exact FreeType identity adapters.
+  * Extend the font source regression and release wiring contracts.
+
+ -- Majoris Contributors <45165533+vovechkin02@users.noreply.github.com>  Thu, 26 Nov 2026 14:25:00 +1100
+
 majoris-characters (1.0.12-1) unstable; urgency=medium
 
   * Migrate legacy byte parsing, formatting and exact round-trip policy to Vala.

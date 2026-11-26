@@ -419,10 +419,14 @@ field masks and validated numeric operands. The scanner evaluates these without
 interpreting query prefixes or hardcoding semantic collection ranges. `Relationships` assembles, deduplicates and
 sorts exact text alternatives from native scalar candidates and emoji catalog
 lookups. Native scalar enumeration avoids per-candidate GObjects. The property
-tables, ICU normalization, FreeType rasterizer, Fontconfig inventory and legacy
-conversion and repertoire enumeration remain in C; byte parsing, presentation
-and explicit conversion policy belong to Vala. No new pattern hierarchy or
-public ABI is introduced. See [pass 4 qualification](vala-migration-pass-4.md),
+tables, ICU normalization, FreeType rasterizer, raw Fontconfig discovery and
+legacy conversion and repertoire enumeration remain in C. Byte parsing,
+presentation, explicit conversion policy, installed-face validation, sorting,
+family grouping and comparison filtering belong to Vala. `FontInventory` owns
+its immutable records and maps application positions back to native pattern
+indexes; worker refresh and exact face ownership are unchanged. No new pattern hierarchy or
+public ABI is introduced. See [pass 5 qualification](vala-migration-pass-5.md),
+[pass 4 qualification](vala-migration-pass-4.md),
 [pass 3 qualification](vala-migration-pass-3.md),
 [pass 2 qualification](vala-migration-pass-2.md), and the earlier
 [pass 1 qualification](vala-migration.md).
