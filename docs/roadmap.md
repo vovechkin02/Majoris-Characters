@@ -56,3 +56,9 @@ application and GJS are not runtime dependencies of the main application. The op
   application policy migration is deferred until full compilation and parity
   benchmarks are available. Generated and vendored data are classified for
   GitHub Linguist without altering their contents.
+
+- Vala migration pass 2 (1.0.10): query syntax and numeric decoding, language
+  collection selection, and related-character assembly are implemented in Vala.
+  The compact native scanner and scalar lookup primitives remain. Full Vala
+  compilation and performance parity are required before further hot-path
+  migration. See [pass 2 qualification](vala-migration-pass-2.md).

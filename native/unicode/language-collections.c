@@ -23,14 +23,10 @@ struct LayoutEntry {
 
 #include "generated/languages.h"
 
-/** Resolve a locale or ISO language code into ICU scripts and then snapshot IDs. */
-static void add_locale(const char *locale, bool *scripts) {
-    if (!locale || !*locale) {
+/** Add ICU locale scripts to a caller-owned snapshot mask. */
+void characters_language_add_locale(const char *locale, uint8_t *scripts, size_t length) {
+    if (!locale || !*locale || !scripts || length != CHARACTERS_LANGUAGE_SCRIPT_LIMIT) {
         return;
-    }
-    if (strcmp(locale, "C") == 0 || strcmp(locale, "POSIX") == 0 ||
-        strcmp(locale, "C.UTF-8") == 0) {
-        locale = "en";
     }
     UErrorCode status = U_ZERO_ERROR;
     UScriptCode codes[16];
@@ -41,34 +37,28 @@ static void add_locale(const char *locale, bool *scripts) {
     for (int32_t index = 0; index < count; index++) {
         int slot = characters_scalar_script_index(uscript_getShortName(codes[index]));
         if (slot >= 0 && slot < CHARACTERS_LANGUAGE_SCRIPT_LIMIT) {
-            scripts[slot] = true;
+            scripts[slot] = 1;
         }
     }
 }
 
-/** Add all declared languages for one exact layout or registered variant. */
-static void add_layout(const char *id, size_t length, bool *scripts) {
-    for (size_t index = 0; index < COUNT(layout_entries); index++) {
-        if (strlen(layout_entries[index].id) != length ||
-            strncmp(id, layout_entries[index].id, length) != 0) {
-            continue;
-        }
-        const char *start = layout_entries[index].languages;
-        while (*start) {
-            size_t size = strcspn(start, " ");
-            if (size && size < 16) {
-                char language[16];
-                memcpy(language, start, size);
-                language[size] = '\0';
-                add_locale(language, scripts);
-            }
-            start += size;
-            if (*start) {
-                start++;
-            }
-        }
-        return;
+/** Borrow the language list of an exact XKB layout or registered variant. */
+const char *characters_language_layout_languages(const char *id) {
+    if (!id) {
+        return NULL;
     }
+    for (size_t index = 0; index < COUNT(layout_entries); index++) {
+        if (strcmp(layout_entries[index].id, id) == 0) {
+            return layout_entries[index].languages;
+        }
+    }
+    return NULL;
+}
+
+/** Borrow the locale identifier of a named language collection. */
+const char *characters_language_tag(size_t index) {
+    return index >= 2 && index - 2 < COUNT(language_entries) ?
+           language_entries[index - 2].tag : NULL;
 }
 
 /** Return the number of selectable language filters. */
@@ -87,22 +77,3 @@ const char *characters_language_name(size_t index) {
     return index - 2 < COUNT(language_entries) ? language_entries[index - 2].label : NULL;
 }
 
-/** Resolve an immutable query-local script mask. */
-void characters_language_scripts(int filter, const char *locale, const char *sources,
-                                 bool scripts[CHARACTERS_LANGUAGE_SCRIPT_LIMIT]) {
-    memset(scripts, 0, CHARACTERS_LANGUAGE_SCRIPT_LIMIT * sizeof(*scripts));
-    if (filter == 0) {
-        add_locale(locale && *locale ? locale : "en", scripts);
-    } else if (filter == 1 && sources) {
-        while (*sources) {
-            size_t length = strcspn(sources, ",");
-            add_layout(sources, length, scripts);
-            sources += length;
-            if (*sources) {
-                sources++;
-            }
-        }
-    } else if (filter >= 2 && (size_t)(filter - 2) < COUNT(language_entries)) {
-        add_locale(language_entries[filter - 2].tag, scripts);
-    }
-}

@@ -35,16 +35,33 @@ test('Unicode engine contracts', unicode_native_test, suite: 'unit', timeout: 30
 unicode_binding_test = executable(
   'test-unicode-bindings',
   'unit/test-unicode-bindings.vala',
-  unicode_vapi,
+  unicode_sources,
+  unicode_domain_vapis,
   dependencies: [gio_dep, unicode_dep],
   c_args: ['-UNDEBUG'],
 )
 test('Unicode Vala bindings', unicode_binding_test, suite: 'unit', timeout: 30)
 
+prepared_search_test = executable(
+  'test-prepared-search',
+  'unit/test-prepared-search.c',
+  dependencies: unicode_dep,
+  c_args: ['-UNDEBUG'],
+)
+test('Prepared search boundary contracts', prepared_search_test, suite: 'unit', timeout: 30)
+
+search_contract_driver = files('support/search-contract-driver.vala',
+  'support/search-contract-tests.vapi')
+search_contract_include = include_directories('support')
+
 character_search_test = executable(
   'test-character-search',
   'unit/test-character-search.c',
-  dependencies: [unicode_dep, dependency('threads')],
+  search_contract_driver,
+  search_domain_sources,
+  search_domain_vapis,
+  include_directories: search_contract_include,
+  dependencies: [gio_dep, unicode_dep, dependency('threads')],
   c_args: ['-UNDEBUG'],
 )
 test('Character search contracts', character_search_test, suite: 'unit', timeout: 30)
@@ -53,8 +70,8 @@ search_controller_test = executable(
   'test-search-controller',
   'unit/test-search-controller.vala',
   search_sources,
-  search_vapi,
-  unicode_vapi,
+  search_domain_sources,
+  search_domain_vapis,
   dependencies: [gio_dep, unicode_dep],
   c_args: ['-UNDEBUG'],
 )
@@ -72,6 +89,7 @@ character_browser_test = executable(
   font_vapi,
   legacy_vapi,
   emoji_vapi,
+  language_vapi,
   app_resources,
   dependencies: app_dependencies,
   vala_args: app_vala_args,
@@ -117,7 +135,11 @@ test('Inspector Vala bindings', inspector_binding_test, suite: 'unit', timeout: 
 legacy_encoding_test = executable(
   'test-legacy-encoding',
   'unit/test-legacy-encoding.c',
-  dependencies: unicode_dep,
+  search_contract_driver,
+  search_domain_sources,
+  search_domain_vapis,
+  include_directories: search_contract_include,
+  dependencies: [gio_dep, unicode_dep],
   c_args: ['-UNDEBUG'],
 )
 test('Legacy encoding and repertoire contracts', legacy_encoding_test,
@@ -135,9 +157,10 @@ font_sources_test = executable(
   'test-font-sources',
   'unit/test-font-sources.vala',
   font_sources,
+  search_domain_sources,
+  search_domain_vapis,
   font_vapi,
   legacy_vapi,
-  search_vapi,
   dependencies: [gio_dep, gtk_dep, font_dep, unicode_dep],
   c_args: ['-UNDEBUG'],
 )
@@ -151,7 +174,11 @@ test('Font and legacy source bindings and supersession', font_sources_test,
 emoji_catalog_test = executable(
   'test-emoji-catalog',
   'unit/test-emoji-catalog.c',
-  dependencies: unicode_dep,
+  search_contract_driver,
+  unicode_sources,
+  unicode_domain_vapis,
+  include_directories: search_contract_include,
+  dependencies: [gio_dep, unicode_dep],
   c_args: ['-UNDEBUG'],
 )
 test('Emoji variations and localized annotation search', emoji_catalog_test,

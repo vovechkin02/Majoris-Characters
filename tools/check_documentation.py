@@ -144,6 +144,8 @@ def main() -> int:
     files += sorted((root / "src").rglob("*.vala.in"))
     files += sorted((root / "vapi").glob("*.vapi"))
     files += sorted((root / "tests").rglob("*.vala"))
+    files += sorted((root / "tests").rglob("*.vapi"))
+    files += sorted((root / "tests").rglob("*.h"))
     files += sorted((root / "native/fonts").glob("*.c"))
     files += sorted((root / "native/fonts").glob("*.h"))
     files += sorted((root / "native/unicode").glob("*.c"))

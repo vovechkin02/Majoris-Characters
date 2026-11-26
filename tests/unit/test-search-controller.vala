@@ -7,7 +7,7 @@ private const ulong POLL_INTERVAL_US = 1000;
 
 /** Native result ownership and catalog identifiers survive the Vala boundary. */
 private void test_bindings () {
-    var job = Search.create (Search.Scope.ALL, -1, -1, "U+20AC");
+    var job = QueryParser.create (Search.Scope.ALL, -1, -1, "U+20AC");
     assert (job != null);
     assert (job.run () == Search.Status.OK);
     assert (job.count () == 1);
@@ -18,6 +18,28 @@ private void test_bindings () {
     assert (Search.display (0x0301) == "◌́");
     assert (Search.text (0) == null);
     assert (Search.filter_count (Search.Scope.BLOCK) == Unicode.block_count ());
+}
+
+/** Exercise shared numeric syntax and invalid input directly through the Vala parser. */
+private void test_query_parser () {
+    var points = QueryParser.decode_code (" \tU+0000 0x20ac dec:128512\r\n");
+    assert (points != null && points.length == 3);
+    assert (points[0] == 0 && points[1] == 0x20AC && points[2] == 0x1F600);
+    foreach (var invalid in new string[] { "", "U+D800", "U+110000", "dec:-1", "U+41 42" }) {
+        assert (QueryParser.decode_code (invalid) == null);
+    }
+    var job = QueryParser.create (Search.Scope.ALL, -1, -1, "face");
+    assert (job != null && job.run () == Search.Status.OK);
+    bool found = false;
+    for (size_t index = 0; index < job.count (); index++) {
+        if (job.id (index) == 0xFACE) {
+            found = true;
+            break;
+        }
+    }
+    assert (found);
+    job = QueryParser.create (Search.Scope.ALL, -1, -1, string.nfill (513, 'a'));
+    assert (job != null && job.run () == Search.Status.INVALID);
 }
 
 /** A newer request must replace pending work and suppress completion of the older request. */
@@ -49,6 +71,7 @@ private void test_latest_request () {
 int main (string[] args) {
     Test.init (ref args);
     Test.add_func ("/characters/search/bindings", test_bindings);
+    Test.add_func ("/characters/search/query-parser", test_query_parser);
     Test.add_func ("/characters/search/latest-request", test_latest_request);
     return Test.run ();
 }

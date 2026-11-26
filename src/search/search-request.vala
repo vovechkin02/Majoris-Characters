@@ -7,25 +7,43 @@ namespace Characters {
         /** Owned native job, immutable except for its worker and atomic cancellation. */
         private Search.Job? job;
 
-        /** Creates a request with a copied query and immutable filter parameters. */
+        /** Bounded input captured before worker execution; null denotes invalid input. */
+        private string? query;
+        /** Locale used by annotation search and language selection. */
+        private string locale = "en";
+        /** Configured XKB layouts captured before worker execution. */
+        private string input_sources = "";
+        /** Scope and filter needed for language collection preparation. */
+        private Search.Scope scope = Search.Scope.ALL;
+        /** Immutable collection filter. */
+        private int filter = -1;
+
+        /** Creates an unprepared request; parsing and language selection run on the worker. */
         public SearchRequest (Search.Scope scope, int filter, int category, string query,
                               string input_sources = "") {
-            job = Search.create (scope, filter, category, query);
-            if (job != null) {
-                job.set_locale (Intl.get_language_names ()[0]);
-                job.set_input_sources (input_sources);
-            }
+            this.scope = scope;
+            this.filter = filter;
+            this.query = query.length <= QueryParser.MAX_BYTES ? query : null;
+            locale = Intl.get_language_names ()[0];
+            this.input_sources = input_sources.length < 1024 ? input_sources : "";
+            job = Search.allocate (scope, filter, category);
         }
 
         /** Copies a font or encoding repertoire into an independently owned native job. */
         public SearchRequest.for_points (uint32[] points, int category, string query) {
-            job = Search.create_points (points, category, query);
+            this.query = query.length <= QueryParser.MAX_BYTES ? query : null;
+            job = Search.allocate_points (points, category);
         }
 
-        /** Runs on the worker exactly once and returns the status for main-context publication. */
+        /** Interpret input and execute on the worker before main-context publication. */
         public Search.Status run () {
             if (job == null) {
                 return Search.Status.FAILED;
+            }
+            QueryParser.prepare (job, query);
+            job.set_locale (locale);
+            if (scope == Search.Scope.LANGUAGE) {
+                LanguageSelection.configure (job, filter, locale, input_sources);
             }
             return job.run ();
         }

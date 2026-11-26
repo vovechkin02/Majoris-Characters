@@ -138,12 +138,7 @@ namespace Characters.Unicode {
     [CCode (cname = "characters_unicode_named_text")]
     public static string? named_text (size_t index);
 
-    /**
-     * Sorted, deduplicated UTF-8 alternatives, excluding the input. Empty results are allocated
-     * empty vectors; NULL indicates invalid input or allocation failure. A lone NUL returns an
-     * empty vector; embedded NUL is rejected. C callers free each string and the vector using
-     * free; Vala uses g_strfreev.
-     */
-    [CCode (cname = "characters_unicode_related", array_length = false, array_null_terminated = true)]
-    public static string[]? related ([CCode (array_length_type = "size_t")] uint32[] points);
+    /** Owned raw scalar candidates; the Vala relationship policy sorts and deduplicates. */
+    [CCode (cname = "characters_unicode_related_scalars", array_length_type = "int")]
+    public static uint32[]? related_scalars (uint32 point);
 }

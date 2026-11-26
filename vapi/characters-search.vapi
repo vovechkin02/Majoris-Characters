@@ -50,9 +50,16 @@ namespace Characters.Search {
         [CCode (cname = "characters_search_set_locale")]
         public void set_locale (string locale);
 
-        /** Capture the configured XKB source identifiers before worker execution. */
-        [CCode (cname = "characters_search_set_input_sources")]
-        public void set_input_sources (string sources);
+        /** Copy a query-local script membership mask before the worker starts scanning. */
+        [CCode (cname = "characters_search_set_scripts")]
+        public void set_scripts ([CCode (array_length_type = "size_t")] uint8[] scripts);
+
+        /** Copy parser output, folding Han terms once; no borrowed data survives. */
+        [CCode (cname = "characters_search_prepare")]
+        public bool prepare (string text,
+            [CCode (array_length_type = "size_t")] uint32[] points,
+            [CCode (array_length_type = "size_t")] string[] terms,
+            bool exact, bool literal_letter);
 
         /** Request cancellation without waiting for its worker. */
         [CCode (cname = "characters_search_cancel")]
@@ -71,13 +78,13 @@ namespace Characters.Search {
         public uint32 id (size_t index);
     }
 
-    /** Allocate a request copying query text; null on allocation failure. */
-    [CCode (cname = "characters_search_new")]
-    public static Job? create (Scope scope, int filter, int category, string query);
+    /** Allocate an unprepared request, to be populated by the Vala query parser. */
+    [CCode (cname = "characters_search_allocate")]
+    public static Job? allocate (Scope scope, int filter, int category);
 
-    /** Copies an explicit scalar repertoire; an empty repertoire remains empty. */
-    [CCode (cname = "characters_search_new_points", array_length_type = "size_t")]
-    public static Job? create_points (uint32[] points, int category, string query);
+    /** Copy an explicit scalar repertoire; an empty repertoire remains empty. */
+    [CCode (cname = "characters_search_allocate_points", array_length_type = "size_t")]
+    public static Job? allocate_points (uint32[]? points, int category);
 
     /** Number of collection-specific filter slots, including unavailable slots. */
     [CCode (cname = "characters_search_filter_count")]
@@ -110,8 +117,4 @@ namespace Characters.Search {
     /** Complete code point notation for an identity, including composite sequences. */
     [CCode (cname = "characters_search_code")]
     public static string? code (uint32 id);
-    /** Decode explicit notation into a caller-owned 32-element scalar buffer. */
-    [CCode (cname = "characters_search_decode_code")]
-    public static size_t decode_code (string code,
-        [CCode (array_length = false)] uint32[] points);
 }

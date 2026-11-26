@@ -1,4 +1,4 @@
-#include "character-search.h"
+#include "search-contract-tests.h"
 
 #include <assert.h>
 #include <pthread.h>
@@ -12,7 +12,7 @@
 /** Start a valid request and require successful publication. Caller owns it. */
 static CharactersSearch *search(CharactersSearchScope scope, int filter, int category,
                                 const char *query) {
-    CharactersSearch *job = characters_search_new(scope, filter, category, query);
+    CharactersSearch *job = characters_query_parser_create(scope, filter, category, query);
     assert(job);
     assert(characters_search_run(job) == CHARACTERS_SEARCH_OK);
     return job;
@@ -215,7 +215,7 @@ static void test_display(void) {
 static void test_invalid(void) {
     const char *queries[] = { "U+D800", "U+110000", "U+", "dec:-1", "0xFFZZ", "\xFF" };
     for (size_t index = 0; index < sizeof(queries) / sizeof(queries[0]); index++) {
-        CharactersSearch *job = characters_search_new(CHARACTERS_SEARCH_ALL, -1, -1,
+        CharactersSearch *job = characters_query_parser_create(CHARACTERS_SEARCH_ALL, -1, -1,
                                                      queries[index]);
         assert(job && characters_search_run(job) == CHARACTERS_SEARCH_INVALID);
         assert(characters_search_count(job) == 0);
@@ -224,10 +224,10 @@ static void test_invalid(void) {
     char oversized[514];
     memset(oversized, 'a', sizeof(oversized) - 1);
     oversized[sizeof(oversized) - 1] = '\0';
-    CharactersSearch *job = characters_search_new(CHARACTERS_SEARCH_ALL, -1, -1, oversized);
+    CharactersSearch *job = characters_query_parser_create(CHARACTERS_SEARCH_ALL, -1, -1, oversized);
     assert(job && characters_search_run(job) == CHARACTERS_SEARCH_INVALID);
     characters_search_free(job);
-    job = characters_search_new(CHARACTERS_SEARCH_BLOCK, 99999, -1, "");
+    job = characters_query_parser_create(CHARACTERS_SEARCH_BLOCK, 99999, -1, "");
     assert(job && characters_search_run(job) == CHARACTERS_SEARCH_INVALID);
     characters_search_free(job);
 }
@@ -240,14 +240,14 @@ static void *cancel_worker(void *argument) {
 
 /** Pre-canceled requests publish nothing; concurrent cancellation permits only complete results. */
 static void test_cancellation(void) {
-    CharactersSearch *job = characters_search_new(CHARACTERS_SEARCH_ALL, -1, -1, "letter");
+    CharactersSearch *job = characters_query_parser_create(CHARACTERS_SEARCH_ALL, -1, -1, "letter");
     assert(job);
     characters_search_cancel(job);
     assert(characters_search_run(job) == CHARACTERS_SEARCH_CANCELED);
     assert(characters_search_count(job) == 0);
     characters_search_free(job);
 
-    job = characters_search_new(CHARACTERS_SEARCH_ALL, -1, -1, "letter");
+    job = characters_query_parser_create(CHARACTERS_SEARCH_ALL, -1, -1, "letter");
     assert(job);
     pthread_t thread;
     assert(pthread_create(&thread, NULL, cancel_worker, job) == 0);
@@ -283,16 +283,16 @@ static void test_language_collections(void) {
     assert(contains_id(job, 0x4E2D) && !contains_id(job, 0x0410));
     characters_search_free(job);
 
-    job = characters_search_new(CHARACTERS_SEARCH_LANGUAGE, 0, -1, "");
+    job = characters_query_parser_create(CHARACTERS_SEARCH_LANGUAGE, 0, -1, "");
     assert(job);
-    characters_search_set_locale(job, "ko_KR.UTF-8");
+    characters_language_selection_configure(job, 0, "ko_KR.UTF-8", "");
     assert(characters_search_run(job) == CHARACTERS_SEARCH_OK);
     assert(contains_id(job, 0xAC00) && contains_id(job, 0x4E2D));
     characters_search_free(job);
 
-    job = characters_search_new(CHARACTERS_SEARCH_LANGUAGE, 1, -1, "");
+    job = characters_query_parser_create(CHARACTERS_SEARCH_LANGUAGE, 1, -1, "");
     assert(job);
-    characters_search_set_input_sources(job, "us,ru,unknown-layout");
+    characters_language_selection_configure(job, 1, "en", "us,ru,unknown-layout");
     assert(characters_search_run(job) == CHARACTERS_SEARCH_OK);
     assert(contains_id(job, 'A') && contains_id(job, 0x0410));
     assert(!contains_id(job, 0x3042));
@@ -384,7 +384,7 @@ static void test_planes_and_unassigned(void) {
     char *display = characters_search_display(0x0378);
     assert(display && strcmp(display, "·") == 0);
     free(display);
-    job = characters_search_new(CHARACTERS_SEARCH_PLANE, 17, -1, "");
+    job = characters_query_parser_create(CHARACTERS_SEARCH_PLANE, 17, -1, "");
     assert(job && characters_search_run(job) == CHARACTERS_SEARCH_INVALID);
     characters_search_free(job);
 }
@@ -415,7 +415,7 @@ static void test_semantic_collections(void) {
 }
 
 /** Execute focused native search contracts, with assertions enabled by the test target. */
-int main(void) {
+int characters_run_contract_tests(void) {
     test_complete_repertoire();
     test_filters();
     test_query_forms();

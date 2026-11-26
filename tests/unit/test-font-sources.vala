@@ -23,7 +23,7 @@ private void test_mapping_bindings () {
     assert (table.bytes (0x20AC) == "80");
     var points = table.points ();
     assert (points != null && points.length >= 128);
-    var job = Search.create_points (points, -1, "U+20AC");
+    var job = QueryParser.create_points (points, -1, "U+20AC");
     assert (job != null);
     assert (job.run () == Search.Status.OK);
     assert (job.count () == 1 && job.id (0) == 0x20AC);

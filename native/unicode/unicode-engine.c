@@ -1,5 +1,6 @@
 #include "unicode-engine.h"
 
+#include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -70,9 +71,9 @@ struct Sequence {
     size_t length;
 };
 
-/** A growable, owned collection of UTF-8 alternatives; failure is sticky. */
-struct RelatedList {
-    char **items;
+/** A growable native scalar candidate vector; failure is sticky. */
+struct ScalarCandidates {
+    uint32_t *items;
     size_t count;
     size_t capacity;
     bool failed;
@@ -180,39 +181,26 @@ static uint32_t canonical_base(uint32_t point) {
     return (uint32_t)base;
 }
 
-/** Append one allocated alternative, growing the vector and retaining a NULL terminator. */
-static void append_related(struct RelatedList *list, const uint32_t *points, size_t length) {
-    if (list->failed || !valid_sequence(points, length)) {
+/** Append a valid non-NUL scalar without encoding or applying presentation policy. */
+static void append_scalar(struct ScalarCandidates *list, uint32_t point) {
+    if (list->failed || !point || !characters_unicode_is_scalar(point)) {
         return;
     }
-    for (size_t index = 0; index < length; index++) {
-        if (!points[index]) {
+    if (list->count == list->capacity) {
+        if (list->capacity > INT_MAX / 2) {
+            list->failed = true;
             return;
         }
-    }
-    char *text = characters_unicode_encode(points, length);
-    if (!text) {
-        list->failed = true;
-        return;
-    }
-    if (list->count + 1 >= list->capacity) {
         size_t capacity = list->capacity ? list->capacity * 2 : 16;
-        char **items = realloc(list->items, capacity * sizeof(*items));
+        uint32_t *items = realloc(list->items, capacity * sizeof(*items));
         if (!items) {
-            free(text);
             list->failed = true;
             return;
         }
         list->items = items;
         list->capacity = capacity;
     }
-    list->items[list->count++] = text;
-    list->items[list->count] = NULL;
-}
-
-/** Append a single non-NUL scalar as an alternative. */
-static void append_scalar(struct RelatedList *list, uint32_t point) {
-    append_related(list, &point, 1);
+    list->items[list->count++] = point;
 }
 
 /** Compare a scalar against the GNOME confusable-class index. */
@@ -223,7 +211,7 @@ static int compare_confusable(const void *key, const void *item) {
 }
 
 /** Adapt GNOME's single-code-point confusable class lookup. Not a security test. */
-static void append_confusables(struct RelatedList *list, uint32_t point) {
+static void append_confusables(struct ScalarCandidates *list, uint32_t point) {
     const struct ConfusableCharacterClass *entry = bsearch(
         &point, confusable_character_classes, COUNT(confusable_character_classes),
         sizeof(confusable_character_classes[0]), compare_confusable);
@@ -239,7 +227,7 @@ static void append_confusables(struct RelatedList *list, uint32_t point) {
 }
 
 /** Add the new simple case pairs defined by Unicode 17 before consulting ICU 16. */
-static void append_case_variants(struct RelatedList *list, uint32_t point) {
+static void append_case_variants(struct ScalarCandidates *list, uint32_t point) {
     if (point >= 0x16EA0 && point <= 0x16EB8) {
         append_scalar(list, point + 0x1B);
     } else if (point >= 0x16EBB && point <= 0x16ED3) {
@@ -255,7 +243,7 @@ static void append_case_variants(struct RelatedList *list, uint32_t point) {
 }
 
 /** Find reverse canonical variants in the same families used by GNOME Characters. */
-static void append_accent_variants(struct RelatedList *list, uint32_t point) {
+static void append_accent_variants(struct ScalarCandidates *list, uint32_t point) {
     const char *script = characters_scalar_script_name((size_t)characters_scalar_script(point));
     if (!script) {
         return;
@@ -292,7 +280,7 @@ static void append_accent_variants(struct RelatedList *list, uint32_t point) {
 }
 
 /** Add canonical decomposition components, including Hangul Jamo. */
-static void append_decomposition(struct RelatedList *list, uint32_t point) {
+static void append_decomposition(struct ScalarCandidates *list, uint32_t point) {
     UErrorCode error = U_ZERO_ERROR;
     const UNormalizer2 *nfd = unorm2_getNFDInstance(&error);
     UChar buffer[64];
@@ -308,38 +296,6 @@ static void append_decomposition(struct RelatedList *list, uint32_t point) {
         U16_NEXT(buffer, offset, length, component);
         append_scalar(list, (uint32_t)component);
     }
-}
-
-/** Compare UTF-8 strings in scalar order; valid UTF-8 preserves lexicographic ordering. */
-static int compare_text(const void *left, const void *right) {
-    return strcmp(*(char *const *)left, *(char *const *)right);
-}
-
-/** Release a failed result or return a sorted unique vector excluding the input. */
-static char **finish_related(struct RelatedList *list, const char *original) {
-    if (list->failed) {
-        for (size_t index = 0; index < list->count; index++) {
-            free(list->items[index]);
-        }
-        free(list->items);
-        return NULL;
-    }
-    if (!list->items) {
-        return calloc(1, sizeof(char *));
-    }
-    qsort(list->items, list->count, sizeof(char *), compare_text);
-    size_t written = 0;
-    for (size_t index = 0; index < list->count; index++) {
-        char *item = list->items[index];
-        if ((original && strcmp(original, item) == 0) ||
-            (written && strcmp(list->items[written - 1], item) == 0)) {
-            free(item);
-        } else {
-            list->items[written++] = item;
-        }
-    }
-    list->items[written] = NULL;
-    return list->items;
 }
 
 bool characters_unicode_is_scalar(uint32_t point) {
@@ -599,55 +555,33 @@ char *characters_unicode_named_text(size_t index) {
     return characters_unicode_encode(named_sequences[index].points, named_sequences[index].length);
 }
 
-char **characters_unicode_related(const uint32_t *points, size_t length) {
-    if (!valid_sequence(points, length)) {
+uint32_t *characters_unicode_related_scalars(uint32_t point, int *count) {
+    if (!count) {
         return NULL;
     }
-    for (size_t index = 0; index < length; index++) {
-        if (points[index] == 0) {
-            return length == 1 ? calloc(1, sizeof(char *)) : NULL;
-        }
+    *count = 0;
+    if (!characters_unicode_is_scalar(point)) {
+        return NULL;
     }
-    struct RelatedList list = { 0 };
-    if (length > 1) {
-        for (size_t index = 0; index < length;) {
-            size_t part = length - index;
-            while (part > 1 && (part == length || !find_emoji(points + index, part))) {
-                part--;
-            }
-            if (points[index] != 0x200D && points[index] != 0xFE0F && points[index] != 0xFE0E) {
-                append_related(&list, points + index, part);
-            }
-            index += part;
-        }
-    } else {
-        uint32_t point = points[0];
-        if (has_properties(point)) {
-            append_case_variants(&list, point);
-            append_scalar(&list, (uint32_t)u_charMirror((UChar32)point));
-            append_decomposition(&list, point);
-            append_accent_variants(&list, point);
-        }
+    struct ScalarCandidates list = { 0 };
+    if (point && has_properties(point)) {
+        append_case_variants(&list, point);
+        append_scalar(&list, (uint32_t)u_charMirror((UChar32)point));
+        append_decomposition(&list, point);
+        append_accent_variants(&list, point);
+    }
+    if (point) {
         append_confusables(&list, point);
     }
-    if (characters_emoji_is_presentation_base(points[0]) &&
-        (length == 1 || (length == 2 && (points[1] == 0xFE0E || points[1] == 0xFE0F)))) {
-        uint32_t pair[] = { points[0], 0xFE0E };
-        append_related(&list, pair, COUNT(pair));
-        pair[1] = 0xFE0F;
-        append_related(&list, pair, COUNT(pair));
+    if (list.failed) {
+        free(list.items);
+        return NULL;
     }
-    char *original = characters_unicode_encode(points, length);
-    if (!original) {
-        list.failed = true;
-    } else {
-        size_t canonical = characters_emoji_alias_canonical(characters_emoji_alias_index(original));
-        if (canonical < COUNT(emoji_characters)) {
-            const struct EmojiCharacter *entry = &emoji_characters[canonical];
-            append_related(&list, entry->uc, (size_t)entry->length);
-        }
+    if (!list.items) {
+        list.items = calloc(1, sizeof(*list.items));
     }
-    char **result = finish_related(&list, original);
-    free(original);
-    return result;
+    if (list.items) {
+        *count = (int)list.count;
+    }
+    return list.items;
 }

@@ -171,6 +171,35 @@ class SourceContractsTest(unittest.TestCase):
         self.assertIn("native/unicode/generated/** linguist-generated=true", attributes)
         self.assertIn("native/unicode/vendor/** linguist-vendored=true", attributes)
 
+    def test_second_vala_migration_wiring(self) -> None:
+        """Keep one query parser and relationship policy, with all fixture targets wired."""
+        sources = (ROOT / "src/meson.build").read_text()
+        tests = (ROOT / "tests/meson.build").read_text()
+        for name in ("search/query-parser", "search/language-selection",
+                     "unicode/relationships"):
+            self.assertIn(f"'{name}.vala'", sources)
+            self.assertTrue((ROOT / f"src/{name}.vala").is_file())
+        request = (ROOT / "src/search/search-request.vala").read_text()
+        self.assertIn("QueryParser.prepare (job, query)", request)
+        self.assertIn("LanguageSelection.configure (job, filter, locale, input_sources)", request)
+        inspector = (ROOT / "src/unicode/inspection-snapshot.vala").read_text()
+        self.assertIn("QueryParser.decode_code (code)", inspector)
+        self.assertIn("Relationships.collect (points)", inspector)
+        scanner = (ROOT / "native/unicode/character-search.c").read_text()
+        self.assertNotIn("static bool parse_query", scanner)
+        self.assertNotIn("characters_search_decode_code", scanner)
+        self.assertIn("characters_search_prepare", scanner)
+        engine = (ROOT / "native/unicode/unicode-engine.c").read_text()
+        self.assertNotIn("characters_unicode_related(", engine)
+        self.assertIn("characters_unicode_related_scalars", engine)
+        self.assertIn("unit/test-prepared-search.c", tests)
+        self.assertIn("support/search-contract-driver.vala", tests)
+        self.assertIn("language_vapi", sources)
+        for name in ("character-search", "legacy-encoding", "emoji-catalog"):
+            fixture = (ROOT / f"tests/unit/test-{name}.c").read_text()
+            self.assertIn("characters_query_parser_create", fixture)
+            self.assertIn("characters_run_contract_tests", fixture)
+
     def test_release_gate(self) -> None:
         """Prove missing and skipped test records cannot pass the release log gate."""
         names = sorted(expected_tests())

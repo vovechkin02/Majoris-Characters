@@ -3,8 +3,8 @@ namespace Characters {
     internal sealed class DesktopSearch : Object {
         /** Maximum results returned to a desktop consumer. */
         public const uint LIMIT = 20;
-        /** Maximum UTF-8 query length accepted by the native search engine. */
-        public const int MAX_QUERY_BYTES = 512;
+        /** Maximum UTF-8 query length accepted by the shared Vala parser. */
+        public const int MAX_QUERY_BYTES = QueryParser.MAX_BYTES;
 
         /** Rejects empty, oversized, or invalid queries before allocating a worker. */
         public static bool valid_query (string query) {

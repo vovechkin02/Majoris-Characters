@@ -108,8 +108,13 @@ and compact-window allocation remain runtime qualification requirements.
 
 ## Native request lifecycle
 
-The `CharactersSearch` request copies bounded UTF-8 input, is run at most once,
-and owns its result vector. Its only concurrent operation is atomic cancellation.
+The Vala `QueryParser` interprets bounded UTF-8 input and shares explicit
+numeric decoding with the inspector. `LanguageSelection` resolves locale and
+XKB collection policies through the immutable registry and ICU adapter.
+`SearchRequest` captures input before worker execution; the worker prepares
+and copies scalar candidates, exact-match flags, metadata terms and the script
+mask into `CharactersSearch`. The native scanner is run at most once and owns
+its result vector; it does not interpret raw query syntax. Its only concurrent operation is atomic cancellation.
 The worker checks cancellation every 256 scalar candidates and each sequence.
 Cancellation/failure does not publish a partial vector. After completion, the
 main-context consumer may read the immutable vector. The request and results are

@@ -1,4 +1,4 @@
-#include "character-search.h"
+#include "search-contract-tests.h"
 #include "legacy-encoding.h"
 #include "unicode-engine.h"
 
@@ -202,11 +202,11 @@ static void test_large_repertoire(void) {
     size_t length = 0;
     uint32_t *points = characters_legacy_points(table, &length);
     assert(points && length > 1000000);
-    CharactersSearch *job = characters_search_new_points(points, length, -1, "U+1F600");
+    CharactersSearch *job = characters_query_parser_create_points(points, length, -1, "U+1F600");
     assert(job && characters_search_run(job) == CHARACTERS_SEARCH_OK);
     assert(characters_search_count(job) == 1 && characters_search_id(job, 0) == 0x1F600);
     characters_search_free(job);
-    job = characters_search_new_points(points, length, -1, "");
+    job = characters_query_parser_create_points(points, length, -1, "");
     assert(job && characters_search_run(job) == CHARACTERS_SEARCH_OK);
     assert(characters_search_count(job) == length);
     characters_search_free(job);
@@ -217,7 +217,7 @@ static void test_large_repertoire(void) {
 /** Searches copied mapped scalars, never broadening the repertoire or adding emoji sequences. */
 static void test_repertoire(void) {
     uint32_t points[] = { 0, 'A', 'A', 0x0378, 0x20AC, 0xE000 };
-    CharactersSearch *job = characters_search_new_points(points, 6, -1, "");
+    CharactersSearch *job = characters_query_parser_create_points(points, 6, -1, "");
     assert(job);
     points[1] = 'Z';
     assert(characters_search_run(job) == CHARACTERS_SEARCH_OK);
@@ -231,27 +231,27 @@ static void test_repertoire(void) {
     free(name);
     free(code);
     characters_search_free(job);
-    job = characters_search_new_points(points, 6, -1, "U+20AC");
+    job = characters_query_parser_create_points(points, 6, -1, "U+20AC");
     assert(job && characters_search_run(job) == CHARACTERS_SEARCH_OK);
     assert(characters_search_count(job) == 1 && characters_search_id(job, 0) == 0x20AC);
     characters_search_free(job);
-    job = characters_search_new_points(points, 6, -1, "U+1F600");
+    job = characters_query_parser_create_points(points, 6, -1, "U+1F600");
     assert(job && characters_search_run(job) == CHARACTERS_SEARCH_OK);
     assert(characters_search_count(job) == 0);
     characters_search_free(job);
-    job = characters_search_new_points(points, 6, 7, "");
+    job = characters_query_parser_create_points(points, 6, 7, "");
     assert(job && characters_search_run(job) == CHARACTERS_SEARCH_OK);
     assert(characters_search_count(job) == 1 && characters_search_id(job, 0) == 0xE000);
     characters_search_free(job);
-    job = characters_search_new_points(NULL, 0, -1, "");
+    job = characters_query_parser_create_points(NULL, 0, -1, "");
     assert(job && characters_search_run(job) == CHARACTERS_SEARCH_OK);
     assert(characters_search_count(job) == 0);
     characters_search_free(job);
     points[0] = 0xD800;
-    assert(!characters_search_new_points(points, 6, -1, ""));
-    assert(!characters_search_new_points(NULL, 1, -1, ""));
+    assert(!characters_query_parser_create_points(points, 6, -1, ""));
+    assert(!characters_query_parser_create_points(NULL, 1, -1, ""));
     points[0] = 0;
-    job = characters_search_new_points(points, 6, -1, "");
+    job = characters_query_parser_create_points(points, 6, -1, "");
     assert(job);
     characters_search_cancel(job);
     assert(characters_search_run(job) == CHARACTERS_SEARCH_CANCELED);
@@ -260,7 +260,7 @@ static void test_repertoire(void) {
 }
 
 /** Runs focused legacy byte and exact repertoire contracts. */
-int main(void) {
+int characters_run_contract_tests(void) {
     test_catalog();
     test_mappings();
     test_invalid();

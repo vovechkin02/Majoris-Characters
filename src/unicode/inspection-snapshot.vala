@@ -79,9 +79,9 @@ namespace Characters.Inspector {
             return normalized == null ? null : format_points (normalized, Format.CODE);
         }
 
-        /** Return owned, sorted related text identities from the Unicode database. */
+        /** Return owned, sorted related text identities from the Unicode relationship service. */
         public string[]? related () {
-            return Unicode.related (points);
+            return Relationships.collect (points);
         }
     }
 
@@ -99,17 +99,12 @@ namespace Characters.Inspector {
         return new Snapshot ((owned) points);
     }
 
-    /** Parse exact numeric notation using the shared native search parser. */
+    /** Parse exact numeric notation using the shared Vala search parser. */
     public static Snapshot? from_code (string? code) {
-        if (code == null) {
+        var points = QueryParser.decode_code (code);
+        if (points == null || points.length == 0 || points.length > MAX_POINTS) {
             return null;
         }
-        var points = new uint32[MAX_POINTS];
-        var count = Search.decode_code (code, points);
-        if (count == 0 || count > MAX_POINTS) {
-            return null;
-        }
-        points.resize ((int) count);
         return new Snapshot ((owned) points);
     }
 

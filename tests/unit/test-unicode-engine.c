@@ -204,44 +204,34 @@ static void test_encoding(void) {
     assert(!characters_unicode_encode(invalid, 1));
     uint32_t nul[] = { 0 };
     assert(!characters_unicode_encode(nul, 1));
-    uint32_t embedded[] = { 'a', 0 };
-    assert(!characters_unicode_related(embedded, 2));
 }
 
-/** Assert membership, sorted uniqueness and input exclusion, then release results. */
-static void expect_related(uint32_t point, const char *expected) {
-    char **items = characters_unicode_related(&point, 1);
+/** Assert the native candidate vector includes one expected scalar. */
+static void expect_related(uint32_t point, uint32_t expected) {
+    int count = 0;
+    uint32_t *items = characters_unicode_related_scalars(point, &count);
     assert(items);
-    char *original = characters_unicode_encode(&point, 1);
     bool found = false;
-    for (size_t index = 0; items[index]; index++) {
-        assert(strcmp(original, items[index]) != 0);
-        if (index) {
-            assert(strcmp(items[index - 1], items[index]) < 0);
-        }
-        found |= strcmp(items[index], expected) == 0;
+    for (int index = 0; index < count; index++) {
+        found |= items[index] == expected;
     }
     assert(found);
-    for (size_t index = 0; items[index]; index++) {
-        free(items[index]);
-    }
     free(items);
-    free(original);
 }
 
-/** Verify case, mirror, canonical, Hangul and confusable relations. */
+/** Verify native case, mirror, canonical, Hangul and confusable primitives. */
 static void test_relationships(void) {
-    expect_related('a', "A");
-    expect_related('(', ")");
-    expect_related('e', "é");
-    expect_related(0xE9, "e");
-    expect_related(0xAC00, "ᄀ");
-    expect_related('A', "Α");
-    expect_related(0xA9, "©️");
-    expect_related(0xA7D3, "\uA7D2");
-    expect_related(0x16EA0, "\U00016EBB");
-    uint32_t invalid = 0x110000;
-    assert(!characters_unicode_related(&invalid, 1));
+    expect_related('a', 'A');
+    expect_related('(', ')');
+    expect_related('e', 0xE9);
+    expect_related(0xE9, 'e');
+    expect_related(0xAC00, 0x1100);
+    expect_related('A', 0x391);
+    expect_related(0xA7D3, 0xA7D2);
+    expect_related(0x16EA0, 0x16EBB);
+    int count = 0;
+    assert(!characters_unicode_related_scalars(0x110000, &count));
+    assert(count == 0);
 }
 
 /** Run the headless native contract suite and report the catalog sizes. */

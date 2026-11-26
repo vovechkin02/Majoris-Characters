@@ -1,3 +1,12 @@
+majoris-characters (1.0.10-1) unstable; urgency=medium
+
+  * Migrate bounded query parsing and language collection policy to Vala.
+  * Move related-character assembly and ordering into Vala.
+  * Preserve the compact native scanner and scalar data lookup primitives.
+  * Retain original assertions through mixed Vala and C contract targets.
+
+ -- Majoris Contributors <45165533+vovechkin02@users.noreply.github.com>  Thu, 26 Nov 2026 13:10:00 +1100
+
 majoris-characters (1.0.9-1) unstable; urgency=medium
 
   * Migrate inspection, composition, and emoji variation policies to Vala.

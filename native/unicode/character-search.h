@@ -1,6 +1,7 @@
 #ifndef CHARACTERS_SEARCH_H
 #define CHARACTERS_SEARCH_H
 
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 
@@ -46,48 +47,49 @@ typedef enum {
 typedef struct CharactersSearch CharactersSearch;
 
 /**
- * characters_search_new:
- * @scope: Primary collection.
- * @filter: Collection index, or -1 for all items in that collection.
- * @category: General-category group index, or -1 for all categories.
- * @query: UTF-8 search text, copied by the request (maximum 512 bytes).
+ * characters_search_allocate:
  *
- * Returns: (transfer full) (nullable): A request, or NULL on allocation failure.
- * Invalid options are reported by run().
+ * Allocate an unprepared single-run request; invalid filters fail at run time.
  */
-CharactersSearch *characters_search_new(CharactersSearchScope scope, int filter,
-                                        int category, const char *query);
+CharactersSearch *characters_search_allocate(CharactersSearchScope scope, int filter,
+                                             int category);
 
 /**
- * characters_search_new_points:
- * @points: (array length=length) (nullable): Exact source repertoire, copied before return.
- * @length: Number of scalar identities (maximum Unicode scalar space).
- * @category: General-category index, or -1 for all categories.
- * @query: Bounded UTF-8 search text, copied by the request.
+ * characters_search_allocate_points:
  *
- * Returns: (transfer full) (nullable): Single-run scalar-only search, or NULL on invalid
- * repertoire/allocation failure. Duplicates are suppressed; unassigned mappings are allowed.
+ * Copy a bounded explicit scalar repertoire; NULL on invalid data or allocation failure.
  */
-CharactersSearch *characters_search_new_points(const uint32_t *points, size_t length,
-                                               int category, const char *query);
+CharactersSearch *characters_search_allocate_points(const uint32_t *points, size_t length,
+                                                    int category);
+
+/**
+ * characters_search_prepare:
+ *
+ * Copy validated Vala parser output and fold Han terms once before worker scanning.
+ * No borrowed arrays survive this call. Failed preparation exposes no results.
+ * Call at most once successfully before run; only cancel may run concurrently.
+ */
+bool characters_search_prepare(CharactersSearch *search, const char *text,
+                               const uint32_t *points, size_t point_count,
+                               char *const *terms, size_t term_count,
+                               bool exact, bool literal_letter);
 
 /**
  * characters_search_set_locale:
  * @search: Request not yet submitted to a worker.
  * @locale: Locale identifier copied before execution; English is always a fallback.
  *
- * Selects emoji annotation and current-locale language collections. Do not call concurrently with run().
+ * Selects emoji annotations. Do not call concurrently with run().
  */
 void characters_search_set_locale(CharactersSearch *search, const char *locale);
 
 /**
- * characters_search_set_input_sources:
- * @search: Request not yet submitted to a worker.
- * @sources: Comma-separated configured XKB layout IDs (at most 1023 bytes).
+ * characters_search_set_scripts:
  *
- * Captures registered input-source IDs before run(); unknown layouts are ignored.
+ * Copy the exact snapshot script mask produced by Vala language selection.
  */
-void characters_search_set_input_sources(CharactersSearch *search, const char *sources);
+void characters_search_set_scripts(CharactersSearch *search, const uint8_t *scripts,
+                                   size_t length);
 
 /**
  * characters_search_free:
@@ -199,15 +201,5 @@ char *characters_search_name(uint32_t id);
  * Returns: (transfer full) (nullable): All scalar values in U+ notation.
  */
 char *characters_search_code(uint32_t id);
-
-/**
- * characters_search_decode_code:
- * @code: Explicit U+, 0x, or dec: tokens, separated by ASCII whitespace.
- * @points: (out): Storage for CHARACTERS_UNICODE_MAX_SEQUENCE_LENGTH scalars.
- *
- * Returns: Number of decoded scalars, or zero for invalid input. No assignment
- * requirement is imposed; the destination may be partially written on failure.
- */
-size_t characters_search_decode_code(const char *code, uint32_t *points);
 
 #endif

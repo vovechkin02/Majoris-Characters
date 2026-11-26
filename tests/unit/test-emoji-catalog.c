@@ -6,7 +6,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "character-search.h"
+#include "search-contract-tests.h"
 #include "unicode-engine.h"
 
 /** Check every generated identity and both standardized selectors for all 371 bases. */
@@ -38,24 +38,23 @@ static void test_all_presentation_pairs(void) {
 /** Test exact minimally qualified forms without silently substituting selectors. */
 static void test_qualification(void) {
     uint32_t watch[] = { 0x231A };
-    char **related = characters_unicode_related(watch, 1);
+    int count = 0;
+    char **related = characters_relationships_collect(watch, 1, &count);
     assert(related);
     bool text_found = false;
     bool emoji_found = false;
-    for (size_t index = 0; related[index]; index++) {
+    for (int index = 0; index < count; index++) {
         text_found |= strcmp(related[index], "⌚︎") == 0;
         emoji_found |= strcmp(related[index], "⌚️") == 0;
-    }
-    assert(text_found && emoji_found);
-    for (size_t index = 0; related[index]; index++) {
         free(related[index]);
     }
+    assert(text_found && emoji_found);
     free(related);
 }
 
 /** Test localized, case-folded annotation search through the production search worker. */
 static void expect_search(const char *locale, const char *query, const char *expected) {
-    CharactersSearch *job = characters_search_new(CHARACTERS_SEARCH_EMOJI, -1, -1, query);
+    CharactersSearch *job = characters_query_parser_create(CHARACTERS_SEARCH_EMOJI, -1, -1, query);
     assert(job);
     characters_search_set_locale(job, locale);
     assert(characters_search_run(job) == CHARACTERS_SEARCH_OK);
@@ -87,7 +86,7 @@ static void test_annotations(void) {
     expect_search("unknown", "cheery", "😀");
     expect_search("fr", "U+1F600", "😀");
     expect_search("fr", "👩‍💻", "👩‍💻");
-    CharactersSearch *job = characters_search_new(CHARACTERS_SEARCH_EMOJI, -1, -1, "U+1F600");
+    CharactersSearch *job = characters_query_parser_create(CHARACTERS_SEARCH_EMOJI, -1, -1, "U+1F600");
     assert(job);
     characters_search_set_locale(job, "fr");
     assert(characters_search_run(job) == CHARACTERS_SEARCH_OK);
@@ -101,7 +100,7 @@ static void test_exact_alias_search(void) {
     const char *expected[] = { "⌚︎", "⌚️", "👁‍🗨", "1⃣" };
     for (size_t index = 0; index < sizeof(queries) / sizeof(queries[0]); index++) {
         for (int scope = 0; scope < 2; scope++) {
-            CharactersSearch *job = characters_search_new(
+            CharactersSearch *job = characters_query_parser_create(
                 scope ? CHARACTERS_SEARCH_EMOJI : CHARACTERS_SEARCH_ALL, -1, -1, queries[index]);
             assert(job && characters_search_run(job) == CHARACTERS_SEARCH_OK);
             assert(characters_search_count(job) == 1);
@@ -114,14 +113,14 @@ static void test_exact_alias_search(void) {
             characters_search_free(job);
         }
     }
-    CharactersSearch *job = characters_search_new(CHARACTERS_SEARCH_EMOJI, 8, -1, "⌚︎");
+    CharactersSearch *job = characters_query_parser_create(CHARACTERS_SEARCH_EMOJI, 8, -1, "⌚︎");
     assert(job && characters_search_run(job) == CHARACTERS_SEARCH_OK);
     assert(characters_search_count(job) == 0);
     characters_search_free(job);
 }
 
 /** Run the focused Stage 6 contracts without a graphical session. */
-int main(void) {
+int characters_run_contract_tests(void) {
     test_annotations();
     test_all_presentation_pairs();
     test_qualification();

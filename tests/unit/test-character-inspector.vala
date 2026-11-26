@@ -21,7 +21,7 @@ private void test_encodings () {
 
 /** Verify a retained snapshot and round-trip every catalog identity through scalar notation. */
 private void test_catalog_identity () {
-    var job = Search.create (Search.Scope.ALL, -1, -1, "U+1F469 U+200D U+1F4BB");
+    var job = QueryParser.create (Search.Scope.ALL, -1, -1, "U+1F469 U+200D U+1F4BB");
     assert (job != null && job.run () == Search.Status.OK && job.count () == 1);
     var snapshot = Inspector.from_id (job.id (0));
     job = null;

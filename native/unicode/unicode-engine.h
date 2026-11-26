@@ -248,16 +248,15 @@ const char *characters_unicode_named_name(size_t index);
 char *characters_unicode_named_text(size_t index);
 
 /**
- * characters_unicode_related:
- * @points: (array length=length): Unicode scalars.
- * @length: Number of scalars, from 1 to 32.
+ * characters_unicode_related_scalars:
+ * @point: Valid Unicode scalar.
+ * @count: (out): Number of returned scalar candidates.
  *
- * Returns: (transfer full) (array zero-terminated=1) (nullable): Sorted,
- * deduplicated UTF-8 alternatives, excluding the input. Empty results are
+ * Returns: (transfer full) (array length=count) (nullable): Raw scalar candidates
+ * from case, mirror, canonical and confusable lookups. Duplicates and the input
+ * can occur; no presentation or sequence policy is applied. Empty results are
  * allocated empty vectors; NULL indicates invalid input or allocation failure.
- * A lone NUL returns an empty vector; embedded NUL is rejected.
- * C callers free each string and the vector using free; Vala uses g_strfreev.
  */
-char **characters_unicode_related(const uint32_t *points, size_t length);
+uint32_t *characters_unicode_related_scalars(uint32_t point, int *count);
 
 #endif

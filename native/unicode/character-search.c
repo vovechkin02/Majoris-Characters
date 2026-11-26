@@ -5,7 +5,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <strings.h>
 
 #include <unicode/uchar.h>
 #include <unicode/utf8.h>
@@ -177,12 +176,10 @@ struct CharactersSearch {
     int filter;
     /** General-category group slot, or -1. */
     int category;
-    /** Bounded, owned input; NULL denotes invalid input or missing allocation. */
-    char *query;
+    /** Owned prepared query; NULL until the Vala domain parser accepts input. */
+    struct Query *query;
     /** Locale captured before worker execution; defaults to English. */
     char locale[64];
-    /** Configured XKB layout IDs captured before execution. */
-    char input_sources[1024];
     /** Script membership mask resolved once before scanning a language collection. */
     bool scripts[CHARACTERS_LANGUAGE_SCRIPT_LIMIT];
     /** Optional copied scalar repertoire; NULL denotes ordinary catalog search. */
@@ -207,9 +204,11 @@ struct CharactersSearch {
 
 /** Parsed input, containing only stack-owned data; terms point into the local buffer. */
 struct Query {
-    /** Owned, bounded, tokenized copy of the query. */
+    /** Exact literal text, used for single-letter emoji keyword searches. */
     char text[MAX_QUERY_BYTES + 1];
-    /** Borrowed pointers into text, valid for the query's stack lifetime. */
+    /** Packed, owned metadata term strings. */
+    char term_text[MAX_QUERY_BYTES + 1];
+    /** Borrowed pointers into term_text, valid for the prepared query lifetime. */
     char *terms[MAX_TERMS];
     /** Number of parsed AND terms. */
     size_t term_count;
@@ -232,11 +231,6 @@ static unsigned char lower_ascii(unsigned char byte) {
     return byte >= 'A' && byte <= 'Z' ? byte + ('a' - 'A') : byte;
 }
 
-/** Recognize ASCII query separators; Unicode text itself is not altered. */
-static bool is_space(char byte) {
-    return byte == ' ' || byte == '\t' || byte == '\r' || byte == '\n';
-}
-
 /** Match a term against a nullable English metadata field, ignoring ASCII case. */
 static bool contains_term(const char *field, const char *term) {
     if (!field) {
@@ -256,28 +250,6 @@ static bool contains_term(const char *field, const char *term) {
     return false;
 }
 
-/** Parse a numeric token without accepting signs, trailing characters, or overflow. */
-static bool parse_number(const char *text, size_t length, unsigned base, uint32_t *point) {
-    if (!length || length > 7) {
-        return false;
-    }
-    uint32_t value = 0;
-    for (size_t index = 0; index < length; index++) {
-        unsigned char byte = lower_ascii((unsigned char)text[index]);
-        unsigned digit = byte >= '0' && byte <= '9' ? byte - '0' :
-                         byte >= 'a' && byte <= 'f' ? byte - 'a' + 10 : 255;
-        if (digit >= base || value > (0x10FFFFu - digit) / base) {
-            return false;
-        }
-        value = value * base + digit;
-    }
-    if (!characters_unicode_is_scalar(value)) {
-        return false;
-    }
-    *point = value;
-    return true;
-}
-
 /** Decode exact UTF-8 without normalization; return zero for invalid or oversized sequences. */
 static size_t decode_text(const char *text, uint32_t *points) {
     if (!text || strlen(text) > MAX_QUERY_BYTES) {
@@ -295,130 +267,6 @@ static size_t decode_text(const char *text, uint32_t *points) {
         points[count++] = (uint32_t)point;
     }
     return count;
-}
-
-/** Parse explicit U+, 0x and dec: tokens; each token must declare its base. */
-static bool parse_explicit(const char *text, struct Query *query) {
-    while (*text) {
-        unsigned base = 16;
-        if (lower_ascii(text[0]) == 'u' && text[1] == '+') {
-            text += 2;
-        } else if (text[0] == '0' && lower_ascii(text[1]) == 'x') {
-            text += 2;
-        } else if (strncasecmp(text, "dec:", 4) == 0) {
-            base = 10;
-            text += 4;
-        } else {
-            return false;
-        }
-        const char *end = text;
-        while (*end && !is_space(*end)) {
-            end++;
-        }
-        if (query->point_count == MAX_SEQUENCE_POINTS ||
-            !parse_number(text, (size_t)(end - text), base,
-                          &query->points[query->point_count])) {
-            return false;
-        }
-        query->point_count++;
-        text = end;
-        while (is_space(*text)) {
-            text++;
-        }
-    }
-    query->exact = true;
-    return query->point_count > 0;
-}
-
-/** Trim and validate input, recognize explicit or literal queries, and split metadata terms. */
-static bool parse_query(const char *input, struct Query *query) {
-    if (!input) {
-        return false;
-    }
-    int32_t length = (int32_t)strlen(input);
-    for (int32_t offset = 0; offset < length;) {
-        UChar32 point;
-        U8_NEXT((const uint8_t *)input, offset, length, point);
-        if (point < 0) {
-            return false;
-        }
-    }
-    while (is_space(*input)) {
-        input++;
-    }
-    size_t bytes = strlen(input);
-    while (bytes && is_space(input[bytes - 1])) {
-        bytes--;
-    }
-    memcpy(query->text, input, bytes);
-    query->text[bytes] = '\0';
-    if (!bytes) {
-        return true;
-    }
-    if (strncasecmp(query->text, "U+", 2) == 0 ||
-        strncasecmp(query->text, "0x", 2) == 0 ||
-        strncasecmp(query->text, "dec:", 4) == 0) {
-        return parse_explicit(query->text, query);
-    }
-    query->point_count = decode_text(query->text, query->points);
-    if (query->point_count == 1) {
-        int category = characters_scalar_category(query->points[0]);
-        query->literal_letter = query->points[0] > 0x7F &&
-            category >= U_UPPERCASE_LETTER && category <= U_OTHER_LETTER;
-        query->exact = true;
-        return true;
-    }
-    if (query->point_count > 1 &&
-        (characters_unicode_emoji_index(query->points, query->point_count) != SIZE_MAX ||
-         characters_emoji_alias_index(query->text) != SIZE_MAX)) {
-        query->exact = true;
-        return true;
-    }
-    uint32_t raw;
-    if (bytes >= 2 && bytes <= 6 && parse_number(query->text, bytes, 16, &raw)) {
-        bool has_digit = false;
-        for (size_t index = 0; index < bytes; index++) {
-            has_digit |= query->text[index] >= '0' && query->text[index] <= '9';
-        }
-        if (has_digit) {
-            query->points[0] = raw;
-            query->point_count = 1;
-            query->exact = true;
-            return true;
-        }
-        /* All-letter hex of at least four digits is ambiguous (e.g. FACE). */
-        if (bytes >= 4) {
-            query->points[0] = raw;
-            query->point_count = 1;
-        }
-    }
-    char *cursor = query->text;
-    while (*cursor) {
-        while (is_space(*cursor)) {
-            cursor++;
-        }
-        if (!*cursor) {
-            break;
-        }
-        if (query->term_count == MAX_TERMS) {
-            return false;
-        }
-        query->terms[query->term_count++] = cursor;
-        while (*cursor && !is_space(*cursor)) {
-            cursor++;
-        }
-        if (*cursor) {
-            *cursor++ = '\0';
-        }
-    }
-    for (size_t index = 0; index < query->term_count; index++) {
-        if (!characters_unihan_fold(query->terms[index], query->han_terms[index],
-                                   sizeof(query->han_terms[index]))) {
-            query->han_terms[index][0] = '\0';
-        }
-        query->han_field |= characters_unihan_is_field_query(query->han_terms[index]);
-    }
-    return true;
 }
 
 /** Match every query term, allowing different terms to occur in different metadata fields. */
@@ -975,8 +823,9 @@ static bool scan_named(CharactersSearch *search, const struct Query *query) {
     return true;
 }
 
-CharactersSearch *characters_search_new(CharactersSearchScope scope, int filter,
-                                        int category, const char *query) {
+/** Allocate an unprepared worker request with an independently owned result vector. */
+CharactersSearch *characters_search_allocate(CharactersSearchScope scope, int filter,
+                                             int category) {
     CharactersSearch *search = calloc(1, sizeof(*search));
     if (!search) {
         return NULL;
@@ -986,22 +835,16 @@ CharactersSearch *characters_search_new(CharactersSearchScope scope, int filter,
     search->category = category;
     search->status = CHARACTERS_SEARCH_INVALID;
     atomic_init(&search->canceled, false);
-    if (query && strnlen(query, MAX_QUERY_BYTES + 1) <= MAX_QUERY_BYTES) {
-        search->query = strdup(query);
-        if (!search->query) {
-            free(search);
-            return NULL;
-        }
-    }
     return search;
 }
 
-CharactersSearch *characters_search_new_points(const uint32_t *points, size_t length,
-                                               int category, const char *query) {
+/** Copy a scalar repertoire while rejecting invalid points and oversized input. */
+CharactersSearch *characters_search_allocate_points(const uint32_t *points, size_t length,
+                                                    int category) {
     if (length > SCALAR_LIMIT || (length && !points)) {
         return NULL;
     }
-    CharactersSearch *search = characters_search_new(CHARACTERS_SEARCH_ALL, -1, category, query);
+    CharactersSearch *search = characters_search_allocate(CHARACTERS_SEARCH_ALL, -1, category);
     if (!search) {
         return NULL;
     }
@@ -1028,11 +871,73 @@ void characters_search_set_locale(CharactersSearch *search, const char *locale) 
     }
 }
 
-void characters_search_set_input_sources(CharactersSearch *search, const char *sources) {
-    if (search && !search->started && sources &&
-        strnlen(sources, sizeof(search->input_sources)) < sizeof(search->input_sources)) {
-        strcpy(search->input_sources, sources);
+/** Copy the prepared language mask before worker scanning. */
+void characters_search_set_scripts(CharactersSearch *search, const uint8_t *scripts,
+                                   size_t length) {
+    if (!search || search->started || !scripts || length != COUNT(search->scripts)) {
+        return;
     }
+    for (size_t index = 0; index < length; index++) {
+        search->scripts[index] = scripts[index] != 0;
+    }
+}
+
+/** Copy bounded parser output and fold the Han search terms once. */
+bool characters_search_prepare(CharactersSearch *search, const char *text,
+                               const uint32_t *points, size_t point_count,
+                               char *const *terms, size_t term_count,
+                               bool exact, bool literal_letter) {
+    if (!search || search->started || search->query || !text ||
+        strnlen(text, MAX_QUERY_BYTES + 1) > MAX_QUERY_BYTES ||
+        point_count > MAX_SEQUENCE_POINTS || (point_count && !points) ||
+        term_count > MAX_TERMS || (term_count && !terms) ||
+        (exact && (!point_count || term_count)) ||
+        (literal_letter && (!exact || point_count != 1))) {
+        return false;
+    }
+    for (size_t index = 0; index < point_count; index++) {
+        if (!characters_unicode_is_scalar(points[index])) {
+            return false;
+        }
+    }
+    size_t offset = 0;
+    for (size_t index = 0; index < term_count; index++) {
+        if (!terms[index]) {
+            return false;
+        }
+        size_t length = strnlen(terms[index], MAX_QUERY_BYTES + 1);
+        if (!length || length >= MAX_QUERY_BYTES + 1 - offset) {
+            return false;
+        }
+        offset += length + 1;
+    }
+    struct Query *query = calloc(1, sizeof(*query));
+    if (!query) {
+        search->status = CHARACTERS_SEARCH_FAILED;
+        return false;
+    }
+    strcpy(query->text, text);
+    if (point_count) {
+        memcpy(query->points, points, point_count * sizeof(*points));
+    }
+    query->point_count = point_count;
+    query->term_count = term_count;
+    query->exact = exact;
+    query->literal_letter = literal_letter;
+    offset = 0;
+    for (size_t index = 0; index < term_count; index++) {
+        size_t length = strlen(terms[index]) + 1;
+        query->terms[index] = query->term_text + offset;
+        memcpy(query->terms[index], terms[index], length);
+        offset += length;
+        if (!characters_unihan_fold(query->terms[index], query->han_terms[index],
+                                   sizeof(query->han_terms[index]))) {
+            query->han_terms[index][0] = '\0';
+        }
+        query->han_field |= characters_unihan_is_field_query(query->han_terms[index]);
+    }
+    search->query = query;
+    return true;
 }
 
 void characters_search_free(CharactersSearch *search) {
@@ -1056,21 +961,17 @@ CharactersSearchStatus characters_search_run(CharactersSearch *search) {
         return CHARACTERS_SEARCH_INVALID;
     }
     search->started = true;
-    struct Query query = { 0 };
+    const struct Query *query = search->query;
     if (search->scope < CHARACTERS_SEARCH_ALL || search->scope > CHARACTERS_SEARCH_UNASSIGNED ||
         search->filter < -1 || (search->filter >= 0 &&
         !characters_search_filter_name(search->scope, (size_t)search->filter)) ||
         search->category < -1 || search->category >= (int)COUNT(category_names) ||
-        !parse_query(search->query, &query)) {
+        !query) {
         return search->status;
     }
     if (is_canceled(search)) {
         search->status = CHARACTERS_SEARCH_CANCELED;
         return search->status;
-    }
-    if (search->scope == CHARACTERS_SEARCH_LANGUAGE && search->filter >= 0) {
-        characters_language_scripts(search->filter, search->locale, search->input_sources,
-                                    search->scripts);
     }
     size_t emoji_count = characters_unicode_emoji_count();
     if (emoji_count > EMOJI_ALIAS_BASE - EMOJI_BASE ||
@@ -1086,20 +987,22 @@ CharactersSearchStatus characters_search_run(CharactersSearch *search) {
     }
     bool success = true;
     if (search->points) {
-        success = scan_points(search, &query);
+        success = scan_points(search, query);
     } else if (search->scope != CHARACTERS_SEARCH_EMOJI && search->scope != CHARACTERS_SEARCH_NAMED) {
-        success = scan_scalars(search, &query);
+        success = scan_scalars(search, query);
     }
-    if (!search->points && success && !query.han_field && !is_canceled(search) &&
+    if (!search->points && success && !query->han_field && !is_canceled(search) &&
         (search->scope == CHARACTERS_SEARCH_ALL || search->scope == CHARACTERS_SEARCH_EMOJI)) {
-        success = scan_emoji(search, &query) && scan_emoji_alias(search, &query);
+        success = scan_emoji(search, query) && scan_emoji_alias(search, query);
     }
-    if (!search->points && success && !query.han_field && !is_canceled(search) &&
+    if (!search->points && success && !query->han_field && !is_canceled(search) &&
         (search->scope == CHARACTERS_SEARCH_ALL || search->scope == CHARACTERS_SEARCH_NAMED)) {
-        success = scan_named(search, &query);
+        success = scan_named(search, query);
     }
     free(search->seen);
     search->seen = NULL;
+    free(search->query);
+    search->query = NULL;
     search->status = !success ? CHARACTERS_SEARCH_FAILED :
                      is_canceled(search) ? CHARACTERS_SEARCH_CANCELED : CHARACTERS_SEARCH_OK;
     if (search->status != CHARACTERS_SEARCH_OK) {
@@ -1260,17 +1163,3 @@ char *characters_search_code(uint32_t id) {
     return strdup(code);
 }
 
-size_t characters_search_decode_code(const char *code, uint32_t *points) {
-    if (!code || !points || strnlen(code, MAX_QUERY_BYTES + 1) > MAX_QUERY_BYTES) {
-        return 0;
-    }
-    while (is_space(*code)) {
-        code++;
-    }
-    struct Query query = { 0 };
-    if (!parse_explicit(code, &query)) {
-        return 0;
-    }
-    memcpy(points, query.points, query.point_count * sizeof(*points));
-    return query.point_count;
-}
