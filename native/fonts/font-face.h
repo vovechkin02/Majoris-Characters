@@ -1,10 +1,6 @@
 #ifndef CHARACTERS_FONT_FACE_H
 #define CHARACTERS_FONT_FACE_H
 
-#include <stdbool.h>
-#include <stddef.h>
-#include <stdint.h>
-
 #include <glib.h>
 
 /** Mutable, thread-confined FreeType face with independent variation coordinates. */
@@ -17,7 +13,7 @@ typedef struct CharactersFontFace CharactersFontFace;
  *
  * Returns: (transfer full) (nullable): Independent face or NULL on failure.
  */
-CharactersFontFace *characters_font_face_open(const char *file, int index);
+CharactersFontFace *characters_font_face_open(const gchar *file, gint index);
 
 /**
  * characters_font_face_free:
@@ -31,7 +27,7 @@ void characters_font_face_free(CharactersFontFace *face);
  *
  * Returns: Number of adjustable design axes.
  */
-size_t characters_font_face_axis_count(const CharactersFontFace *face);
+gsize characters_font_face_axis_count(const CharactersFontFace *face);
 
 /**
  * characters_font_face_axis_tag:
@@ -40,7 +36,7 @@ size_t characters_font_face_axis_count(const CharactersFontFace *face);
  *
  * Returns: (transfer full) (nullable): Four-character OpenType tag.
  */
-char *characters_font_face_axis_tag(const CharactersFontFace *face, size_t index);
+gchar *characters_font_face_axis_tag(const CharactersFontFace *face, gsize index);
 
 /**
  * characters_font_face_axis_range:
@@ -53,9 +49,9 @@ char *characters_font_face_axis_tag(const CharactersFontFace *face, size_t index
  *
  * Returns: Whether the axis and output arguments are valid.
  */
-bool characters_font_face_axis_range(const CharactersFontFace *face, size_t index,
-                                     double *minimum, double *maximum,
-                                     double *default_value, double *current);
+gboolean characters_font_face_axis_range(const CharactersFontFace *face, gsize index,
+                                     gdouble *minimum, gdouble *maximum,
+                                     gdouble *default_value, gdouble *current);
 
 /**
  * characters_font_face_set_axis:
@@ -65,7 +61,7 @@ bool characters_font_face_axis_range(const CharactersFontFace *face, size_t inde
  *
  * Returns: Whether FreeType accepted the complete coordinate vector.
  */
-bool characters_font_face_set_axis(CharactersFontFace *face, size_t index, double value);
+gboolean characters_font_face_set_axis(CharactersFontFace *face, gsize index, gdouble value);
 
 /**
  * characters_font_face_reset:
@@ -73,7 +69,7 @@ bool characters_font_face_set_axis(CharactersFontFace *face, size_t index, doubl
  *
  * Returns: Whether the selected named instance or base coordinates were restored.
  */
-bool characters_font_face_reset(CharactersFontFace *face);
+gboolean characters_font_face_reset(CharactersFontFace *face);
 
 /**
  * characters_font_face_unicode_points:
@@ -83,7 +79,7 @@ bool characters_font_face_reset(CharactersFontFace *face);
  * Returns: (transfer full) (array length=length) (nullable): Sorted exact cmap scalars;
  * empty for a symbol-only face. Free with g_free().
  */
-uint32_t *characters_font_face_unicode_points(CharactersFontFace *face, size_t *length);
+gunichar *characters_font_face_unicode_points(CharactersFontFace *face, gsize *length);
 
 /**
  * characters_font_face_symbol_count:
@@ -91,16 +87,16 @@ uint32_t *characters_font_face_unicode_points(CharactersFontFace *face, size_t *
  *
  * Returns: Number of exact raw symbol mappings.
  */
-size_t characters_font_face_symbol_count(const CharactersFontFace *face);
+gsize characters_font_face_symbol_count(const CharactersFontFace *face);
 
 /**
  * characters_font_face_symbol_code:
  * @face: Borrowed face.
  * @index: Raw mapping index.
  *
- * Returns: Raw mapped code or UINT32_MAX if the index is invalid.
+ * Returns: Raw mapped code or G_MAXUINT32 if the index is invalid.
  */
-uint32_t characters_font_face_symbol_code(const CharactersFontFace *face, size_t index);
+guint32 characters_font_face_symbol_code(const CharactersFontFace *face, gsize index);
 
 /**
  * characters_font_face_glyph:
@@ -110,7 +106,7 @@ uint32_t characters_font_face_symbol_code(const CharactersFontFace *face, size_t
  *
  * Returns: Actual glyph index, or zero when not mapped.
  */
-uint32_t characters_font_face_glyph(CharactersFontFace *face, uint32_t code, bool symbol);
+guint32 characters_font_face_glyph(CharactersFontFace *face, guint32 code, gboolean symbol);
 
 /**
  * characters_font_face_render:
@@ -126,7 +122,7 @@ uint32_t characters_font_face_glyph(CharactersFontFace *face, uint32_t code, boo
  * tightly packed. NULL means unavailable, never a substituted face. An empty mapped
  * glyph returns a transparent image. Bitmap strikes may be scaled to fit.
  */
-GBytes *characters_font_face_render(CharactersFontFace *face, uint32_t code, bool symbol,
-                                    unsigned size_px, uint8_t red, uint8_t green, uint8_t blue);
+GBytes *characters_font_face_render(CharactersFontFace *face, guint32 code, gboolean symbol,
+                                    guint size_px, guint8 red, guint8 green, guint8 blue);
 
 #endif

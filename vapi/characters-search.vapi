@@ -52,20 +52,20 @@ namespace Characters.Search {
 
         /** Copy a query-local script membership mask before the worker starts scanning. */
         [CCode (cname = "characters_search_set_scripts")]
-        public void set_scripts ([CCode (array_length_type = "size_t")] uint8[] scripts);
+        public void set_scripts ([CCode (array_length_type = "gsize")] uint8[] scripts);
 
         /** Copy parser output and prepared Han operands; no borrowed data survives. */
         [CCode (cname = "characters_search_prepare")]
         public bool prepare (string text,
-            [CCode (array_length_type = "size_t")] uint32[] points,
-            [CCode (array_length_type = "size_t")] string[] terms,
-            [CCode (array_length_type = "size_t")] string[] han_terms,
-            [CCode (array_length_type = "size_t")] uint32[] han_rules,
+            [CCode (array_length_type = "gsize")] uint32[] points,
+            [CCode (array_length_type = "gsize")] string[] terms,
+            [CCode (array_length_type = "gsize")] string[] han_terms,
+            [CCode (array_length_type = "gsize")] uint32[] han_rules,
             bool exact, bool literal_letter);
 
         /** Copy a bounded union of four-word semantic clauses before scanning. */
         [CCode (cname = "characters_search_set_rules")]
-        public bool set_rules ([CCode (array_length_type = "size_t")] uint32[] rules);
+        public bool set_rules ([CCode (array_length_type = "gsize")] uint32[] rules);
 
         /** Request cancellation without waiting for its worker. */
         [CCode (cname = "characters_search_cancel")]
@@ -89,7 +89,7 @@ namespace Characters.Search {
     public static Job? allocate (Scope scope, int filter, int category);
 
     /** Copy an explicit scalar repertoire; an empty repertoire remains empty. */
-    [CCode (cname = "characters_search_allocate_points", array_length_type = "size_t")]
+    [CCode (cname = "characters_search_allocate_points", array_length_type = "gsize")]
     public static Job? allocate_points (uint32[]? points, int category);
 
     /** Number of collection-specific filter slots, including unavailable slots. */

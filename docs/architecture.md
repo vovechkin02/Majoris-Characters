@@ -438,3 +438,12 @@ pattern hierarchy or public ABI is introduced. See
 [pass 3 qualification](vala-migration-pass-3.md),
 [pass 2 qualification](vala-migration-pass-2.md), and the earlier
 [pass 1 qualification](vala-migration.md).
+
+## Native GLib contracts (1.0.15)
+
+Both native adapters directly depend on GLib. Project-owned API types,
+allocation ownership and VAPI array lengths use GLib conventions; external
+library contracts retain their required types. Recoverable allocations use
+checked `g_try_*` helpers. Compact vectors, immutable generated arrays and
+C11 cancellation atomics are retained. See
+[GLib standardization and verification](glib-native-standardization.md).

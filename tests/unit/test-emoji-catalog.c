@@ -6,30 +6,32 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <glib.h>
+
 #include "search-contract-tests.h"
 #include "unicode-engine.h"
 
 /** Check every generated identity and both standardized selectors for all 371 bases. */
 static void test_all_presentation_pairs(void) {
-    size_t base_count = 0;
-    size_t alias_count = characters_emoji_alias_count();
+    gsize base_count = 0;
+    gsize alias_count = characters_emoji_alias_count();
     assert(alias_count == 1819);
-    for (size_t index = 0; index < alias_count; index++) {
-        const char *text = characters_emoji_alias_text(index);
+    for (gsize index = 0; index < alias_count; index++) {
+        const gchar *text = characters_emoji_alias_text(index);
         assert(text && characters_emoji_alias_index(text) == index);
         assert(characters_emoji_is_candidate(text));
         assert(characters_emoji_alias_label(index));
-        char *name = characters_emoji_alias_name(index);
+        gchar *name = characters_emoji_alias_name(index);
         assert(name && *name);
-        free(name);
-        size_t length = strlen(text);
+        g_free(name);
+        gsize length = strlen(text);
         if (length >= 3 && strcmp(text + length - 3, "\xEF\xB8\x8E") == 0) {
             base_count++;
         }
     }
     assert(base_count == 371);
     assert(!characters_emoji_alias_text(alias_count));
-    assert(characters_emoji_alias_index("😀️") == SIZE_MAX);
+    assert(characters_emoji_alias_index("😀️") == G_MAXSIZE);
     assert(!characters_emoji_is_candidate("😀️"));
     assert(!characters_emoji_is_candidate("A︎"));
     assert(!characters_emoji_is_candidate("👁️️‍🗨️"));
@@ -37,32 +39,32 @@ static void test_all_presentation_pairs(void) {
 
 /** Test exact minimally qualified forms without silently substituting selectors. */
 static void test_qualification(void) {
-    uint32_t watch[] = { 0x231A };
-    int count = 0;
-    char **related = characters_relationships_collect(watch, 1, &count);
+    guint32 watch[] = { 0x231A };
+    gint count = 0;
+    gchar **related = characters_relationships_collect(watch, 1, &count);
     assert(related);
-    bool text_found = false;
-    bool emoji_found = false;
-    for (int index = 0; index < count; index++) {
+    gboolean text_found = FALSE;
+    gboolean emoji_found = FALSE;
+    for (gint index = 0; index < count; index++) {
         text_found |= strcmp(related[index], "⌚︎") == 0;
         emoji_found |= strcmp(related[index], "⌚️") == 0;
-        free(related[index]);
+        g_free(related[index]);
     }
     assert(text_found && emoji_found);
-    free(related);
+    g_free(related);
 }
 
 /** Test localized, case-folded annotation search through the production search worker. */
-static void expect_search(const char *locale, const char *query, const char *expected) {
+static void expect_search(const gchar *locale, const gchar *query, const gchar *expected) {
     CharactersSearch *job = characters_query_parser_create(CHARACTERS_SEARCH_EMOJI, -1, -1, query);
     assert(job);
     characters_search_set_locale(job, locale);
     assert(characters_search_run(job) == CHARACTERS_SEARCH_OK);
-    bool found = false;
-    for (size_t index = 0; index < characters_search_count(job); index++) {
-        char *text = characters_search_text(characters_search_id(job, index));
+    gboolean found = FALSE;
+    for (gsize index = 0; index < characters_search_count(job); index++) {
+        gchar *text = characters_search_text(characters_search_id(job, index));
         found |= text && strcmp(text, expected) == 0;
-        free(text);
+        g_free(text);
     }
     assert(found);
     characters_search_free(job);
@@ -96,20 +98,20 @@ static void test_annotations(void) {
 
 /** Validate exact alias search and catalog category restrictions in both browsing scopes. */
 static void test_exact_alias_search(void) {
-    const char *queries[] = { "U+231A U+FE0E", "⌚️", "👁‍🗨", "U+0031 U+20E3" };
-    const char *expected[] = { "⌚︎", "⌚️", "👁‍🗨", "1⃣" };
-    for (size_t index = 0; index < sizeof(queries) / sizeof(queries[0]); index++) {
-        for (int scope = 0; scope < 2; scope++) {
+    const gchar *queries[] = { "U+231A U+FE0E", "⌚️", "👁‍🗨", "U+0031 U+20E3" };
+    const gchar *expected[] = { "⌚︎", "⌚️", "👁‍🗨", "1⃣" };
+    for (gsize index = 0; index < sizeof(queries) / sizeof(queries[0]); index++) {
+        for (gint scope = 0; scope < 2; scope++) {
             CharactersSearch *job = characters_query_parser_create(
                 scope ? CHARACTERS_SEARCH_EMOJI : CHARACTERS_SEARCH_ALL, -1, -1, queries[index]);
             assert(job && characters_search_run(job) == CHARACTERS_SEARCH_OK);
             assert(characters_search_count(job) == 1);
-            uint32_t id = characters_search_id(job, 0);
-            char *text = characters_search_text(id);
-            char *name = characters_search_name(id);
+            guint32 id = characters_search_id(job, 0);
+            gchar *text = characters_search_text(id);
+            gchar *name = characters_search_name(id);
             assert(text && strcmp(text, expected[index]) == 0 && name);
-            free(text);
-            free(name);
+            g_free(text);
+            g_free(name);
             characters_search_free(job);
         }
     }
@@ -120,7 +122,7 @@ static void test_exact_alias_search(void) {
 }
 
 /** Run the focused Stage 6 contracts without a graphical session. */
-int characters_run_contract_tests(void) {
+gint characters_run_contract_tests(void) {
     test_annotations();
     test_all_presentation_pairs();
     test_qualification();

@@ -1,8 +1,10 @@
 #include "legacy-encoding.h"
 
-#include <stdbool.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+
+#include <glib.h>
 
 #include <unicode/ucnv.h>
 #include <unicode/ucnv_err.h>
@@ -11,8 +13,6 @@
 #include "icu-scalar-conversion.h"
 #include "unicode-engine.h"
 
-/** Count elements in a compile-time array. */
-#define COUNT(array) (sizeof(array) / sizeof((array)[0]))
 /** Maximum temporary mapping entries, including independent aliases. */
 #define MAX_MAPPINGS 2000000u
 /** Shared inspector scalar limit. */
@@ -39,9 +39,9 @@ enum MappingKind {
 /** Describes a supported ICU encoding and the repertoire enumeration strategy. */
 struct Encoding {
     /** Stable display label. */
-    const char *name;
+    const gchar *name;
     /** ICU converter alias or canonical name. */
-    const char *converter;
+    const gchar *converter;
     /** Grammar for independent mappings, or contextual repertoire mode. */
     enum MappingKind kind;
 };
@@ -130,9 +130,9 @@ static const struct Encoding encodings[] = {
 /** Associates a scalar with an exact byte unit (length in high bits, value in low bits). */
 struct Mapping {
     /** Decoded scalar, including NUL. */
-    uint32_t point;
+    gunichar point;
     /** Packed bytes; zero denotes a contextual canonical mapping generated on demand. */
-    uint64_t key;
+    guint64 key;
 };
 
 /** Owns a bounded sorted mapping vector and its immutable encoding identity. */
@@ -140,16 +140,17 @@ struct CharactersLegacy {
     /** Initialized mapping entries. */
     struct Mapping *entries;
     /** Number of entries, including independent byte alternatives. */
-    size_t count;
+    gsize count;
     /** Allocated entries, used only during construction. */
-    size_t capacity;
+    gsize capacity;
     /** Stable catalog index used for exact conversion. */
-    size_t encoding;
+    gsize encoding;
 };
 
 /** Open a fresh converter with strict callbacks in both directions. */
-static UConverter *open_converter(size_t index) {
-    if (index >= COUNT(encodings)) {
+static UConverter *open_converter(gsize index)
+{
+    if (index >= G_N_ELEMENTS(encodings)) {
         return NULL;
     }
     UErrorCode error = U_ZERO_ERROR;
@@ -157,7 +158,7 @@ static UConverter *open_converter(size_t index) {
     if (U_FAILURE(error) || !converter) {
         return NULL;
     }
-    ucnv_setFallback(converter, false);
+    ucnv_setFallback(converter, FALSE);
     ucnv_setToUCallBack(converter, UCNV_TO_U_CALLBACK_STOP, NULL, NULL, NULL, &error);
     ucnv_setFromUCallBack(converter, UCNV_FROM_U_CALLBACK_STOP, NULL, NULL, NULL, &error);
     if (U_FAILURE(error)) {
@@ -168,11 +169,12 @@ static UConverter *open_converter(size_t index) {
 }
 
 /** Decode a complete independent input from initial state, preserving exact scalar order. */
-static size_t decode_points(UConverter *converter, const char *bytes, size_t length,
-                            uint32_t points[MAX_POINTS]) {
+static gsize decode_points(UConverter *converter, const gchar *bytes, gsize length,
+                            gunichar points[MAX_POINTS])
+{
     UChar output[MAX_POINTS * 2];
     UErrorCode error = U_ZERO_ERROR;
-    int32_t count = ucnv_toUChars(converter, output, COUNT(output), bytes,
+    int32_t count = ucnv_toUChars(converter, output, G_N_ELEMENTS(output), bytes,
                                  (int32_t)length, &error);
     if (U_FAILURE(error) || count <= 0) {
         return 0;
@@ -181,13 +183,14 @@ static size_t decode_points(UConverter *converter, const char *bytes, size_t len
 }
 
 /** Encode explicit scalars with strict callbacks, without imposing round-trip policy. */
-static size_t encode_points(UConverter *converter, const uint32_t *points, size_t length,
-                            char bytes[MAX_BYTES]) {
+static gsize encode_points(UConverter *converter, const gunichar *points, gsize length,
+                            gchar bytes[MAX_BYTES])
+{
     if (!points || !length || length > MAX_POINTS) {
         return 0;
     }
     UChar input[MAX_POINTS * 2];
-    int32_t used = characters_icu_encode_utf16(points, length, input, COUNT(input));
+    int32_t used = characters_icu_encode_utf16(points, length, input, G_N_ELEMENTS(input));
     if (!used) {
         return 0;
     }
@@ -196,19 +199,21 @@ static size_t encode_points(UConverter *converter, const uint32_t *points, size_
     if (U_FAILURE(error) || count <= 0) {
         return 0;
     }
-    return (size_t)count;
+    return (gsize)count;
 }
 
 /** Verify standalone contextual repertoire membership without allocating intermediate arrays. */
-static bool round_trip_scalar(UConverter *converter, uint32_t point) {
-    char bytes[MAX_BYTES];
-    size_t count = encode_points(converter, &point, 1, bytes);
-    uint32_t decoded[MAX_POINTS];
+static gboolean round_trip_scalar(UConverter *converter, gunichar point)
+{
+    gchar bytes[MAX_BYTES];
+    gsize count = encode_points(converter, &point, 1, bytes);
+    guint32 decoded[MAX_POINTS];
     return count && decode_points(converter, bytes, count, decoded) == 1 && decoded[0] == point;
 }
 
 /** Keep alternatives contiguous, ordered by encoded length then unsigned byte value. */
-static int compare_mappings(const void *left, const void *right) {
+static gint compare_mappings(gconstpointer left, gconstpointer right)
+{
     const struct Mapping *a = left;
     const struct Mapping *b = right;
     if (a->point != b->point) {
@@ -218,11 +223,12 @@ static int compare_mappings(const void *left, const void *right) {
 }
 
 /** Find the first entry whose scalar is at least point. */
-static size_t lower_bound(const CharactersLegacy *table, uint32_t point) {
-    size_t low = 0;
-    size_t high = table->count;
+static gsize lower_bound(const CharactersLegacy *table, gunichar point)
+{
+    gsize low = 0;
+    gsize high = table->count;
     while (low < high) {
-        size_t middle = low + (high - low) / 2;
+        gsize middle = low + (high - low) / 2;
         if (table->entries[middle].point < point) {
             low = middle + 1;
         } else {
@@ -233,112 +239,116 @@ static size_t lower_bound(const CharactersLegacy *table, uint32_t point) {
 }
 
 /** Grow the temporary vector with a hard limit; allocation failures abort publication. */
-static bool append_mapping(CharactersLegacy *table, uint32_t point, uint64_t key) {
+static gboolean append_mapping(CharactersLegacy *table, gunichar point, guint64 key)
+{
     if (table->count == table->capacity) {
-        size_t capacity = table->capacity ? table->capacity * 2 : 256;
+        gsize capacity = table->capacity ? table->capacity * 2 : 256;
         if (capacity > MAX_MAPPINGS) {
             capacity = MAX_MAPPINGS;
         }
         if (capacity == table->capacity) {
-            return false;
+            return FALSE;
         }
-        struct Mapping *entries = realloc(table->entries, capacity * sizeof(*entries));
+        struct Mapping *entries = g_try_realloc_n(table->entries, capacity, sizeof(*entries));
         if (!entries) {
-            return false;
+            return FALSE;
         }
         table->entries = entries;
         table->capacity = capacity;
     }
     table->entries[table->count++] = (struct Mapping){ point, key };
-    return true;
+    return TRUE;
 }
 
 /** Add one independent encoded unit if it decodes to exactly one scalar. */
-static bool add_unit(CharactersLegacy *table, UConverter *converter, uint32_t value,
-                     unsigned length) {
-    char bytes[4];
-    for (unsigned index = 0; index < length; index++) {
-        bytes[index] = (char)(value >> (8 * (length - index - 1)));
+static gboolean add_unit(CharactersLegacy *table, UConverter *converter, guint32 value,
+                     guint length)
+{
+    gchar bytes[4];
+    for (guint index = 0; index < length; index++) {
+        bytes[index] = (gchar)(value >> (8 * (length - index - 1)));
     }
-    uint32_t points[MAX_POINTS];
+    gunichar points[MAX_POINTS];
     if (decode_points(converter, bytes, length, points) != 1) {
-        return true;
+        return TRUE;
     }
-    return append_mapping(table, points[0], ((uint64_t)length << 32) | value);
+    return append_mapping(table, points[0], ((guint64)length << 32) | value);
 }
 
 /** Enumerate all single/double units, then the legal longer byte grammars only. */
-static bool enumerate_units(CharactersLegacy *table, UConverter *converter,
-                            enum MappingKind kind) {
-    for (uint32_t value = 0; value < 256; value++) {
+static gboolean enumerate_units(CharactersLegacy *table, UConverter *converter,
+                            enum MappingKind kind)
+{
+    for (guint32 value = 0; value < 256; value++) {
         if (!add_unit(table, converter, value, 1)) {
-            return false;
+            return FALSE;
         }
     }
     if (kind == SINGLE) {
-        return true;
+        return TRUE;
     }
-    for (uint32_t value = 0; value < 65536; value++) {
+    for (guint32 value = 0; value < 65536; value++) {
         if (!add_unit(table, converter, value, 2)) {
-            return false;
+            return FALSE;
         }
     }
     if (kind == EUC_JP) {
-        for (uint32_t row = 0xA1; row <= 0xFE; row++) {
-            for (uint32_t cell = 0xA1; cell <= 0xFE; cell++) {
+        for (guint32 row = 0xA1; row <= 0xFE; row++) {
+            for (guint32 cell = 0xA1; cell <= 0xFE; cell++) {
                 if (!add_unit(table, converter, 0x8F0000 | row << 8 | cell, 3)) {
-                    return false;
+                    return FALSE;
                 }
             }
         }
     } else if (kind == GB18030) {
-        for (uint32_t lead = 0x81; lead <= 0xFE; lead++) {
-            for (uint32_t second = 0x30; second <= 0x39; second++) {
-                for (uint32_t third = 0x81; third <= 0xFE; third++) {
-                    for (uint32_t last = 0x30; last <= 0x39; last++) {
-                        uint32_t value = lead << 24 | second << 16 | third << 8 | last;
+        for (guint32 lead = 0x81; lead <= 0xFE; lead++) {
+            for (guint32 second = 0x30; second <= 0x39; second++) {
+                for (guint32 third = 0x81; third <= 0xFE; third++) {
+                    for (guint32 last = 0x30; last <= 0x39; last++) {
+                        guint32 value = lead << 24 | second << 16 | third << 8 | last;
                         if (!add_unit(table, converter, value, 4)) {
-                            return false;
+                            return FALSE;
                         }
                     }
                 }
             }
         }
     } else if (kind == EUC_TW) {
-        for (uint32_t plane = 0xA1; plane <= 0xB0; plane++) {
-            for (uint32_t row = 0xA1; row <= 0xFE; row++) {
-                for (uint32_t cell = 0xA1; cell <= 0xFE; cell++) {
-                    uint32_t value = 0x8E000000 | plane << 16 | row << 8 | cell;
+        for (guint32 plane = 0xA1; plane <= 0xB0; plane++) {
+            for (guint32 row = 0xA1; row <= 0xFE; row++) {
+                for (guint32 cell = 0xA1; cell <= 0xFE; cell++) {
+                    guint32 value = 0x8E000000 | plane << 16 | row << 8 | cell;
                     if (!add_unit(table, converter, value, 4)) {
-                        return false;
+                        return FALSE;
                     }
                 }
             }
         }
     }
-    return true;
+    return TRUE;
 }
 
 /** Contextual encodings expose strictly round-trippable standalone scalars, not arbitrary streams. */
-static bool enumerate_contextual(CharactersLegacy *table, UConverter *converter) {
+static gboolean enumerate_contextual(CharactersLegacy *table, UConverter *converter)
+{
     USet *set = uset_openEmpty();
     if (!set) {
-        return false;
+        return FALSE;
     }
     UErrorCode error = U_ZERO_ERROR;
     ucnv_getUnicodeSet(converter, set, UCNV_ROUNDTRIP_SET, &error);
-    bool success = U_SUCCESS(error);
+    gboolean success = U_SUCCESS(error);
     for (int32_t range = 0; success && range < uset_getRangeCount(set); range++) {
         UChar32 start, end;
         uset_getItem(set, range, &start, &end, NULL, 0, &error);
         if (U_FAILURE(error)) {
-            success = false;
+            success = FALSE;
             break;
         }
         for (UChar32 value = start; value <= end; value++) {
-            uint32_t point = (uint32_t)value;
+            gunichar point = (guint32)value;
             if (round_trip_scalar(converter, point) && !append_mapping(table, point, 0)) {
-                success = false;
+                success = FALSE;
                 break;
             }
         }
@@ -347,28 +357,32 @@ static bool enumerate_contextual(CharactersLegacy *table, UConverter *converter)
     return success;
 }
 
-size_t characters_legacy_count(void) {
-    return COUNT(encodings);
+gsize characters_legacy_count(void)
+{
+    return G_N_ELEMENTS(encodings);
 }
 
-const char *characters_legacy_name(size_t index) {
-    return index < COUNT(encodings) ? encodings[index].name : NULL;
+const gchar *characters_legacy_name(gsize index)
+{
+    return index < G_N_ELEMENTS(encodings) ? encodings[index].name : NULL;
 }
 
-bool characters_legacy_is_contextual(size_t index) {
-    return index < COUNT(encodings) && encodings[index].kind == CONTEXTUAL;
+gboolean characters_legacy_is_contextual(gsize index)
+{
+    return index < G_N_ELEMENTS(encodings) && encodings[index].kind == CONTEXTUAL;
 }
 
-CharactersLegacy *characters_legacy_load(size_t index) {
+CharactersLegacy *characters_legacy_load(gsize index)
+{
     UConverter *converter = open_converter(index);
     if (!converter) {
         return NULL;
     }
-    CharactersLegacy *table = calloc(1, sizeof(*table));
+    CharactersLegacy *table = g_try_new0(CharactersLegacy, 1);
     if (table) {
         table->encoding = index;
         enum MappingKind kind = encodings[index].kind;
-        bool success = kind == CONTEXTUAL ? enumerate_contextual(table, converter) :
+        gboolean success = kind == CONTEXTUAL ? enumerate_contextual(table, converter) :
             enumerate_units(table, converter, kind);
         if (!success) {
             characters_legacy_free(table);
@@ -381,14 +395,16 @@ CharactersLegacy *characters_legacy_load(size_t index) {
     return table;
 }
 
-void characters_legacy_free(CharactersLegacy *table) {
+void characters_legacy_free(CharactersLegacy *table)
+{
     if (table) {
-        free(table->entries);
-        free(table);
+        g_free(table->entries);
+        g_free(table);
     }
 }
 
-uint32_t *characters_legacy_points(const CharactersLegacy *table, size_t *length) {
+gunichar *characters_legacy_points(const CharactersLegacy *table, gsize *length)
+{
     if (!length) {
         return NULL;
     }
@@ -396,12 +412,12 @@ uint32_t *characters_legacy_points(const CharactersLegacy *table, size_t *length
     if (!table) {
         return NULL;
     }
-    uint32_t *points = malloc((table->count ? table->count : 1) * sizeof(*points));
+    gunichar *points = g_try_malloc_n((table->count ? table->count : 1), sizeof(*points));
     if (!points) {
         return NULL;
     }
-    for (size_t index = 0; index < table->count; index++) {
-        uint32_t point = table->entries[index].point;
+    for (gsize index = 0; index < table->count; index++) {
+        gunichar point = table->entries[index].point;
         if (!*length || points[*length - 1] != point) {
             points[(*length)++] = point;
         }
@@ -409,8 +425,9 @@ uint32_t *characters_legacy_points(const CharactersLegacy *table, size_t *length
     return points;
 }
 
-uint32_t *characters_legacy_decode_raw(size_t encoding, const uint8_t *bytes, size_t count,
-                                       size_t *length) {
+gunichar *characters_legacy_decode_raw(gsize encoding, const guint8 *bytes, gsize count,
+                                       gsize *length)
+{
     if (!length) {
         return NULL;
     }
@@ -422,13 +439,13 @@ uint32_t *characters_legacy_decode_raw(size_t encoding, const uint8_t *bytes, si
     if (!converter) {
         return NULL;
     }
-    uint32_t decoded[MAX_POINTS];
-    size_t used = decode_points(converter, (const char *)bytes, count, decoded);
+    guint32 decoded[MAX_POINTS];
+    gsize used = decode_points(converter, (const gchar *)bytes, count, decoded);
     ucnv_close(converter);
     if (!used) {
         return NULL;
     }
-    uint32_t *points = malloc(used * sizeof(*points));
+    gunichar *points = g_try_malloc_n(used, sizeof(*points));
     if (points) {
         memcpy(points, decoded, used * sizeof(*points));
         *length = used;
@@ -436,8 +453,9 @@ uint32_t *characters_legacy_decode_raw(size_t encoding, const uint8_t *bytes, si
     return points;
 }
 
-uint8_t *characters_legacy_encode_raw(size_t encoding, const uint32_t *points, size_t length,
-                                     size_t *count) {
+guint8 *characters_legacy_encode_raw(gsize encoding, const gunichar *points, gsize length,
+                                     gsize *count)
+{
     if (!count) {
         return NULL;
     }
@@ -446,13 +464,13 @@ uint8_t *characters_legacy_encode_raw(size_t encoding, const uint32_t *points, s
     if (!converter) {
         return NULL;
     }
-    char bytes[MAX_BYTES];
-    size_t used = encode_points(converter, points, length, bytes);
+    gchar bytes[MAX_BYTES];
+    gsize used = encode_points(converter, points, length, bytes);
     ucnv_close(converter);
     if (!used) {
         return NULL;
     }
-    uint8_t *output = malloc(used);
+    guint8 *output = g_try_malloc(used);
     if (output) {
         memcpy(output, bytes, used);
         *count = used;
@@ -460,19 +478,22 @@ uint8_t *characters_legacy_encode_raw(size_t encoding, const uint32_t *points, s
     return output;
 }
 
-size_t characters_legacy_encoding_index(const CharactersLegacy *table) {
-    return table ? table->encoding : SIZE_MAX;
+gsize characters_legacy_encoding_index(const CharactersLegacy *table)
+{
+    return table ? table->encoding : G_MAXSIZE;
 }
 
-bool characters_legacy_contains(const CharactersLegacy *table, uint32_t point) {
+gboolean characters_legacy_contains(const CharactersLegacy *table, gunichar point)
+{
     if (!table || !characters_unicode_is_scalar(point)) {
-        return false;
+        return FALSE;
     }
-    size_t index = lower_bound(table, point);
+    gsize index = lower_bound(table, point);
     return index < table->count && table->entries[index].point == point;
 }
 
-uint64_t *characters_legacy_keys(const CharactersLegacy *table, uint32_t point, size_t *length) {
+guint64 *characters_legacy_keys(const CharactersLegacy *table, gunichar point, gsize *length)
+{
     if (!length) {
         return NULL;
     }
@@ -481,14 +502,14 @@ uint64_t *characters_legacy_keys(const CharactersLegacy *table, uint32_t point, 
         characters_legacy_is_contextual(table->encoding)) {
         return NULL;
     }
-    size_t first = lower_bound(table, point);
-    size_t end = lower_bound(table, point + 1);
+    gsize first = lower_bound(table, point);
+    gsize end = lower_bound(table, point + 1);
     if (first == end) {
         return NULL;
     }
-    uint64_t *keys = malloc((end - first) * sizeof(*keys));
+    guint64 *keys = g_try_malloc_n((end - first), sizeof(*keys));
     if (keys) {
-        for (size_t index = first; index < end; index++) {
+        for (gsize index = first; index < end; index++) {
             keys[index - first] = table->entries[index].key;
         }
         *length = end - first;

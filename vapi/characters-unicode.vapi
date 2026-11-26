@@ -1,3 +1,4 @@
+/* Native scalar arrays use gunichar (guint32); keep uint32[] for shared Vala identities. */
 /** Internal native Unicode engine bindings; no installed ABI is promised. */
 [CCode (cheader_filename = "unicode-engine.h", cprefix = "characters_unicode_")]
 namespace Characters.Unicode {
@@ -78,14 +79,14 @@ namespace Characters.Unicode {
      * is performed.
      */
     [CCode (cname = "characters_unicode_encode")]
-    public static string? encode ([CCode (array_length_type = "size_t")] uint32[] points);
+    public static string? encode ([CCode (array_length_type = "gsize")] uint32[] points);
 
     /**
      * Canonical scalar name, named sequence name or emoji label; NULL for unknown sequences.
      * Scalar emoji labels are available separately through the emoji catalog.
      */
     [CCode (cname = "characters_unicode_sequence_name")]
-    public static string? sequence_name ([CCode (array_length_type = "size_t")] uint32[] points);
+    public static string? sequence_name ([CCode (array_length_type = "gsize")] uint32[] points);
 
     /**
      * Normalized UTF-8, or NULL for invalid text, form, size or allocation failure. The original
@@ -112,7 +113,7 @@ namespace Characters.Unicode {
 
     /** Exact emoji catalog index, or SIZE_MAX for unknown sequences. */
     [CCode (cname = "characters_unicode_emoji_index")]
-    public static size_t emoji_index ([CCode (array_length_type = "size_t")] uint32[] points);
+    public static size_t emoji_index ([CCode (array_length_type = "gsize")] uint32[] points);
 
     /** Number of fully qualified emoji sequences in the catalog. */
     [CCode (cname = "characters_unicode_emoji_count")]
@@ -139,6 +140,6 @@ namespace Characters.Unicode {
     public static string? named_text (size_t index);
 
     /** Owned raw scalar candidates; the Vala relationship policy sorts and deduplicates. */
-    [CCode (cname = "characters_unicode_related_scalars", array_length_type = "int")]
+    [CCode (cname = "characters_unicode_related_scalars", array_length_type = "gint")]
     public static uint32[]? related_scalars (uint32 point);
 }

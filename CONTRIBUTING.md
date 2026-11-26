@@ -24,3 +24,25 @@ values. Mark all new user-visible messages for gettext extraction and update
 placeholders, application IDs or schema keys. Use the native accessibility
 properties of interactive GTK controls, including clearing recycled item labels
 on unbind. Record incomplete translation and screen-reader qualification honestly.
+
+## Native GLib contracts
+
+Project-owned C interfaces use GLib types (`gboolean`, `gchar`, `gint`,
+`guint`, `gsize`, fixed-width GLib integers, and `gunichar` for scalar values).
+Keep opaque catalog identities and raw symbol codes distinct from Unicode
+scalars. Preserve the types mandated by ICU, FreeType, Fontconfig, and Pango,
+and retain generated and vendored declarations unchanged. Native modules
+must declare GLib directly in their Meson dependencies and include the
+required headers explicitly.
+
+Return GLib-owned strings and arrays to Vala and release them with `g_free()`.
+Use checked `g_try_*` allocation where failure is recoverable, including the
+search scanner, normalization, encoding enumeration, and native catalog
+lookups. The private `characters_try_strdup()` helper preserves the nullable
+string allocation contract; ordinary `g_strdup()` is appropriate only when
+fatal allocation behavior is acceptable. Keep compact typed vectors and
+C11 atomic cancellation; do not introduce per-character GObjects or replace
+bounded algorithms solely to use a GLib container. Use GLib cleanup helpers
+where they simplify ownership without changing failure or lifetime semantics.
+Keep VAPI length, type, and transfer annotations synchronized with native
+headers and mixed-language tests.

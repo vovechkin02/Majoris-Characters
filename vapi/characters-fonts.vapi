@@ -43,7 +43,7 @@ namespace Characters.Fonts {
         public bool contains (size_t index, uint32 point);
 
         /** Owned sorted mapped scalars, excluding surrogates and invalid code points. */
-        [CCode (cname = "characters_fonts_points", array_length_type = "size_t")]
+        [CCode (cname = "characters_fonts_points", array_length_type = "gsize")]
         public uint32[]? points (size_t index);
 
         /** Opens an independent face from its exact installed file and index. */
@@ -90,7 +90,7 @@ namespace Characters.Fonts {
         public bool reset ();
 
         /** Owned actual Unicode cmap coverage; empty for symbol-only faces. */
-        [CCode (cname = "characters_font_face_unicode_points", array_length_type = "size_t")]
+        [CCode (cname = "characters_font_face_unicode_points", array_length_type = "gsize")]
         public uint32[]? unicode_points ();
 
         /** Raw Microsoft Symbol code count, independent of Unicode coverage. */

@@ -7,7 +7,7 @@ namespace Characters.Legacy {
         has_type_id = false)]
     public class Table {
         /** Owned sorted unique scalars; null on failure. */
-        [CCode (cname = "characters_legacy_points", array_length_type = "size_t")]
+        [CCode (cname = "characters_legacy_points", array_length_type = "gsize")]
         public uint32[]? points ();
 
         /** Stable converter index used for explicit-length operations. */
@@ -19,7 +19,7 @@ namespace Characters.Legacy {
         public bool contains (uint32 point);
 
         /** Owned sorted packed independent byte alternatives, or null. */
-        [CCode (cname = "characters_legacy_keys", array_length_type = "size_t")]
+        [CCode (cname = "characters_legacy_keys", array_length_type = "gsize")]
         public uint64[]? keys (uint32 point);
     }
 
@@ -36,14 +36,14 @@ namespace Characters.Legacy {
     public static bool is_contextual (size_t index);
 
     /** Strict ICU decoding from an exact byte array, including zero bytes. */
-    [CCode (cname = "characters_legacy_decode_raw", array_length_type = "size_t")]
+    [CCode (cname = "characters_legacy_decode_raw", array_length_type = "gsize")]
     public static uint32[]? decode_raw (size_t encoding,
-        [CCode (array_length_type = "size_t")] uint8[] bytes);
+        [CCode (array_length_type = "gsize")] uint8[] bytes);
 
     /** Strict ICU encoding; the caller must validate exact reverse conversion. */
-    [CCode (cname = "characters_legacy_encode_raw", array_length_type = "size_t")]
+    [CCode (cname = "characters_legacy_encode_raw", array_length_type = "gsize")]
     public static uint8[]? encode_raw (size_t encoding,
-        [CCode (array_length_type = "size_t")] uint32[] points);
+        [CCode (array_length_type = "gsize")] uint32[] points);
 
     /** Builds a strict mapping table off the GTK main context. */
     [CCode (cname = "characters_legacy_load")]

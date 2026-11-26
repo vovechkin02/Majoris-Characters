@@ -1,8 +1,11 @@
 #include "unihan.h"
 
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#include <glib.h>
 
 #include <unicode/uchar.h>
 #include <unicode/unorm2.h>
@@ -10,7 +13,8 @@
 #include <unicode/ustring.h>
 #include <unicode/utf16.h>
 
-#define COUNT(array) (sizeof(array) / sizeof((array)[0]))
+#include "../allocation.h"
+
 #define MAX_TERM_UNITS 2048
 
 /** Indexed fields shared with the offline generator. */
@@ -22,15 +26,15 @@ enum HanField {
 
 /** One scalar's immutable metadata and non-authoritative collation groups. */
 struct HanRecord {
-    uint32_t point;
-    uint16_t radical;
-    uint8_t strokes;
-    uint32_t values[HAN_FIELD_COUNT];
-    uint32_t folded[HAN_FIELD_COUNT];
+    gunichar point;
+    guint16 radical;
+    guint8 strokes;
+    guint32 values[HAN_FIELD_COUNT];
+    guint32 folded[HAN_FIELD_COUNT];
 };
 
 /** Exact property keys, in the same order as HanField. */
-static const char *const field_names[] = {
+static const gchar *const field_names[] = {
     "kMandarin", "kCantonese", "kJapaneseOn", "kJapaneseKun", "kJapanese", "kKorean",
     "kHangul", "kDefinition", "kRSUnicode", "kTotalStrokes",
     "Mandarin_Fallback", "Hangul_Fallback"
@@ -39,37 +43,41 @@ static const char *const field_names[] = {
 #include "generated/unihan.h"
 
 /** Compare a scalar against the sorted record table. */
-static int compare_record(const void *key, const void *item) {
-    uint32_t point = *(const uint32_t *)key;
+static gint compare_record(gconstpointer key, gconstpointer item)
+{
+    gunichar point = *(const guint32 *)key;
     const struct HanRecord *row = item;
     return (point > row->point) - (point < row->point);
 }
 
 /** Borrow immutable metadata without allocation; absent scalars have no row. */
-static const struct HanRecord *lookup(uint32_t point) {
-    return bsearch(&point, han_records, COUNT(han_records), sizeof(han_records[0]),
+static const struct HanRecord *lookup(gunichar point)
+{
+    return bsearch(&point, han_records, G_N_ELEMENTS(han_records), sizeof(han_records[0]),
                    compare_record);
 }
 
 /** Return a decimal group label as owned text, or NULL for an unknown group. */
-static char *group_text(unsigned value) {
+static gchar *group_text(guint value)
+{
     if (!value) {
         return NULL;
     }
-    char text[16];
-    snprintf(text, sizeof(text), "%u", value);
-    return strdup(text);
+    gchar text[16];
+    g_snprintf(text, sizeof(text), "%u", value);
+    return characters_try_strdup(text);
 }
 
 /** Return an owned property value without substituting a different source. */
-char *characters_unihan_property(uint32_t point, const char *property) {
+gchar *characters_unihan_property(gunichar point, const gchar *property)
+{
     const struct HanRecord *row = lookup(point);
     if (!row || !property) {
         return NULL;
     }
-    for (size_t index = 0; index < COUNT(field_names); index++) {
+    for (gsize index = 0; index < G_N_ELEMENTS(field_names); index++) {
         if (strcmp(property, field_names[index]) == 0) {
-            return row->values[index] ? strdup(han_strings + row->values[index]) : NULL;
+            return row->values[index] ? characters_try_strdup(han_strings + row->values[index]) : NULL;
         }
     }
     if (strcmp(property, "Radical_Collation") == 0) {
@@ -82,39 +90,41 @@ char *characters_unihan_property(uint32_t point, const char *property) {
 }
 
 /** Report the official data version separately from the fallback. */
-const char *characters_unihan_version(void) {
+const gchar *characters_unihan_version(void)
+{
     return UNIHAN_OFFICIAL_VERSION;
 }
 
 /** Normalize bounded reading search text without changing original metadata. */
-static bool fold(const char *term, char *output, size_t capacity) {
+static gboolean fold(const gchar *term, gchar *output, gsize capacity)
+{
     if (!term || !output || !capacity || capacity > INT32_MAX) {
-        return false;
+        return FALSE;
     }
     UErrorCode status = U_ZERO_ERROR;
     UChar input[MAX_TERM_UNITS];
     UChar folded[MAX_TERM_UNITS];
     UChar decomposed[MAX_TERM_UNITS];
     int32_t length;
-    u_strFromUTF8(input, COUNT(input), &length, term, -1, &status);
+    u_strFromUTF8(input, G_N_ELEMENTS(input), &length, term, -1, &status);
     if (U_FAILURE(status)) {
-        return false;
+        return FALSE;
     }
-    length = u_strFoldCase(folded, COUNT(folded), input, length, U_FOLD_CASE_DEFAULT, &status);
+    length = u_strFoldCase(folded, G_N_ELEMENTS(folded), input, length, U_FOLD_CASE_DEFAULT, &status);
     const UNormalizer2 *normalizer = unorm2_getNFDInstance(&status);
     if (U_FAILURE(status)) {
-        return false;
+        return FALSE;
     }
-    length = unorm2_normalize(normalizer, folded, length, decomposed, COUNT(decomposed), &status);
+    length = unorm2_normalize(normalizer, folded, length, decomposed, G_N_ELEMENTS(decomposed), &status);
     if (U_FAILURE(status)) {
-        return false;
+        return FALSE;
     }
     int32_t used = 0;
-    bool latin = false;
+    gboolean latin = FALSE;
     for (int32_t index = 0; index < length;) {
         UChar32 point;
         U16_NEXT(decomposed, index, length, point);
-        int type = u_charType(point);
+        gint type = u_charType(point);
         if (type != U_NON_SPACING_MARK && type != U_COMBINING_SPACING_MARK &&
             type != U_ENCLOSING_MARK) {
             UErrorCode script_status = U_ZERO_ERROR;
@@ -128,78 +138,85 @@ static bool fold(const char *term, char *output, size_t capacity) {
         U16_APPEND_UNSAFE(folded, used, point);
     }
     u_strToUTF8(output, (int32_t)capacity, &length, folded, used, &status);
-    return U_SUCCESS(status) && length > 0 && (size_t)length < capacity;
+    return U_SUCCESS(status) && length > 0 && (gsize)length < capacity;
 }
 
 /** Match one numeric group in the formal whitespace-separated property values. */
-static bool formal_group(const char *values, bool radical, unsigned group) {
+static gboolean formal_group(const gchar *values, gboolean radical, guint group)
+{
     while (*values) {
-        char *end;
-        unsigned long value = strtoul(values, &end, 10);
+        gchar *end;
+        gulong value = strtoul(values, &end, 10);
         if (end != values && value == group &&
             (radical ? (*end == '.' || *end == '\'') : (*end == ' ' || !*end))) {
-            return true;
+            return TRUE;
         }
-        const char *next = strchr(values, ' ');
+        const gchar *next = strchr(values, ' ');
         if (!next) {
             break;
         }
         values = next + 1;
     }
-    return false;
+    return FALSE;
 }
 
 /** Apply formal grouping when present, otherwise the explicitly labeled collation fallback. */
-static bool group_matches(const struct HanRecord *row, bool radical, unsigned group) {
-    uint32_t offset = row->values[radical ? HAN_RADICAL : HAN_STROKES];
+static gboolean group_matches(const struct HanRecord *row, gboolean radical, guint group)
+{
+    guint32 offset = row->values[radical ? HAN_RADICAL : HAN_STROKES];
     if (offset) {
         return !group || formal_group(han_strings + offset, radical, group);
     }
-    unsigned fallback = radical ? row->radical : row->strokes;
+    guint fallback = radical ? row->radical : row->strokes;
     return fallback && (!group || fallback == group);
 }
 
 /** Fold one query term using the same bounded ICU operation as the previous scanner. */
-char *characters_unihan_fold_text(const char *term) {
-    char output[512 * 3 + 1];
-    return fold(term, output, sizeof(output)) ? strdup(output) : NULL;
+gchar *characters_unihan_fold_text(const gchar *term)
+{
+    gchar output[512 * 3 + 1];
+    return fold(term, output, sizeof(output)) ? characters_try_strdup(output) : NULL;
 }
 
 /** Match selected immutable folded fields without allocation or prefix interpretation. */
-bool characters_unihan_match_fields(uint32_t point, uint32_t fields, const char *term) {
+gboolean characters_unihan_match_fields(gunichar point, guint32 fields, const gchar *term)
+{
     if (!term || !*term || !(fields & CHARACTERS_HAN_TEXT_FIELDS)) {
-        return false;
+        return FALSE;
     }
     const struct HanRecord *row = lookup(point);
     if (!row) {
-        return false;
+        return FALSE;
     }
     fields &= CHARACTERS_HAN_TEXT_FIELDS;
-    for (size_t field = 0; field < HAN_FIELD_COUNT; field++) {
+    for (gsize field = 0; field < HAN_FIELD_COUNT; field++) {
         if ((fields & (UINT32_C(1) << field)) && row->folded[field] &&
             strstr(han_strings + row->folded[field], term)) {
-            return true;
+            return TRUE;
         }
     }
-    return false;
+    return FALSE;
 }
 
 /** Match an explicit numeric constraint using the same group data as browsing. */
-bool characters_unihan_match_group(uint32_t point, bool radical, unsigned group) {
+gboolean characters_unihan_match_group(gunichar point, gboolean radical, guint group)
+{
     if (!group || group > (radical ? 214u : 128u)) {
-        return false;
+        return FALSE;
     }
     const struct HanRecord *row = lookup(point);
     return row && group_matches(row, radical, group);
 }
 
 /** Return the number of group filter slots. */
-size_t characters_unihan_group_count(bool radical) {
-    return radical ? COUNT(radical_labels) : COUNT(stroke_labels);
+gsize characters_unihan_group_count(gboolean radical)
+{
+    return radical ? G_N_ELEMENTS(radical_labels) : G_N_ELEMENTS(stroke_labels);
 }
 
 /** Borrow the immutable display label of a group. */
-const char *characters_unihan_group_name(bool radical, size_t index) {
+const gchar *characters_unihan_group_name(gboolean radical, gsize index)
+{
     if (index >= characters_unihan_group_count(radical)) {
         return NULL;
     }
@@ -207,11 +224,12 @@ const char *characters_unihan_group_name(bool radical, size_t index) {
 }
 
 /** Match a valid filter slot against the formal or fallback group. */
-bool characters_unihan_group_matches(uint32_t point, bool radical, int index) {
-    if (index < -1 || (index >= 0 && (size_t)index >= characters_unihan_group_count(radical))) {
-        return false;
+gboolean characters_unihan_group_matches(gunichar point, gboolean radical, gint index)
+{
+    if (index < -1 || (index >= 0 && (gsize)index >= characters_unihan_group_count(radical))) {
+        return FALSE;
     }
     const struct HanRecord *row = lookup(point);
-    unsigned group = index < 0 ? 0 : radical ? (unsigned)index + 1 : stroke_values[index];
+    guint group = index < 0 ? 0 : radical ? (guint)index + 1 : stroke_values[index];
     return row && group_matches(row, radical, group);
 }

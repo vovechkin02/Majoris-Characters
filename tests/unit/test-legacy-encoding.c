@@ -7,9 +7,11 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <glib.h>
+
 /** Finds a stable test encoding by its exact label, independent of dropdown order. */
-static CharactersLegacy *load(const char *name) {
-    for (size_t index = 0; index < characters_legacy_count(); index++) {
+static CharactersLegacy *load(const gchar *name) {
+    for (gsize index = 0; index < characters_legacy_count(); index++) {
         if (strcmp(characters_legacy_name(index), name) == 0) {
             return characters_legacy_load(index);
         }
@@ -20,45 +22,45 @@ static CharactersLegacy *load(const char *name) {
 /** Every advertised encoding has a nonempty sorted unique scalar repertoire. */
 static void test_catalog(void) {
     assert(characters_legacy_count() == 77);
-    for (size_t index = 0; index < characters_legacy_count(); index++) {
+    for (gsize index = 0; index < characters_legacy_count(); index++) {
         CharactersLegacy *table = characters_legacy_load(index);
         assert(table);
-        size_t length = 0;
-        uint32_t *points = characters_legacy_points(table, &length);
+        gsize length = 0;
+        gunichar *points = characters_legacy_points(table, &length);
         assert(points && length > 0 && length <= 0x110000u);
-        for (size_t position = 0; position < length; position++) {
+        for (gsize position = 0; position < length; position++) {
             assert(characters_unicode_is_scalar(points[position]));
             if (position) {
                 assert(points[position] > points[position - 1]);
             }
         }
         printf("%s: %zu distinct scalars\n", characters_legacy_name(index), length);
-        free(points);
+        g_free(points);
         characters_legacy_free(table);
     }
-    assert(!characters_legacy_name(SIZE_MAX));
-    assert(!characters_legacy_load(SIZE_MAX));
+    assert(!characters_legacy_name(G_MAXSIZE));
+    assert(!characters_legacy_load(G_MAXSIZE));
 }
 
 /** Returns the stable encoding index used by independent stream conversion. */
-static size_t encoding_index(const char *name) {
-    for (size_t index = 0; index < characters_legacy_count(); index++) {
+static gsize encoding_index(const gchar *name) {
+    for (gsize index = 0; index < characters_legacy_count(); index++) {
         if (strcmp(characters_legacy_name(index), name) == 0) {
             return index;
         }
     }
     assert(!"Missing encoding");
-    return SIZE_MAX;
+    return G_MAXSIZE;
 }
 
 /** A known byte sequence decodes exactly and appears in the reverse byte alternatives. */
-static void expect_mapping(const char *encoding, const char *hex, uint32_t point) {
+static void expect_mapping(const gchar *encoding, const gchar *hex, gunichar point) {
     CharactersLegacy *table = load(encoding);
     assert(table);
     assert(characters_legacy_decode(table, hex) == point);
-    char *bytes = characters_legacy_bytes(table, point);
+    gchar *bytes = characters_legacy_bytes(table, point);
     assert(bytes && strstr(bytes, hex));
-    free(bytes);
+    g_free(bytes);
     characters_legacy_free(table);
 }
 
@@ -80,9 +82,9 @@ static void test_mappings(void) {
     expect_mapping("EUC-TW", "8E A2 A1 A1", 0x4E42);
     CharactersLegacy *aliases = load("Shift JIS (Windows-932)");
     assert(aliases);
-    char *bytes = characters_legacy_bytes(aliases, 0x2160);
+    gchar *bytes = characters_legacy_bytes(aliases, 0x2160);
     assert(bytes && strcmp(bytes, "87 54, FA 4A") == 0);
-    free(bytes);
+    g_free(bytes);
     assert(characters_legacy_decode(aliases, "fa4a") == 0x2160);
     characters_legacy_free(aliases);
 }
@@ -91,124 +93,124 @@ static void test_mappings(void) {
 static void test_invalid(void) {
     CharactersLegacy *ascii = load("US-ASCII");
     assert(ascii);
-    const char *queries[] = { "", "A", "GG", "FF", "41 42", "0041", "0x41", " 41",
+    const gchar *queries[] = { "", "A", "GG", "FF", "41 42", "0041", "0x41", " 41",
                               "41 ", "41  42", "414243" };
-    for (size_t index = 0; index < sizeof(queries) / sizeof(queries[0]); index++) {
-        assert(characters_legacy_decode(ascii, queries[index]) == UINT32_MAX);
+    for (gsize index = 0; index < sizeof(queries) / sizeof(queries[0]); index++) {
+        assert(characters_legacy_decode(ascii, queries[index]) == G_MAXUINT32);
     }
     assert(!characters_legacy_bytes(ascii, 0x20AC));
     assert(!characters_legacy_bytes(ascii, 0xD800));
-    assert(!characters_legacy_bytes(ascii, UINT32_MAX));
+    assert(!characters_legacy_bytes(ascii, G_MAXUINT32));
     characters_legacy_free(ascii);
     CharactersLegacy *sjis = load("Shift JIS (Windows-932)");
     assert(sjis);
-    assert(characters_legacy_decode(sjis, "82") == UINT32_MAX);
+    assert(characters_legacy_decode(sjis, "82") == G_MAXUINT32);
     assert(characters_legacy_decode(sjis, "82A0") == 0x3042);
-    assert(characters_legacy_decode(sjis, "41 42") == UINT32_MAX);
+    assert(characters_legacy_decode(sjis, "41 42") == G_MAXUINT32);
     characters_legacy_free(sjis);
 }
 
 /** Validates a byte stream including any initial-state shifts against exact scalar output. */
-static void expect_sequence(size_t encoding, const char *hex, const uint32_t *expected,
-                            size_t count) {
-    int length = 0;
-    uint32_t *points = characters_legacy_decode_sequence(encoding, hex, &length);
-    assert(points && (size_t)length == count && memcmp(points, expected, count * sizeof(*points)) == 0);
-    free(points);
+static void expect_sequence(gsize encoding, const gchar *hex, const guint32 *expected,
+                            gsize count) {
+    gint length = 0;
+    gunichar *points = characters_legacy_decode_sequence(encoding, hex, &length);
+    assert(points && (gsize)length == count && memcmp(points, expected, count * sizeof(*points)) == 0);
+    g_free(points);
 }
 
 /** Stateful and contextual input is reset per conversion; canonical output round-trips exactly. */
 static void test_contextual(void) {
-    size_t japanese = encoding_index("ISO-2022-JP");
-    size_t chinese = encoding_index("HZ-GB-2312");
-    size_t indic = encoding_index("ISCII Devanagari");
+    gsize japanese = encoding_index("ISO-2022-JP");
+    gsize chinese = encoding_index("HZ-GB-2312");
+    gsize indic = encoding_index("ISCII Devanagari");
     assert(characters_legacy_is_contextual(japanese));
     assert(!characters_legacy_is_contextual(encoding_index("GB18030-2022")));
-    uint32_t hiragana[] = { 0x3042 };
-    uint32_t han[] = { 0x4E2D };
-    uint32_t virama[] = { 0x094D, 0x200C };
-    uint32_t joiner[] = { 0x094D, 0x200D };
-    uint32_t mixed[] = { 'A', 0x3042, 'B' };
+    guint32 hiragana[] = { 0x3042 };
+    guint32 han[] = { 0x4E2D };
+    guint32 virama[] = { 0x094D, 0x200C };
+    guint32 joiner[] = { 0x094D, 0x200D };
+    guint32 mixed[] = { 'A', 0x3042, 'B' };
     expect_sequence(japanese, "1B 24 42 24 22 1B 28 42", hiragana, 1);
     expect_sequence(japanese, "41 1B 24 42 24 22 1B 28 42 42", mixed, 3);
     expect_sequence(chinese, "7E 7B 56 50 7E 7D", han, 1);
     expect_sequence(indic, "E8 E8", virama, 2);
     expect_sequence(indic, "E8 E9", joiner, 2);
-    char *encoded = characters_legacy_encode_sequence(japanese, mixed, 3);
+    gchar *encoded = characters_legacy_encode_sequence(japanese, mixed, 3);
     assert(encoded);
     expect_sequence(japanese, encoded, mixed, 3);
-    free(encoded);
+    g_free(encoded);
     encoded = characters_legacy_encode_sequence(indic, virama, 2);
     assert(encoded);
     expect_sequence(indic, encoded, virama, 2);
-    free(encoded);
+    g_free(encoded);
     CharactersLegacy *table = characters_legacy_load(japanese);
     assert(table && characters_legacy_decode(table, "1B244224221B2842") == 0x3042);
     encoded = characters_legacy_bytes(table, 0x3042);
     assert(encoded);
     expect_sequence(japanese, encoded, hiragana, 1);
-    free(encoded);
+    g_free(encoded);
     characters_legacy_free(table);
-    int length = 99;
+    gint length = 99;
     assert(!characters_legacy_decode_sequence(japanese, "1B 24", &length) && !length);
     assert(!characters_legacy_decode_sequence(japanese, "1B 24 42 24", &length) && !length);
     assert(!characters_legacy_decode_sequence(japanese, "1B 24 42", &length) && !length);
-    uint32_t dollar[] = { '$', '"' };
+    guint32 dollar[] = { '$', '"' };
     expect_sequence(japanese, "24 22", dollar, 2);
 }
 
 /** Strict sequence conversion preserves NUL and rejects malformed or lossy input. */
 static void test_sequence_limits(void) {
-    size_t ascii = encoding_index("US-ASCII");
-    size_t gb = encoding_index("GB18030-2022");
-    uint32_t mixed[] = { 'A', 0, 0x1F600 };
+    gsize ascii = encoding_index("US-ASCII");
+    gsize gb = encoding_index("GB18030-2022");
+    guint32 mixed[] = { 'A', 0, 0x1F600 };
     expect_sequence(gb, "41 00 94 39 FC 36", mixed, 3);
-    char *encoded = characters_legacy_encode_sequence(gb, mixed, 3);
+    gchar *encoded = characters_legacy_encode_sequence(gb, mixed, 3);
     assert(encoded && strcmp(encoded, "41 00 94 39 FC 36") == 0);
-    free(encoded);
+    g_free(encoded);
     assert(!characters_legacy_encode_sequence(ascii, mixed, 3));
-    uint32_t lossy[] = { 'A', 0x200D };
+    guint32 lossy[] = { 'A', 0x200D };
     assert(!characters_legacy_encode_sequence(ascii, lossy, 2));
-    uint32_t invalid[] = { 0xD800, 0x110000 };
+    guint32 invalid[] = { 0xD800, 0x110000 };
     assert(!characters_legacy_encode_sequence(gb, invalid, 2));
-    uint32_t points[33];
-    for (size_t index = 0; index < 33; index++) {
+    gunichar points[33];
+    for (gsize index = 0; index < 33; index++) {
         points[index] = 'A';
     }
     assert(!characters_legacy_encode_sequence(ascii, points, 33));
     assert(!characters_legacy_encode_sequence(ascii, points, 0));
-    char hex[259];
+    gchar hex[259];
     memset(hex, '4', sizeof(hex) - 1);
     hex[sizeof(hex) - 1] = '\0';
-    int length = 10;
+    gint length = 10;
     assert(!characters_legacy_decode_sequence(ascii, hex, &length) && !length);
     hex[66] = '\0';
     assert(!characters_legacy_decode_sequence(ascii, hex, &length) && !length);
     hex[64] = '\0';
-    uint32_t *decoded = characters_legacy_decode_sequence(ascii, hex, &length);
+    guint32 *decoded = characters_legacy_decode_sequence(ascii, hex, &length);
     assert(decoded && length == 32 && decoded[31] == 'D');
-    free(decoded);
+    g_free(decoded);
     assert(!characters_legacy_decode_sequence(gb, "94 39 FC", &length) && !length);
     assert(!characters_legacy_decode_sequence(ascii, "41  42", &length) && !length);
     assert(!characters_legacy_decode_sequence(ascii, "41 ", &length) && !length);
-    assert(!characters_legacy_decode_sequence(SIZE_MAX, "41", &length) && !length);
-    assert(!characters_legacy_encode_sequence(SIZE_MAX, points, 1));
-    uint32_t supplementary[32];
-    for (size_t index = 0; index < 32; index++) {
+    assert(!characters_legacy_decode_sequence(G_MAXSIZE, "41", &length) && !length);
+    assert(!characters_legacy_encode_sequence(G_MAXSIZE, points, 1));
+    guint32 supplementary[32];
+    for (gsize index = 0; index < 32; index++) {
         supplementary[index] = 0x1F600;
     }
     encoded = characters_legacy_encode_sequence(gb, supplementary, 32);
     assert(encoded && strlen(encoded) == 383);
     expect_sequence(gb, encoded, supplementary, 32);
-    free(encoded);
+    g_free(encoded);
 }
 
 /** GB18030 covers supplementary and unassigned scalars without exhausting grid search limits. */
 static void test_large_repertoire(void) {
     CharactersLegacy *table = load("GB18030-2022");
     assert(table);
-    size_t length = 0;
-    uint32_t *points = characters_legacy_points(table, &length);
+    gsize length = 0;
+    gunichar *points = characters_legacy_points(table, &length);
     assert(points && length > 1000000);
     CharactersSearch *job = characters_query_parser_create_points(points, length, -1, "U+1F600");
     assert(job && characters_search_run(job) == CHARACTERS_SEARCH_OK);
@@ -218,13 +220,13 @@ static void test_large_repertoire(void) {
     assert(job && characters_search_run(job) == CHARACTERS_SEARCH_OK);
     assert(characters_search_count(job) == length);
     characters_search_free(job);
-    free(points);
+    g_free(points);
     characters_legacy_free(table);
 }
 
 /** Searches copied mapped scalars, never broadening the repertoire or adding emoji sequences. */
 static void test_repertoire(void) {
-    uint32_t points[] = { 0, 'A', 'A', 0x0378, 0x20AC, 0xE000 };
+    gunichar points[] = { 0, 'A', 'A', 0x0378, 0x20AC, 0xE000 };
     CharactersSearch *job = characters_query_parser_create_points(points, 6, -1, "");
     assert(job);
     points[1] = 'Z';
@@ -232,12 +234,12 @@ static void test_repertoire(void) {
     assert(characters_search_count(job) == 5);
     assert(characters_search_id(job, 1) == 'A');
     assert(characters_search_id(job, 2) == 0x0378);
-    char *name = characters_search_name(0x0378);
-    char *code = characters_search_code(0x0378);
+    gchar *name = characters_search_name(0x0378);
+    gchar *code = characters_search_code(0x0378);
     assert(name && strcmp(name, "Unassigned Character") == 0);
     assert(code && strcmp(code, "U+0378") == 0);
-    free(name);
-    free(code);
+    g_free(name);
+    g_free(code);
     characters_search_free(job);
     job = characters_query_parser_create_points(points, 6, -1, "U+20AC");
     assert(job && characters_search_run(job) == CHARACTERS_SEARCH_OK);
@@ -268,7 +270,7 @@ static void test_repertoire(void) {
 }
 
 /** Runs focused legacy byte and exact repertoire contracts. */
-int characters_run_contract_tests(void) {
+gint characters_run_contract_tests(void) {
     test_catalog();
     test_mappings();
     test_invalid();

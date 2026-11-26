@@ -6,9 +6,9 @@ Unicode, international browsing, emoji data, and exact font inspection improveme
 
 | Project metadata | Value |
 | --- | --- |
-| Version | 1.0.14 |
+| Version | 1.0.15 |
 | Platform target | Majoris OS / Debian 13 (Trixie) |
-| Development status | Vala migration pass 6 — qualification candidate (not a verified stable release) |
+| Development status | GLib native standardization — qualification candidate (not a verified stable release) |
 | Application ID | `com.majoris.characters` |
 | Debian package | `majoris-characters` |
 | License | GPL-3.0-or-later |
@@ -172,7 +172,7 @@ For Debian binary packages (run from the repository root):
 
 ```sh
 dpkg-buildpackage -us -uc -b
-sudo apt install ../majoris-characters_1.0.14-1_$(dpkg --print-architecture).deb
+sudo apt install ../majoris-characters_1.0.15-1_$(dpkg --print-architecture).deb
 ```
 
 The source package uses `3.0 (quilt)` and requires the corresponding upstream
@@ -333,9 +333,9 @@ After installing the Debian package, the same runtime tests can target the real
 installed executable:
 
 ```sh
-python3 tests/integration/test_application.py /usr/bin/majoris-characters 1.0.14 cli
+python3 tests/integration/test_application.py /usr/bin/majoris-characters 1.0.15 cli
 xvfb-run -a dbus-run-session -- python3 \
-  tests/integration/test_application.py /usr/bin/majoris-characters 1.0.14 gui
+  tests/integration/test_application.py /usr/bin/majoris-characters 1.0.15 gui
 ```
 
 For a fresh, fail-closed automated build/test and optional Debian package gate:
@@ -370,3 +370,6 @@ See [Unicode engine](docs/unicode-engine.md) for data provenance and limitations
 GNOME-derived components and Unicode data retain their upstream licenses; see
 [third-party notices](THIRD_PARTY_NOTICES.md).
 See [debian/copyright](debian/copyright) for packaging license information.
+
+The 1.0.15 native GLib standardization and its verification limitations are
+recorded in [the native GLib report](docs/glib-native-standardization.md).

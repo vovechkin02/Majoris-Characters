@@ -186,7 +186,7 @@ class SourceContractsTest(unittest.TestCase):
         self.assertIn("QueryParser.decode_code (code)", inspector)
         self.assertIn("Relationships.collect (points)", inspector)
         scanner = (ROOT / "native/unicode/character-search.c").read_text()
-        self.assertNotIn("static bool parse_query", scanner)
+        self.assertNotIn("static gboolean parse_query", scanner)
         self.assertNotIn("characters_search_decode_code", scanner)
         self.assertIn("characters_search_prepare", scanner)
         engine = (ROOT / "native/unicode/unicode-engine.c").read_text()
@@ -268,8 +268,8 @@ class SourceContractsTest(unittest.TestCase):
         engine = (unicode / "unicode-engine.c").read_text()
         self.assertIn("characters_unicode_normalize(", adapter)
         self.assertIn("characters_unicode_encode(", adapter)
-        self.assertNotIn("char *characters_unicode_normalize(", engine)
-        self.assertNotIn("char *characters_unicode_encode(", engine)
+        self.assertNotIn("gchar *characters_unicode_normalize(", engine)
+        self.assertNotIn("gchar *characters_unicode_encode(", engine)
         for name in ("character-search", "emoji-catalog"):
             source = (unicode / f"{name}.c").read_text()
             self.assertIn("characters_icu_decode_utf8(", source)
@@ -280,10 +280,32 @@ class SourceContractsTest(unittest.TestCase):
         for name in ("font-catalog", "font-face"):
             source = (ROOT / f"native/fonts/{name}.c").read_text()
             self.assertIn("characters_scalar_is_valid(", source)
-            self.assertNotIn("static bool is_scalar(", source)
+            self.assertNotIn("static gboolean is_scalar(", source)
         header = (ROOT / "native/fonts/font-face.h").read_text()
         self.assertNotIn("characters_font_face_symbol_points(", header)
         self.assertIn("characters_font_face_symbol_code(", header)
+
+    def test_native_glib_contracts(self) -> None:
+        """Require direct GLib dependencies, consistent ownership and native ABI types."""
+        native = ROOT / "native"
+        self.assertIn("glib_dep = dependency('glib-2.0'", (ROOT / "meson.build").read_text())
+        for component in ("unicode", "fonts"):
+            build = (native / component / "meson.build").read_text()
+            self.assertEqual(build.count("dependencies: [glib_dep,"), 2)
+        paths = list(native.glob("*.h")) + list(native.glob("*/*.h"))
+        paths += list(native.glob("*/*.c"))
+        for path in paths:
+            source = path.read_text()
+            code = re.sub(r'/\*.*?\*/|//[^\n]*', '', source, flags=re.S)
+            self.assertIn("#include <glib.h>", source, str(path))
+            self.assertNotRegex(code, r"\b(?:malloc|calloc|realloc|strdup|free)\s*\(", str(path))
+            self.assertNotRegex(code, r"\bbool\b", str(path))
+            self.assertNotRegex(code, r"typedef[^;]+\bgunichar\s*;", str(path))
+        scanner = (native / "unicode/character-search.c").read_text()
+        self.assertIn("g_try_realloc_n(search->ids", scanner)
+        self.assertIn("atomic_load_explicit", scanner)
+        for path in (ROOT / "vapi").glob("*.vapi"):
+            self.assertNotIn('array_length_type = "size_t"', path.read_text())
 
     def test_release_gate(self) -> None:
         """Prove missing and skipped test records cannot pass the release log gate."""

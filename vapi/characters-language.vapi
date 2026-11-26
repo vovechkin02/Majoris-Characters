@@ -12,5 +12,5 @@ namespace Characters.LanguageData {
     /** OR ICU script IDs into a caller-owned 256-byte mask. */
     [CCode (cname = "characters_language_add_locale")]
     public static void add_locale (string locale,
-        [CCode (array_length_type = "size_t")] uint8[] scripts);
+        [CCode (array_length_type = "gsize")] uint8[] scripts);
 }

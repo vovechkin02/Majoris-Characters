@@ -1,7 +1,10 @@
 #include "icu-adapter.h"
 
+#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+
+#include <glib.h>
 
 #include <unicode/ubrk.h>
 #include <unicode/uchar.h>
@@ -9,6 +12,7 @@
 #include <unicode/utext.h>
 #include <unicode/ustring.h>
 
+#include "../allocation.h"
 #include "icu-scalar-conversion.h"
 #include "normalization.h"
 #include "scalar-properties.h"
@@ -20,7 +24,8 @@
 #define MAX_TEXT_BYTES (1024 * 1024)
 
 /** Count extended grapheme boundaries in a validated UTF-8 input. */
-int characters_icu_graphemes(const char *text) {
+gint characters_icu_graphemes(const gchar *text)
+{
     if (!text || strnlen(text, 16384 * 4 + 1) > 16384 * 4) {
         return -1;
     }
@@ -31,7 +36,7 @@ int characters_icu_graphemes(const char *text) {
     if (U_SUCCESS(error)) {
         ubrk_setUText(iterator, &source, &error);
     }
-    int result = -1;
+    gint result = -1;
     if (U_SUCCESS(error)) {
         result = 0;
         ubrk_first(iterator);
@@ -47,7 +52,8 @@ int characters_icu_graphemes(const char *text) {
 }
 
 /** Extract the immediate ICU decomposition into caller-owned scalar storage. */
-size_t characters_icu_decomposition(uint32_t point, uint32_t *points) {
+gsize characters_icu_decomposition(gunichar point, gunichar *points)
+{
     if (!points || !characters_unicode_is_assigned(point) ||
         characters_scalar_decomposition_type(point) == U_DT_NONE) {
         return 0;
@@ -72,8 +78,9 @@ size_t characters_icu_decomposition(uint32_t point, uint32_t *points) {
 }
 
 /** Bridge length-aware UTF-16 normalization to owned scalar storage. */
-uint32_t *characters_icu_normalize_points(const uint32_t *input_points, int input_count,
-                                         const char *form, int *output_count) {
+gunichar *characters_icu_normalize_points(const gunichar *input_points, gint input_count,
+                                         const gchar *form, gint *output_count)
+{
     if (!output_count) {
         return NULL;
     }
@@ -82,12 +89,12 @@ uint32_t *characters_icu_normalize_points(const uint32_t *input_points, int inpu
         return NULL;
     }
     UChar input[MAX_POINTS * 2];
-    for (int index = 0; index < input_count; index++) {
+    for (gint index = 0; index < input_count; index++) {
         if (!characters_unicode_is_assigned(input_points[index])) {
             return NULL;
         }
     }
-    int32_t length = characters_icu_encode_utf16(input_points, (size_t)input_count,
+    int32_t length = characters_icu_encode_utf16(input_points, (gsize)input_count,
                                                  input, MAX_POINTS * 2);
     if (!length) {
         return NULL;
@@ -95,64 +102,67 @@ uint32_t *characters_icu_normalize_points(const uint32_t *input_points, int inpu
     int32_t actual = 0;
     UChar *normalized = characters_normalize_utf16(input, length, form, &actual);
     if (!normalized || actual <= 0) {
-        free(normalized);
+        g_free(normalized);
         return NULL;
     }
-    uint32_t *points = malloc((size_t)actual * sizeof(*points));
+    gunichar *points = g_try_malloc_n((gsize)actual, sizeof(*points));
     if (!points) {
-        free(normalized);
+        g_free(normalized);
         return NULL;
     }
-    size_t count = characters_icu_decode_utf16(normalized, actual, points, (size_t)actual);
-    free(normalized);
+    gsize count = characters_icu_decode_utf16(normalized, actual, points, (gsize)actual);
+    g_free(normalized);
     if (!count) {
-        free(points);
+        g_free(points);
         return NULL;
     }
-    *output_count = (int)count;
+    *output_count = (gint)count;
     return points;
 }
 
 /** Convert a valid bounded UTF-16 buffer to newly allocated NUL-terminated UTF-8. */
-static char *from_utf16(const UChar *text, int32_t length) {
+static gchar *from_utf16(const UChar *text, int32_t length)
+{
     UErrorCode error = U_ZERO_ERROR;
     int32_t bytes = 0;
     u_strToUTF8(NULL, 0, &bytes, text, length, &error);
     if (error != U_BUFFER_OVERFLOW_ERROR && U_FAILURE(error)) {
         return NULL;
     }
-    char *result = malloc((size_t)bytes + 1);
+    gchar *result = g_try_malloc((gsize)bytes + 1);
     if (!result) {
         return NULL;
     }
     error = U_ZERO_ERROR;
     u_strToUTF8(result, bytes + 1, NULL, text, length, &error);
     if (U_FAILURE(error)) {
-        free(result);
+        g_free(result);
         return NULL;
     }
     return result;
 }
 
 /** Encode an exact bounded catalog sequence; NUL is not representable as C text. */
-char *characters_unicode_encode(const uint32_t *points, size_t length) {
+gchar *characters_unicode_encode(const gunichar *points, gsize length)
+{
     if (!points || !length || length > MAX_POINTS) {
         return NULL;
     }
-    uint8_t text[MAX_POINTS * 4 + 1];
+    guint8 text[MAX_POINTS * 4 + 1];
     int32_t offset = 0;
-    for (size_t index = 0; index < length; index++) {
+    for (gsize index = 0; index < length; index++) {
         if (!points[index] || !characters_scalar_is_valid(points[index])) {
             return NULL;
         }
         U8_APPEND_UNSAFE(text, offset, points[index]);
     }
     text[offset] = 0;
-    return strdup((const char *)text);
+    return characters_try_strdup((const gchar *)text);
 }
 
 /** Normalize bounded UTF-8 using the same engine as explicit scalar normalization. */
-char *characters_unicode_normalize(const char *text, const char *form) {
+gchar *characters_unicode_normalize(const gchar *text, const gchar *form)
+{
     if (!text || strnlen(text, MAX_TEXT_BYTES + 1) > MAX_TEXT_BYTES) {
         return NULL;
     }
@@ -162,20 +172,20 @@ char *characters_unicode_normalize(const char *text, const char *form) {
     if (error != U_BUFFER_OVERFLOW_ERROR && U_FAILURE(error)) {
         return NULL;
     }
-    UChar *input = malloc(((size_t)length + 1) * sizeof(*input));
+    UChar *input = g_try_malloc_n(((gsize)length + 1), sizeof(*input));
     if (!input) {
         return NULL;
     }
     error = U_ZERO_ERROR;
     u_strFromUTF8(input, length + 1, NULL, text, -1, &error);
     if (U_FAILURE(error)) {
-        free(input);
+        g_free(input);
         return NULL;
     }
     int32_t needed = 0;
     UChar *output = characters_normalize_utf16(input, length, form, &needed);
-    free(input);
-    char *result = output ? from_utf16(output, needed) : NULL;
-    free(output);
+    g_free(input);
+    gchar *result = output ? from_utf16(output, needed) : NULL;
+    g_free(output);
     return result;
 }

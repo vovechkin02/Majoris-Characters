@@ -1,9 +1,7 @@
 #ifndef CHARACTERS_SEARCH_H
 #define CHARACTERS_SEARCH_H
 
-#include <stdbool.h>
-#include <stddef.h>
-#include <stdint.h>
+#include <glib.h>
 
 /** The mutually exclusive primary browsing scopes. */
 typedef enum {
@@ -51,16 +49,16 @@ typedef struct CharactersSearch CharactersSearch;
  *
  * Allocate an unprepared single-run request; invalid filters fail at run time.
  */
-CharactersSearch *characters_search_allocate(CharactersSearchScope scope, int filter,
-                                             int category);
+CharactersSearch *characters_search_allocate(CharactersSearchScope scope, gint filter,
+                                             gint category);
 
 /**
  * characters_search_allocate_points:
  *
  * Copy a bounded explicit scalar repertoire; NULL on invalid data or allocation failure.
  */
-CharactersSearch *characters_search_allocate_points(const uint32_t *points, size_t length,
-                                                    int category);
+CharactersSearch *characters_search_allocate_points(const gunichar *points, gsize length,
+                                                    gint category);
 
 /**
  * characters_search_prepare:
@@ -69,12 +67,12 @@ CharactersSearch *characters_search_allocate_points(const uint32_t *points, size
  * No borrowed arrays survive this call. Failed preparation exposes no results.
  * Call at most once successfully before run; only cancel may run concurrently.
  */
-bool characters_search_prepare(CharactersSearch *search, const char *text,
-                               const uint32_t *points, size_t point_count,
-                               char *const *terms, size_t term_count,
-                               char *const *han_terms, size_t han_count,
-                               const uint32_t *han_rules, size_t han_rule_count,
-                               bool exact, bool literal_letter);
+gboolean characters_search_prepare(CharactersSearch *search, const gchar *text,
+                               const gunichar *points, gsize point_count,
+                               gchar *const *terms, gsize term_count,
+                               gchar *const *han_terms, gsize han_count,
+                               const guint32 *han_rules, gsize han_rule_count,
+                               gboolean exact, gboolean literal_letter);
 
 /**
  * characters_search_set_rules:
@@ -83,8 +81,8 @@ bool characters_search_prepare(CharactersSearch *search, const char *text,
  * first scalar, last scalar). A zero decomposition mask means any type.
  * Required for symbol scope; false on invalid input or repeated configuration.
  */
-bool characters_search_set_rules(CharactersSearch *search, const uint32_t *rules,
-                                 size_t length);
+gboolean characters_search_set_rules(CharactersSearch *search, const guint32 *rules,
+                                 gsize length);
 
 /**
  * characters_search_set_locale:
@@ -93,15 +91,15 @@ bool characters_search_set_rules(CharactersSearch *search, const uint32_t *rules
  *
  * Selects emoji annotations. Do not call concurrently with run().
  */
-void characters_search_set_locale(CharactersSearch *search, const char *locale);
+void characters_search_set_locale(CharactersSearch *search, const gchar *locale);
 
 /**
  * characters_search_set_scripts:
  *
  * Copy the exact snapshot script mask produced by Vala language selection.
  */
-void characters_search_set_scripts(CharactersSearch *search, const uint8_t *scripts,
-                                   size_t length);
+void characters_search_set_scripts(CharactersSearch *search, const guint8 *scripts,
+                                   gsize length);
 
 /**
  * characters_search_free:
@@ -134,17 +132,17 @@ CharactersSearchStatus characters_search_run(CharactersSearch *search);
  *
  * Returns: Number of results, zero unless successfully completed.
  */
-size_t characters_search_count(const CharactersSearch *search);
+gsize characters_search_count(const CharactersSearch *search);
 
 /**
  * characters_search_id:
  * @search: Completed request.
  * @index: Zero-based result position.
  *
- * Returns: Opaque, catalog-local identity or UINT32_MAX for invalid position.
+ * Returns: Opaque, catalog-local identity or G_MAXUINT32 for invalid position.
  * Identities are stable in this process, not a persistence format.
  */
-uint32_t characters_search_id(const CharactersSearch *search, size_t index);
+guint32 characters_search_id(const CharactersSearch *search, gsize index);
 
 /**
  * characters_search_filter_count:
@@ -152,7 +150,7 @@ uint32_t characters_search_id(const CharactersSearch *search, size_t index);
  *
  * Returns: Number of possible filter slots, some of which may have no name.
  */
-size_t characters_search_filter_count(CharactersSearchScope scope);
+gsize characters_search_filter_count(CharactersSearchScope scope);
 
 /**
  * characters_search_filter_name:
@@ -162,14 +160,14 @@ size_t characters_search_filter_count(CharactersSearchScope scope);
  * Returns: (transfer none) (nullable): Immutable English label or NULL for an
  * unavailable slot. Script slots refer to the bundled Unicode snapshot.
  */
-const char *characters_search_filter_name(CharactersSearchScope scope, size_t index);
+const gchar *characters_search_filter_name(CharactersSearchScope scope, gsize index);
 
 /**
  * characters_search_category_count:
  *
  * Returns: Number of available general-category groups.
  */
-size_t characters_search_category_count(void);
+gsize characters_search_category_count(void);
 
 /**
  * characters_search_category_name:
@@ -177,7 +175,7 @@ size_t characters_search_category_count(void);
  *
  * Returns: (transfer none) (nullable): Immutable English label or NULL.
  */
-const char *characters_search_category_name(size_t index);
+const gchar *characters_search_category_name(gsize index);
 
 /**
  * characters_search_text:
@@ -186,7 +184,7 @@ const char *characters_search_category_name(size_t index);
  * Returns: (transfer full) (nullable): Exact UTF-8 text, or NULL for NUL or
  * invalid identities. Never substitutes a display representation.
  */
-char *characters_search_text(uint32_t id);
+gchar *characters_search_text(guint32 id);
 
 /**
  * characters_search_display:
@@ -195,7 +193,7 @@ char *characters_search_text(uint32_t id);
  * Returns: (transfer full) (nullable): Safe tile representation, including
  * visible placeholders for invisible scalars and dotted circle for marks.
  */
-char *characters_search_display(uint32_t id);
+gchar *characters_search_display(guint32 id);
 
 /**
  * characters_search_name:
@@ -204,7 +202,7 @@ char *characters_search_display(uint32_t id);
  * Returns: (transfer full) (nullable): Catalog name, alias, or descriptive
  * fallback for an assigned scalar; NULL for invalid identity.
  */
-char *characters_search_name(uint32_t id);
+gchar *characters_search_name(guint32 id);
 
 /**
  * characters_search_code:
@@ -212,6 +210,6 @@ char *characters_search_name(uint32_t id);
  *
  * Returns: (transfer full) (nullable): All scalar values in U+ notation.
  */
-char *characters_search_code(uint32_t id);
+gchar *characters_search_code(guint32 id);
 
 #endif

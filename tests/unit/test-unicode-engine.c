@@ -9,10 +9,14 @@
 #include <unicode/uchar.h>
 #include <unicode/utf8.h>
 
+#include <stdint.h>
+
+#include <glib.h>
+
 /** Compare a newly allocated value and release it after the assertion. */
-static void expect_text(char *actual, const char *expected) {
+static void expect_text(gchar *actual, const gchar *expected) {
     assert(actual && strcmp(actual, expected) == 0);
-    free(actual);
+    g_free(actual);
 }
 
 /** Check scalar validity, names, aliases, assignment and metadata version boundaries. */
@@ -30,9 +34,9 @@ static void test_scalar_metadata(void) {
     expect_text(characters_unicode_name(0x1F600), "GRINNING FACE");
     expect_text(characters_unicode_name(0x4E00), "CJK UNIFIED IDEOGRAPH-4E00");
     expect_text(characters_unicode_name(0xAC00), "HANGUL SYLLABLE GA");
-    char *aliases = characters_unicode_aliases(0);
+    gchar *aliases = characters_unicode_aliases(0);
     assert(aliases && strstr(aliases, "NULL") && strstr(aliases, "NUL"));
-    free(aliases);
+    g_free(aliases);
     expect_text(characters_unicode_property('A', "General_Category"), "Lu");
     expect_text(characters_unicode_property('A', "Script"), "Latn");
     assert(strcmp(characters_unicode_script_name("Latn"), "Latin") == 0);
@@ -45,17 +49,17 @@ static void test_scalar_metadata(void) {
     expect_text(characters_unicode_property(0x1F600, "Plane"), "1");
     expect_text(characters_unicode_property('(', "Bidi_Mirrored"), "Y");
     expect_text(characters_unicode_property(0x5D0, "Bidi_Class"), "R");
-    char *scripts = characters_unicode_property(0x30FC, "Script_Extensions");
+    gchar *scripts = characters_unicode_property(0x30FC, "Script_Extensions");
     assert(scripts && strstr(scripts, "Hira") && strstr(scripts, "Kana"));
-    free(scripts);
+    g_free(scripts);
     assert(!characters_unicode_property(0x0378, "Script"));
     assert(!characters_unicode_property('A', "invalid"));
     assert(!characters_unicode_property(0xD800, "Plane"));
-    char *version = characters_unicode_properties_version();
+    gchar *version = characters_unicode_properties_version();
     assert(version && *version);
     printf("Property data: %s; catalog: %s; supplement: %s\n", version,
            characters_unicode_catalog_version(), characters_unicode_supplement_version());
-    free(version);
+    g_free(version);
 }
 
 /** Verify Unicode 17 coverage independently of the installed ICU repertoire. */
@@ -74,20 +78,20 @@ static void test_unicode_17(void) {
     expect_text(characters_unicode_property(0x1FAEA, "Emoji"), "Y");
     expect_text(characters_unicode_aliases(0x16881), "BAMUM LETTER PHASE-B PUNGGAAM");
     expect_text(characters_unicode_aliases(0x12327), "CUNEIFORM SIGN KALAM");
-    char *scripts = characters_unicode_property(0x0306, "Script_Extensions");
+    gchar *scripts = characters_unicode_property(0x0306, "Script_Extensions");
     assert(scripts && strstr(scripts, "Tfng"));
-    free(scripts);
-    size_t assigned = 0;
-    for (uint32_t point = 0; point <= 0x10FFFF; point++) {
+    g_free(scripts);
+    gsize assigned = 0;
+    for (gunichar point = 0; point <= 0x10FFFF; point++) {
         if (!characters_unicode_is_assigned(point)) {
             continue;
         }
         assigned++;
-        int category = characters_scalar_category(point);
+        gint category = characters_scalar_category(point);
         if (category != U_CONTROL_CHAR && category != U_PRIVATE_USE_CHAR) {
-            char *name = characters_unicode_name(point);
+            gchar *name = characters_unicode_name(point);
             assert(name && *name);
-            free(name);
+            g_free(name);
         }
     }
     assert(assigned == 297334);
@@ -95,12 +99,12 @@ static void test_unicode_17(void) {
 
 /** Check ordered, nonoverlapping blocks and both inclusive endpoints. */
 static void test_blocks(void) {
-    size_t count = characters_unicode_block_count();
+    gsize count = characters_unicode_block_count();
     assert(count > 300);
-    for (size_t index = 0; index < count; index++) {
-        uint32_t start = characters_unicode_block_start(index);
-        uint32_t end = characters_unicode_block_end(index);
-        const char *name = characters_unicode_block_name(index);
+    for (gsize index = 0; index < count; index++) {
+        guint32 start = characters_unicode_block_start(index);
+        guint32 end = characters_unicode_block_end(index);
+        const gchar *name = characters_unicode_block_name(index);
         assert(start <= end && end <= 0x10FFFF && name);
         assert(strcmp(name, characters_unicode_find_block(start)) == 0);
         assert(strcmp(name, characters_unicode_find_block(end)) == 0);
@@ -109,68 +113,68 @@ static void test_blocks(void) {
         }
     }
     assert(!characters_unicode_block_name(count));
-    assert(characters_unicode_block_start(count) == UINT32_MAX);
+    assert(characters_unicode_block_start(count) == G_MAXUINT32);
     assert(!characters_unicode_find_block(0x110000));
     printf("Blocks: %zu\n", count);
 }
 
 /** Convert a short catalog string to numeric scalars for round-trip tests. */
-static size_t decode(const char *text, uint32_t points[32]) {
-    size_t count = 0;
+static gsize decode(const gchar *text, gunichar points[32]) {
+    gsize count = 0;
     int32_t length = (int32_t)strlen(text);
     for (int32_t offset = 0; offset < length;) {
         UChar32 point;
         U8_NEXT(text, offset, length, point);
         assert(point >= 0 && count < 32);
-        points[count++] = (uint32_t)point;
+        points[count++] = (guint32)point;
     }
     return count;
 }
 
 /** Verify every emoji and named sequence, group membership and invalid indexes. */
 static void test_catalogs(void) {
-    size_t count = characters_unicode_emoji_count();
+    gsize count = characters_unicode_emoji_count();
     assert(count > 3900);
-    bool *seen = calloc(count, sizeof(*seen));
+    gboolean *seen = g_malloc0_n(count, sizeof(*seen));
     assert(seen);
-    size_t group_count = characters_unicode_emoji_group_count();
+    gsize group_count = characters_unicode_emoji_group_count();
     assert(group_count == 9);
-    for (size_t group = 0; group < group_count; group++) {
+    for (gsize group = 0; group < group_count; group++) {
         assert(characters_unicode_emoji_group_name(group));
-        for (size_t index = 0; index < characters_unicode_emoji_group_size(group); index++) {
-            size_t position = characters_unicode_emoji_group_index(group, index);
+        for (gsize index = 0; index < characters_unicode_emoji_group_size(group); index++) {
+            gsize position = characters_unicode_emoji_group_index(group, index);
             assert(position < count && !seen[position]);
-            seen[position] = true;
+            seen[position] = TRUE;
         }
     }
-    for (size_t index = 0; index < count; index++) {
+    for (gsize index = 0; index < count; index++) {
         assert(seen[index]);
-        char *text = characters_unicode_emoji_text(index);
-        const char *label = characters_unicode_emoji_label(index);
+        gchar *text = characters_unicode_emoji_text(index);
+        const gchar *label = characters_unicode_emoji_label(index);
         assert(text && label && *label);
-        uint32_t points[32];
-        size_t length = decode(text, points);
+        gunichar points[32];
+        gsize length = decode(text, points);
         expect_text(characters_unicode_encode(points, length), text);
         if (length > 1) {
-            char *name = characters_unicode_sequence_name(points, length);
+            gchar *name = characters_unicode_sequence_name(points, length);
             assert(name && *name);
-            free(name);
+            g_free(name);
         }
-        free(text);
+        g_free(text);
     }
-    free(seen);
+    g_free(seen);
     assert(!characters_unicode_emoji_text(count));
-    assert(characters_unicode_emoji_group_index(group_count, 0) == SIZE_MAX);
-    size_t named_count = characters_unicode_named_count();
+    assert(characters_unicode_emoji_group_index(group_count, 0) == G_MAXSIZE);
+    gsize named_count = characters_unicode_named_count();
     assert(named_count > 400);
-    for (size_t index = 0; index < named_count; index++) {
-        char *text = characters_unicode_named_text(index);
-        const char *name = characters_unicode_named_name(index);
+    for (gsize index = 0; index < named_count; index++) {
+        gchar *text = characters_unicode_named_text(index);
+        const gchar *name = characters_unicode_named_name(index);
         assert(text && name);
-        uint32_t points[32];
-        size_t length = decode(text, points);
+        gunichar points[32];
+        gsize length = decode(text, points);
         expect_text(characters_unicode_sequence_name(points, length), name);
-        free(text);
+        g_free(text);
     }
     assert(!characters_unicode_named_name(named_count));
     printf("Emoji: %zu; named sequences: %zu\n", count, named_count);
@@ -178,7 +182,7 @@ static void test_catalogs(void) {
 
 /** Check exact sequence encoding, normalization forms and malformed input. */
 static void test_encoding(void) {
-    uint32_t points[] = { 0x1F469, 0x200D, 0x1F4BB };
+    gunichar points[] = { 0x1F469, 0x200D, 0x1F4BB };
     expect_text(characters_unicode_encode(points, 3), "👩‍💻");
     expect_text(characters_unicode_sequence_name(points, 3), "WOMAN TECHNOLOGIST");
     expect_text(characters_unicode_normalize("e\xCC\x81", "NFC"), "é");
@@ -200,23 +204,23 @@ static void test_encoding(void) {
     assert(!characters_unicode_normalize("abc", "invalid"));
     assert(!characters_unicode_encode(points, 33));
     assert(!characters_unicode_encode(NULL, 1));
-    uint32_t invalid[] = { 0xD800 };
+    guint32 invalid[] = { 0xD800 };
     assert(!characters_unicode_encode(invalid, 1));
-    uint32_t nul[] = { 0 };
+    guint32 nul[] = { 0 };
     assert(!characters_unicode_encode(nul, 1));
 }
 
 /** Assert the native candidate vector includes one expected scalar. */
-static void expect_related(uint32_t point, uint32_t expected) {
-    int count = 0;
-    uint32_t *items = characters_unicode_related_scalars(point, &count);
+static void expect_related(gunichar point, guint32 expected) {
+    gint count = 0;
+    guint32 *items = characters_unicode_related_scalars(point, &count);
     assert(items);
-    bool found = false;
-    for (int index = 0; index < count; index++) {
+    gboolean found = FALSE;
+    for (gint index = 0; index < count; index++) {
         found |= items[index] == expected;
     }
     assert(found);
-    free(items);
+    g_free(items);
 }
 
 /** Verify native case, mirror, canonical, Hangul and confusable primitives. */
@@ -229,7 +233,7 @@ static void test_relationships(void) {
     expect_related('A', 0x391);
     expect_related(0xA7D3, 0xA7D2);
     expect_related(0x16EA0, 0x16EBB);
-    int count = 0;
+    gint count = 0;
     assert(!characters_unicode_related_scalars(0x110000, &count));
     assert(count == 0);
 }

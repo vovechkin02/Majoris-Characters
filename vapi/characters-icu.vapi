@@ -11,7 +11,7 @@ namespace Characters.Icu {
         [CCode (array_length = false)] uint32[] points);
 
     /** Return an owned scalar array with explicit length, including embedded NUL. */
-    [CCode (cname = "characters_icu_normalize_points", array_length_type = "int")]
+    [CCode (cname = "characters_icu_normalize_points", array_length_type = "gint")]
     public static uint32[]? normalize_points (uint32[] points, string form);
 }
 

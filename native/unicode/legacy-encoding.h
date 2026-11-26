@@ -1,9 +1,7 @@
 #ifndef CHARACTERS_LEGACY_ENCODING_H
 #define CHARACTERS_LEGACY_ENCODING_H
 
-#include <stdbool.h>
-#include <stddef.h>
-#include <stdint.h>
+#include <glib.h>
 
 /** Maximum bytes accepted or emitted by the bounded sequence converter. */
 #define CHARACTERS_LEGACY_MAX_BYTES 128
@@ -16,7 +14,7 @@ typedef struct CharactersLegacy CharactersLegacy;
  *
  * Returns: Number of supported encoding choices.
  */
-size_t characters_legacy_count(void);
+gsize characters_legacy_count(void);
 
 /**
  * characters_legacy_name:
@@ -24,7 +22,7 @@ size_t characters_legacy_count(void);
  *
  * Returns: (transfer none) (nullable): Stable display name or NULL for invalid index.
  */
-const char *characters_legacy_name(size_t index);
+const gchar *characters_legacy_name(gsize index);
 
 /**
  * characters_legacy_load:
@@ -33,7 +31,7 @@ const char *characters_legacy_name(size_t index);
  * Returns: (transfer full) (nullable): Strict ICU repertoire table or NULL on failure.
  * Construct on a worker. Invalid input is never replaced; Independent byte aliases are retained; contextual encodings expose canonical bytes.
  */
-CharactersLegacy *characters_legacy_load(size_t index);
+CharactersLegacy *characters_legacy_load(gsize index);
 
 /**
  * characters_legacy_free:
@@ -47,17 +45,17 @@ void characters_legacy_free(CharactersLegacy *table);
  * @length: (out): Number of distinct scalars returned.
  *
  * Returns: (transfer full) (array length=length) (nullable): Sorted unique Unicode scalars.
- * Free with free(); an empty mapping is distinct from allocation failure.
+ * Free with g_free(); an empty mapping is distinct from allocation failure.
  */
-uint32_t *characters_legacy_points(const CharactersLegacy *table, size_t *length);
+gunichar *characters_legacy_points(const CharactersLegacy *table, gsize *length);
 
 /**
  * characters_legacy_encoding_index:
  * @table: Borrowed immutable table.
  *
- * Returns: Stable converter index or SIZE_MAX for NULL.
+ * Returns: Stable converter index or G_MAXSIZE for NULL.
  */
-size_t characters_legacy_encoding_index(const CharactersLegacy *table);
+gsize characters_legacy_encoding_index(const CharactersLegacy *table);
 
 /**
  * characters_legacy_contains:
@@ -66,7 +64,7 @@ size_t characters_legacy_encoding_index(const CharactersLegacy *table);
  *
  * Returns: True if the scalar is present in the repertoire.
  */
-bool characters_legacy_contains(const CharactersLegacy *table, uint32_t point);
+gboolean characters_legacy_contains(const CharactersLegacy *table, gunichar point);
 
 /**
  * characters_legacy_keys:
@@ -76,9 +74,9 @@ bool characters_legacy_contains(const CharactersLegacy *table, uint32_t point);
  *
  * Returns: (transfer full) (array length=length) (nullable): Sorted packed keys,
  * with byte length in the high 32 bits and big-endian bytes in the low 32 bits.
- * NULL for unmapped/contextual scalars or allocation failure. Free with free().
+ * NULL for unmapped/contextual scalars or allocation failure. Free with g_free().
  */
-uint64_t *characters_legacy_keys(const CharactersLegacy *table, uint32_t point, size_t *length);
+guint64 *characters_legacy_keys(const CharactersLegacy *table, gunichar point, gsize *length);
 
 /**
  * characters_legacy_is_contextual:
@@ -86,7 +84,7 @@ uint64_t *characters_legacy_keys(const CharactersLegacy *table, uint32_t point, 
  *
  * Returns: True for encodings whose repertoire uses standalone round-trip mappings.
  */
-bool characters_legacy_is_contextual(size_t index);
+gboolean characters_legacy_is_contextual(gsize index);
 
 /**
  * characters_legacy_decode_raw:
@@ -97,10 +95,10 @@ bool characters_legacy_is_contextual(size_t index);
  *
  * Returns: (transfer full) (array length=length) (nullable): Exact 1–32 scalars
  * from the converter's initial state; NULL for invalid, empty or oversized output.
- * No replacement or normalization is performed. Free with free().
+ * No replacement or normalization is performed. Free with g_free().
  */
-uint32_t *characters_legacy_decode_raw(size_t encoding, const uint8_t *bytes, size_t count,
-                                       size_t *length);
+gunichar *characters_legacy_decode_raw(gsize encoding, const guint8 *bytes, gsize count,
+                                       gsize *length);
 
 /**
  * characters_legacy_encode_raw:
@@ -111,9 +109,9 @@ uint32_t *characters_legacy_decode_raw(size_t encoding, const uint8_t *bytes, si
  *
  * Returns: (transfer full) (array length=count) (nullable): Strict ICU output
  * of at most 128 bytes, including state resets. The caller must check exact
- * round-trip equality before publishing conversion results. Free with free().
+ * round-trip equality before publishing conversion results. Free with g_free().
  */
-uint8_t *characters_legacy_encode_raw(size_t encoding, const uint32_t *points, size_t length,
-                                     size_t *count);
+guint8 *characters_legacy_encode_raw(gsize encoding, const gunichar *points, gsize length,
+                                     gsize *count);
 
 #endif

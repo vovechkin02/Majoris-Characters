@@ -1,9 +1,7 @@
 #ifndef CHARACTERS_FONT_CATALOG_H
 #define CHARACTERS_FONT_CATALOG_H
 
-#include <stdbool.h>
-#include <stddef.h>
-#include <stdint.h>
+#include <glib.h>
 
 #include <pango/pango.h>
 
@@ -32,7 +30,7 @@ void characters_fonts_free(CharactersFontCatalog *catalog);
  *
  * Returns: Number of raw discovered patterns, before application filtering or sorting.
  */
-size_t characters_fonts_count(const CharactersFontCatalog *catalog);
+gsize characters_fonts_count(const CharactersFontCatalog *catalog);
 
 /**
  * characters_fonts_family:
@@ -41,7 +39,7 @@ size_t characters_fonts_count(const CharactersFontCatalog *catalog);
  *
  * Returns: (transfer none) (nullable): Primary font family; valid until inventory destruction.
  */
-const char *characters_fonts_family(const CharactersFontCatalog *catalog, size_t index);
+const gchar *characters_fonts_family(const CharactersFontCatalog *catalog, gsize index);
 
 /**
  * characters_fonts_style:
@@ -50,7 +48,7 @@ const char *characters_fonts_family(const CharactersFontCatalog *catalog, size_t
  *
  * Returns: (transfer none) (nullable): Raw Fontconfig style label; validate UTF-8 before display.
  */
-const char *characters_fonts_style(const CharactersFontCatalog *catalog, size_t index);
+const gchar *characters_fonts_style(const CharactersFontCatalog *catalog, gsize index);
 
 /**
  * characters_fonts_file:
@@ -59,7 +57,7 @@ const char *characters_fonts_style(const CharactersFontCatalog *catalog, size_t 
  *
  * Returns: (transfer none) (nullable): Installed font path, not a user-supplied path.
  */
-const char *characters_fonts_file(const CharactersFontCatalog *catalog, size_t index);
+const gchar *characters_fonts_file(const CharactersFontCatalog *catalog, gsize index);
 
 /**
  * characters_fonts_face_index:
@@ -68,7 +66,7 @@ const char *characters_fonts_file(const CharactersFontCatalog *catalog, size_t i
  *
  * Returns: Fontconfig face/named-instance index, or -1 for an invalid face.
  */
-int characters_fonts_face_index(const CharactersFontCatalog *catalog, size_t index);
+gint characters_fonts_face_index(const CharactersFontCatalog *catalog, gsize index);
 
 /**
  * characters_fonts_description:
@@ -78,7 +76,7 @@ int characters_fonts_face_index(const CharactersFontCatalog *catalog, size_t ind
  * Returns: (transfer full) (nullable): Pango description, released with g_free().
  * Resolve it on the main context; family/style descriptions are not unique file IDs.
  */
-char *characters_fonts_description(const CharactersFontCatalog *catalog, size_t index);
+gchar *characters_fonts_description(const CharactersFontCatalog *catalog, gsize index);
 
 /**
  * characters_fonts_is_variable:
@@ -87,7 +85,7 @@ char *characters_fonts_description(const CharactersFontCatalog *catalog, size_t 
  *
  * Returns: Whether Fontconfig advertises this face as variable.
  */
-bool characters_fonts_is_variable(const CharactersFontCatalog *catalog, size_t index);
+gboolean characters_fonts_is_variable(const CharactersFontCatalog *catalog, gsize index);
 
 /**
  * characters_fonts_is_color:
@@ -96,7 +94,7 @@ bool characters_fonts_is_variable(const CharactersFontCatalog *catalog, size_t i
  *
  * Returns: Whether Fontconfig advertises color glyph support.
  */
-bool characters_fonts_is_color(const CharactersFontCatalog *catalog, size_t index);
+gboolean characters_fonts_is_color(const CharactersFontCatalog *catalog, gsize index);
 
 /**
  * characters_fonts_contains:
@@ -108,8 +106,8 @@ bool characters_fonts_is_color(const CharactersFontCatalog *catalog, size_t inde
  * are checked directly with FreeType. No fallback is used.
  * This does not guarantee a visible glyph, variation-selector mapping, or sequence shaping.
  */
-bool characters_fonts_contains(const CharactersFontCatalog *catalog, size_t index,
-                               uint32_t point);
+gboolean characters_fonts_contains(const CharactersFontCatalog *catalog, gsize index,
+                               gunichar point);
 
 /**
  * characters_fonts_points:
@@ -121,8 +119,8 @@ bool characters_fonts_contains(const CharactersFontCatalog *catalog, size_t inde
  * including private-use and unassigned mappings. Uses the selected FreeType Unicode
  * cmap; a symbol-only face yields an empty array. Free with g_free().
  */
-uint32_t *characters_fonts_points(const CharactersFontCatalog *catalog, size_t index,
-                                 size_t *length);
+gunichar *characters_fonts_points(const CharactersFontCatalog *catalog, gsize index,
+                                 gsize *length);
 
 /**
  * characters_fonts_is_current:
@@ -131,7 +129,7 @@ uint32_t *characters_fonts_points(const CharactersFontCatalog *catalog, size_t i
  * Returns: Whether Fontconfig considers the retained configuration up to date.
  * Check on a worker, not in a GTK callback.
  */
-bool characters_fonts_is_current(const CharactersFontCatalog *catalog);
+gboolean characters_fonts_is_current(const CharactersFontCatalog *catalog);
 
 /**
  * characters_fonts_apply_config:
@@ -141,7 +139,7 @@ bool characters_fonts_is_current(const CharactersFontCatalog *catalog);
  * Updates the Linux PangoFc renderer with this snapshot's configuration on the GTK main context.
  * Returns: Whether the font map supports Fontconfig configuration.
  */
-bool characters_fonts_apply_config(const CharactersFontCatalog *catalog, PangoFontMap *map);
+gboolean characters_fonts_apply_config(const CharactersFontCatalog *catalog, PangoFontMap *map);
 
 /**
  * characters_fonts_matches:
@@ -152,7 +150,7 @@ bool characters_fonts_apply_config(const CharactersFontCatalog *catalog, PangoFo
  * Returns: Whether Pango resolved the same installed file and Fontconfig face index.
  * Non-Fontconfig renderers and unresolved fonts return false.
  */
-bool characters_fonts_matches(const CharactersFontCatalog *catalog, size_t index, PangoFont *font);
+gboolean characters_fonts_matches(const CharactersFontCatalog *catalog, gsize index, PangoFont *font);
 
 /**
  * characters_fonts_open_face:
@@ -161,6 +159,6 @@ bool characters_fonts_matches(const CharactersFontCatalog *catalog, size_t index
  *
  * Returns: (transfer full) (nullable): Independent exact FreeType face.
  */
-CharactersFontFace *characters_fonts_open_face(const CharactersFontCatalog *catalog, size_t index);
+CharactersFontFace *characters_fonts_open_face(const CharactersFontCatalog *catalog, gsize index);
 
 #endif
