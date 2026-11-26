@@ -80,17 +80,6 @@ gchar *characters_unicode_aliases(gunichar point);
 const gchar *characters_unicode_script_name(const gchar *code);
 
 /**
- * characters_unicode_property:
- * @point: Numeric Unicode scalar.
- * @property: Supported UCD or Han metadata key (see the Unicode engine documentation).
- *
- * Returns: (transfer full) (nullable): Property value, or NULL for unsupported
- * queries, invalid scalars, or scalars not assigned in the scalar property snapshot.
- * Plane is available for all valid scalars.
- */
-gchar *characters_unicode_property(gunichar point, const gchar *property);
-
-/**
  * characters_unicode_block_count:
  *
  * Returns: Number of blocks in the independently versioned catalog.

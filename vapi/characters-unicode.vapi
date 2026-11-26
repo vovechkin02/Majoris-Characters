@@ -47,13 +47,6 @@ namespace Characters.Unicode {
     [CCode (cname = "characters_unicode_script_name")]
     public static unowned string? script_name (string code);
 
-    /**
-     * Property value, or NULL for unsupported queries, invalid scalars, or scalars not assigned in
-     * the scalar property snapshot. Plane is available for all valid scalars.
-     */
-    [CCode (cname = "characters_unicode_property")]
-    public static string? get_property_value (uint32 point, string property);
-
     /** Number of blocks in the independently versioned catalog. */
     [CCode (cname = "characters_unicode_block_count")]
     public static size_t block_count ();

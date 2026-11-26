@@ -489,3 +489,14 @@ catalog retains exact annotation key lookup and tone-base lookup with bounded
 stack storage. Supplementary presentation labels and names are assembled in
 Vala; canonical scalar, named-sequence and fully qualified catalog precedence
 is preserved. See [emoji annotation migration](emoji-annotation-migration.md).
+
+## Property and metadata policy (1.0.19)
+
+The Vala `Unicode.get_property_value` service selects property keys, formats
+age, plane, combining class, Boolean values and fallback collation groups,
+and chooses exact Han fields. Native scalar and Han adapters expose typed
+selectors, borrowed immutable strings and raw numbers. ICU alias resolution
+remains a library boundary. No generated data, search predicates, Unicode
+assignment or official/fallback provenance changes. Canonical name lookup
+(including algorithmic names) remains native because the scanner uses it.
+See [property metadata migration](property-metadata-migration.md).

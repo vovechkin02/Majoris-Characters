@@ -1,5 +1,6 @@
 #include "unicode-engine.h"
 #include "scalar-properties.h"
+#include "unihan.h"
 
 #include <assert.h>
 #include <stdio.h>
@@ -37,24 +38,41 @@ static void test_scalar_metadata(void) {
     gchar *aliases = characters_unicode_aliases(0);
     assert(aliases && strstr(aliases, "NULL") && strstr(aliases, "NUL"));
     g_free(aliases);
-    expect_text(characters_unicode_property('A', "General_Category"), "Lu");
-    expect_text(characters_unicode_property('A', "Script"), "Latn");
+    assert(strcmp(characters_scalar_text('A', CHARACTERS_SCALAR_TEXT_CATEGORY), "Lu") == 0);
+    assert(strcmp(characters_scalar_text('A', CHARACTERS_SCALAR_TEXT_SCRIPT), "Latn") == 0);
     assert(strcmp(characters_unicode_script_name("Latn"), "Latin") == 0);
     assert(strcmp(characters_unicode_script_name("Hira"), "Hiragana") == 0);
     assert(strcmp(characters_unicode_script_name("Berf"), "Beria_Erfe") == 0);
     assert(!characters_unicode_script_name("invalid"));
     assert(!characters_unicode_script_name(NULL));
-    expect_text(characters_unicode_property('A', "Age"), "1.1");
-    expect_text(characters_unicode_property(0x301, "Canonical_Combining_Class"), "230");
-    expect_text(characters_unicode_property(0x1F600, "Plane"), "1");
-    expect_text(characters_unicode_property('(', "Bidi_Mirrored"), "Y");
-    expect_text(characters_unicode_property(0x5D0, "Bidi_Class"), "R");
-    gchar *scripts = characters_unicode_property(0x30FC, "Script_Extensions");
+    assert(characters_scalar_age('A') == 11);
+    assert(characters_scalar_combining_class(0x301) == 230);
+    assert(characters_scalar_boolean_flags('(') & 1u);
+    assert(strcmp(characters_scalar_text(0x5D0, CHARACTERS_SCALAR_TEXT_BIDI), "R") == 0);
+    const gchar *scripts = characters_scalar_text(0x30FC, CHARACTERS_SCALAR_TEXT_EXTENSIONS);
     assert(scripts && strstr(scripts, "Hira") && strstr(scripts, "Kana"));
-    g_free(scripts);
-    assert(!characters_unicode_property(0x0378, "Script"));
-    assert(!characters_unicode_property('A', "invalid"));
-    assert(!characters_unicode_property(0xD800, "Plane"));
+    assert(!characters_scalar_text(0x0378, CHARACTERS_SCALAR_TEXT_SCRIPT));
+    assert(characters_scalar_age(0x0378) == -1);
+    assert(!characters_scalar_property_alias("invalid"));
+    assert(strcmp(characters_scalar_property_alias("gc"), "General_Category") == 0);
+    assert(!characters_scalar_text('A', (CharactersScalarText)99));
+    assert(characters_scalar_age(0xD800) == -1);
+    assert(characters_scalar_boolean_flags('A') == 0);
+    assert(!characters_scalar_text(0xD800, CHARACTERS_SCALAR_TEXT_CATEGORY));
+    assert(strcmp(characters_scalar_property_alias("bidi-m"), "Bidi_Mirrored") == 0);
+    assert(!characters_scalar_property_alias("ccc"));
+    assert(!characters_scalar_property_alias(NULL));
+    const gchar *reading = characters_unihan_value(0x4E2D,
+                                                   CHARACTERS_HAN_VALUE_MANDARIN_FALLBACK);
+    assert(reading && strstr(reading, "zhōng"));
+    assert(strcmp(characters_unihan_value(0x4E2D, CHARACTERS_HAN_VALUE_HANGUL_FALLBACK),
+                  "중") == 0);
+    assert(characters_unihan_collation(0x4E2D, TRUE) == 2);
+    assert(characters_unihan_collation(0x4E2D, FALSE) == 4);
+    assert(!characters_unihan_value(0x4E2D, (CharactersHanValue)-1));
+    assert(!characters_unihan_value(0x4E2D, CHARACTERS_HAN_VALUE_COUNT));
+    assert(!characters_unihan_value('A', CHARACTERS_HAN_VALUE_MANDARIN_FALLBACK));
+    assert(characters_unihan_collation('A', TRUE) == 0);
     gchar *version = characters_unicode_properties_version();
     assert(version && *version);
     printf("Property data: %s; catalog: %s; supplement: %s\n", version,
@@ -70,17 +88,16 @@ static void test_unicode_17(void) {
     expect_text(characters_unicode_name(0x323B0), "CJK UNIFIED IDEOGRAPH-323B0");
     expect_text(characters_unicode_name(0x187F8), "TANGUT IDEOGRAPH-187F8");
     expect_text(characters_unicode_name(0x1FAEA), "DISTORTED FACE");
-    expect_text(characters_unicode_property(0x16EA0, "Script"), "Berf");
-    expect_text(characters_unicode_property(0x16EA0, "General_Category"), "Lu");
-    expect_text(characters_unicode_property(0x16EA0, "Age"), "17.0");
-    expect_text(characters_unicode_property(0x0295, "General_Category"), "Lo");
-    expect_text(characters_unicode_property(0x1ADD, "Canonical_Combining_Class"), "220");
-    expect_text(characters_unicode_property(0x1FAEA, "Emoji"), "Y");
+    assert(strcmp(characters_scalar_text(0x16EA0, CHARACTERS_SCALAR_TEXT_SCRIPT), "Berf") == 0);
+    assert(strcmp(characters_scalar_text(0x16EA0, CHARACTERS_SCALAR_TEXT_CATEGORY), "Lu") == 0);
+    assert(characters_scalar_age(0x16EA0) == 170);
+    assert(strcmp(characters_scalar_text(0x0295, CHARACTERS_SCALAR_TEXT_CATEGORY), "Lo") == 0);
+    assert(characters_scalar_combining_class(0x1ADD) == 220);
+    assert(characters_scalar_boolean_flags(0x1FAEA) & 2u);
     expect_text(characters_unicode_aliases(0x16881), "BAMUM LETTER PHASE-B PUNGGAAM");
     expect_text(characters_unicode_aliases(0x12327), "CUNEIFORM SIGN KALAM");
-    gchar *scripts = characters_unicode_property(0x0306, "Script_Extensions");
+    const gchar *scripts = characters_scalar_text(0x0306, CHARACTERS_SCALAR_TEXT_EXTENSIONS);
     assert(scripts && strstr(scripts, "Tfng"));
-    g_free(scripts);
     gsize assigned = 0;
     for (gunichar point = 0; point <= 0x10FFFF; point++) {
         if (!characters_unicode_is_assigned(point)) {

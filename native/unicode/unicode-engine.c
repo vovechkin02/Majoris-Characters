@@ -261,20 +261,6 @@ const gchar *characters_unicode_script_name(const gchar *code)
     return index < 0 ? NULL : characters_scalar_script_name((gsize)index);
 }
 
-gchar *characters_unicode_property(gunichar point, const gchar *property)
-{
-    if (!property || !characters_unicode_is_scalar(point)) {
-        return NULL;
-    }
-    if (strcmp(property, "Plane") == 0) {
-        gchar text[8];
-        g_snprintf(text, sizeof(text), "%u", (guint)(point >> 16));
-        return characters_try_strdup(text);
-    }
-    gchar *value = characters_scalar_property(point, property);
-    return value ? value : characters_unihan_property(point, property);
-}
-
 gsize characters_unicode_block_count(void)
 {
     return G_N_ELEMENTS(all_blocks);

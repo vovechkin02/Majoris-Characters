@@ -10,6 +10,7 @@
 #include <glib.h>
 
 #include "unicode-engine.h"
+#include "unihan.h"
 
 /** Start a valid request and require successful publication. Caller owns it. */
 static CharactersSearch *search(CharactersSearchScope scope, gint filter, gint category,
@@ -341,13 +342,11 @@ static void test_han_search(void) {
     assert(contains_id(job, 0x4E2D));
     characters_search_free(job);
 
-    gchar *value = characters_unicode_property(0x4E2D, "Mandarin_Fallback");
+    const gchar *value = characters_unihan_value(0x4E2D, CHARACTERS_HAN_VALUE_MANDARIN_FALLBACK);
     assert(value && strstr(value, "zhōng"));
-    g_free(value);
-    value = characters_unicode_property(0x4E2D, "Hangul_Fallback");
+    value = characters_unihan_value(0x4E2D, CHARACTERS_HAN_VALUE_HANGUL_FALLBACK);
     assert(value && strcmp(value, "중") == 0);
-    g_free(value);
-    assert(characters_unicode_property('A', "Mandarin_Fallback") == NULL);
+    assert(characters_unihan_value('A', CHARACTERS_HAN_VALUE_MANDARIN_FALLBACK) == NULL);
 }
 
 /** Plane filters partition the assigned and reserved scalar spaces without surrogates. */

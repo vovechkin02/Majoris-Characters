@@ -6,7 +6,7 @@ Unicode, international browsing, emoji data, and exact font inspection improveme
 
 | Project metadata | Value |
 | --- | --- |
-| Version | 1.0.18 |
+| Version | 1.0.19 |
 | Platform target | Majoris OS / Debian 13 (Trixie) |
 | Development status | GLib native standardization — qualification candidate (not a verified stable release) |
 | Application ID | `com.majoris.characters` |
@@ -172,7 +172,7 @@ For Debian binary packages (run from the repository root):
 
 ```sh
 dpkg-buildpackage -us -uc -b
-sudo apt install ../majoris-characters_1.0.18-1_$(dpkg --print-architecture).deb
+sudo apt install ../majoris-characters_1.0.19-1_$(dpkg --print-architecture).deb
 ```
 
 The source package uses `3.0 (quilt)` and requires the corresponding upstream
@@ -333,9 +333,9 @@ After installing the Debian package, the same runtime tests can target the real
 installed executable:
 
 ```sh
-python3 tests/integration/test_application.py /usr/bin/majoris-characters 1.0.18 cli
+python3 tests/integration/test_application.py /usr/bin/majoris-characters 1.0.19 cli
 xvfb-run -a dbus-run-session -- python3 \
-  tests/integration/test_application.py /usr/bin/majoris-characters 1.0.18 gui
+  tests/integration/test_application.py /usr/bin/majoris-characters 1.0.19 gui
 ```
 
 For a fresh, fail-closed automated build/test and optional Debian package gate:
@@ -380,3 +380,6 @@ The 1.0.17 Unicode relationship migration is documented in
 
 The 1.0.18 emoji annotation policy migration is documented in
 [the annotation migration report](docs/emoji-annotation-migration.md).
+
+The 1.0.19 property and metadata migration is documented in
+[the property migration report](docs/property-metadata-migration.md).

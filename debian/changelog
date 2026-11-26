@@ -1,3 +1,11 @@
+majoris-characters (1.0.19-1) unstable; urgency=medium
+
+  * Move application property dispatch and numeric metadata formatting to Vala.
+  * Expose borrowed standardized UCD and Han fields with typed selectors.
+  * Preserve exact metadata values, aliases, and fallback provenance.
+
+ -- Majoris Contributors <45165533+vovechkin02@users.noreply.github.com>  Thu, 26 Nov 2026 19:00:00 +1100
+
 majoris-characters (1.0.18-1) unstable; urgency=medium
 
   * Prepare emoji annotation locales and folded terms in Vala before scanning.

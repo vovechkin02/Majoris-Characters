@@ -39,7 +39,32 @@ gboolean characters_scalar_is_ignorable(gunichar point);
 /** Return a newly allocated algorithmic name or NULL when not applicable. */
 gchar *characters_scalar_algorithmic_name(gunichar point);
 
-/** Return a newly allocated property value or NULL for an unsupported query. */
-gchar *characters_scalar_property(gunichar point, const gchar *property);
+/** Select an immutable standardized scalar property string. */
+typedef enum {
+    /** General category abbreviation. */
+    CHARACTERS_SCALAR_TEXT_CATEGORY,
+    /** ISO 15924 primary script code. */
+    CHARACTERS_SCALAR_TEXT_SCRIPT,
+    /** Space-delimited script extension codes. */
+    CHARACTERS_SCALAR_TEXT_EXTENSIONS,
+    /** Bidirectional class abbreviation. */
+    CHARACTERS_SCALAR_TEXT_BIDI,
+    /** Decomposition type abbreviation. */
+    CHARACTERS_SCALAR_TEXT_DECOMPOSITION,
+    /** East Asian width abbreviation. */
+    CHARACTERS_SCALAR_TEXT_WIDTH
+} CharactersScalarText;
+
+/** Borrow an assigned scalar's standardized value; NULL for invalid or absent data. */
+const gchar *characters_scalar_text(gunichar point, CharactersScalarText field);
+
+/** Return age encoded as major * 10 + minor, or -1 for an unassigned or invalid scalar. */
+gint characters_scalar_age(gunichar point);
+
+/** Return the four exposed Boolean property bits, or zero for an invalid scalar. */
+guint characters_scalar_boolean_flags(gunichar point);
+
+/** Borrow the canonical key of a supported ICU property alias, or NULL. */
+const gchar *characters_scalar_property_alias(const gchar *property);
 
 #endif

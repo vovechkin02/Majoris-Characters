@@ -48,6 +48,49 @@ private void test_relationship_policy () {
     expect_exact_relationships (0xFFFF, new uint32[0]);
 }
 
+/** Verify application formatting, exact property aliases and independent Han provenance. */
+private void test_property_metadata () {
+    assert (Unicode.get_property_value (0x41, "General_Category") == "Lu");
+    assert (Unicode.get_property_value (0x41, "gc") == "Lu");
+    assert (Unicode.get_property_value (0x41, "sC") == "Latn");
+    assert (Unicode.get_property_value (0x41, "Age") == "1.1");
+    assert (Unicode.get_property_value (0x16EA0, "Age") == "17.0");
+    assert (Unicode.get_property_value (0x16EA0, "Script") == "Berf");
+    assert (Unicode.get_property_value (0x301, "Canonical_Combining_Class") == "230");
+    assert (Unicode.get_property_value (0x41, "Canonical_Combining_Class") == "0");
+    assert (Unicode.get_property_value (0x301, "ccc") == null);
+    assert (Unicode.get_property_value (0x41, "age") == null);
+    assert (Unicode.get_property_value (0x41, "East_Asian_Width") == "Na");
+    assert (Unicode.get_property_value (0x41, "Decomposition_Type") == "None");
+    assert (Unicode.get_property_value (0x5D0, "bc") == "R");
+    assert (Unicode.get_property_value (0x28, "Bidi_Mirrored") == "Y");
+    assert (Unicode.get_property_value (0x41, "Emoji") == "N");
+    assert (Unicode.get_property_value (0x1F600, "Emoji_Presentation") == "Y");
+    assert (Unicode.get_property_value (0x1F3FB, "Emoji_Modifier") == "Y");
+    var extensions = Unicode.get_property_value (0x30FC, "Script_Extensions");
+    assert (extensions != null && extensions.contains ("Hira") && extensions.contains ("Kana"));
+    assert (Unicode.get_property_value (0, "Plane") == "0");
+    assert (Unicode.get_property_value (0x0378, "Plane") == "0");
+    assert (Unicode.get_property_value (0x10FFFF, "Plane") == "16");
+    assert (Unicode.get_property_value (0x0378, "Script") == null);
+    assert (Unicode.get_property_value (0xFFFF, "Age") == null);
+    assert (Unicode.get_property_value (0xD800, "Plane") == null);
+    assert (Unicode.get_property_value (0x110000, "Plane") == null);
+    assert (Unicode.get_property_value (0x41, "invalid") == null);
+    assert (Unicode.get_property_value (0x41, null) == null);
+    var mandarin = Unicode.get_property_value (0x4E2D, "Mandarin_Fallback");
+    assert (mandarin != null && mandarin.contains ("zhōng"));
+    assert (Unicode.get_property_value (0x4E2D, "Hangul_Fallback") == "중");
+    assert (Unicode.get_property_value (0x4E2D, "Radical_Collation") == "2");
+    assert (Unicode.get_property_value (0x4E2D, "Stroke_Collation") == "4");
+    if (Unicode.unihan_version () == "none") {
+        assert (Unicode.get_property_value (0x4E2D, "kMandarin") == null);
+        assert (Unicode.get_property_value (0x4E2D, "kDefinition") == null);
+    }
+    assert (Unicode.get_property_value (0x41, "Mandarin_Fallback") == null);
+    assert (Unicode.get_property_value (0x41, "Radical_Collation") == null);
+}
+
 /** Exercise native binding ownership, UTF-8 sequence lengths, and borrowed catalog data. */
 int main () {
     assert (Unicode.is_scalar (0x10FFFF));
@@ -60,6 +103,7 @@ int main () {
     assert (Unicode.encode (points) == "👩‍💻");
     assert (Unicode.sequence_name (points) == "WOMAN TECHNOLOGIST");
     assert (Unicode.normalize ("é", "NFD") == "e\u0301");
+    test_property_metadata ();
     test_relationship_policy ();
     expect_related (0x61, "A");
     expect_related (0x28, ")");

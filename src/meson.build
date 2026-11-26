@@ -14,6 +14,7 @@ search_domain_sources = files(
   'search/semantic-filters.vala',
   'unicode/scalar-sequence.vala',
   'unicode/character-presentation.vala',
+  'unicode/property-metadata.vala',
   'unicode/sequence-format.vala',
 )
 search_domain_vapis = unicode_vapi + search_vapi + emoji_vapi + language_vapi + han_vapi + icu_vapi

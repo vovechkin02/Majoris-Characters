@@ -196,57 +196,72 @@ gchar *characters_scalar_algorithmic_name(gunichar point)
     return characters_try_strdup(text);
 }
 
-/** Return a newly allocated property value or NULL for an unsupported query. */
-gchar *characters_scalar_property(gunichar point, const gchar *property)
+/** Borrow an assigned scalar's standardized value without allocating. */
+const gchar *characters_scalar_text(gunichar point, CharactersScalarText field)
 {
     const struct PropertyRange *row = lookup(point);
-    if (!row || !row->category || !property) {
+    if (!row || !row->category) {
         return NULL;
     }
-    /* The earlier engine accepted ICU aliases for its enumerated properties. */
+    switch (field) {
+        case CHARACTERS_SCALAR_TEXT_CATEGORY:
+            return category_names[row->category];
+        case CHARACTERS_SCALAR_TEXT_SCRIPT:
+            return script_entries[row->script].code;
+        case CHARACTERS_SCALAR_TEXT_EXTENSIONS:
+            return row->extensions ? extension_sets[row->extensions] :
+            script_entries[row->script].code;
+        case CHARACTERS_SCALAR_TEXT_BIDI:
+            return bc_names[row->bidi];
+        case CHARACTERS_SCALAR_TEXT_DECOMPOSITION:
+            return dt_names[row->decomposition];
+        case CHARACTERS_SCALAR_TEXT_WIDTH:
+            return ea_names[row->width];
+        default:
+            return NULL;
+    }
+}
+
+/** Return the raw age number without formatting. */
+gint characters_scalar_age(gunichar point)
+{
+    const struct PropertyRange *row = lookup(point);
+    return row && row->category ? row->age : -1;
+}
+
+/** Return Bidi_Mirrored, Emoji, Emoji_Presentation and Emoji_Modifier in bits 0–3. */
+guint characters_scalar_boolean_flags(gunichar point)
+{
+    const struct PropertyRange *row = lookup(point);
+    return row && row->category ? row->flags & 0xFu : 0;
+}
+
+/** Resolve only the ICU aliases historically supported by the metadata interface. */
+const gchar *characters_scalar_property_alias(const gchar *property)
+{
+    if (!property) {
+        return NULL;
+    }
     switch (u_getPropertyEnum(property)) {
-        case UCHAR_GENERAL_CATEGORY: property = "General_Category"; break;
-        case UCHAR_SCRIPT: property = "Script"; break;
-        case UCHAR_BIDI_CLASS: property = "Bidi_Class"; break;
-        case UCHAR_BIDI_MIRRORED: property = "Bidi_Mirrored"; break;
-        case UCHAR_DECOMPOSITION_TYPE: property = "Decomposition_Type"; break;
-        case UCHAR_EAST_ASIAN_WIDTH: property = "East_Asian_Width"; break;
-        case UCHAR_EMOJI: property = "Emoji"; break;
-        case UCHAR_EMOJI_PRESENTATION: property = "Emoji_Presentation"; break;
-        case UCHAR_EMOJI_MODIFIER: property = "Emoji_Modifier"; break;
-        default: break;
+        case UCHAR_GENERAL_CATEGORY:
+            return "General_Category";
+        case UCHAR_SCRIPT:
+            return "Script";
+        case UCHAR_BIDI_CLASS:
+            return "Bidi_Class";
+        case UCHAR_BIDI_MIRRORED:
+            return "Bidi_Mirrored";
+        case UCHAR_DECOMPOSITION_TYPE:
+            return "Decomposition_Type";
+        case UCHAR_EAST_ASIAN_WIDTH:
+            return "East_Asian_Width";
+        case UCHAR_EMOJI:
+            return "Emoji";
+        case UCHAR_EMOJI_PRESENTATION:
+            return "Emoji_Presentation";
+        case UCHAR_EMOJI_MODIFIER:
+            return "Emoji_Modifier";
+        default:
+            return NULL;
     }
-    const gchar *value = NULL;
-    gchar number[8];
-    if (strcmp(property, "Age") == 0) {
-        g_snprintf(number, sizeof(number), "%u.%u", row->age / 10u, row->age % 10u);
-        value = number;
-    } else if (strcmp(property, "General_Category") == 0) {
-        value = category_names[row->category];
-    } else if (strcmp(property, "Script") == 0) {
-        value = script_entries[row->script].code;
-    } else if (strcmp(property, "Script_Extensions") == 0) {
-        value = row->extensions ? extension_sets[row->extensions] :
-                script_entries[row->script].code;
-    } else if (strcmp(property, "Canonical_Combining_Class") == 0) {
-        g_snprintf(number, sizeof(number), "%u", row->combining);
-        value = number;
-    } else if (strcmp(property, "Bidi_Class") == 0) {
-        value = bc_names[row->bidi];
-    } else if (strcmp(property, "Decomposition_Type") == 0) {
-        value = dt_names[row->decomposition];
-    } else if (strcmp(property, "East_Asian_Width") == 0) {
-        value = ea_names[row->width];
-    } else {
-        static const gchar *const flags[] = {
-            "Bidi_Mirrored", "Emoji", "Emoji_Presentation", "Emoji_Modifier"
-        };
-        for (gsize index = 0; index < G_N_ELEMENTS(flags); index++) {
-            if (strcmp(property, flags[index]) == 0) {
-                value = row->flags & (1u << index) ? "Y" : "N";
-                break;
-            }
-        }
-    }
-    return value ? characters_try_strdup(value) : NULL;
 }

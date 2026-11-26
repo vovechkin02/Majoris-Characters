@@ -88,4 +88,42 @@ namespace Characters.Scalar {
     /** Borrow the long script name from the bundled snapshot. */
     [CCode (cname = "characters_scalar_script_name")]
     public static unowned string? script_name (size_t index);
+
+    /** Stable selector for borrowed property abbreviations. */
+    [CCode (cname = "CharactersScalarText", cprefix = "CHARACTERS_SCALAR_TEXT_",
+        has_type_id = false)]
+    public enum Text {
+        /** General category abbreviation. */
+        CATEGORY,
+        /** ISO 15924 primary script code. */
+        SCRIPT,
+        /** Space-delimited script extension codes. */
+        EXTENSIONS,
+        /** Bidirectional class abbreviation. */
+        BIDI,
+        /** Decomposition type abbreviation. */
+        DECOMPOSITION,
+        /** East Asian width abbreviation. */
+        WIDTH
+    }
+
+    /** Borrow the standardized value for an assigned scalar. */
+    [CCode (cname = "characters_scalar_text")]
+    public static unowned string? text (uint32 point, Text field);
+
+    /** Return the raw encoded age or -1 for absent data. */
+    [CCode (cname = "characters_scalar_age")]
+    public static int age (uint32 point);
+
+    /** Return the raw canonical combining class. */
+    [CCode (cname = "characters_scalar_combining_class")]
+    public static uint combining_class (uint32 point);
+
+    /** Return the four standardized Boolean bits in property order. */
+    [CCode (cname = "characters_scalar_boolean_flags")]
+    public static uint boolean_flags (uint32 point);
+
+    /** Borrow a supported canonical ICU alias key, or null. */
+    [CCode (cname = "characters_scalar_property_alias")]
+    public static unowned string? property_alias (string property);
 }

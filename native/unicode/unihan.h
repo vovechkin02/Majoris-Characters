@@ -5,8 +5,41 @@
 
 #include <glib.h>
 
-/** Return an owned formal or explicitly labeled fallback property; NULL if absent. */
-gchar *characters_unihan_property(gunichar point, const gchar *property);
+/** Field identifiers in the immutable generated record order. */
+typedef enum {
+    /** Mandarin reading. */
+    CHARACTERS_HAN_VALUE_MANDARIN,
+    /** Cantonese reading. */
+    CHARACTERS_HAN_VALUE_CANTONESE,
+    /** Japanese on reading. */
+    CHARACTERS_HAN_VALUE_JAPANESE_ON,
+    /** Japanese kun reading. */
+    CHARACTERS_HAN_VALUE_JAPANESE_KUN,
+    /** Japanese reading. */
+    CHARACTERS_HAN_VALUE_JAPANESE,
+    /** Korean reading. */
+    CHARACTERS_HAN_VALUE_KOREAN,
+    /** Hangul reading. */
+    CHARACTERS_HAN_VALUE_HANGUL,
+    /** English definition. */
+    CHARACTERS_HAN_VALUE_DEFINITION,
+    /** Official radical and residual strokes. */
+    CHARACTERS_HAN_VALUE_RADICAL,
+    /** Official total strokes. */
+    CHARACTERS_HAN_VALUE_STROKES,
+    /** Separately attributed Mandarin fallback. */
+    CHARACTERS_HAN_VALUE_MANDARIN_FALLBACK,
+    /** Separately attributed Hangul fallback. */
+    CHARACTERS_HAN_VALUE_HANGUL_FALLBACK,
+    /** Exclusive upper bound; not a field. */
+    CHARACTERS_HAN_VALUE_COUNT
+} CharactersHanValue;
+
+/** Borrow a field without replacing its provenance; NULL when absent. */
+const gchar *characters_unihan_value(gunichar point, CharactersHanValue field);
+
+/** Return the raw collation fallback group, or zero when absent. */
+guint characters_unihan_collation(gunichar point, gboolean radical);
 
 /** Return the official data release, or "none" when only fallback data is bundled. */
 const gchar *characters_unihan_version(void);

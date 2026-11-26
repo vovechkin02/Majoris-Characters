@@ -371,6 +371,25 @@ class SourceContractsTest(unittest.TestCase):
         self.assertIn("emoji/annotation-policy.vala", sources)
         self.assertIn("emoji/presentation.vala", sources)
 
+    def test_property_metadata_migration(self) -> None:
+        """Keep property selection and decimal formatting in Vala, not C."""
+        native = ROOT / "native/unicode"
+        source = (ROOT / "src/unicode/property-metadata.vala").read_text()
+        for module, obsolete in (("scalar-properties", "characters_scalar_property("),
+                                 ("unicode-engine", "characters_unicode_property("),
+                                 ("unihan", "characters_unihan_property(")):
+            for suffix in (".c", ".h"):
+                self.assertNotIn(obsolete, (native / (module + suffix)).read_text())
+        self.assertIn("Scalar.age (point)", source)
+        self.assertIn("Scalar.combining_class (point).to_string ()", source)
+        self.assertIn("Han.value (point, Han.Value.MANDARIN_FALLBACK)", source)
+        self.assertIn("Han.collation (point, radical)", source)
+        self.assertIn("unicode/property-metadata.vala", (ROOT / "src/meson.build").read_text())
+        self.assertIn('public static unowned string? text',
+                      (ROOT / "vapi/characters-icu.vapi").read_text())
+        self.assertIn('public static unowned string? value',
+                      (ROOT / "vapi/characters-han.vapi").read_text())
+
     def test_release_gate(self) -> None:
         """Prove missing and skipped test records cannot pass the release log gate."""
         names = sorted(expected_tests())

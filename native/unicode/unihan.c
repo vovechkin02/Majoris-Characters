@@ -1,7 +1,6 @@
 #include "unihan.h"
 
 #include <stdint.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -17,27 +16,13 @@
 
 #define MAX_TERM_UNITS 2048
 
-/** Indexed fields shared with the offline generator. */
-enum HanField {
-    HAN_MANDARIN, HAN_CANTONESE, HAN_JAPANESE_ON, HAN_JAPANESE_KUN, HAN_JAPANESE,
-    HAN_KOREAN, HAN_HANGUL, HAN_DEFINITION, HAN_RADICAL, HAN_STROKES,
-    HAN_MANDARIN_FALLBACK, HAN_HANGUL_FALLBACK, HAN_FIELD_COUNT
-};
-
 /** One scalar's immutable metadata and non-authoritative collation groups. */
 struct HanRecord {
     gunichar point;
     guint16 radical;
     guint8 strokes;
-    guint32 values[HAN_FIELD_COUNT];
-    guint32 folded[HAN_FIELD_COUNT];
-};
-
-/** Exact property keys, in the same order as HanField. */
-static const gchar *const field_names[] = {
-    "kMandarin", "kCantonese", "kJapaneseOn", "kJapaneseKun", "kJapanese", "kKorean",
-    "kHangul", "kDefinition", "kRSUnicode", "kTotalStrokes",
-    "Mandarin_Fallback", "Hangul_Fallback"
+    guint32 values[CHARACTERS_HAN_VALUE_COUNT];
+    guint32 folded[CHARACTERS_HAN_VALUE_COUNT];
 };
 
 #include "generated/unihan.h"
@@ -57,36 +42,21 @@ static const struct HanRecord *lookup(gunichar point)
                    compare_record);
 }
 
-/** Return a decimal group label as owned text, or NULL for an unknown group. */
-static gchar *group_text(guint value)
+/** Borrow a field from the immutable record without changing its source. */
+const gchar *characters_unihan_value(gunichar point, CharactersHanValue field)
 {
-    if (!value) {
+    if ((guint)field >= CHARACTERS_HAN_VALUE_COUNT) {
         return NULL;
     }
-    gchar text[16];
-    g_snprintf(text, sizeof(text), "%u", value);
-    return characters_try_strdup(text);
+    const struct HanRecord *row = lookup(point);
+    return row && row->values[field] ? han_strings + row->values[field] : NULL;
 }
 
-/** Return an owned property value without substituting a different source. */
-gchar *characters_unihan_property(gunichar point, const gchar *property)
+/** Return a raw fallback collation group; formal properties remain separate. */
+guint characters_unihan_collation(gunichar point, gboolean radical)
 {
     const struct HanRecord *row = lookup(point);
-    if (!row || !property) {
-        return NULL;
-    }
-    for (gsize index = 0; index < G_N_ELEMENTS(field_names); index++) {
-        if (strcmp(property, field_names[index]) == 0) {
-            return row->values[index] ? characters_try_strdup(han_strings + row->values[index]) : NULL;
-        }
-    }
-    if (strcmp(property, "Radical_Collation") == 0) {
-        return group_text(row->radical);
-    }
-    if (strcmp(property, "Stroke_Collation") == 0) {
-        return group_text(row->strokes);
-    }
-    return NULL;
+    return row ? (radical ? row->radical : row->strokes) : 0;
 }
 
 /** Report the official data version separately from the fallback. */
@@ -163,7 +133,7 @@ static gboolean formal_group(const gchar *values, gboolean radical, guint group)
 /** Apply formal grouping when present, otherwise the explicitly labeled collation fallback. */
 static gboolean group_matches(const struct HanRecord *row, gboolean radical, guint group)
 {
-    guint32 offset = row->values[radical ? HAN_RADICAL : HAN_STROKES];
+    guint32 offset = row->values[radical ? CHARACTERS_HAN_VALUE_RADICAL : CHARACTERS_HAN_VALUE_STROKES];
     if (offset) {
         return !group || formal_group(han_strings + offset, radical, group);
     }
@@ -189,7 +159,7 @@ gboolean characters_unihan_match_fields(gunichar point, guint32 fields, const gc
         return FALSE;
     }
     fields &= CHARACTERS_HAN_TEXT_FIELDS;
-    for (gsize field = 0; field < HAN_FIELD_COUNT; field++) {
+    for (gsize field = 0; field < CHARACTERS_HAN_VALUE_COUNT; field++) {
         if ((fields & (UINT32_C(1) << field)) && row->folded[field] &&
             strstr(han_strings + row->folded[field], term)) {
             return TRUE;

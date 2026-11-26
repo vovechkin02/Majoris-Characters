@@ -42,7 +42,11 @@ except in block-range queries. U+0000 is inspectable but cannot be represented
 as standalone NUL-terminated UTF-8. Exact sequences are bounded to 32 scalars;
 no implicit normalization is performed.
 
-`get_property_value` accepts standard ICU property names for supported fields.
+`Unicode.get_property_value` is implemented in the Vala property metadata service.
+It accepts the historically supported ICU aliases for enumerated and Boolean
+fields, and exact keys for age, combining class, script extensions, plane and
+Han metadata. The native adapter exposes borrowed immutable text values and
+raw numeric properties, with no application-level formatting.
 Enumerated values use standardized short aliases; script extensions are
 space-delimited ISO 15924 codes. Age is a Unicode version; combining class and
 plane are decimal. Unknown properties return null. The primary script and
